@@ -102,7 +102,7 @@ consumption and multi-release runtime evidence are not yet proven.
 - Credit contributors in generated release reports and changelog entries.
 - Publish a short screen recording of the exact install → handshake → constrained
   tool turn flow; the video must show the pinned version and evidence status.
-- Seek review from OpenClaw integrators and WebContainer maintainers before
+- Seek review from OpenClaw integrators and browser-runtime maintainers before
   promoting to general end users.
 
 Exit signal: three non-maintainer contributors land a useful change and one
@@ -112,8 +112,8 @@ maintainer can process a new release without handwritten runtime changes.
 
 - Do not become a second OpenClaw implementation.
 - Do not hide unsupported native capabilities behind generic dummy packages.
-- Do not claim “runs locally” without disclosing WebContainer hosting and
-  licensing dependencies.
+- Do not claim “runs locally” without disclosing runtime delivery, metering,
+  license, and external provider traffic.
 - Do not make a live-provider request part of the default or automated demo.
 - Do not optimize for a large feature checklist before release freshness,
   reproducibility, and cold-start cost are under control.
@@ -122,12 +122,13 @@ maintainer can process a new release without handwritten runtime changes.
 
 ## Immediate priority order
 
-1. Upstream the Ed25519/WebContainer finding and the published shrinkwrap
-   inconsistency with minimal reproductions.
+1. Upstream the existing Ed25519/WebContainer finding and the published
+   shrinkwrap inconsistency with minimal reproductions, while keeping that patch
+   out of future runtime providers unless they reproduce the same failure.
 2. Cache or replace the nested dependency repair path.
 3. Automate stable/previous/preview reports and preserve the last verified
    stable result.
-4. Publish the current project page and invite review from the two communities
-   Clawsembly depends on: OpenClaw and WebContainers.
+4. Publish the current project page and invite review from OpenClaw, the
+   selected browser-runtime provider, and the open fallback community.
 5. Add broader workspace persistence, remote mode, and more capabilities only
    when they improve a measured compatibility gate.

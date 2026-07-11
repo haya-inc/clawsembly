@@ -2,8 +2,11 @@
 
 | Risk | Current evidence | Decision or mitigation | Gate |
 | --- | --- | --- | --- |
-| WebContainer production licensing | Commercial for-profit production usage may require a license | Confirm the intended hosted-product model with StackBlitz before promising a operated service | Before public hosted beta |
-| Hosted runtime dependency | The WebContainer engine is hosted separately from the npm client | Document availability, privacy, caching, and fallback expectations; do not claim fully self-contained operation | Phase 0 |
+| Commercial browser-runtime terms | BrowserPod explicitly permits commercial use on Pro/Enterprise plans, but is proprietary, metered, and vendor-hosted; the current WebContainer lane is not the product runtime | Keep runtime terms visible, require explicit user opt-in/API key, obtain the appropriate plan before commercial beta, and preserve the open container2wasm exit path | Before public hosted beta |
+| Hosted runtime dependency | BrowserPod loads runtime code from vendor infrastructure unless Enterprise self-hosting is contracted | Document availability, API-key handling, privacy, origin controls, caching, and outage behavior; never claim fully self-contained operation for this provider | Phase 3b |
+| Open runtime maturity | container2wasm is experimental and a minimal Node image may still be too large or slow for browser adoption | Publish conversion/browser measurements and reject the candidate if transfer or cold-start budgets fail | Phase 3b |
+| Runtime redistribution compliance | container2wasm output includes emulator, Linux, and guest packages with licenses beyond the converter's Apache-2.0 license | Generate an SBOM, notices, and corresponding-source workflow; complete legal review before distributing a generated image | Before distributing Wasm images |
+| Vendor API surface | BrowserPod's public process/terminal types are narrower than the WebContainer API used by the current broker bridge | Prove long-lived process control, input, cancellation, portal lifecycle, and secret boundaries before porting the Gateway | Phase 3b |
 | Node runtime mismatch | WebContainer provides Node 22.22.3, satisfying OpenClaw's >=22.19.0 requirement; one nested dependency warns that it prefers Node >=24 | Keep the warning visible and exercise the code path before upgrading the browser baseline | Continuous |
 | Artifact weight | After a 4.1% script-suppression improvement, Chromium measures 57.1 s cold install, 2.9 s warm reinstall, 618.5 MB `node_modules`, and 261.6 MB npm cache; the nested repair alone takes 49.7 s, while `npm ci` rejects 31 manifest dev dependencies missing from the shrinkwrap root | Keep the automated root-consistency warning, report the shrinkwrap defect upstream, cache or replace the 293-package repair path, and set regression budgets before beta | Phase 1 |
 | Native dependencies | node-pty and sqlite-vec platform variants are present | Classify eager versus optional imports and disable only the owning capability | Phase 1 |
@@ -12,7 +15,7 @@
 | OpenClaw source patch drift | 2026.6.11 needs an exact-marker Noble fallback because WebContainer `node:crypto` cannot construct the verifier key | Fail closed on marker drift, test invalid signatures, publish the patch in compatibility evidence, and pursue an upstream fix | Every OpenClaw upgrade |
 | Provider-secret exposure | An OpenClaw agent completes a turn through the browser-host broker without receiving the API key; the live smoke-test gate requires explicit consent, but same-origin script injection could still invoke the stored key | Keep provider calls destination/model allowlisted with user-configurable request/input/output budgets, fixed live probe content, token caps, and explicit opt-in; enforce strict content delivery and dependency review | Before live provider testing |
 | Browser data loss | OPFS mock-state recovery and explicit binary export/import pass, but quota eviction or origin changes can still remove state | Add a versioned manifest, recovery UX, and encrypted user-workspace backups before production-ready status | Phase 3 |
-| Browser support overclaim | Firefox and Safari WebContainer behavior differs from Chromium | Support desktop Chromium first and publish a browser matrix based on test artifacts | Before 0.2 |
+| Browser support overclaim | Browser-local runtime behavior differs across Chromium, Firefox, and Safari | Support desktop Chromium first and publish a provider-specific browser matrix based on test artifacts | Before 0.2 |
 | Cross-version evidence reuse | A new dist-tag could otherwise appear verified using an older release's Gateway artifact | Match the embedded OpenClaw version before attachment and make the report builder reject all mismatches | Every generated report |
 | Upstream velocity | Stable releases are frequent | Start automated static inspection in Phase 0 and runtime inspection in Phase 1 | Continuous |
 | Product sprawl | Embedded, remote, persistence, WIT, and channels compete for focus | Compatibility lab first; one-turn demo second; defer ecosystem features | Every milestone |
@@ -24,5 +27,5 @@ Pivot the project toward the Compatibility Lab and generated Gateway client if:
 
 - a future stable cannot reach a Gateway handshake without changing agent logic;
 - identity or provider secrets must be exposed to untrusted workspace code;
-- the hosted-runtime dependency or licensing cannot support the intended use;
+- no browser-local provider can support the intended commercial use;
 - supported-browser boot performance makes the one-turn experience impractical.

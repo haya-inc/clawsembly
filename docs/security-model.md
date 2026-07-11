@@ -16,10 +16,12 @@ the current prototype is production-ready.
 1. **Application shell** — trusted project code delivered by the Clawsembly origin.
 2. **Browser host broker** — the narrow owner of identity, credential, network,
    persistence, and permission operations.
-3. **WebContainer** — untrusted runtime containing upstream OpenClaw, downloaded
-   packages, model-generated code, plugins, and workspace content.
-4. **External services** — npm, StackBlitz runtime services, model providers, and
-   an optional native OpenClaw Gateway.
+3. **Browser guest runtime** — untrusted runtime containing upstream OpenClaw,
+   downloaded packages, model-generated code, plugins, and workspace content.
+   WebContainer is the current evidence implementation; BrowserPod and
+   container2wasm are migration candidates.
+4. **External services** — npm, runtime delivery or metering services, model
+   providers, and an optional native OpenClaw Gateway.
 
 The browser sandbox is one boundary, not the only control.
 
@@ -28,7 +30,7 @@ The browser sandbox is one boundary, not the only control.
 - Deny unclassified host calls.
 - Never embed or share a device private key.
 - Never write plaintext provider secrets into the workspace.
-- Validate host-call inputs and destinations outside the WebContainer.
+- Validate host-call inputs and destinations outside the guest runtime.
 - Require explicit user intent for backup export, native Gateway connection, and
   newly granted capabilities.
 - Redact secrets from bounded diagnostic and audit output.

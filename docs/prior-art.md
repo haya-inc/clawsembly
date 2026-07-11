@@ -86,6 +86,19 @@ manual feature reimplementation.
   Node-compatible runtime used by ClawLess. Native addons cannot run unless
   they are implemented for WebAssembly, as described in the
   [WebContainers troubleshooting guide](https://webcontainers.io/guides/troubleshooting).
+- [BrowserPod](https://browserpod.io/docs/overview) runs Node 22 inside the
+  browser with a virtual filesystem and controlled service portals. Its paid
+  plans explicitly allow commercial use, making it the shortest migration
+  candidate, but the runtime is proprietary, metered, and vendor-hosted unless
+  separately licensed for self-hosting.
+- [container2wasm](https://github.com/container2wasm/container2wasm) converts
+  amd64 containers into browser-runnable Wasm using emulation. It offers an open
+  self-distribution path but remains experimental and generated artifacts carry
+  emulator, Linux, and guest-package licensing obligations.
+- [v86](https://github.com/copy/v86) is BSD-licensed and browser-local, but it
+  does not support 64-bit kernels. Current
+  [CheerpX](https://cheerpx.io/docs/overview) likewise documents 32-bit x86.
+  Neither can host the official Node 22 Linux x64 artifact required here.
 - [The WebAssembly Component Model](https://component-model.bytecodealliance.org/)
   provides typed WIT interfaces suitable for future capability modules.
 - [Node.js WASI](https://nodejs.org/api/wasi.html) lets Node host Wasm modules;

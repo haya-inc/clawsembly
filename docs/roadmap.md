@@ -10,14 +10,15 @@ Deliverables:
 - project documentation and contribution baseline;
 - a checked-in compatibility-report schema and static artifact inspector;
 - a report-driven public project page;
-- WebContainer commercial-use and hosted-runtime dependency decision;
+- browser-local commercial-runtime decision;
 - actual WebContainer Node-version capture;
 - a minimal current-stable OpenClaw install and boot attempt;
 - structured capture of install, stdout, stderr, and browser errors.
 
 Exit criterion: CI publishes a machine-readable current-stable report and can
-either reach the Gateway handshake in a WebContainer or retain a reproducible,
-classified blocker. A trivial Node service alone is not sufficient evidence.
+either reach the Gateway handshake in a browser-local runtime or retain a
+reproducible, classified blocker. A trivial Node service alone is not
+sufficient evidence.
 
 Status: achieved locally for `openclaw@2026.6.11`; the checked-in evidence
 includes server readiness, `/healthz`, and protocol 4 `hello-ok`.
@@ -104,13 +105,30 @@ shrinkwrap root omits 31 manifest dev-dependency declarations. The static
 inspector now detects root declaration drift on every inspected release.
 Footprint and cold-path reduction remain Phase 3 work.
 
+### Phase 3b: commercial browser-runtime migration
+
+Replace the WebContainer-specific production boundary without moving execution
+to a server:
+
+- keep the current WebContainer lane as regression evidence;
+- verify BrowserPod Node 22.19+, crypto, SQLite, long-lived Gateway process I/O,
+  portal routing, persistence, cancellation, and commercial terms;
+- verify container2wasm amd64 browser execution, transfer size, cold/warm boot,
+  OPFS or IndexedDB restore, broker networking, SBOM, notices, and source duties;
+- introduce one provider-neutral runtime contract;
+- promote no candidate until it reproduces the full Gateway evidence slice.
+
+Exit criterion: one commercially deployable browser-local provider passes the
+same health, handshake, turn, tool, history, abort, reconnect, and restore
+evidence as the baseline. Remote execution does not satisfy this criterion.
+
 ## Phase 4: harden automated upstream tracking
 
 Deliverables:
 
 - stable and beta release detection;
 - schema, dependency, and native-addon diffing;
-- WebContainer smoke-test matrix;
+- browser-runtime smoke-test matrix;
 - generated compatibility manifests and reports;
 - automated upgrade pull requests;
 - rollback to the previous verified stable release.
@@ -147,5 +165,5 @@ agent runtime inside Clawsembly.
 1. Extend the versioned mock-state envelope to cover user workspaces and migration fixtures.
 2. Execute the protected live smoke test with an owner-provided key, archive redacted evidence, and expand moderation UX.
 3. Replace or cache the 293-package repair path and reduce the measured 880 MB combined install/cache footprint.
-4. Add a second supported browser result where the WebContainer host permits it.
+4. Reproduce the full runtime slice on the selected commercial browser runtime.
 5. Add remote pairing approval, device-token rotation, revocation, recovery, and bridge-process hardening.

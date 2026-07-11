@@ -1,7 +1,9 @@
 # Proposed architecture
 
-This is the initial architecture hypothesis. The first compatibility probe may
-change implementation details, but the upstream boundary should remain stable.
+This architecture preserves browser-local execution while moving the product
+off a WebContainer-specific boundary. The current WebContainer probe is a
+measured compatibility baseline, not the selected commercial runtime. See
+[ADR 0002](decisions/0002-commercial-browser-runtime.md).
 
 ## System overview
 
@@ -9,17 +11,23 @@ change implementation details, but the upstream boundary should remain stable.
 flowchart LR
     UI["Browser UI"]
     Client["Generated Gateway client"]
-    Selector["Runtime selector"]
-    Embedded["Embedded OpenClaw\nin WebContainer"]
-    Remote["Native OpenClaw Gateway"]
+    Contract["BrowserRuntime contract"]
+    Commercial["BrowserPod candidate\ncommercial browser runtime"]
+    Open["container2wasm candidate\nself-distributable browser runtime"]
+    Baseline["WebContainer\nevidence baseline"]
+    Remote["Optional native Gateway"]
     Adapter["Browser compatibility adapter"]
     Host["Browser host capabilities"]
     Store["OPFS / IndexedDB"]
 
-    UI --> Client --> Selector
-    Selector --> Embedded
-    Selector --> Remote
-    Embedded --> Adapter --> Host
+    UI --> Client --> Contract
+    Contract --> Commercial
+    Contract --> Open
+    Contract -. regression only .-> Baseline
+    Contract -. optional interop .-> Remote
+    Commercial --> Adapter
+    Open --> Adapter
+    Baseline --> Adapter --> Host
     Host --> Store
 ```
 
@@ -27,15 +35,18 @@ flowchart LR
 
 ### Embedded mode
 
-The browser boots a WebContainer, installs or mounts a pinned upstream OpenClaw
-package, applies a versioned compatibility manifest, and starts a constrained
-Gateway. This mode favors privacy, disposability, and zero infrastructure.
+The browser boots a runtime provider, installs or mounts a pinned upstream
+OpenClaw package, applies a versioned compatibility manifest, and starts a
+constrained Gateway. Execution and workspace state remain in the browser tab.
+BrowserPod is the first commercial integration candidate; container2wasm is the
+open feasibility lane. Neither is supported until it earns the acceptance
+evidence defined by ADR 0002.
 
 Expected initial capabilities:
 
 - browser chat and streamed model responses;
 - provider HTTP calls through an audited host bridge where necessary;
-- a workspace stored in the WebContainer and persisted through OPFS;
+- a workspace stored in the guest and persisted through IndexedDB or OPFS;
 - JavaScript or Wasm-based constrained tool execution;
 - Gateway health, session, and chat operations.
 
@@ -47,11 +58,11 @@ Expected initial exclusions:
 - messaging integrations requiring unsupported native libraries;
 - reliable background execution after the browser runtime is terminated.
 
-### Remote mode
+### Optional remote mode
 
-The UI connects to an ordinary native OpenClaw Gateway over its documented
-WebSocket protocol. Remote mode provides full OpenClaw host capabilities and a
-fallback when an upstream release cannot yet run in the embedded environment.
+The UI may connect to an ordinary native OpenClaw Gateway over its documented
+WebSocket protocol for interoperability. It is not the default and cannot be
+used to satisfy browser-runtime acceptance gates.
 
 Both modes should expose the same UI-facing client interface. Feature discovery
 determines which actions are shown or enabled.
@@ -78,11 +89,20 @@ OpenClaw documents its Gateway protocol and TypeBox code-generation pipeline in
 [Gateway protocol](https://docs.openclaw.ai/gateway/protocol) and
 [TypeBox](https://docs.openclaw.ai/concepts/typebox).
 
-### Embedded runtime manager
+### Browser runtime manager
 
-Boots and tears down the WebContainer, mounts workspace files, installs the
-pinned OpenClaw artifact, launches the Gateway, captures diagnostics, and
-publishes runtime capabilities.
+Boots and tears down a selected browser runtime, mounts workspace files,
+installs the pinned OpenClaw artifact, launches the Gateway, captures
+diagnostics, and publishes runtime capabilities. Provider-specific behavior
+must stay behind a contract covering process execution, terminal I/O, file
+operations, local service discovery, persistence, cancellation, and teardown.
+
+The first BrowserPod preflight is intentionally dependency-injected. It checks
+the exact Node 22.19+ baseline, `node:crypto`, and `node:sqlite` without loading
+proprietary runtime code or transmitting a metered API key until the caller
+explicitly opts in. The container2wasm lane begins with a pinned official Node
+22.19 amd64 image and records browser execution, size, performance, and license
+evidence separately.
 
 ### Compatibility adapter
 
@@ -101,7 +121,7 @@ Responsibilities include:
 
 ### Browser host
 
-Runs outside the WebContainer and owns privileged browser APIs. Candidate
+Runs outside the guest runtime and owns privileged browser APIs. Candidate
 interfaces include:
 
 - `identity.generate`;
@@ -112,8 +132,8 @@ interfaces include:
 
 Every interface should be narrow, typed, cancellable, and auditable.
 
-The browser implementation follows the same boundary in code:
-`runtime-probe.ts` owns page state and install/preflight UI,
+The current evidence implementation follows the same boundary in code:
+`runtime-probe.ts` owns page state and the legacy WebContainer preflight UI,
 `runtime-gateway-probe.ts` owns the Gateway, provider bridge, lifecycle, and
 recovery orchestration, and `runtime-probe-support.ts` owns reusable process,
 device-signing, and transcript-verification helpers. Provider policy,

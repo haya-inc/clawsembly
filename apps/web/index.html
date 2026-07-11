@@ -50,6 +50,7 @@
       </a>
       <nav aria-label="Primary navigation">
         <a href="#compatibility">Compatibility</a>
+        <a href="#runtimes">Runtimes</a>
         <a href="#releases">Releases</a>
         <a href="#method">Method</a>
         <a class="nav-github" href="https://github.com/haya-inc/clawsembly">GitHub ↗</a>
@@ -80,7 +81,7 @@
           <p class="hero-line hero-enter">OpenClaw, assembled for the browser.</p>
           <p class="hero-summary hero-enter">
             Every upstream release, inspected. Every missing capability, explicit.
-            No independent agent rewrite.
+            Browser-local by design, with a commercially deployable runtime path.
           </p>
           <div class="hero-actions hero-enter">
             <a class="button button-primary" href="#compatibility">View latest probe</a>
@@ -200,7 +201,7 @@
                   type="password"
                   autocomplete="new-password"
                   spellcheck="false"
-                  placeholder="Stored outside WebContainer"
+                  placeholder="Stored outside the guest runtime"
                   data-credential-input
                 />
               </label>
@@ -253,12 +254,61 @@
             <ol data-probe-output>
               <li data-state="idle"><span>01</span><strong>crossOriginIsolated</strong><em>not measured</em></li>
               <li data-state="idle"><span>02</span><strong>SharedArrayBuffer</strong><em>not measured</em></li>
-              <li data-state="idle"><span>03</span><strong>WebContainer boot</strong><em>not started</em></li>
+              <li data-state="idle"><span>03</span><strong>Legacy evidence runtime</strong><em>WebContainer · not started</em></li>
               <li data-state="idle"><span>04</span><strong>node --version</strong><em>pending</em></li>
               <li data-state="idle"><span>05</span><strong>node:sqlite close()</strong><em>pending</em></li>
             </ol>
             <pre class="install-output" data-install-output hidden></pre>
           </div>
+        </div>
+      </section>
+
+      <section id="runtimes" class="runtime-direction section-pad" aria-labelledby="runtime-direction-title">
+        <div class="runtime-direction-head reveal">
+          <div>
+            <p class="eyebrow">Commercial browser runtime</p>
+            <h2 id="runtime-direction-title">Local stays non-negotiable.</h2>
+          </div>
+          <p>
+            The remote-sandbox route is rejected as the product default. The migration
+            keeps execution in this tab, separates runtime vendors behind one boundary,
+            and publishes every license and compatibility gate.
+          </p>
+        </div>
+        <div class="runtime-ledger reveal" aria-label="Browser runtime candidate evaluation">
+          <a class="runtime-row runtime-row-primary" href="https://browserpod.io/docs/more/licensing" target="_blank" rel="noreferrer">
+            <span class="runtime-rank">01 / target</span>
+            <div class="runtime-name"><strong>BrowserPod 2.x</strong><span>Node 22 · browser-local</span></div>
+            <p>Commercial Pro terms are explicit. Fastest migration candidate; metered API key, proprietary CDN runtime, and OpenClaw proof still required.</p>
+            <span class="runtime-license">Commercial</span>
+            <span class="runtime-state">Candidate ↗</span>
+          </a>
+          <a class="runtime-row" href="https://github.com/container2wasm/container2wasm" target="_blank" rel="noreferrer">
+            <span class="runtime-rank">02 / escape hatch</span>
+            <div class="runtime-name"><strong>container2wasm</strong><span>amd64 Linux · browser-local</span></div>
+            <p>Self-distributable feasibility lane. Experimental today; size, cold start, persistence, networking, SBOM, and guest-license duties remain gates.</p>
+            <span class="runtime-license">Apache-2.0 + guest</span>
+            <span class="runtime-state runtime-state-open">Experiment ↗</span>
+          </a>
+          <a class="runtime-row" href="https://webcontainers.io/" target="_blank" rel="noreferrer">
+            <span class="runtime-rank">03 / baseline</span>
+            <div class="runtime-name"><strong>WebContainer</strong><span>Current Chromium evidence</span></div>
+            <p>The verified Gateway slice remains a regression baseline. It is not the selected commercial production runtime and gains no new coupling.</p>
+            <span class="runtime-license">Hosted terms</span>
+            <span class="runtime-state runtime-state-baseline">Evidence only ↗</span>
+          </a>
+          <div class="runtime-row runtime-row-rejected">
+            <span class="runtime-rank">04 / rejected</span>
+            <div class="runtime-name"><strong>v86 / CheerpX</strong><span>32-bit execution</span></div>
+            <p>OpenClaw requires Node 22.19+. Current 32-bit-only execution cannot run the official Linux x64 Node artifact.</p>
+            <span class="runtime-license">Technically blocked</span>
+            <span class="runtime-state runtime-state-rejected">Rejected</span>
+          </div>
+        </div>
+        <div class="runtime-guardrail reveal">
+          <span>Default gate</span>
+          <p>Node 22.19+ → Gateway handshake → broker turn → tool → history → cancel → persistent restore → license/SBOM review.</p>
+          <a href="https://github.com/haya-inc/clawsembly/blob/main/docs/decisions/0002-commercial-browser-runtime.md">Read ADR 0002 ↗</a>
         </div>
       </section>
 
@@ -286,7 +336,7 @@
             <span>03</span>
             <div>
               <h3>Boot the real runtime</h3>
-              <p>Run upstream OpenClaw in a clean WebContainer. Capture every failure as a fixture.</p>
+              <p>Run upstream OpenClaw in a clean browser-local runtime. Keep WebContainer as the measured baseline while replacement candidates earn equivalent evidence.</p>
             </div>
           </li>
           <li class="reveal">

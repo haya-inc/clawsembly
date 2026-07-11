@@ -21,6 +21,7 @@ design does not become stale when OpenClaw changes.
 | [Security model](security-model.md) | Trust boundaries, assets, threats, and release requirements |
 | [Deployment](deployment.md) | Required isolation headers and supported static hosts |
 | [ADR 0001](decisions/0001-compatibility-lab-first.md) | Why compatibility evidence ships before a broad product UI |
+| [ADR 0002](decisions/0002-commercial-browser-runtime.md) | Commercial browser-local runtime decision and acceptance gates |
 
 ## Current position
 

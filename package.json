@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/haya-inc/clawsembly/issues"
   },
-  "keywords": ["openclaw", "webcontainer", "webassembly", "browser", "compatibility"],
+  "keywords": ["openclaw", "browserpod", "container2wasm", "webcontainer", "webassembly", "browser", "compatibility"],
   "type": "module",
   "engines": {
     "node": ">=22.19.0"
@@ -22,7 +22,7 @@
     "build": "vite build --config apps/web/vite.config.js",
     "preview": "vite preview --config apps/web/vite.config.js",
     "typecheck": "tsc -p apps/web/tsconfig.json --noEmit",
-    "test": "node --test packages/compatibility/src/*.test.mjs packages/webcontainer-adapter/*.test.mjs",
+    "test": "node --test packages/browser-runtime/*.test.mjs packages/compatibility/src/*.test.mjs packages/webcontainer-adapter/*.test.mjs",
     "pretest:browser": "npm run build",
     "test:browser": "playwright test --config playwright.config.ts",
     "compat:inspect": "node packages/compatibility/src/inspect.mjs",

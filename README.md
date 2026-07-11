@@ -19,6 +19,19 @@ OpenClaw releases.
 The project is in an experimental compatibility-lab phase. It is not affiliated
 with or endorsed by the OpenClaw project.
 
+## Browser runtime direction
+
+Browser-local execution is a product invariant; a remote sandbox is not the
+replacement path. The verified WebContainer slice below remains a regression
+baseline, but it is not the selected commercial production runtime. The current
+migration evaluates [BrowserPod](https://browserpod.io/docs/overview) as the
+commercial Node 22 candidate and
+[container2wasm](https://github.com/container2wasm/container2wasm) as the open,
+self-distributable feasibility lane. Neither is called supported until it
+reproduces the full Gateway, broker, tool, recovery, cancellation, persistence,
+performance, and licensing evidence in
+[ADR 0002](docs/decisions/0002-commercial-browser-runtime.md).
+
 ## Current evidence
 
 The first implementation is a static compatibility inspector and a public,
@@ -142,7 +155,8 @@ untouched when all three resolved channels are unchanged.
 ## Goals
 
 - Run upstream OpenClaw rather than maintaining an independent agent rewrite.
-- Provide a useful browser-only mode with an optional native Gateway fallback.
+- Keep the useful default browser-local, with an optional native Gateway
+  interoperability mode rather than a remote-sandbox dependency.
 - Expose browser limitations as explicit capabilities instead of silently
   emulating unavailable host features.
 - Detect and validate upstream releases automatically.
@@ -161,6 +175,7 @@ untouched when all three resolved channels are unchanged.
 - [OSS success strategy](docs/oss-strategy.md)
 - [Risk register](docs/risk-register.md)
 - [Security model](docs/security-model.md)
+- [Commercial browser runtime decision](docs/decisions/0002-commercial-browser-runtime.md)
 
 ## Contributing
 

@@ -50,6 +50,12 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   const evidencedCount = index.releases.filter((release) => release.runtimeEvidence).length;
   await expect(history.getByText("runtime evidenced", { exact: true })).toHaveCount(evidencedCount);
   await expect(history.getByText("static inspection only", { exact: true })).toHaveCount(3 - evidencedCount);
+  const runtimes = page.locator("#runtimes");
+  await expect(runtimes.getByRole("heading", { name: "Local stays non-negotiable." })).toBeVisible();
+  await expect(runtimes.getByText("BrowserPod 2.x", { exact: true })).toBeVisible();
+  await expect(runtimes.getByText("container2wasm", { exact: true })).toBeVisible();
+  await expect(runtimes.getByText("Evidence only ↗", { exact: true })).toBeVisible();
+  await expect(runtimes.getByText("Rejected", { exact: true })).toBeVisible();
   const preview = index.releases.find((release) => release.channel === "preview");
   const dependencyDelta = preview?.deltaFromStable.directDependencyCount ?? 0;
   const expectedDelta = dependencyDelta === 0 ? "±0 deps" : `${dependencyDelta > 0 ? "+" : "−"}${Math.abs(dependencyDelta)} deps`;

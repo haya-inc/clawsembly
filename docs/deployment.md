@@ -1,8 +1,10 @@
 # Project page deployment
 
-The report-driven project page is a static Vite build, but its interactive
-WebContainer probe has stricter hosting requirements than an ordinary static
-site.
+The report-driven project page is a static Vite build, but its current
+WebContainer evidence probe has stricter hosting requirements than an ordinary
+static site. These requirements describe the regression baseline, not the
+selected commercial runtime. Candidate-specific CSP and isolation requirements
+will be added only after their browser acceptance probes pass.
 
 ## Required response headers
 
