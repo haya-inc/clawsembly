@@ -72,6 +72,18 @@ test("mock provider requires agents_list then completes after its tool result", 
   assert.match(secondStream, /"finish_reason":"stop"/);
 });
 
+test("mock provider rejects invalid JSON with HTTP 400 instead of hanging", async (t) => {
+  const { port } = await startServer(t);
+  const response = await fetch(`http://127.0.0.1:${port}/v1/chat/completions`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: "{not json"
+  });
+  assert.equal(response.status, 400);
+  const failure = await response.json();
+  assert.match(failure.error.message, /invalid JSON/);
+});
+
 test("mock provider keeps a cancellation scenario open until the client aborts", async (t) => {
   const { port } = await startServer(t);
   const controller = new AbortController();

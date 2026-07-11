@@ -274,7 +274,11 @@ async function performOpenAIRequest(
   const controller = new AbortController();
   const abort = () => controller.abort();
   signal?.addEventListener("abort", abort, { once: true });
-  const timeout = window.setTimeout(abort, DEFAULT_TIMEOUT_MS);
+  let timedOut = false;
+  const timeout = window.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, DEFAULT_TIMEOUT_MS);
   try {
     const response = await fetcher(OPENAI_RESPONSES_ENDPOINT, {
       method: "POST",
@@ -301,6 +305,7 @@ async function performOpenAIRequest(
     return await readBoundedJson(response);
   } catch (error: unknown) {
     if (error instanceof ProviderBrokerError) throw error;
+    if (timedOut) throw new ProviderBrokerError("provider request timed out");
     throw new ProviderBrokerError(controller.signal.aborted ? "provider request cancelled" : "provider network request failed");
   } finally {
     window.clearTimeout(timeout);
@@ -469,7 +474,11 @@ async function performOpenAIStream(
   const controller = new AbortController();
   const abort = () => controller.abort();
   signal?.addEventListener("abort", abort, { once: true });
-  const timeout = window.setTimeout(abort, DEFAULT_TIMEOUT_MS);
+  let timedOut = false;
+  const timeout = window.setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, DEFAULT_TIMEOUT_MS);
   try {
     const response = await fetcher(OPENAI_RESPONSES_ENDPOINT, {
       method: "POST",
@@ -492,6 +501,7 @@ async function performOpenAIStream(
     }
     return await readBoundedResponseStream(response, handlers, controller.signal, budget);
   } catch (error: unknown) {
+    if (timedOut) throw new ProviderBrokerError("provider request timed out");
     if (error instanceof ProviderBrokerError) throw error;
     throw new ProviderBrokerError(controller.signal.aborted ? "provider request cancelled" : "provider streaming network request failed");
   } finally {

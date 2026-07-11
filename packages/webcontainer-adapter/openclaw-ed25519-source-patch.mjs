@@ -23,15 +23,21 @@ export function patchOpenClawEd25519Source(source) {
 export function patchInstalledOpenClaw(root = process.cwd()) {
   const dist = path.join(root, "node_modules", "openclaw", "dist");
   const candidates = fs.readdirSync(dist).filter((name) => name.startsWith("device-identity-") && name.endsWith(".js"));
+  const patchedTargets = [];
+  let changed = false;
   for (const name of candidates) {
     const target = path.join(dist, name);
     const source = fs.readFileSync(target, "utf8");
     if (!source.includes(VERIFY_TAIL_MARKER) && !source.includes(FALLBACK_IMPORT)) continue;
     const patched = patchOpenClawEd25519Source(source);
-    fs.writeFileSync(target, patched);
-    return { target: path.relative(root, target), changed: patched !== source };
+    if (patched !== source) {
+      fs.writeFileSync(target, patched);
+      changed = true;
+    }
+    patchedTargets.push(path.relative(root, target));
   }
-  throw new Error("OpenClaw Ed25519 verifier module was not found");
+  if (patchedTargets.length === 0) throw new Error("OpenClaw Ed25519 verifier module was not found");
+  return { target: patchedTargets[0], targets: patchedTargets, changed };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

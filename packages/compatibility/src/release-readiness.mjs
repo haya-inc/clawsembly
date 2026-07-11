@@ -7,6 +7,7 @@ const IGNORED_DIRECTORIES = new Set([".git", "dist", "node_modules", "playwright
 
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.isSymbolicLink()) return [];
     if (entry.isDirectory() && IGNORED_DIRECTORIES.has(entry.name)) return [];
     const path = resolve(directory, entry.name);
     if (entry.isDirectory()) return walk(path);
@@ -42,6 +43,7 @@ const required = [
   ".github/workflows/compatibility.yml",
   ".github/workflows/pages.yml",
   ".github/workflows/runtime-browser.yml",
+  "scripts/validate-workflows.mjs",
   "apps/web/public/_headers",
   "netlify.toml",
   "vercel.json",

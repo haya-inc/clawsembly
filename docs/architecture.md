@@ -112,6 +112,13 @@ interfaces include:
 
 Every interface should be narrow, typed, cancellable, and auditable.
 
+The browser implementation follows the same boundary in code:
+`runtime-probe.ts` owns page state and install/preflight UI,
+`runtime-gateway-probe.ts` owns the Gateway, provider bridge, lifecycle, and
+recovery orchestration, and `runtime-probe-support.ts` owns reusable process,
+device-signing, and transcript-verification helpers. Provider policy,
+credential storage, and state persistence remain separate modules.
+
 ## Persistence
 
 The first implementation should separate:

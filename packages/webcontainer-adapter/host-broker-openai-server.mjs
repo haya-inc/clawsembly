@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import http from "node:http";
 import { createInterface } from "node:readline";
 
@@ -12,6 +13,13 @@ const callIdPattern = /^[A-Za-z0-9_-]{1,128}$/;
 const functionNamePattern = /^[A-Za-z0-9_][A-Za-z0-9_-]{0,63}$/;
 
 if (!capability || capability.length < 24) throw new Error("host broker capability is required");
+
+const expectedAuthorization = Buffer.from(`Bearer ${capability}`);
+
+function authorizationMatches(header) {
+  const actual = Buffer.from(header ?? "");
+  return actual.length === expectedAuthorization.length && timingSafeEqual(actual, expectedAuthorization);
+}
 
 function sendJson(response, status, value) {
   response.writeHead(status, { "content-type": "application/json" });
@@ -148,7 +156,7 @@ const server = http.createServer(async (request, response) => {
     sendJson(response, 404, { error: { message: "not found" } });
     return;
   }
-  if (request.headers.authorization !== `Bearer ${capability}`) {
+  if (!authorizationMatches(request.headers.authorization)) {
     sendJson(response, 401, { error: { message: "invalid bridge capability" } });
     return;
   }

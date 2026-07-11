@@ -1,0 +1,46 @@
+#!/usr/bin/env node
+import assert from "node:assert/strict";
+import { readFileSync, readdirSync } from "node:fs";
+import { resolve } from "node:path";
+
+const root = process.cwd();
+const workflowDirectory = resolve(root, ".github/workflows");
+const workflowFiles = readdirSync(workflowDirectory)
+  .filter((name) => name.endsWith(".yml") || name.endsWith(".yaml"))
+  .sort();
+
+assert.ok(workflowFiles.length > 0, "at least one GitHub Actions workflow is required");
+
+for (const name of workflowFiles) {
+  const source = readFileSync(resolve(workflowDirectory, name), "utf8");
+  const uses = [...source.matchAll(/^\s*-?\s*uses:\s*([^\s#]+)(?:\s+#.*)?$/gm)].map((match) => match[1]);
+  for (const action of uses) {
+    const separator = action.lastIndexOf("@");
+    assert.ok(separator > 0, `${name}: action reference is missing @: ${action}`);
+    const ref = action.slice(separator + 1);
+    assert.match(ref, /^[a-f0-9]{40}$/, `${name}: action must be pinned to a full commit SHA: ${action}`);
+  }
+}
+
+const compatibility = readFileSync(resolve(workflowDirectory, "compatibility.yml"), "utf8");
+const publishMarker = "\n  publish-report-pr:\n";
+const publishIndex = compatibility.indexOf(publishMarker);
+assert.ok(publishIndex > 0, "compatibility workflow must separate report generation from publishing");
+const generationJob = compatibility.slice(0, publishIndex);
+const publishJob = compatibility.slice(publishIndex);
+
+assert.match(generationJob, /permissions:\n\s+contents: read/, "report generation must be read-only");
+assert.doesNotMatch(generationJob, /contents: write|pull-requests: write/, "report generation must not have write permissions");
+assert.match(generationJob, /npm ci/, "report generation must install the locked toolchain");
+assert.match(generationJob, /npm run compat:validate/, "report generation must validate evidence before upload");
+assert.ok(
+  generationJob.indexOf("Package validated reports") < generationJob.indexOf("actions/upload-artifact@"),
+  "validated reports must be packaged before artifact upload"
+);
+
+assert.match(publishJob, /contents: write/, "report publishing requires contents write permission");
+assert.match(publishJob, /pull-requests: write/, "report publishing requires pull-request write permission");
+assert.doesNotMatch(publishJob, /npm ci|npm install|npm run/, "the write-capable publishing job must not execute npm code");
+assert.match(publishJob, /Report artifact must not contain symlinks/, "report publishing must reject artifact symlinks");
+
+process.stdout.write(`Validated ${workflowFiles.length} pinned workflows and compatibility-job permissions.\n`);

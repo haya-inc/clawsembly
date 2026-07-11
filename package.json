@@ -23,15 +23,19 @@
     "preview": "vite preview --config apps/web/vite.config.js",
     "typecheck": "tsc -p apps/web/tsconfig.json --noEmit",
     "test": "node --test packages/compatibility/src/*.test.mjs packages/webcontainer-adapter/*.test.mjs",
+    "pretest:browser": "npm run build",
     "test:browser": "playwright test --config playwright.config.ts",
     "compat:inspect": "node packages/compatibility/src/inspect.mjs",
     "compat:track": "node packages/compatibility/src/track-releases.mjs",
     "compat:validate": "node packages/compatibility/src/validate-artifacts.mjs",
+    "workflows:validate": "node scripts/validate-workflows.mjs",
+    "pretest:page": "npm run build",
     "test:page": "playwright test tests/browser/project-page.spec.ts --config playwright.config.ts",
+    "test:security": "playwright test tests/browser/security-probes.spec.ts --config playwright.config.ts",
     "social:render": "node scripts/render-social-preview.mjs",
     "build:pages": "CLAWSEMBLY_BASE_PATH=/clawsembly/ vite build --config apps/web/vite.config.js",
-    "check": "npm run test && npm run compat:validate && npm run typecheck && npm run build",
-    "release:check": "npm run social:render && npm run check && npm run test:page && npm run build:pages && node packages/compatibility/src/release-readiness.mjs"
+    "check": "npm run test && npm run compat:validate && npm run workflows:validate && npm run typecheck && npm run build",
+    "release:check": "npm run social:render && npm run check && npm run test:security && npm run test:page && npm run build:pages && node packages/compatibility/src/release-readiness.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",
@@ -42,7 +46,7 @@
   },
   "dependencies": {
     "@noble/curves": "2.2.0",
-    "@webcontainer/api": "^1.6.4",
+    "@webcontainer/api": "1.6.4",
     "sql.js": "1.14.1",
     "ws": "8.21.0"
   }

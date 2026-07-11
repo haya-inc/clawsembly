@@ -23,6 +23,10 @@ npm run check
 npm run dev
 ```
 
+`npm run check` also enforces that GitHub Actions are commit-SHA pinned and that
+the compatibility report generator remains read-only while only the separate
+publishing job receives repository write permission.
+
 Changes to the runtime adapter or browser probe should also run the long lane:
 
 ```bash
@@ -31,6 +35,8 @@ npm run test:browser
 ```
 
 The same lane runs on matching pull requests, by manual dispatch, and weekly.
+It builds and serves the production bundle, avoiding development-server HMR
+reloads while the resource-intensive WebContainer lifecycle is running.
 
 Static compatibility inspection downloads but does not install or execute the
 target package:

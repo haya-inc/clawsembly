@@ -3,6 +3,7 @@ import http from "node:http";
 const port = Number(process.env.CLAWSEMBLY_MOCK_PORT ?? 19002);
 const responseText = "Clawsembly tool round-trip passed.";
 const requiredToolName = "agents_list";
+const maxBodyBytes = 1024 * 1024;
 let toolCallSequence = 0;
 
 function sendJson(response, status, value) {
@@ -22,8 +23,21 @@ const server = http.createServer(async (request, response) => {
   }
 
   let body = "";
-  for await (const chunk of request) body += chunk;
-  const input = JSON.parse(body);
+  for await (const chunk of request) {
+    body += chunk;
+    if (Buffer.byteLength(body) > maxBodyBytes) {
+      sendJson(response, 413, { error: { message: "request too large" } });
+      request.destroy();
+      return;
+    }
+  }
+  let input;
+  try {
+    input = JSON.parse(body);
+  } catch {
+    sendJson(response, 400, { error: { message: "invalid JSON request body" } });
+    return;
+  }
   const toolNames = Array.isArray(input.tools)
     ? input.tools.map((tool) => tool?.function?.name).filter(Boolean)
     : [];

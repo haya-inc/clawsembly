@@ -9,13 +9,40 @@ permissions:
   contents: read
 
 jobs:
-  check:
+  node_check:
+    name: node-${{ matrix.node-version }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["22.19.0", "24"]
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 24
+          node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Verify release readiness against the Pages build
+        if: matrix.node-version == '24'
+        run: |
+          npm run build:pages
+          node packages/compatibility/src/release-readiness.mjs
+      - name: Run browser security probes
+        if: matrix.node-version == '24'
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:security
+          npm run test:page
+
+  check:
+    name: check
+    if: ${{ always() }}
+    needs: node_check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every Node lane
+        env:
+          NODE_CHECK_RESULT: ${{ needs.node_check.result }}
+        run: test "$NODE_CHECK_RESULT" = success

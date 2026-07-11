@@ -1,9 +1,10 @@
-import fs, { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import fs, { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import Module from "node:module";
 import { dirname } from "node:path";
 import initSqlJs from "sql.js";
 
 const fsBigIntAdapterMarker = Symbol.for("clawsembly.fs-bigint-position-adapter");
+const sqliteLoaderMarker = Symbol.for("clawsembly.node-sqlite-polyfill-loader");
 
 export function installFsBigIntPositionAdapter() {
   if (fs.readSync[fsBigIntAdapterMarker]) return;
@@ -166,7 +167,9 @@ export async function installNodeSqlitePolyfill() {
     persist(force = false) {
       if (!this.isOpen || this.readOnly || this.path === ":memory:" || (!force && this.transactionDepth > 0)) return;
       mkdirSync(dirname(this.path), { recursive: true });
-      writeFileSync(this.path, this.database.export());
+      const staging = `${this.path}.tmp-${process.pid}`;
+      writeFileSync(staging, this.database.export());
+      renameSync(staging, this.path);
     }
 
     assertOpen() {
@@ -175,11 +178,17 @@ export async function installNodeSqlitePolyfill() {
   }
 
   const sqliteModule = { DatabaseSync, StatementSync };
-  const originalLoad = Module._load;
-  Module._load = function loadWithBrowserSqlite(request, parent, isMain) {
-    if (request === "node:sqlite") return sqliteModule;
-    return originalLoad.call(this, request, parent, isMain);
-  };
+  if (!Module._load[sqliteLoaderMarker]) {
+    const originalLoad = Module._load;
+    function loadWithBrowserSqlite(request, parent, isMain) {
+      if (request === "node:sqlite") return loadWithBrowserSqlite[sqliteLoaderMarker];
+      return originalLoad.call(this, request, parent, isMain);
+    }
+    Object.defineProperty(loadWithBrowserSqlite, sqliteLoaderMarker, { value: sqliteModule, writable: true });
+    Module._load = loadWithBrowserSqlite;
+  } else {
+    Module._load[sqliteLoaderMarker] = sqliteModule;
+  }
 
   return sqliteModule;
 }
