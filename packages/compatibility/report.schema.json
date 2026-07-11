@@ -62,12 +62,13 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "kind", "capturedAt", "path", "summary"],
+        "required": ["id", "kind", "capturedAt", "path", "sha256", "summary"],
         "properties": {
           "id": { "type": "string" },
           "kind": { "enum": ["browser-runtime", "browser-security", "browser-performance", "gateway", "chat"] },
           "capturedAt": { "type": "string", "format": "date-time" },
           "path": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
           "summary": { "type": "string" }
         }
       }

@@ -71,8 +71,9 @@ the test value to WebContainer.
 
 This protects the credential from workspace code and accidental backup export,
 not from trusted-origin script injection. A same-origin attacker could ask the
-browser to decrypt with the stored key. Strict content delivery, dependency
-review, and protected broker integration remain release requirements. Browser
+browser to decrypt with the stored key. The deployed page therefore restricts
+scripts, frames, network destinations, and form targets with a checked-in CSP;
+dependency review and protected broker integration remain release requirements. Browser
 quota eviction, site-data clearing, or an origin change can also remove the key
 and ciphertext together.
 

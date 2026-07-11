@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-11T22:01:44.032Z",
+  "generatedAt": "2026-07-11T22:31:57.022Z",
   "package": "openclaw",
   "channels": {
     "stable": "2026.6.11",
@@ -13,7 +13,7 @@
       "version": "2026.6.11",
       "status": "partial",
       "reportPath": "releases/openclaw-2026.6.11.json",
-      "generatedAt": "2026-07-11T22:01:42.593Z",
+      "generatedAt": "2026-07-11T22:31:55.478Z",
       "runtimeEvidence": true,
       "artifact": {
         "integrity": "sha512-T+P/g19IheeT1ckXMoPN61dYuE8vBF4MderI+kWkvpuFYxPkJxn8AXLpu9IXCnN9g36Acpm9+mMD/V+lsvOkyA==",
@@ -42,7 +42,7 @@
       "version": "2026.6.10",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.6.10.json",
-      "generatedAt": "2026-07-11T22:01:43.304Z",
+      "generatedAt": "2026-07-11T22:31:56.188Z",
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-LcooND2tBQw8A+kc1Ujltu3lg30bJ0w7XaeRy7eYzobb8BBdcW6DOGbwJL4vpj1vl9+gjRceOtlh5nh9OARcug==",
@@ -71,7 +71,7 @@
       "version": "2026.7.1-beta.5",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.7.1-beta.5.json",
-      "generatedAt": "2026-07-11T22:01:44.019Z",
+      "generatedAt": "2026-07-11T22:31:57.008Z",
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-ejdttiBZwk5RJmZdGD3gQPW1+4819pb0gyw4ZbGg/NcEAdozk6UQWq4n3P2XfDBgOn2k7D8fSKLcN+YDdJ77TA==",

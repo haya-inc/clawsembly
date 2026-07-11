@@ -25,3 +25,7 @@ boot, Gateway handshake, or chat checks.
 handshake, streamed chat, constrained tool, reconnect history, and cancellation
 checks only when their matching evidence fields pass. A health check by itself
 never implies that later protocol stages passed.
+
+Every evidence reference includes a canonical SHA-256 digest. `compat:validate`
+schema-checks the raw host and Gateway records, verifies those digests, matches
+the embedded OpenClaw version, and recomputes all evidence-derived statuses.

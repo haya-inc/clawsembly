@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-11T22:01:44.019Z",
+  "generatedAt": "2026-07-11T22:31:57.008Z",
   "status": "probing",
   "target": {
     "runtime": "webcontainer",
@@ -95,6 +95,7 @@
       "kind": "browser-runtime",
       "capturedAt": "2026-07-11T16:06:30.000Z",
       "path": "evidence/webcontainer-host.json",
+      "sha256": "9ccc5d3c41b486eaf4d1df1080fbfe8d201e809d22e5272650f3c7779c0ae51c",
       "summary": "WebContainer 1.6.4 booted Node v22.22.3 with cross-origin isolation."
     }
   ],

@@ -63,6 +63,7 @@ export interface ProviderBrokerProbe {
   maxOutputTokensValidated: true;
   requestBudgetValidated: true;
   cancellationPropagated: true;
+  bodyCancellationPropagated: true;
   result: "pass";
 }
 
@@ -274,9 +275,8 @@ async function performOpenAIRequest(
   const abort = () => controller.abort();
   signal?.addEventListener("abort", abort, { once: true });
   const timeout = window.setTimeout(abort, DEFAULT_TIMEOUT_MS);
-  let response: Response;
   try {
-    response = await fetcher(OPENAI_RESPONSES_ENDPOINT, {
+    const response = await fetcher(OPENAI_RESPONSES_ENDPOINT, {
       method: "POST",
       headers: {
         authorization: `Bearer ${apiKey}`,
@@ -289,23 +289,23 @@ async function performOpenAIRequest(
       referrerPolicy: "no-referrer",
       signal: controller.signal
     });
-  } catch {
+    const requestId = response.headers.get("x-request-id") ?? undefined;
+    if (!response.ok) {
+      await response.body?.cancel().catch(() => undefined);
+      throw new ProviderBrokerError(`provider request failed with HTTP ${response.status}`, { status: response.status, requestId });
+    }
+    if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
+      await response.body?.cancel().catch(() => undefined);
+      throw new ProviderBrokerError("provider returned an unsupported content type", { status: response.status, requestId });
+    }
+    return await readBoundedJson(response);
+  } catch (error: unknown) {
+    if (error instanceof ProviderBrokerError) throw error;
     throw new ProviderBrokerError(controller.signal.aborted ? "provider request cancelled" : "provider network request failed");
   } finally {
     window.clearTimeout(timeout);
     signal?.removeEventListener("abort", abort);
   }
-
-  const requestId = response.headers.get("x-request-id") ?? undefined;
-  if (!response.ok) {
-    await response.body?.cancel().catch(() => undefined);
-    throw new ProviderBrokerError(`provider request failed with HTTP ${response.status}`, { status: response.status, requestId });
-  }
-  if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
-    await response.body?.cancel().catch(() => undefined);
-    throw new ProviderBrokerError("provider returned an unsupported content type", { status: response.status, requestId });
-  }
-  return readBoundedJson(response);
 }
 
 async function readBoundedResponseStream(
@@ -743,6 +743,38 @@ export async function runProviderBrokerPolicyProbe(): Promise<ProviderBrokerProb
       && cancellationStreamCancelled;
   }
 
+  let bodyAbortObserved = false;
+  let releaseStalledBody: (() => void) | undefined;
+  const stalledBodyFetch: typeof fetch = async (_input, init) => new Response(new ReadableStream<Uint8Array>({
+    start(controller) {
+      const fail = () => controller.error(new DOMException("request aborted", "AbortError"));
+      releaseStalledBody = fail;
+      init?.signal?.addEventListener("abort", () => {
+        bodyAbortObserved = true;
+        fail();
+      }, { once: true });
+    }
+  }), { status: 200, headers: { "content-type": "application/json" } });
+  const bodyController = new AbortController();
+  const stalledRequest = performOpenAIRequest(
+    probeSecret,
+    { model: "clawsembly-policy-probe", input: "Verify stalled body cancellation." },
+    stalledBodyFetch,
+    bodyController.signal
+  );
+  await new Promise((resolve) => window.setTimeout(resolve, 0));
+  bodyController.abort();
+  const stalledOutcome = await Promise.race([
+    stalledRequest.then(() => "resolved", (error: unknown) => error instanceof ProviderBrokerError
+      && error.message.includes("cancelled") ? "cancelled" : "rejected"),
+    new Promise<"timeout">((resolve) => window.setTimeout(() => resolve("timeout"), 250))
+  ]);
+  if (stalledOutcome === "timeout") {
+    releaseStalledBody?.();
+    await stalledRequest.catch(() => undefined);
+  }
+  const bodyCancellationPropagated = stalledOutcome === "cancelled" && bodyAbortObserved;
+
   const passed = capturedUrl === OPENAI_RESPONSES_ENDPOINT
     && capturedInit?.method === "POST"
     && capturedInit.redirect === "error"
@@ -762,7 +794,8 @@ export async function runProviderBrokerPolicyProbe(): Promise<ProviderBrokerProb
     && functionResultInputValidated
     && maxOutputTokensValidated
     && requestBudgetValidated
-    && cancellationPropagated;
+    && cancellationPropagated
+    && bodyCancellationPropagated;
   if (!passed) throw new Error("provider broker policy self-test failed");
 
   return {
@@ -785,6 +818,7 @@ export async function runProviderBrokerPolicyProbe(): Promise<ProviderBrokerProb
     maxOutputTokensValidated: true,
     requestBudgetValidated: true,
     cancellationPropagated: true,
+    bodyCancellationPropagated: true,
     result: "pass"
   };
 }

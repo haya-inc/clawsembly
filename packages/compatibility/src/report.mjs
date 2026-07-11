@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 const RISK_RULES = [
   {
     pattern: /(^|\/)@lydell\/node-pty(?:-|$)|(^|\/)node-pty(?:-|$)/,
@@ -8,6 +10,40 @@ const RISK_RULES = [
     reason: "Ships platform-specific SQLite extensions and must remain optional."
   }
 ];
+
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]));
+}
+
+export function evidenceDigest(value) {
+  return createHash("sha256").update(JSON.stringify(canonicalize(value))).digest("hex");
+}
+
+export function deriveRuntimeClaimStatuses({ hostEvidence, gatewayEvidence } = {}) {
+  const deviceVerification = gatewayEvidence?.hostBroker?.deviceIdentity?.verification;
+  const performance = gatewayEvidence?.gateway?.performance;
+  return {
+    "host-preflight": hostEvidence ? hostEvidence.nodeSqlite?.close === "function" ? "pass" : "warn" : "pending",
+    "openclaw-webcontainer-boot": gatewayEvidence?.gateway?.healthz?.status === 200 ? "pass" : "pending",
+    "gateway-handshake": gatewayEvidence?.gateway?.handshake?.result === "pass" ? "pass" : "pending",
+    "mocked-chat-turn": gatewayEvidence?.gateway?.chat?.result === "pass" ? "pass" : "pending",
+    "mocked-tool-call": gatewayEvidence?.gateway?.chat?.tool?.result === "pass" ? "pass" : "pending",
+    "history-reconnect": gatewayEvidence?.gateway?.lifecycle?.reconnect?.result === "pass" ? "pass" : "pending",
+    "chat-cancellation": gatewayEvidence?.gateway?.lifecycle?.cancellation?.result === "pass" ? "pass" : "pending",
+    "credential-vault": gatewayEvidence?.hostBroker?.credentialVault?.result === "pass" ? "pass" : "pending",
+    "provider-broker": gatewayEvidence?.hostBroker?.providerBroker?.result === "pass" ? "pass" : "pending",
+    "host-broker-turn": gatewayEvidence?.gateway?.browserHostBroker?.result === "pass" ? "pass" : "pending",
+    "provider-budget": gatewayEvidence?.gateway?.browserHostBroker?.budget?.result === "pass" ? "pass" : "pending",
+    "live-opt-in-gate": gatewayEvidence?.hostBroker?.liveOptInGate?.result === "pass" ? "pass" : "pending",
+    "device-identity": deviceVerification?.actualGatewayHelloOk === true
+      && deviceVerification?.controlUiPairing === true
+      && deviceVerification?.deviceTokenReconnect === true ? "pass" : "pending",
+    "opfs-recovery": gatewayEvidence?.gateway?.persistence?.result === "pass" ? "pass" : "pending",
+    "runtime-performance": performance?.result === "pass" ? performance.assessment === "warn" ? "warn" : "pass" : "pending"
+  };
+}
 
 export function findNativeRisks(packages = {}) {
   const risks = [];
@@ -62,6 +98,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
   const nativeRiskDependencies = findNativeRisks(shrinkwrap?.packages);
   const shrinkwrapRootDrift = findShrinkwrapRootDrift(manifest, shrinkwrap);
   const hasLifecycleScript = Boolean(manifest.scripts?.preinstall || manifest.scripts?.install || manifest.scripts?.postinstall);
+  const runtimeStatuses = deriveRuntimeClaimStatuses({ hostEvidence, gatewayEvidence });
 
   return {
     schemaVersion: 1,
@@ -94,6 +131,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
         kind: "browser-runtime",
         capturedAt: hostEvidence.capturedAt,
         path: "evidence/webcontainer-host.json",
+        sha256: evidenceDigest(hostEvidence),
         summary: `WebContainer ${hostEvidence.webcontainerApi} booted Node ${hostEvidence.nodeVersion} with cross-origin isolation.`
       }] : [],
       ...gatewayEvidence?.gateway ? [{
@@ -101,6 +139,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
         kind: "gateway",
         capturedAt: gatewayEvidence.capturedAt,
         path: `evidence/openclaw-${gatewayEvidence.openclaw.version}-gateway.json`,
+        sha256: evidenceDigest(gatewayEvidence),
         summary: gatewayEvidence.gateway.persistence?.result === "pass"
           ? `OpenClaw ${gatewayEvidence.openclaw.version} completed the browser lifecycle and recovered its mock session from a versioned OPFS backup in a fresh WebContainer.`
           : gatewayEvidence.gateway.lifecycle?.result === "pass"
@@ -118,6 +157,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
         kind: "browser-security",
         capturedAt: gatewayEvidence.capturedAt,
         path: `evidence/openclaw-${gatewayEvidence.openclaw.version}-gateway.json`,
+        sha256: evidenceDigest(gatewayEvidence),
         summary: `The browser host retained a non-extractable ${gatewayEvidence.hostBroker.credentialVault.key.algorithm}-${gatewayEvidence.hostBroker.credentialVault.key.bits} key and provider ciphertext without mounting either into WebContainer.`
       }] : [],
       ...gatewayEvidence?.hostBroker?.providerBroker ? [{
@@ -125,6 +165,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
         kind: "browser-security",
         capturedAt: gatewayEvidence.capturedAt,
         path: `evidence/openclaw-${gatewayEvidence.openclaw.version}-gateway.json`,
+        sha256: evidenceDigest(gatewayEvidence),
         summary: gatewayEvidence.gateway?.browserHostBroker?.result === "pass"
           ? `An OpenClaw agent completed a streamed ${gatewayEvidence.gateway.browserHostBroker.toolRoundTrip?.result === "pass" ? "tool round-trip" : "turn"} through the browser-host ${gatewayEvidence.hostBroker.providerBroker.method} ${gatewayEvidence.hostBroker.providerBroker.endpoint} bridge without exposing provider credentials to WebContainer.`
           : `The browser host broker constrained provider traffic to ${gatewayEvidence.hostBroker.providerBroker.method} ${gatewayEvidence.hostBroker.providerBroker.endpoint} with stateless storage and bounded responses.`
@@ -134,6 +175,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
         kind: "browser-security",
         capturedAt: gatewayEvidence.capturedAt,
         path: `evidence/openclaw-${gatewayEvidence.openclaw.version}-gateway.json`,
+        sha256: evidenceDigest(gatewayEvidence),
         summary: `The browser exposes a credential-and-consent-gated ${gatewayEvidence.hostBroker.liveOptInGate.model} smoke test with a $${gatewayEvidence.hostBroker.liveOptInGate.pricing.displayedUpperBoundUsd.toFixed(3)} displayed upper bound; automation made no live request.`
       }] : [],
       ...gatewayEvidence?.hostBroker?.deviceIdentity ? [{
@@ -141,6 +183,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
         kind: "browser-security",
         capturedAt: gatewayEvidence.capturedAt,
         path: `evidence/openclaw-${gatewayEvidence.openclaw.version}-gateway.json`,
+        sha256: evidenceDigest(gatewayEvidence),
         summary: `A browser-owned non-extractable ${gatewayEvidence.hostBroker.deviceIdentity.key.algorithm} key signed the Gateway ${gatewayEvidence.hostBroker.deviceIdentity.payloadVersion} challenge, completed local Control UI pairing, and reconnected with an encrypted device token.`
       }] : [],
       ...gatewayEvidence?.gateway?.performance ? [{
@@ -148,6 +191,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
         kind: "browser-performance",
         capturedAt: gatewayEvidence.capturedAt,
         path: `evidence/openclaw-${gatewayEvidence.openclaw.version}-gateway.json`,
+        sha256: evidenceDigest(gatewayEvidence),
         summary: `Cold install completed in ${(gatewayEvidence.gateway.performance.install.coldTotalMs / 1000).toFixed(1)}s after a ${gatewayEvidence.gateway.performance.install.improvement?.coldTotalPercent ?? 0}% adapter improvement, warm reinstall in ${(gatewayEvidence.gateway.performance.install.warmInstallMs / 1000).toFixed(1)}s, with ${Math.round(gatewayEvidence.gateway.performance.footprint.combinedBytes / 1_000_000)} MB combined node_modules and npm-cache content.`
       }] : []
     ],
@@ -185,7 +229,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "host-preflight",
         label: "Browser host preflight",
-        status: hostEvidence ? hostEvidence.nodeSqlite?.close === "function" ? "pass" : "warn" : "pending",
+        status: runtimeStatuses["host-preflight"],
         detail: hostEvidence
           ? `WebContainer ${hostEvidence.webcontainerApi} booted Node ${hostEvidence.nodeVersion}; built-in node:sqlite requires an adapter.`
           : "A dated browser-host evidence record has not been attached."
@@ -193,7 +237,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "openclaw-webcontainer-boot",
         label: "OpenClaw WebContainer boot",
-        status: gatewayEvidence?.gateway?.healthz?.status === 200 ? "pass" : "pending",
+        status: runtimeStatuses["openclaw-webcontainer-boot"],
         detail: gatewayEvidence?.gateway?.healthz?.status === 200
           ? `The official artifact reached server-ready and /healthz returned HTTP ${gatewayEvidence.gateway.healthz.status} through explicit dependency and SQLite adapters.`
           : "The host runtime works, but this exact OpenClaw artifact has not booted in it yet."
@@ -201,7 +245,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "gateway-handshake",
         label: "Gateway handshake",
-        status: gatewayEvidence?.gateway?.handshake?.result === "pass" ? "pass" : "pending",
+        status: runtimeStatuses["gateway-handshake"],
         detail: gatewayEvidence?.gateway?.handshake?.result === "pass"
           ? `An authenticated WebSocket client received hello-ok for protocol ${gatewayEvidence.gateway.handshake.protocol} from OpenClaw ${gatewayEvidence.gateway.handshake.serverVersion}.`
           : "A successful hello-ok frame is required before this release can be supported."
@@ -209,7 +253,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "mocked-chat-turn",
         label: "Provider-independent chat turn",
-        status: gatewayEvidence?.gateway?.chat?.result === "pass" ? "pass" : "pending",
+        status: runtimeStatuses["mocked-chat-turn"],
         detail: gatewayEvidence?.gateway?.chat?.result === "pass"
           ? `OpenClaw completed a streamed turn through a deterministic local ${gatewayEvidence.gateway.chat.providerProtocol} provider and emitted a final chat event.`
           : "A streamed mocked turn through the real agent runner is required."
@@ -217,7 +261,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "mocked-tool-call",
         label: "Constrained tool execution",
-        status: gatewayEvidence?.gateway?.chat?.tool?.result === "pass" ? "pass" : "pending",
+        status: runtimeStatuses["mocked-tool-call"],
         detail: gatewayEvidence?.gateway?.chat?.tool?.result === "pass"
           ? `The model could request only ${gatewayEvidence.gateway.chat.tool.name}; OpenClaw executed it, returned the result to the provider, and completed the turn.`
           : "The model received the real tool catalog; a deterministic tool request and result round-trip is still required."
@@ -225,7 +269,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "history-reconnect",
         label: "History after reconnect",
-        status: gatewayEvidence?.gateway?.lifecycle?.reconnect?.result === "pass" ? "pass" : "pending",
+        status: runtimeStatuses["history-reconnect"],
         detail: gatewayEvidence?.gateway?.lifecycle?.reconnect?.result === "pass"
           ? `A new authenticated WebSocket recovered ${gatewayEvidence.gateway.lifecycle.history.reconnectedMessageCount} messages through chat.history.`
           : "History must survive a WebSocket disconnect and authenticated reconnect."
@@ -233,7 +277,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "chat-cancellation",
         label: "Streaming cancellation",
-        status: gatewayEvidence?.gateway?.lifecycle?.cancellation?.result === "pass" ? "pass" : "pending",
+        status: runtimeStatuses["chat-cancellation"],
         detail: gatewayEvidence?.gateway?.lifecycle?.cancellation?.result === "pass"
           ? `chat.abort accepted the active run and emitted an ${gatewayEvidence.gateway.lifecycle.cancellation.eventState} event.`
           : "An active streamed turn must stop through chat.abort and emit an aborted event."
@@ -241,7 +285,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "credential-vault",
         label: "Encrypted credential boundary",
-        status: gatewayEvidence?.hostBroker?.credentialVault?.result === "pass" ? "pass" : "pending",
+        status: runtimeStatuses["credential-vault"],
         detail: gatewayEvidence?.hostBroker?.credentialVault?.result === "pass"
           ? `${gatewayEvidence.hostBroker.credentialVault.testedProvider} ciphertext persisted across document reload with a non-extractable ${gatewayEvidence.hostBroker.credentialVault.key.algorithm}-${gatewayEvidence.hostBroker.credentialVault.key.bits} key; key export and wrong-scope decryption were rejected.`
           : "Provider credentials must remain encrypted in the browser host and outside the WebContainer filesystem."
@@ -249,7 +293,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "provider-broker",
         label: "Provider request policy",
-        status: gatewayEvidence?.hostBroker?.providerBroker?.result === "pass" ? "pass" : "pending",
+        status: runtimeStatuses["provider-broker"],
         detail: gatewayEvidence?.hostBroker?.providerBroker?.result === "pass"
           ? `Mock transport verified an exact ${gatewayEvidence.hostBroker.providerBroker.method} destination, store:false, redirect rejection, credential omission, secret-safe errors, and a ${Math.round(gatewayEvidence.hostBroker.providerBroker.responseLimitBytes / 1024 / 1024)} MB response limit without making a live request.`
           : "Provider traffic must cross a fixed-destination, secret-redacting browser-host broker before live testing."
@@ -257,7 +301,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "host-broker-turn",
         label: "OpenClaw host-broker turn",
-        status: gatewayEvidence?.gateway?.browserHostBroker?.result === "pass" ? "pass" : "pending",
+        status: runtimeStatuses["host-broker-turn"],
         detail: gatewayEvidence?.gateway?.browserHostBroker?.result === "pass"
           ? `OpenClaw agent ${gatewayEvidence.gateway.browserHostBroker.agent} completed a typed-SSE streamed ${gatewayEvidence.gateway.browserHostBroker.toolRoundTrip?.result === "pass" ? `${gatewayEvidence.gateway.browserHostBroker.toolRoundTrip.tool} tool round-trip with matched Responses function_call/function_call_output input` : "turn"} through the loopback bridge and host-owned Responses policy using ${gatewayEvidence.gateway.browserHostBroker.browserHostModel}; chat.abort reached the provider stream, credential plaintext never entered WebContainer, and no live request was made.`
           : "A real OpenClaw agent turn must cross the browser-host provider broker without mounting or logging provider credentials."
@@ -265,7 +309,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "provider-budget",
         label: "User-configurable provider budget",
-        status: gatewayEvidence?.gateway?.browserHostBroker?.budget?.result === "pass" ? "pass" : "pending",
+        status: runtimeStatuses["provider-budget"],
         detail: gatewayEvidence?.gateway?.browserHostBroker?.budget?.result === "pass"
           ? `The browser host enforces request, input-character, and streamed-output budgets; a custom ${gatewayEvidence.gateway.browserHostBroker.budget.customProbe.maxRequests}-request / ${gatewayEvidence.gateway.browserHostBroker.budget.customProbe.maxInputChars}-input / ${gatewayEvidence.gateway.browserHostBroker.budget.customProbe.maxOutputChars}-output configuration recorded ${gatewayEvidence.gateway.browserHostBroker.budget.customProbe.requestsUsed} requests and over-limit probes failed closed.`
           : "Provider traffic needs user-visible request, input, and streamed-output limits before live opt-in."
@@ -273,7 +317,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "live-opt-in-gate",
         label: "Protected live opt-in gate",
-        status: gatewayEvidence?.hostBroker?.liveOptInGate?.result === "pass" ? "pass" : "pending",
+        status: runtimeStatuses["live-opt-in-gate"],
         detail: gatewayEvidence?.hostBroker?.liveOptInGate?.result === "pass"
           ? `A stored credential plus explicit billable-request consent unlocks one fixed-prompt ${gatewayEvidence.hostBroker.liveOptInGate.model} smoke test with store:false, ${gatewayEvidence.hostBroker.liveOptInGate.maxOutputTokens} output tokens, cancel control, completed plain-text rendering, and a $${gatewayEvidence.hostBroker.liveOptInGate.pricing.displayedUpperBoundUsd.toFixed(3)} displayed upper bound; automation sent ${gatewayEvidence.hostBroker.liveOptInGate.verification.liveEndpointRequestsDuringAutomation} live requests.`
           : "Live traffic needs a fixed-prompt, cost-bounded, credential-and-consent gate before it can be enabled."
@@ -281,9 +325,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "device-identity",
         label: "Device pairing and token reconnect",
-        status: gatewayEvidence?.hostBroker?.deviceIdentity?.verification?.actualGatewayHelloOk === true
-          && gatewayEvidence?.hostBroker?.deviceIdentity?.verification?.controlUiPairing === true
-          && gatewayEvidence?.hostBroker?.deviceIdentity?.verification?.deviceTokenReconnect === true ? "pass" : "pending",
+        status: runtimeStatuses["device-identity"],
         detail: gatewayEvidence?.hostBroker?.deviceIdentity?.verification?.actualGatewayHelloOk === true
           && gatewayEvidence?.hostBroker?.deviceIdentity?.verification?.controlUiPairing === true
           && gatewayEvidence?.hostBroker?.deviceIdentity?.verification?.deviceTokenReconnect === true
@@ -293,7 +335,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "opfs-recovery",
         label: "OPFS runtime recovery",
-        status: gatewayEvidence?.gateway?.persistence?.result === "pass" ? "pass" : "pending",
+        status: runtimeStatuses["opfs-recovery"],
         detail: gatewayEvidence?.gateway?.persistence?.result === "pass"
           ? `A ${Math.round(gatewayEvidence.gateway.persistence.snapshotBytes / 1024)} KB mock-state backup (${gatewayEvidence.gateway.persistence.format}, ${gatewayEvidence.gateway.persistence.integrity}) restored ${gatewayEvidence.gateway.persistence.recovery.transcriptFiles} transcript files in a fresh WebContainer and remained available after document reload.`
           : "The mock session must survive OPFS save, WebContainer restart, binary mount, and document reload."
@@ -301,9 +343,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       {
         id: "runtime-performance",
         label: "Measured browser runtime cost",
-        status: gatewayEvidence?.gateway?.performance?.result === "pass"
-          ? gatewayEvidence.gateway.performance.assessment === "warn" ? "warn" : "pass"
-          : "pending",
+        status: runtimeStatuses["runtime-performance"],
         detail: gatewayEvidence?.gateway?.performance?.result === "pass"
           ? `Chromium measured ${(gatewayEvidence.gateway.performance.install.coldTotalMs / 1000).toFixed(1)}s cold install (${(gatewayEvidence.gateway.performance.install.nestedDependencyRepairMs / 1000).toFixed(1)}s dependency repair), ${(gatewayEvidence.gateway.performance.install.warmInstallMs / 1000).toFixed(1)}s warm reinstall, ${Math.round(gatewayEvidence.gateway.performance.footprint.nodeModules.bytes / 1_000_000)} MB node_modules, ${Math.round(gatewayEvidence.gateway.performance.footprint.npmCache.bytes / 1_000_000)} MB npm cache, and ${(gatewayEvidence.gateway.performance.gateway.protocolReadyMs / 1000).toFixed(1)}s to protocol-ready. Suppressing redundant repair lifecycle scripts improved cold time by ${gatewayEvidence.gateway.performance.install.improvement?.coldTotalPercent ?? 0}%; npm ci remains blocked by missing published shrinkwrap entries.`
           : "Cold/warm install time, actual filesystem footprint, and Gateway-ready latency have not been measured in the browser lane."

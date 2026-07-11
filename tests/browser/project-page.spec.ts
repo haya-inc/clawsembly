@@ -20,7 +20,15 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   expect(index.releases.map((release) => release.channel)).toEqual(["stable", "previous", "preview"]);
   expect(new Set(Object.values(index.channels)).size).toBe(3);
 
+  const pageResponse = await request.get("/");
+  expect(pageResponse.headers()["content-security-policy"]).toContain("default-src 'self'");
+  expect(pageResponse.headers()["content-security-policy"]).toContain("frame-src https://stackblitz.com");
+  expect(pageResponse.headers()["content-security-policy"]).toContain("connect-src 'self' https://api.openai.com");
+  expect(pageResponse.headers()["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+  expect(pageResponse.headers()["x-content-type-options"]).toBe("nosniff");
+
   await page.goto("/#releases");
+  await expect(page.locator('meta[http-equiv="Content-Security-Policy"]')).toHaveAttribute("content", /script-src 'self' 'sha256-/);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://haya-inc.github.io/clawsembly/");
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", "https://haya-inc.github.io/clawsembly/social-preview.png");
   const structuredData = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent() ?? "null") as {

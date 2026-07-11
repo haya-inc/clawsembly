@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clawsembly.dev/schemas/gateway-evidence.v1.json",
+  "title": "Clawsembly OpenClaw Gateway evidence",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schemaVersion", "capturedAt", "source", "openclaw", "environment", "hostBroker", "install", "adapters", "gateway"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "capturedAt": { "type": "string", "format": "date-time" },
+    "source": { "type": "string", "minLength": 1 },
+    "openclaw": {
+      "type": "object",
+      "required": ["version", "sourcePatched"],
+      "properties": {
+        "version": { "type": "string", "minLength": 1 },
+        "sourcePatched": { "type": "boolean" }
+      }
+    },
+    "environment": { "type": "object" },
+    "hostBroker": {
+      "type": "object",
+      "required": ["credentialVault", "providerBroker", "liveOptInGate", "deviceIdentity"],
+      "properties": {
+        "credentialVault": { "$ref": "#/$defs/passResult" },
+        "providerBroker": { "$ref": "#/$defs/passResult" },
+        "liveOptInGate": { "$ref": "#/$defs/passResult" },
+        "deviceIdentity": {
+          "allOf": [{ "$ref": "#/$defs/passResult" }],
+          "type": "object",
+          "required": ["verification"],
+          "properties": {
+            "verification": {
+              "type": "object",
+              "required": ["actualGatewayHelloOk", "controlUiPairing", "deviceTokenReconnect"],
+              "properties": {
+                "actualGatewayHelloOk": { "type": "boolean" },
+                "controlUiPairing": { "type": "boolean" },
+                "deviceTokenReconnect": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "install": { "$ref": "#/$defs/passResult" },
+    "adapters": { "type": "array", "minItems": 1 },
+    "gateway": {
+      "type": "object",
+      "required": ["healthz", "handshake", "chat", "browserHostBroker", "lifecycle", "persistence", "performance"],
+      "properties": {
+        "healthz": {
+          "type": "object",
+          "required": ["status"],
+          "properties": { "status": { "type": "integer", "minimum": 100, "maximum": 599 } }
+        },
+        "handshake": { "$ref": "#/$defs/passResult" },
+        "chat": {
+          "allOf": [{ "$ref": "#/$defs/passResult" }],
+          "type": "object",
+          "required": ["tool"],
+          "properties": { "tool": { "$ref": "#/$defs/passResult" } }
+        },
+        "browserHostBroker": {
+          "allOf": [{ "$ref": "#/$defs/passResult" }],
+          "type": "object",
+          "required": ["budget"],
+          "properties": { "budget": { "$ref": "#/$defs/passResult" } }
+        },
+        "lifecycle": {
+          "allOf": [{ "$ref": "#/$defs/passResult" }],
+          "type": "object",
+          "required": ["reconnect", "cancellation"],
+          "properties": {
+            "reconnect": { "$ref": "#/$defs/passResult" },
+            "cancellation": { "$ref": "#/$defs/passResult" }
+          }
+        },
+        "persistence": { "$ref": "#/$defs/passResult" },
+        "performance": {
+          "allOf": [{ "$ref": "#/$defs/passResult" }],
+          "type": "object",
+          "required": ["assessment"],
+          "properties": { "assessment": { "enum": ["pass", "warn"] } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "passResult": {
+      "type": "object",
+      "required": ["result"],
+      "properties": { "result": { "enum": ["pass", "fail"] } }
+    }
+  }
+}

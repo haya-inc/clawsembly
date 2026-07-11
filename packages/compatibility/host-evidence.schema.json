@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clawsembly.dev/schemas/host-evidence.v1.json",
+  "title": "Clawsembly browser-host evidence",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schemaVersion", "capturedAt", "source", "browser", "origin", "crossOriginIsolated", "sharedArrayBuffer", "coep", "webcontainerApi", "webcontainerBoot", "nodeVersion", "nodeSqlite"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "capturedAt": { "type": "string", "format": "date-time" },
+    "source": { "type": "string", "minLength": 1 },
+    "browser": { "type": "string", "minLength": 1 },
+    "origin": { "type": "string", "format": "uri" },
+    "crossOriginIsolated": { "type": "boolean" },
+    "sharedArrayBuffer": { "type": "boolean" },
+    "coep": { "const": "credentialless" },
+    "webcontainerApi": { "type": "string", "minLength": 1 },
+    "webcontainerBoot": { "enum": ["pass", "fail"] },
+    "nodeVersion": { "type": "string", "pattern": "^v[0-9]+\\." },
+    "nodeSqlite": {
+      "type": "object",
+      "required": ["databaseSync", "close", "exec", "prepare"],
+      "properties": {
+        "databaseSync": { "type": "string" },
+        "close": { "type": "string" },
+        "exec": { "type": "string" },
+        "prepare": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { extname, relative, resolve } from "node:path";
 
@@ -41,12 +42,17 @@ const required = [
   ".github/workflows/compatibility.yml",
   ".github/workflows/pages.yml",
   ".github/workflows/runtime-browser.yml",
+  "apps/web/public/_headers",
+  "netlify.toml",
+  "vercel.json",
   "apps/web/public/data/compatibility.json",
   "apps/web/public/data/compatibility-badge.svg",
   "apps/web/public/data/release-history.json",
   "apps/web/public/social-preview.png",
   "packages/compatibility/report.schema.json",
   "packages/compatibility/release-history.schema.json",
+  "packages/compatibility/host-evidence.schema.json",
+  "packages/compatibility/gateway-evidence.schema.json",
   "dist/index.html",
   "dist/data/compatibility.json",
   "dist/data/compatibility-badge.svg",
@@ -66,6 +72,16 @@ if (manifest.repository?.url !== "https://github.com/haya-inc/clawsembly.git") {
 const builtIndex = readFileSync(resolve(root, "dist/index.html"), "utf8");
 for (const expected of ["/clawsembly/mark.svg", "/clawsembly/assets/", "https://haya-inc.github.io/clawsembly/social-preview.png"]) {
   if (!builtIndex.includes(expected)) throw new Error(`GitHub Pages build is missing ${expected}.`);
+}
+const structuredData = builtIndex.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
+if (!structuredData) throw new Error("The Pages build is missing JSON-LD structured data.");
+const structuredDataHash = createHash("sha256").update(structuredData).digest("base64");
+if (!builtIndex.includes(`'sha256-${structuredDataHash}'`)) {
+  throw new Error("The Content Security Policy hash does not match the JSON-LD block.");
+}
+const builtHeaders = readFileSync(resolve(root, "dist/_headers"), "utf8");
+for (const expected of ["Content-Security-Policy:", "Referrer-Policy: strict-origin-when-cross-origin", "X-Content-Type-Options: nosniff"]) {
+  if (!builtHeaders.includes(expected)) throw new Error(`The deployment headers are missing ${expected}.`);
 }
 
 const socialPreview = readFileSync(resolve(root, "apps/web/public/social-preview.png"));

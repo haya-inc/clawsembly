@@ -13,6 +13,18 @@ Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: credentialless
 ```
 
+The checked-in deployment configurations also enforce a restrictive Content
+Security Policy, `Referrer-Policy: strict-origin-when-cross-origin`, MIME sniffing protection, and a
+minimal Permissions Policy. The CSP permits only same-origin scripts, the
+hashed JSON-LD block, Google Fonts, the fixed OpenAI Responses destination, and
+the StackBlitz WebContainer iframe. Keep the HTML meta policy in sync because it
+is the enforcement fallback on GitHub Pages, where repository-defined response
+headers are unavailable.
+
+WebContainer boot requires the embedding origin on its StackBlitz headless
+request, so the document-level referrer policy retains the origin while omitting
+the path. Provider requests independently set `referrerPolicy: "no-referrer"`.
+
 The probe boots WebContainer with `coep: "credentialless"`, so the document
 header and boot option must stay aligned. The runtime preflight fails closed
 when `window.crossOriginIsolated` or `SharedArrayBuffer` is unavailable.

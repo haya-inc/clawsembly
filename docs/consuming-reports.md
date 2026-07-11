@@ -29,10 +29,12 @@ Consumers should:
 1. require the expected `schemaVersion`;
 2. compare `artifact.version` and integrity with the artifact they will use;
 3. require `runtimeEvidence: true` when making runtime claims;
-4. inspect `fail`, `warn`, and `pending` checks rather than relying only on the
+4. verify each evidence entry's `sha256` against the recursively key-sorted,
+   compact JSON form of the referenced evidence object;
+5. inspect `fail`, `warn`, and `pending` checks rather than relying only on the
    top-level status;
-5. retain the last verified stable report as a rollback reference;
-6. cache responses but revalidate when npm channel versions change.
+6. retain the last verified stable report as a rollback reference;
+7. cache responses but revalidate when npm channel versions change.
 
 ## Minimal policy example
 
@@ -59,3 +61,6 @@ The JSON is a published observation, not a substitute for pinning npm integrity
 or for a downstream project's own acceptance tests. Runtime evidence is attached
 only to the exact OpenClaw version named inside that evidence. Clawsembly's
 generator rejects attempts to reuse it for another version.
+The checked-in validator also schema-checks the source evidence, verifies its
+canonical SHA-256 digest, and recomputes every evidence-derived check status so
+that edited or stale reports fail CI.

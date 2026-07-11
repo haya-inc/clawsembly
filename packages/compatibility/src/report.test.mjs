@@ -1,6 +1,33 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertReport, buildReport, findNativeRisks, findShrinkwrapRootDrift } from "./report.mjs";
+import {
+  assertReport,
+  buildReport,
+  deriveRuntimeClaimStatuses,
+  evidenceDigest,
+  findNativeRisks,
+  findShrinkwrapRootDrift
+} from "./report.mjs";
+
+test("evidenceDigest is stable across object key order", () => {
+  assert.equal(
+    evidenceDigest({ nested: { second: 2, first: 1 }, items: [{ beta: true, alpha: false }] }),
+    evidenceDigest({ items: [{ alpha: false, beta: true }], nested: { first: 1, second: 2 } })
+  );
+  assert.notEqual(evidenceDigest({ result: "pass" }), evidenceDigest({ result: "fail" }));
+});
+
+test("deriveRuntimeClaimStatuses fails closed when evidence is incomplete", () => {
+  const statuses = deriveRuntimeClaimStatuses({
+    hostEvidence: { nodeSqlite: { close: "undefined" } },
+    gatewayEvidence: { gateway: { healthz: { status: 200 }, handshake: { result: "pass" } } }
+  });
+  assert.equal(statuses["host-preflight"], "warn");
+  assert.equal(statuses["openclaw-webcontainer-boot"], "pass");
+  assert.equal(statuses["gateway-handshake"], "pass");
+  assert.equal(statuses["mocked-chat-turn"], "pending");
+  assert.equal(statuses["runtime-performance"], "pending");
+});
 
 test("findNativeRisks classifies platform variants", () => {
   const risks = findNativeRisks({

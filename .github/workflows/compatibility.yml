@@ -5,16 +5,14 @@ on:
     - cron: "17 */6 * * *"
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   static-inspection:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
@@ -30,14 +28,43 @@ jobs:
         run: |
           echo '## OpenClaw release-channel inspection' >> "$GITHUB_STEP_SUMMARY"
           node -e 'const h=require("./apps/web/public/data/release-history.json"); for (const r of h.releases) console.log(`- ${r.channel}: ${r.version} · ${r.status} · ${r.runtimeEvidence ? "runtime evidenced" : "static only"}`)' >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
+      - name: Package validated reports
+        run: >-
+          tar -czf "$RUNNER_TEMP/compatibility-reports.tgz"
+          apps/web/public/data/compatibility.json
+          apps/web/public/data/compatibility-badge.svg
+          apps/web/public/data/release-history.json
+          apps/web/public/data/releases/*.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: compatibility-reports
-          path: |
-            apps/web/public/data/compatibility.json
-            apps/web/public/data/compatibility-badge.svg
-            apps/web/public/data/release-history.json
-            apps/web/public/data/releases/*.json
+          path: ${{ runner.temp }}/compatibility-reports.tgz
+
+  publish-report-pr:
+    needs: static-inspection
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: compatibility-reports
+          path: ${{ runner.temp }}
+      - name: Install validated reports
+        run: |
+          staging="$RUNNER_TEMP/compatibility-reports"
+          mkdir -p "$staging"
+          tar -xzf "$RUNNER_TEMP/compatibility-reports.tgz" -C "$staging"
+          if find "$staging" -type l -print -quit | grep -q .; then
+            echo 'Report artifact must not contain symlinks.' >&2
+            exit 1
+          fi
+          cp "$staging/apps/web/public/data/compatibility.json" apps/web/public/data/compatibility.json
+          cp "$staging/apps/web/public/data/compatibility-badge.svg" apps/web/public/data/compatibility-badge.svg
+          cp "$staging/apps/web/public/data/release-history.json" apps/web/public/data/release-history.json
+          cp "$staging"/apps/web/public/data/releases/*.json apps/web/public/data/releases/
       - name: Commit changed channel reports
         id: changes
         run: |

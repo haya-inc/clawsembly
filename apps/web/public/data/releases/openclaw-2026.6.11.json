@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-11T22:01:42.593Z",
+  "generatedAt": "2026-07-11T22:31:55.478Z",
   "status": "partial",
   "target": {
     "runtime": "webcontainer",
@@ -95,6 +95,7 @@
       "kind": "browser-runtime",
       "capturedAt": "2026-07-11T16:06:30.000Z",
       "path": "evidence/webcontainer-host.json",
+      "sha256": "9ccc5d3c41b486eaf4d1df1080fbfe8d201e809d22e5272650f3c7779c0ae51c",
       "summary": "WebContainer 1.6.4 booted Node v22.22.3 with cross-origin isolation."
     },
     {
@@ -102,6 +103,7 @@
       "kind": "gateway",
       "capturedAt": "2026-07-11T21:41:44.000Z",
       "path": "evidence/openclaw-2026.6.11-gateway.json",
+      "sha256": "0ef578fb81abb2bd5f13f5135f15867b591fce69fb2e2c6ee7647218a4cacc1a",
       "summary": "OpenClaw 2026.6.11 completed the browser lifecycle and recovered its mock session from a versioned OPFS backup in a fresh WebContainer."
     },
     {
@@ -109,6 +111,7 @@
       "kind": "browser-security",
       "capturedAt": "2026-07-11T21:41:44.000Z",
       "path": "evidence/openclaw-2026.6.11-gateway.json",
+      "sha256": "0ef578fb81abb2bd5f13f5135f15867b591fce69fb2e2c6ee7647218a4cacc1a",
       "summary": "The browser host retained a non-extractable AES-GCM-256 key and provider ciphertext without mounting either into WebContainer."
     },
     {
@@ -116,6 +119,7 @@
       "kind": "browser-security",
       "capturedAt": "2026-07-11T21:41:44.000Z",
       "path": "evidence/openclaw-2026.6.11-gateway.json",
+      "sha256": "0ef578fb81abb2bd5f13f5135f15867b591fce69fb2e2c6ee7647218a4cacc1a",
       "summary": "An OpenClaw agent completed a streamed tool round-trip through the browser-host POST https://api.openai.com/v1/responses bridge without exposing provider credentials to WebContainer."
     },
     {
@@ -123,6 +127,7 @@
       "kind": "browser-security",
       "capturedAt": "2026-07-11T21:41:44.000Z",
       "path": "evidence/openclaw-2026.6.11-gateway.json",
+      "sha256": "0ef578fb81abb2bd5f13f5135f15867b591fce69fb2e2c6ee7647218a4cacc1a",
       "summary": "The browser exposes a credential-and-consent-gated gpt-5.6-luna smoke test with a $0.001 displayed upper bound; automation made no live request."
     },
     {
@@ -130,6 +135,7 @@
       "kind": "browser-security",
       "capturedAt": "2026-07-11T21:41:44.000Z",
       "path": "evidence/openclaw-2026.6.11-gateway.json",
+      "sha256": "0ef578fb81abb2bd5f13f5135f15867b591fce69fb2e2c6ee7647218a4cacc1a",
       "summary": "A browser-owned non-extractable Ed25519 key signed the Gateway v3 challenge, completed local Control UI pairing, and reconnected with an encrypted device token."
     },
     {
@@ -137,6 +143,7 @@
       "kind": "browser-performance",
       "capturedAt": "2026-07-11T21:41:44.000Z",
       "path": "evidence/openclaw-2026.6.11-gateway.json",
+      "sha256": "0ef578fb81abb2bd5f13f5135f15867b591fce69fb2e2c6ee7647218a4cacc1a",
       "summary": "Cold install completed in 57.1s after a 4.1% adapter improvement, warm reinstall in 2.9s, with 880 MB combined node_modules and npm-cache content."
     }
   ],
