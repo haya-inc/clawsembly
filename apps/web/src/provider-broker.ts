@@ -229,7 +229,7 @@ function createRequestBody(request: OpenAITextRequest, stream: boolean): Record<
   };
 }
 
-async function readBoundedJson(response: Response): Promise<unknown> {
+async function readBoundedJson(response: Response, signal: AbortSignal): Promise<unknown> {
   const declaredLength = Number(response.headers.get("content-length"));
   if (Number.isFinite(declaredLength) && declaredLength > MAX_RESPONSE_BYTES) {
     await response.body?.cancel().catch(() => undefined);
@@ -238,29 +238,40 @@ async function readBoundedJson(response: Response): Promise<unknown> {
   if (!response.body) throw new ProviderBrokerError("provider response has no body", { status: response.status });
 
   const reader = response.body.getReader();
+  const abort = () => { void reader.cancel().catch(() => undefined); };
+  if (signal.aborted) abort();
+  else signal.addEventListener("abort", abort, { once: true });
   const chunks: Uint8Array[] = [];
   let total = 0;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    total += value.byteLength;
-    if (total > MAX_RESPONSE_BYTES) {
-      await reader.cancel().catch(() => undefined);
-      throw new ProviderBrokerError("provider response exceeds the 2 MB safety limit", { status: response.status });
-    }
-    chunks.push(value);
-  }
-
-  const bytes = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
   try {
-    return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)) as unknown;
-  } catch {
-    throw new ProviderBrokerError("provider returned invalid JSON", { status: response.status });
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_RESPONSE_BYTES) {
+        await reader.cancel().catch(() => undefined);
+        throw new ProviderBrokerError("provider response exceeds the 2 MB safety limit", { status: response.status });
+      }
+      chunks.push(value);
+    }
+    if (signal.aborted) throw new ProviderBrokerError("provider request cancelled", { status: response.status });
+
+    const bytes = new Uint8Array(total);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    try {
+      return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)) as unknown;
+    } catch {
+      throw new ProviderBrokerError("provider returned invalid JSON", { status: response.status });
+    }
+  } catch (error: unknown) {
+    if (signal.aborted) throw new ProviderBrokerError("provider request cancelled", { status: response.status });
+    throw error;
+  } finally {
+    signal.removeEventListener("abort", abort);
   }
 }
 
@@ -273,7 +284,8 @@ async function performOpenAIRequest(
   const request = validateRequest(untrustedRequest);
   const controller = new AbortController();
   const abort = () => controller.abort();
-  signal?.addEventListener("abort", abort, { once: true });
+  if (signal?.aborted) abort();
+  else signal?.addEventListener("abort", abort, { once: true });
   let timedOut = false;
   const timeout = window.setTimeout(() => {
     timedOut = true;
@@ -302,11 +314,12 @@ async function performOpenAIRequest(
       await response.body?.cancel().catch(() => undefined);
       throw new ProviderBrokerError("provider returned an unsupported content type", { status: response.status, requestId });
     }
-    return await readBoundedJson(response);
+    return await readBoundedJson(response, controller.signal);
   } catch (error: unknown) {
-    if (error instanceof ProviderBrokerError) throw error;
     if (timedOut) throw new ProviderBrokerError("provider request timed out");
-    throw new ProviderBrokerError(controller.signal.aborted ? "provider request cancelled" : "provider network request failed");
+    if (controller.signal.aborted) throw new ProviderBrokerError("provider request cancelled");
+    if (error instanceof ProviderBrokerError) throw error;
+    throw new ProviderBrokerError("provider network request failed");
   } finally {
     window.clearTimeout(timeout);
     signal?.removeEventListener("abort", abort);
@@ -473,7 +486,8 @@ async function performOpenAIStream(
   budget?.consumeRequest(request);
   const controller = new AbortController();
   const abort = () => controller.abort();
-  signal?.addEventListener("abort", abort, { once: true });
+  if (signal?.aborted) abort();
+  else signal?.addEventListener("abort", abort, { once: true });
   let timedOut = false;
   const timeout = window.setTimeout(() => {
     timedOut = true;
@@ -754,16 +768,8 @@ export async function runProviderBrokerPolicyProbe(): Promise<ProviderBrokerProb
   }
 
   let bodyAbortObserved = false;
-  let releaseStalledBody: (() => void) | undefined;
-  const stalledBodyFetch: typeof fetch = async (_input, init) => new Response(new ReadableStream<Uint8Array>({
-    start(controller) {
-      const fail = () => controller.error(new DOMException("request aborted", "AbortError"));
-      releaseStalledBody = fail;
-      init?.signal?.addEventListener("abort", () => {
-        bodyAbortObserved = true;
-        fail();
-      }, { once: true });
-    }
+  const stalledBodyFetch: typeof fetch = async () => new Response(new ReadableStream<Uint8Array>({
+    cancel() { bodyAbortObserved = true; }
   }), { status: 200, headers: { "content-type": "application/json" } });
   const bodyController = new AbortController();
   const stalledRequest = performOpenAIRequest(
@@ -779,10 +785,6 @@ export async function runProviderBrokerPolicyProbe(): Promise<ProviderBrokerProb
       && error.message.includes("cancelled") ? "cancelled" : "rejected"),
     new Promise<"timeout">((resolve) => window.setTimeout(() => resolve("timeout"), 250))
   ]);
-  if (stalledOutcome === "timeout") {
-    releaseStalledBody?.();
-    await stalledRequest.catch(() => undefined);
-  }
   const bodyCancellationPropagated = stalledOutcome === "cancelled" && bodyAbortObserved;
 
   const passed = capturedUrl === OPENAI_RESPONSES_ENDPOINT
