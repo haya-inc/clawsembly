@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-11T22:01:43.304Z",
+  "status": "probing",
+  "target": {
+    "runtime": "webcontainer",
+    "browserBaseline": "Desktop Chromium; Firefox and Safari are experimental until runtime evidence exists."
+  },
+  "artifact": {
+    "package": "openclaw",
+    "version": "2026.6.10",
+    "integrity": "sha512-LcooND2tBQw8A+kc1Ujltu3lg30bJ0w7XaeRy7eYzobb8BBdcW6DOGbwJL4vpj1vl9+gjRceOtlh5nh9OARcug==",
+    "nodeEngine": ">=22.19.0",
+    "tarballBytes": 19243098,
+    "unpackedBytes": 86652214,
+    "directDependencyCount": 54,
+    "nativeRiskDependencies": [
+      {
+        "name": "@lydell/node-pty",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "@lydell/node-pty-darwin-arm64",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "@lydell/node-pty-darwin-x64",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "@lydell/node-pty-linux-arm64",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "@lydell/node-pty-linux-x64",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "@lydell/node-pty-win32-arm64",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "@lydell/node-pty-win32-x64",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "sqlite-vec",
+        "version": "0.1.9",
+        "reason": "Ships platform-specific SQLite extensions and must remain optional."
+      },
+      {
+        "name": "sqlite-vec-darwin-arm64",
+        "version": "0.1.9",
+        "reason": "Ships platform-specific SQLite extensions and must remain optional."
+      },
+      {
+        "name": "sqlite-vec-darwin-x64",
+        "version": "0.1.9",
+        "reason": "Ships platform-specific SQLite extensions and must remain optional."
+      },
+      {
+        "name": "sqlite-vec-linux-arm64",
+        "version": "0.1.9",
+        "reason": "Ships platform-specific SQLite extensions and must remain optional."
+      },
+      {
+        "name": "sqlite-vec-linux-x64",
+        "version": "0.1.9",
+        "reason": "Ships platform-specific SQLite extensions and must remain optional."
+      },
+      {
+        "name": "sqlite-vec-windows-x64",
+        "version": "0.1.9",
+        "reason": "Ships platform-specific SQLite extensions and must remain optional."
+      }
+    ],
+    "shrinkwrapRootConsistency": {
+      "lockfileVersion": 3,
+      "compatible": false,
+      "missingCount": 31,
+      "mismatchedCount": 0,
+      "missingDevDependencyCount": 31
+    }
+  },
+  "evidence": [
+    {
+      "id": "host-preflight",
+      "kind": "browser-runtime",
+      "capturedAt": "2026-07-11T16:06:30.000Z",
+      "path": "evidence/webcontainer-host.json",
+      "summary": "WebContainer 1.6.4 booted Node v22.22.3 with cross-origin isolation."
+    }
+  ],
+  "checks": [
+    {
+      "id": "artifact-pinned",
+      "label": "Exact upstream artifact",
+      "status": "pass",
+      "detail": "openclaw@2026.6.10 is pinned by version and integrity."
+    },
+    {
+      "id": "lifecycle-scripts",
+      "label": "Lifecycle scripts classified",
+      "status": "warn",
+      "detail": "The artifact declares lifecycle scripts; the browser probe must capture their behavior without silently skipping them."
+    },
+    {
+      "id": "shrinkwrap-root-consistency",
+      "label": "Published shrinkwrap consistency",
+      "status": "warn",
+      "detail": "The published manifest has 31 root declarations missing from shrinkwrap lockfile v3 and 0 mismatched declarations (31 missing dev dependencies); npm ci rejects the artifact even when dev dependencies are omitted."
+    },
+    {
+      "id": "native-dependencies",
+      "label": "Native dependency inventory",
+      "status": "warn",
+      "detail": "13 platform-specific package variants require capability-scoped handling."
+    },
+    {
+      "id": "host-preflight",
+      "label": "Browser host preflight",
+      "status": "warn",
+      "detail": "WebContainer 1.6.4 booted Node v22.22.3; built-in node:sqlite requires an adapter."
+    },
+    {
+      "id": "openclaw-webcontainer-boot",
+      "label": "OpenClaw WebContainer boot",
+      "status": "pending",
+      "detail": "The host runtime works, but this exact OpenClaw artifact has not booted in it yet."
+    },
+    {
+      "id": "gateway-handshake",
+      "label": "Gateway handshake",
+      "status": "pending",
+      "detail": "A successful hello-ok frame is required before this release can be supported."
+    },
+    {
+      "id": "mocked-chat-turn",
+      "label": "Provider-independent chat turn",
+      "status": "pending",
+      "detail": "A streamed mocked turn through the real agent runner is required."
+    },
+    {
+      "id": "mocked-tool-call",
+      "label": "Constrained tool execution",
+      "status": "pending",
+      "detail": "The model received the real tool catalog; a deterministic tool request and result round-trip is still required."
+    },
+    {
+      "id": "history-reconnect",
+      "label": "History after reconnect",
+      "status": "pending",
+      "detail": "History must survive a WebSocket disconnect and authenticated reconnect."
+    },
+    {
+      "id": "chat-cancellation",
+      "label": "Streaming cancellation",
+      "status": "pending",
+      "detail": "An active streamed turn must stop through chat.abort and emit an aborted event."
+    },
+    {
+      "id": "credential-vault",
+      "label": "Encrypted credential boundary",
+      "status": "pending",
+      "detail": "Provider credentials must remain encrypted in the browser host and outside the WebContainer filesystem."
+    },
+    {
+      "id": "provider-broker",
+      "label": "Provider request policy",
+      "status": "pending",
+      "detail": "Provider traffic must cross a fixed-destination, secret-redacting browser-host broker before live testing."
+    },
+    {
+      "id": "host-broker-turn",
+      "label": "OpenClaw host-broker turn",
+      "status": "pending",
+      "detail": "A real OpenClaw agent turn must cross the browser-host provider broker without mounting or logging provider credentials."
+    },
+    {
+      "id": "provider-budget",
+      "label": "User-configurable provider budget",
+      "status": "pending",
+      "detail": "Provider traffic needs user-visible request, input, and streamed-output limits before live opt-in."
+    },
+    {
+      "id": "live-opt-in-gate",
+      "label": "Protected live opt-in gate",
+      "status": "pending",
+      "detail": "Live traffic needs a fixed-prompt, cost-bounded, credential-and-consent gate before it can be enabled."
+    },
+    {
+      "id": "device-identity",
+      "label": "Device pairing and token reconnect",
+      "status": "pending",
+      "detail": "A browser-owned non-extractable device key must complete Control UI pairing and a token-authenticated reconnect without leaking credentials."
+    },
+    {
+      "id": "opfs-recovery",
+      "label": "OPFS runtime recovery",
+      "status": "pending",
+      "detail": "The mock session must survive OPFS save, WebContainer restart, binary mount, and document reload."
+    },
+    {
+      "id": "runtime-performance",
+      "label": "Measured browser runtime cost",
+      "status": "pending",
+      "detail": "Cold/warm install time, actual filesystem footprint, and Gateway-ready latency have not been measured in the browser lane."
+    }
+  ]
+}

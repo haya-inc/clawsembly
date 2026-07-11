@@ -1,0 +1,47 @@
+name: Compatibility finding
+description: Report a reproducible OpenClaw or browser-runtime compatibility result.
+title: "compat: "
+labels: ["compatibility", "needs-triage"]
+body:
+  - type: input
+    id: openclaw-version
+    attributes:
+      label: OpenClaw version
+      placeholder: 2026.6.11
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and operating system
+      placeholder: Chrome 140 / macOS 16
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Probe stage
+      options:
+        - Artifact inspection
+        - Installation
+        - Gateway boot
+        - Gateway handshake
+        - Mocked chat
+        - Persistence
+        - Disabled capability
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include exact commands, configuration with secrets removed, and the smallest relevant log.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected classification
+      description: Explain whether this should pass, warn, fail, or remain unsupported.
+    validations:
+      required: true

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-11T17:28:06.000Z",
+  "artifact": "openclaw@2026.6.11",
+  "environment": {
+    "webcontainerApi": "1.6.4",
+    "node": "v22.22.3"
+  },
+  "operation": "fs.readSync(fileDescriptor, buffer, 0, 1, snapshot.size - 1n)",
+  "upstreamLocation": "session-manager sessionFileNeedsAppendSeparator",
+  "expected": "Node accepts a bigint position and reads the final byte.",
+  "observed": {
+    "name": "TypeError",
+    "message": "Cannot mix BigInt and other types, use explicit conversions"
+  },
+  "scope": "WebContainer node:fs builtin; no OpenClaw source change required",
+  "adapter": "packages/webcontainer-adapter/node-sqlite-polyfill.mjs#installFsBigIntPositionAdapter",
+  "resolution": "Convert bigint positions only when Number.isSafeInteger(Number(position)); reject larger positions.",
+  "regressionEvidence": [
+    "packages/webcontainer-adapter/node-sqlite-polyfill.test.mjs",
+    "apps/web/public/data/evidence/openclaw-2026.6.11-gateway.json"
+  ]
+}

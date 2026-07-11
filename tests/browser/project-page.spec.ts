@@ -1,0 +1,63 @@
+import { expect, test } from "@playwright/test";
+
+test("project page distinguishes stable, previous, and preview evidence", async ({ page, request }) => {
+  const consoleErrors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+
+  const indexResponse = await request.get("/data/release-history.json");
+  expect(indexResponse.ok()).toBe(true);
+  const index = await indexResponse.json() as {
+    channels: Record<string, string>;
+    releases: Array<{
+      channel: string;
+      version: string;
+      runtimeEvidence: boolean;
+      deltaFromStable: { directDependencyCount: number };
+    }>;
+  };
+  expect(index.releases.map((release) => release.channel)).toEqual(["stable", "previous", "preview"]);
+  expect(new Set(Object.values(index.channels)).size).toBe(3);
+
+  await page.goto("/#releases");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", "https://haya-inc.github.io/clawsembly/");
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute("content", "https://haya-inc.github.io/clawsembly/social-preview.png");
+  const structuredData = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent() ?? "null") as {
+    "@type"?: string;
+    codeRepository?: string;
+  };
+  expect(structuredData).toMatchObject({
+    "@type": "SoftwareSourceCode",
+    codeRepository: "https://github.com/haya-inc/clawsembly"
+  });
+  const previewResponse = await request.get("/social-preview.png");
+  expect(previewResponse.ok()).toBe(true);
+  expect(previewResponse.headers()["content-type"]).toContain("image/png");
+  const history = page.locator("[data-release-history]");
+  await expect(history.locator(".release-row")).toHaveCount(3);
+  for (const release of index.releases) {
+    await expect(history.getByText(release.version, { exact: true })).toBeVisible();
+  }
+  const evidencedCount = index.releases.filter((release) => release.runtimeEvidence).length;
+  await expect(history.getByText("runtime evidenced", { exact: true })).toHaveCount(evidencedCount);
+  await expect(history.getByText("static inspection only", { exact: true })).toHaveCount(3 - evidencedCount);
+  const preview = index.releases.find((release) => release.channel === "preview");
+  const dependencyDelta = preview?.deltaFromStable.directDependencyCount ?? 0;
+  const expectedDelta = dependencyDelta === 0 ? "±0 deps" : `${dependencyDelta > 0 ? "+" : "−"}${Math.abs(dependencyDelta)} deps`;
+  const previewRow = history.locator(".release-row").filter({ hasText: preview?.version ?? "preview" });
+  await expect(previewRow.getByText(expectedDelta, { exact: true })).toBeVisible();
+  expect(consoleErrors).toEqual([]);
+});
+
+test("release ledger remains readable at a mobile viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/#releases");
+  const section = page.locator("#releases");
+  await expect(section.getByRole("heading", { name: "Stable, rollback, preview." })).toBeVisible();
+  await expect(section.locator(".release-row")).toHaveCount(3);
+  const bounds = await section.boundingBox();
+  expect(bounds).not.toBeNull();
+  expect(bounds!.x).toBeGreaterThanOrEqual(0);
+  expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390);
+});

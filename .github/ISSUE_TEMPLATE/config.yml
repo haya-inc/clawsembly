@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/haya-inc/clawsembly/security/advisories/new
+    about: Report credential, identity, sandbox, or authentication vulnerabilities privately.

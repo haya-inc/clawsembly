@@ -1,0 +1,42 @@
+name: Browser runtime
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * 6"
+  pull_request:
+    paths:
+      - "apps/web/**"
+      - "packages/webcontainer-adapter/**"
+      - "tests/browser/**"
+      - "playwright.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/runtime-browser.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-slice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - name: Upload browser evidence and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-runtime-diagnostics
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: error
+          retention-days: 30

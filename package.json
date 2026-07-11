@@ -1,0 +1,49 @@
+{
+  "name": "clawsembly",
+  "version": "0.0.0",
+  "description": "Upstream-first browser compatibility runtime and evidence lab for OpenClaw.",
+  "private": true,
+  "license": "MIT",
+  "homepage": "https://haya-inc.github.io/clawsembly/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/haya-inc/clawsembly.git"
+  },
+  "bugs": {
+    "url": "https://github.com/haya-inc/clawsembly/issues"
+  },
+  "keywords": ["openclaw", "webcontainer", "webassembly", "browser", "compatibility"],
+  "type": "module",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "dev": "vite --config apps/web/vite.config.js",
+    "build": "vite build --config apps/web/vite.config.js",
+    "preview": "vite preview --config apps/web/vite.config.js",
+    "typecheck": "tsc -p apps/web/tsconfig.json --noEmit",
+    "test": "node --test packages/compatibility/src/*.test.mjs packages/webcontainer-adapter/*.test.mjs",
+    "test:browser": "playwright test --config playwright.config.ts",
+    "compat:inspect": "node packages/compatibility/src/inspect.mjs",
+    "compat:track": "node packages/compatibility/src/track-releases.mjs",
+    "compat:validate": "node packages/compatibility/src/validate-artifacts.mjs",
+    "test:page": "playwright test tests/browser/project-page.spec.ts --config playwright.config.ts",
+    "social:render": "node scripts/render-social-preview.mjs",
+    "build:pages": "CLAWSEMBLY_BASE_PATH=/clawsembly/ vite build --config apps/web/vite.config.js",
+    "check": "npm run test && npm run compat:validate && npm run typecheck && npm run build",
+    "release:check": "npm run social:render && npm run check && npm run test:page && npm run build:pages && node packages/compatibility/src/release-readiness.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "typescript": "7.0.2",
+    "vite": "8.1.4"
+  },
+  "dependencies": {
+    "@noble/curves": "2.2.0",
+    "@webcontainer/api": "^1.6.4",
+    "sql.js": "1.14.1",
+    "ws": "8.21.0"
+  }
+}
