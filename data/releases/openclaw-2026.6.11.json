@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-11T22:31:55.478Z",
+  "status": "partial",
+  "target": {
+    "runtime": "webcontainer",
+    "browserBaseline": "Desktop Chromium; Firefox and Safari are experimental until runtime evidence exists."
+  },
+  "artifact": {
+    "package": "openclaw",
+    "version": "2026.6.11",
+    "integrity": "sha512-T+P/g19IheeT1ckXMoPN61dYuE8vBF4MderI+kWkvpuFYxPkJxn8AXLpu9IXCnN9g36Acpm9+mMD/V+lsvOkyA==",
+    "nodeEngine": ">=22.19.0",
+    "tarballBytes": 18782869,
+    "unpackedBytes": 86337310,
+    "directDependencyCount": 54,
+    "nativeRiskDependencies": [
+      {
+        "name": "@lydell/node-pty",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "@lydell/node-pty-darwin-arm64",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "@lydell/node-pty-darwin-x64",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "@lydell/node-pty-linux-arm64",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "@lydell/node-pty-linux-x64",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "@lydell/node-pty-win32-arm64",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "@lydell/node-pty-win32-x64",
+        "version": "1.2.0-beta.12",
+        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+      },
+      {
+        "name": "sqlite-vec",
+        "version": "0.1.9",
+        "reason": "Ships platform-specific SQLite extensions and must remain optional."
+      },
+      {
+        "name": "sqlite-vec-darwin-arm64",
+        "version": "0.1.9",
+        "reason": "Ships platform-specific SQLite extensions and must remain optional."
+      },
+      {
+        "name": "sqlite-vec-darwin-x64",
+        "version": "0.1.9",
+        "reason": "Ships platform-specific SQLite extensions and must remain optional."
+      },
+      {
+        "name": "sqlite-vec-linux-arm64",
+        "version": "0.1.9",
+        "reason": "Ships platform-specific SQLite extensions and must remain optional."
+      },
+      {
+        "name": "sqlite-vec-linux-x64",
+        "version": "0.1.9",
+        "reason": "Ships platform-specific SQLite extensions and must remain optional."
+      },
+      {
+        "name": "sqlite-vec-windows-x64",
+        "version": "0.1.9",
+        "reason": "Ships platform-specific SQLite extensions and must remain optional."
+      }
+    ],
+    "shrinkwrapRootConsistency": {
+      "lockfileVersion": 3,
+      "compatible": false,
+      "missingCount": 31,
+      "mismatchedCount": 0,
+      "missingDevDependencyCount": 31
+    }
+  },
+  "evidence": [
+    {
+      "id": "host-preflight",
+      "kind": "browser-runtime",
+      "capturedAt": "2026-07-11T16:06:30.000Z",
+      "path": "evidence/webcontainer-host.json",
+      "sha256": "9ccc5d3c41b486eaf4d1df1080fbfe8d201e809d22e5272650f3c7779c0ae51c",
+      "summary": "WebContainer 1.6.4 booted Node v22.22.3 with cross-origin isolation."
+    },
+    {
+      "id": "gateway-health",
+      "kind": "gateway",
+      "capturedAt": "2026-07-11T21:41:44.000Z",
+      "path": "evidence/openclaw-2026.6.11-gateway.json",
+      "sha256": "0ef578fb81abb2bd5f13f5135f15867b591fce69fb2e2c6ee7647218a4cacc1a",
+      "summary": "OpenClaw 2026.6.11 completed the browser lifecycle and recovered its mock session from a versioned OPFS backup in a fresh WebContainer."
+    },
+    {
+      "id": "credential-vault",
+      "kind": "browser-security",
+      "capturedAt": "2026-07-11T21:41:44.000Z",
+      "path": "evidence/openclaw-2026.6.11-gateway.json",
+      "sha256": "0ef578fb81abb2bd5f13f5135f15867b591fce69fb2e2c6ee7647218a4cacc1a",
+      "summary": "The browser host retained a non-extractable AES-GCM-256 key and provider ciphertext without mounting either into WebContainer."
+    },
+    {
+      "id": "provider-broker",
+      "kind": "browser-security",
+      "capturedAt": "2026-07-11T21:41:44.000Z",
+      "path": "evidence/openclaw-2026.6.11-gateway.json",
+      "sha256": "0ef578fb81abb2bd5f13f5135f15867b591fce69fb2e2c6ee7647218a4cacc1a",
+      "summary": "An OpenClaw agent completed a streamed tool round-trip through the browser-host POST https://api.openai.com/v1/responses bridge without exposing provider credentials to WebContainer."
+    },
+    {
+      "id": "live-opt-in-gate",
+      "kind": "browser-security",
+      "capturedAt": "2026-07-11T21:41:44.000Z",
+      "path": "evidence/openclaw-2026.6.11-gateway.json",
+      "sha256": "0ef578fb81abb2bd5f13f5135f15867b591fce69fb2e2c6ee7647218a4cacc1a",
+      "summary": "The browser exposes a credential-and-consent-gated gpt-5.6-luna smoke test with a $0.001 displayed upper bound; automation made no live request."
+    },
+    {
+      "id": "device-identity",
+      "kind": "browser-security",
+      "capturedAt": "2026-07-11T21:41:44.000Z",
+      "path": "evidence/openclaw-2026.6.11-gateway.json",
+      "sha256": "0ef578fb81abb2bd5f13f5135f15867b591fce69fb2e2c6ee7647218a4cacc1a",
+      "summary": "A browser-owned non-extractable Ed25519 key signed the Gateway v3 challenge, completed local Control UI pairing, and reconnected with an encrypted device token."
+    },
+    {
+      "id": "runtime-performance",
+      "kind": "browser-performance",
+      "capturedAt": "2026-07-11T21:41:44.000Z",
+      "path": "evidence/openclaw-2026.6.11-gateway.json",
+      "sha256": "0ef578fb81abb2bd5f13f5135f15867b591fce69fb2e2c6ee7647218a4cacc1a",
+      "summary": "Cold install completed in 57.1s after a 4.1% adapter improvement, warm reinstall in 2.9s, with 880 MB combined node_modules and npm-cache content."
+    }
+  ],
+  "checks": [
+    {
+      "id": "artifact-pinned",
+      "label": "Exact upstream artifact",
+      "status": "pass",
+      "detail": "openclaw@2026.6.11 is pinned by version and integrity."
+    },
+    {
+      "id": "lifecycle-scripts",
+      "label": "Lifecycle scripts classified",
+      "status": "warn",
+      "detail": "The artifact declares lifecycle scripts; the browser probe must capture their behavior without silently skipping them."
+    },
+    {
+      "id": "shrinkwrap-root-consistency",
+      "label": "Published shrinkwrap consistency",
+      "status": "warn",
+      "detail": "The published manifest has 31 root declarations missing from shrinkwrap lockfile v3 and 0 mismatched declarations (31 missing dev dependencies); npm ci rejects the artifact even when dev dependencies are omitted."
+    },
+    {
+      "id": "native-dependencies",
+      "label": "Native dependency inventory",
+      "status": "warn",
+      "detail": "13 platform-specific package variants require capability-scoped handling."
+    },
+    {
+      "id": "host-preflight",
+      "label": "Browser host preflight",
+      "status": "warn",
+      "detail": "WebContainer 1.6.4 booted Node v22.22.3; built-in node:sqlite requires an adapter."
+    },
+    {
+      "id": "openclaw-webcontainer-boot",
+      "label": "OpenClaw WebContainer boot",
+      "status": "pass",
+      "detail": "The official artifact reached server-ready and /healthz returned HTTP 200 through explicit dependency and SQLite adapters."
+    },
+    {
+      "id": "gateway-handshake",
+      "label": "Gateway handshake",
+      "status": "pass",
+      "detail": "An authenticated WebSocket client received hello-ok for protocol 4 from OpenClaw 2026.6.11."
+    },
+    {
+      "id": "mocked-chat-turn",
+      "label": "Provider-independent chat turn",
+      "status": "pass",
+      "detail": "OpenClaw completed a streamed turn through a deterministic local openai-completions provider and emitted a final chat event."
+    },
+    {
+      "id": "mocked-tool-call",
+      "label": "Constrained tool execution",
+      "status": "pass",
+      "detail": "The model could request only agents_list; OpenClaw executed it, returned the result to the provider, and completed the turn."
+    },
+    {
+      "id": "history-reconnect",
+      "label": "History after reconnect",
+      "status": "pass",
+      "detail": "A new authenticated WebSocket recovered 4 messages through chat.history."
+    },
+    {
+      "id": "chat-cancellation",
+      "label": "Streaming cancellation",
+      "status": "pass",
+      "detail": "chat.abort accepted the active run and emitted an aborted event."
+    },
+    {
+      "id": "credential-vault",
+      "label": "Encrypted credential boundary",
+      "status": "pass",
+      "detail": "openai ciphertext persisted across document reload with a non-extractable AES-GCM-256 key; key export and wrong-scope decryption were rejected."
+    },
+    {
+      "id": "provider-broker",
+      "label": "Provider request policy",
+      "status": "pass",
+      "detail": "Mock transport verified an exact POST destination, store:false, redirect rejection, credential omission, secret-safe errors, and a 2 MB response limit without making a live request."
+    },
+    {
+      "id": "host-broker-turn",
+      "label": "OpenClaw host-broker turn",
+      "status": "pass",
+      "detail": "OpenClaw agent broker completed a typed-SSE streamed agents_list tool round-trip with matched Responses function_call/function_call_output input through the loopback bridge and host-owned Responses policy using gpt-5.6-luna; chat.abort reached the provider stream, credential plaintext never entered WebContainer, and no live request was made."
+    },
+    {
+      "id": "provider-budget",
+      "label": "User-configurable provider budget",
+      "status": "pass",
+      "detail": "The browser host enforces request, input-character, and streamed-output budgets; a custom 5-request / 120000-input / 90000-output configuration recorded 3 requests and over-limit probes failed closed."
+    },
+    {
+      "id": "live-opt-in-gate",
+      "label": "Protected live opt-in gate",
+      "status": "pass",
+      "detail": "A stored credential plus explicit billable-request consent unlocks one fixed-prompt gpt-5.6-luna smoke test with store:false, 128 output tokens, cancel control, completed plain-text rendering, and a $0.001 displayed upper bound; automation sent 0 live requests."
+    },
+    {
+      "id": "device-identity",
+      "label": "Device pairing and token reconnect",
+      "status": "pass",
+      "detail": "A non-extractable Ed25519 key persisted in IndexedDB, completed local Control UI pairing, encrypted the issued device token, and used it for a second hello-ok while the private key remained outside WebContainer and token plaintext stayed out of diagnostics."
+    },
+    {
+      "id": "opfs-recovery",
+      "label": "OPFS runtime recovery",
+      "status": "pass",
+      "detail": "A 1010 KB mock-state backup (Clawsembly backup envelope v1, SHA-256) restored 2 transcript files in a fresh WebContainer and remained available after document reload."
+    },
+    {
+      "id": "runtime-performance",
+      "label": "Measured browser runtime cost",
+      "status": "warn",
+      "detail": "Chromium measured 57.1s cold install (49.7s dependency repair), 2.9s warm reinstall, 619 MB node_modules, 262 MB npm cache, and 16.4s to protocol-ready. Suppressing redundant repair lifecycle scripts improved cold time by 4.1%; npm ci remains blocked by missing published shrinkwrap entries."
+    }
+  ]
+}

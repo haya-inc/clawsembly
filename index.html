@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'; script-src 'self' 'sha256-3Y4Yqf39XLm2rQIzZpKLs/EDhqPdsN7AG31xgCEx/QQ='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.openai.com https://stackblitz.com; frame-src https://stackblitz.com; worker-src 'self' blob:; manifest-src 'self'"
+    />
+    <meta name="theme-color" content="#0a0b09" />
+    <meta
+      name="description"
+      content="Clawsembly is an upstream-first compatibility runtime for running OpenClaw inside a browser sandbox."
+    />
+    <meta property="og:title" content="Clawsembly — OpenClaw, assembled for the browser." />
+    <meta property="og:description" content="Every upstream release, inspected. Every missing capability, explicit." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://haya-inc.github.io/clawsembly/" />
+    <meta property="og:image" content="https://haya-inc.github.io/clawsembly/social-preview.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Clawsembly — OpenClaw, verified in the browser" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Clawsembly — OpenClaw, assembled for the browser." />
+    <meta name="twitter:description" content="Exact upstream artifacts. Public browser evidence. No independent agent rewrite." />
+    <meta name="twitter:image" content="https://haya-inc.github.io/clawsembly/social-preview.png" />
+    <link rel="canonical" href="https://haya-inc.github.io/clawsembly/" />
+    <link rel="icon" href="/clawsembly/mark.svg" type="image/svg+xml" />
+    <title>Clawsembly — OpenClaw, assembled for the browser.</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "Clawsembly",
+        "description": "Upstream-first browser compatibility runtime and evidence lab for OpenClaw.",
+        "codeRepository": "https://github.com/haya-inc/clawsembly",
+        "url": "https://haya-inc.github.io/clawsembly/",
+        "license": "https://opensource.org/license/mit",
+        "programmingLanguage": ["TypeScript", "JavaScript"]
+      }
+    </script>
+    <script type="module" crossorigin src="/clawsembly/assets/index-DMssJ5-g.js"></script>
+    <link rel="stylesheet" crossorigin href="/clawsembly/assets/index-D4GNIfpk.css">
+  </head>
+  <body>
+    <div class="scroll-progress" aria-hidden="true"></div>
+    <header class="site-header">
+      <a class="wordmark" href="#top" aria-label="Clawsembly home">
+        <span class="wordmark-mark" aria-hidden="true">C/</span>
+        <span>Clawsembly</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#compatibility">Compatibility</a>
+        <a href="#runtimes">Runtimes</a>
+        <a href="#releases">Releases</a>
+        <a href="#method">Method</a>
+        <a class="nav-github" href="https://github.com/haya-inc/clawsembly">GitHub ↗</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-visual" aria-hidden="true">
+          <div class="runtime-orbit" data-orbit>
+            <div class="orbit orbit-one"><span>UPSTREAM</span></div>
+            <div class="orbit orbit-two"><span>ADAPTER</span></div>
+            <div class="orbit orbit-three"><span>BROWSER</span></div>
+            <div class="runtime-core">
+              <span class="runtime-pulse"></span>
+              <strong>OC</strong>
+              <small data-version>2026.6.11</small>
+            </div>
+            <span class="orbit-node node-a"></span>
+            <span class="orbit-node node-b"></span>
+            <span class="orbit-node node-c"></span>
+          </div>
+        </div>
+
+        <div class="hero-copy">
+          <p class="eyebrow hero-enter">Upstream-compatible browser runtime</p>
+          <h1 id="hero-title" class="hero-enter">CLAWSEMBLY</h1>
+          <p class="hero-line hero-enter">OpenClaw, assembled for the browser.</p>
+          <p class="hero-summary hero-enter">
+            Every upstream release, inspected. Every missing capability, explicit.
+            Browser-local by design, with a commercially deployable runtime path.
+          </p>
+          <div class="hero-actions hero-enter">
+            <a class="button button-primary" href="#compatibility">View latest probe</a>
+            <a class="button button-quiet" href="https://github.com/haya-inc/clawsembly">Read the source ↗</a>
+          </div>
+        </div>
+
+        <div class="hero-status hero-enter" aria-label="Latest compatibility status">
+          <span class="status-light status-pending"></span>
+          <span>Latest stable</span>
+          <strong data-status>PROBING</strong>
+        </div>
+        <a class="scroll-cue" href="#compatibility">Scroll to evidence <span>↓</span></a>
+      </section>
+
+      <section id="compatibility" class="compatibility section-pad">
+        <div class="section-intro reveal">
+          <p class="eyebrow">Latest compatibility probe</p>
+          <h2>Evidence before emulation.</h2>
+          <p>
+            The report separates facts we can prove from runtime behavior still under test.
+            “It starts” is not compatibility.
+          </p>
+        </div>
+
+        <div class="report-shell reveal" aria-live="polite">
+          <div class="report-head">
+            <div>
+              <span class="report-path">reports / openclaw / <span data-version>2026.6.11</span></span>
+              <h3><span data-package>openclaw</span>@<span data-version>2026.6.11</span></h3>
+            </div>
+            <button class="copy-button" type="button" data-copy-report>Copy report URL</button>
+          </div>
+
+          <dl class="artifact-facts">
+            <div>
+              <dt>Node engine</dt>
+              <dd data-node-engine>—</dd>
+            </div>
+            <div>
+              <dt>Tarball</dt>
+              <dd data-tarball>—</dd>
+            </div>
+            <div>
+              <dt>Unpacked</dt>
+              <dd data-unpacked>—</dd>
+            </div>
+            <div>
+              <dt>Direct deps</dt>
+              <dd data-dependencies>—</dd>
+            </div>
+          </dl>
+
+          <div class="check-list" data-checks>
+            <div class="check-row skeleton"><span></span><strong>Loading checked-in report…</strong></div>
+          </div>
+
+          <div class="report-foot">
+            <span>Generated <time data-generated>—</time></span>
+            <span data-browser-baseline>Desktop Chromium baseline</span>
+          </div>
+        </div>
+
+        <section id="releases" class="release-history reveal" aria-labelledby="release-history-title">
+          <div class="release-history-head">
+            <div>
+              <p class="eyebrow">Release tracking</p>
+              <h3 id="release-history-title">Stable, rollback, preview.</h3>
+            </div>
+            <p>
+              Three npm channels, inspected with one schema. Runtime evidence is
+              never inherited by a release that has not earned it.
+            </p>
+          </div>
+          <div class="release-ledger" data-release-history aria-live="polite">
+            <div class="release-row release-skeleton">
+              <span>Resolving channels…</span>
+            </div>
+          </div>
+          <div class="release-history-foot">
+            <span>Tracked <time data-release-generated>—</time></span>
+            <a href="./data/release-history.json" data-release-index>Open release JSON ↗</a>
+          </div>
+        </section>
+
+        <div class="environment-probe reveal" data-environment-probe>
+          <div class="probe-intro">
+            <p class="eyebrow">Phase 0 / this browser</p>
+            <h3>Measure the host before testing OpenClaw.</h3>
+            <p>
+              Start with a clean host preflight. The following steps install the
+              exact artifact and verify readiness, chat, a constrained tool,
+              history recovery, reconnect, cancellation, and OPFS recovery in a
+              fresh runtime.
+            </p>
+            <div class="probe-actions">
+              <button class="button button-primary" type="button" data-run-probe>Run environment probe</button>
+              <button class="button button-quiet" type="button" data-run-openclaw-probe disabled>Run host preflight first</button>
+              <button class="button button-quiet" type="button" data-run-gateway-probe disabled>Install OpenClaw first</button>
+            </div>
+            <div class="state-actions" aria-label="Mock state backup controls">
+              <button class="state-action" type="button" data-export-state disabled>Export backup</button>
+              <label class="state-action" for="state-import">Import backup</label>
+              <input class="sr-only" id="state-import" type="file" accept=".clawsembly-backup,application/vnd.clawsembly.backup" data-import-state />
+              <button class="state-action" type="button" data-clear-state>Clear saved state</button>
+              <span data-storage-status>No saved mock state</span>
+            </div>
+            <form class="credential-vault" data-credential-vault>
+              <div class="vault-head">
+                <span>Browser host credential vault</span>
+                <strong data-vault-health data-state="pending">Checking…</strong>
+              </div>
+              <label class="credential-field" for="openai-credential">
+                <span>OpenAI API key</span>
+                <input
+                  id="openai-credential"
+                  type="password"
+                  autocomplete="new-password"
+                  spellcheck="false"
+                  placeholder="Stored outside the guest runtime"
+                  data-credential-input
+                />
+              </label>
+              <div class="vault-actions">
+                <button class="state-action" type="submit" data-save-credential>Save encrypted</button>
+                <button class="state-action" type="button" data-clear-credential disabled>Clear credential</button>
+              </div>
+              <fieldset class="broker-budget">
+                <legend>Browser-host session budget</legend>
+                <label><span>Requests</span><input type="number" min="3" max="32" step="1" value="4" data-budget-requests /></label>
+                <label><span>Input chars</span><input type="number" min="50000" max="1000000" step="10000" value="100000" data-budget-input /></label>
+                <label><span>Output chars</span><input type="number" min="1000" max="1000000" step="1000" value="100000" data-budget-output /></label>
+              </fieldset>
+              <section class="live-provider" data-live-provider aria-labelledby="live-provider-title">
+                <div class="live-provider-head">
+                  <strong id="live-provider-title">Protected live smoke test</strong>
+                  <span>gpt-5.6-luna · store:false</span>
+                </div>
+                <p>
+                  Sends only a fixed probe prompt to OpenAI. It never includes workspace,
+                  chat, tool-result, device-token, or backup data. Output is hidden until
+                  the response completes and is rendered as plain text.
+                </p>
+                <a href="https://developers.openai.com/api/docs/pricing#text-tokens" target="_blank" rel="noreferrer" data-live-cost>Loading official-price bound…</a>
+                <label class="live-consent">
+                  <input type="checkbox" data-live-consent />
+                  <span>I understand this makes one billable OpenAI API request.</span>
+                </label>
+                <div class="live-actions">
+                  <button class="state-action" type="button" data-live-run disabled>Run protected live test</button>
+                  <button class="state-action" type="button" data-live-cancel disabled>Cancel</button>
+                </div>
+                <p role="status" aria-live="polite" data-live-status>Live test locked · save an OpenAI credential first</p>
+                <pre hidden data-live-output></pre>
+              </section>
+              <p role="status" aria-live="polite" data-vault-status>Checking browser cryptography…</p>
+              <small>
+                Mock broker probe only; no provider request is made. The browser host
+                rejects traffic beyond this budget. Never mounted into the OpenClaw workspace.
+              </small>
+            </form>
+            <div class="device-identity" aria-live="polite">
+              <span>Browser device identity</span>
+              <code data-device-id>creating…</code>
+              <strong data-device-health data-state="pending">CHECKING…</strong>
+            </div>
+          </div>
+          <div class="probe-terminal" role="status" aria-live="polite">
+            <div class="terminal-head"><span></span><span></span><span></span><strong>host-preflight.log</strong></div>
+            <ol data-probe-output>
+              <li data-state="idle"><span>01</span><strong>crossOriginIsolated</strong><em>not measured</em></li>
+              <li data-state="idle"><span>02</span><strong>SharedArrayBuffer</strong><em>not measured</em></li>
+              <li data-state="idle"><span>03</span><strong>Legacy evidence runtime</strong><em>WebContainer · not started</em></li>
+              <li data-state="idle"><span>04</span><strong>node --version</strong><em>pending</em></li>
+              <li data-state="idle"><span>05</span><strong>node:sqlite close()</strong><em>pending</em></li>
+            </ol>
+            <pre class="install-output" data-install-output hidden></pre>
+          </div>
+        </div>
+      </section>
+
+      <section id="runtimes" class="runtime-direction section-pad" aria-labelledby="runtime-direction-title">
+        <div class="runtime-direction-head reveal">
+          <div>
+            <p class="eyebrow">Commercial browser runtime</p>
+            <h2 id="runtime-direction-title">Local stays non-negotiable.</h2>
+          </div>
+          <p>
+            The remote-sandbox route is rejected as the product default. The migration
+            keeps execution in this tab, separates runtime vendors behind one boundary,
+            and publishes every license and compatibility gate.
+          </p>
+        </div>
+        <div class="runtime-ledger reveal" aria-label="Browser runtime candidate evaluation">
+          <a class="runtime-row runtime-row-primary" href="https://browserpod.io/docs/more/licensing" target="_blank" rel="noreferrer">
+            <span class="runtime-rank">01 / target</span>
+            <div class="runtime-name"><strong>BrowserPod 2.x</strong><span>Node 22 · browser-local</span></div>
+            <p>Commercial Pro terms are explicit. Fastest migration candidate; metered API key, proprietary CDN runtime, and OpenClaw proof still required.</p>
+            <span class="runtime-license">Commercial</span>
+            <span class="runtime-state">Candidate ↗</span>
+          </a>
+          <a class="runtime-row" href="https://github.com/container2wasm/container2wasm" target="_blank" rel="noreferrer">
+            <span class="runtime-rank">02 / escape hatch</span>
+            <div class="runtime-name"><strong>container2wasm</strong><span>amd64 Linux · browser-local</span></div>
+            <p>Self-distributable feasibility lane. Experimental today; size, cold start, persistence, networking, SBOM, and guest-license duties remain gates.</p>
+            <span class="runtime-license">Apache-2.0 + guest</span>
+            <span class="runtime-state runtime-state-open">Experiment ↗</span>
+          </a>
+          <a class="runtime-row" href="https://webcontainers.io/" target="_blank" rel="noreferrer">
+            <span class="runtime-rank">03 / baseline</span>
+            <div class="runtime-name"><strong>WebContainer</strong><span>Current Chromium evidence</span></div>
+            <p>The verified Gateway slice remains a regression baseline. It is not the selected commercial production runtime and gains no new coupling.</p>
+            <span class="runtime-license">Hosted terms</span>
+            <span class="runtime-state runtime-state-baseline">Evidence only ↗</span>
+          </a>
+          <div class="runtime-row runtime-row-rejected">
+            <span class="runtime-rank">04 / rejected</span>
+            <div class="runtime-name"><strong>v86 / CheerpX</strong><span>32-bit execution</span></div>
+            <p>OpenClaw requires Node 22.19+. Current 32-bit-only execution cannot run the official Linux x64 Node artifact.</p>
+            <span class="runtime-license">Technically blocked</span>
+            <span class="runtime-state runtime-state-rejected">Rejected</span>
+          </div>
+        </div>
+        <div class="runtime-guardrail reveal">
+          <span>Default gate</span>
+          <p>Node 22.19+ → Gateway handshake → broker turn → tool → history → cancel → persistent restore → license/SBOM review.</p>
+          <a href="https://github.com/haya-inc/clawsembly/blob/main/docs/decisions/0002-commercial-browser-runtime.md">Read ADR 0002 ↗</a>
+        </div>
+      </section>
+
+      <section id="method" class="method section-pad">
+        <div class="method-title reveal">
+          <p class="eyebrow">The compatibility loop</p>
+          <h2>A release arrives.<br />The evidence updates.</h2>
+        </div>
+        <ol class="method-steps">
+          <li class="reveal">
+            <span>01</span>
+            <div>
+              <h3>Pin the artifact</h3>
+              <p>Resolve an exact npm version and integrity. Never install an unverified <code>latest</code>.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <span>02</span>
+            <div>
+              <h3>Classify the edges</h3>
+              <p>Inventory native packages, lifecycle scripts, Node APIs, schemas, and protocol changes.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <span>03</span>
+            <div>
+              <h3>Boot the real runtime</h3>
+              <p>Run upstream OpenClaw in a clean browser-local runtime. Keep WebContainer as the measured baseline while replacement candidates earn equivalent evidence.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <span>04</span>
+            <div>
+              <h3>Publish the truth</h3>
+              <p>Report supported, constrained, and unavailable capabilities in machine-readable form.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="principles section-pad">
+        <h2 class="sr-only">Design principles</h2>
+        <div class="principles-word reveal" aria-hidden="true">UPSTREAM<br />FIRST</div>
+        <div class="principles-copy">
+          <div class="reveal">
+            <span>01 / USE</span>
+            <h3>The official runtime.</h3>
+            <p>OpenClaw remains the source of agent behavior, sessions, providers, and protocol.</p>
+          </div>
+          <div class="reveal">
+            <span>02 / DENY</span>
+            <h3>Unknown capabilities.</h3>
+            <p>Browser limitations fail closed with actionable diagnostics instead of dummy success.</p>
+          </div>
+          <div class="reveal">
+            <span>03 / SHARE</span>
+            <h3>Every compatibility finding.</h3>
+            <p>Reports, manifests, fixtures, and narrow upstream fixes are public OSS artifacts.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="contribute section-pad reveal">
+        <p class="eyebrow">Build in public</p>
+        <h2>Help make the browser<br />a verified OpenClaw host.</h2>
+        <p>
+          Start with a dependency classification, a reproducible browser failure,
+          or a capability adapter with one clear boundary.
+        </p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="https://github.com/haya-inc/clawsembly/issues">Find an issue ↗</a>
+          <a class="button button-quiet" href="https://github.com/haya-inc/clawsembly/blob/main/CONTRIBUTING.md">Contribution guide ↗</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a class="wordmark" href="#top"><span class="wordmark-mark">C/</span><span>Clawsembly</span></a>
+      <p>Unofficial. Not affiliated with or endorsed by OpenClaw.</p>
+      <span>MIT · Haya, 2026</span>
+    </footer>
+
+  </body>
+</html>

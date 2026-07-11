@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-11T22:31:57.022Z",
+  "package": "openclaw",
+  "channels": {
+    "stable": "2026.6.11",
+    "previous": "2026.6.10",
+    "preview": "2026.7.1-beta.5"
+  },
+  "releases": [
+    {
+      "channel": "stable",
+      "version": "2026.6.11",
+      "status": "partial",
+      "reportPath": "releases/openclaw-2026.6.11.json",
+      "generatedAt": "2026-07-11T22:31:55.478Z",
+      "runtimeEvidence": true,
+      "artifact": {
+        "integrity": "sha512-T+P/g19IheeT1ckXMoPN61dYuE8vBF4MderI+kWkvpuFYxPkJxn8AXLpu9IXCnN9g36Acpm9+mMD/V+lsvOkyA==",
+        "unpackedBytes": 86337310,
+        "directDependencyCount": 54,
+        "nativeRiskCount": 13,
+        "shrinkwrapConsistent": false,
+        "shrinkwrapMissingCount": 31,
+        "shrinkwrapMismatchedCount": 0
+      },
+      "checks": {
+        "pass": 14,
+        "warn": 5,
+        "fail": 0,
+        "pending": 0
+      },
+      "deltaFromStable": {
+        "unpackedBytes": 0,
+        "directDependencyCount": 0,
+        "nativeRiskCount": 0,
+        "shrinkwrapMissingCount": 0
+      }
+    },
+    {
+      "channel": "previous",
+      "version": "2026.6.10",
+      "status": "probing",
+      "reportPath": "releases/openclaw-2026.6.10.json",
+      "generatedAt": "2026-07-11T22:31:56.188Z",
+      "runtimeEvidence": false,
+      "artifact": {
+        "integrity": "sha512-LcooND2tBQw8A+kc1Ujltu3lg30bJ0w7XaeRy7eYzobb8BBdcW6DOGbwJL4vpj1vl9+gjRceOtlh5nh9OARcug==",
+        "unpackedBytes": 86652214,
+        "directDependencyCount": 54,
+        "nativeRiskCount": 13,
+        "shrinkwrapConsistent": false,
+        "shrinkwrapMissingCount": 31,
+        "shrinkwrapMismatchedCount": 0
+      },
+      "checks": {
+        "pass": 1,
+        "warn": 4,
+        "fail": 0,
+        "pending": 14
+      },
+      "deltaFromStable": {
+        "unpackedBytes": 314904,
+        "directDependencyCount": 0,
+        "nativeRiskCount": 0,
+        "shrinkwrapMissingCount": 0
+      }
+    },
+    {
+      "channel": "preview",
+      "version": "2026.7.1-beta.5",
+      "status": "probing",
+      "reportPath": "releases/openclaw-2026.7.1-beta.5.json",
+      "generatedAt": "2026-07-11T22:31:57.008Z",
+      "runtimeEvidence": false,
+      "artifact": {
+        "integrity": "sha512-ejdttiBZwk5RJmZdGD3gQPW1+4819pb0gyw4ZbGg/NcEAdozk6UQWq4n3P2XfDBgOn2k7D8fSKLcN+YDdJ77TA==",
+        "unpackedBytes": 87593195,
+        "directDependencyCount": 56,
+        "nativeRiskCount": 13,
+        "shrinkwrapConsistent": false,
+        "shrinkwrapMissingCount": 31,
+        "shrinkwrapMismatchedCount": 0
+      },
+      "checks": {
+        "pass": 1,
+        "warn": 4,
+        "fail": 0,
+        "pending": 14
+      },
+      "deltaFromStable": {
+        "unpackedBytes": 1255885,
+        "directDependencyCount": 2,
+        "nativeRiskCount": 0,
+        "shrinkwrapMissingCount": 0
+      }
+    }
+  ]
+}
