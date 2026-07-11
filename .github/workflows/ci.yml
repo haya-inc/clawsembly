@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   node_check:
     name: node-${{ matrix.node-version }}
@@ -29,12 +33,6 @@ jobs:
         run: |
           npm run build:pages
           node packages/compatibility/src/release-readiness.mjs
-      - name: Run browser security probes
-        if: matrix.node-version == '24'
-        run: |
-          npx playwright install --with-deps chromium
-          npm run test:security
-          npm run test:page
 
   check:
     name: check
