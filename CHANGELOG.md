@@ -27,6 +27,8 @@ The project does not yet promise semantic-version compatibility.
   BrowserPod staging, explicit connection environment, and CI drift detection;
 - headless capability-consent lifecycle with pending requests, bounded
   approval, deny, revoke, expiry, and schema-governed payload-free audit export;
+- framework-neutral permission prompt with bounded grant controls, automatic
+  expiry refresh, explicit audit download, and a provider-free public demo;
 - nonce-bound guest process supervisor for cooperative child shutdown without
   overstating BrowserPod process-termination or Pod-disposal capabilities;
 - stable / previous / preview release tracking with generated update pull

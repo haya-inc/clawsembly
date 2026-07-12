@@ -62,12 +62,17 @@ exceed the requested call limit and always expires within 24 hours. Stable,
 payload-free state and audit exports are available from `manifest()` and
 `exportAudit()`.
 
+Embedding hosts can render the controller with
+`mountCapabilityPermissionPrompt`. The framework-neutral DOM component exposes
+only bounded duration/call inputs and exact approve, deny, and revoke actions;
+audit download remains an explicit user action.
+
 The mailbox provides typed exact-scope guest requests, replay rejection,
 bounded responses, cancellation, and payload-free transport audit without
 terminal input. Verified boot stages a generated, SHA-256-pinned guest client,
 reads both modules back, and returns its paths plus explicit non-secret command
 environment in `session.guestTransport`; integrators no longer copy protocol
-files by hand. Gateway installation and user-facing permission prompts remain
-next SDK slices. BrowserPod 2.12.1 still lacks documented provider process
+files by hand. Gateway installation remains the next SDK slice. BrowserPod
+2.12.1 still lacks documented provider process
 termination and hard-disposal APIs; a guest supervisor now handles cooperative
 shutdown only for Clawsembly-launched processes.

@@ -56,6 +56,8 @@ const required = [
   "packages/compatibility/browserpod-evidence.schema.json",
   "packages/capability-broker/capability-manifest.schema.json",
   "packages/capability-broker/capability-audit.schema.json",
+  "packages/embed-sdk/permission-prompt.mjs",
+  "packages/embed-sdk/permission-prompt.d.mts",
   "apps/web/public/schemas/capability-manifest.schema.json",
   "apps/web/public/schemas/capability-audit.schema.json",
   "dist/index.html",

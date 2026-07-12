@@ -54,6 +54,36 @@ Before approval, a matching guest mailbox request receives `not_granted`. The
 controller is the host integration surface; the untrusted guest never receives
 the controller or broker grant method.
 
+## Reusable prompt
+
+`mountCapabilityPermissionPrompt` renders the controller without copying its
+authority into DOM state. Capability and scope values are written with
+`textContent`; the component accepts only fixed duration choices, bounded
+integer call limits, and exact approve/deny/revoke actions.
+
+```js
+import {
+  downloadCapabilityAudit,
+  mountCapabilityPermissionPrompt
+} from "./packages/embed-sdk/permission-prompt.mjs";
+
+const prompt = mountCapabilityPermissionPrompt({
+  container: document.querySelector("#permissions"),
+  permissions: session.permissions,
+  onAuditExport(audit) {
+    downloadCapabilityAudit(audit);
+  }
+});
+
+prompt.refresh();
+prompt.destroy();
+```
+
+The public project page mounts this same component against a local, inert
+broker subject. It demonstrates decisions and audit export without booting
+BrowserPod, invoking a capability, reading a credential, or making a network
+request.
+
 ## Export formats
 
 `session.permissions.manifest()` returns current requested and decided state.

@@ -285,6 +285,24 @@
           </div>
         </div>
 
+        <section class="consent-console reveal" aria-labelledby="consent-console-title">
+          <div class="consent-console-head">
+            <div>
+              <p class="eyebrow">Reusable permission prompt</p>
+              <h3 id="consent-console-title">Approve the exact edge.</h3>
+            </div>
+            <div>
+              <p>
+                This local demo renders the production SDK component against the
+                exact checked-in artifact. Decisions create expiring grants and
+                payload-free audit events, but boot no runtime and invoke no capability.
+              </p>
+              <a href="./schemas/capability-audit.schema.json">Audit schema ↗</a>
+            </div>
+          </div>
+          <div data-permission-demo aria-live="polite">Loading exact permission requests…</div>
+        </section>
+
         <div class="broker-proof reveal">
           <span>Implemented slice</span>
           <p>Exact artifact → verified manifest → pending permission → user approval → expiring exact grant → typed mailbox → payload-free audit. Drift, replay, and cross-runtime evidence fail closed.</p>

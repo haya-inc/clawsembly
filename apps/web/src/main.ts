@@ -2,6 +2,7 @@ import "./styles.css";
 import { setupCredentialVault } from "./credential-vault-ui";
 import { setupDeviceIdentity } from "./device-identity-ui";
 import { setupLiveProvider } from "./live-provider-ui";
+import { setupPermissionDemo } from "./permission-demo";
 
 type CheckStatus = "pass" | "warn" | "fail" | "pending";
 
@@ -224,7 +225,9 @@ function setupCopyButton(): void {
   });
 }
 
-loadReport().catch((error: unknown) => {
+loadReport().then(() => {
+  setupPermissionDemo();
+}).catch((error: unknown) => {
   setText("[data-status]", "REPORT ERROR");
   const list = document.querySelector<HTMLElement>("[data-checks]");
   if (list) list.textContent = error instanceof Error ? error.message : "Unable to load compatibility evidence.";

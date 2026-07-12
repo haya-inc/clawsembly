@@ -222,6 +222,36 @@ nav a:hover, nav a:focus-visible { color: var(--accent); }
 .broker-gate ul { list-style: none; display: grid; gap: 10px; margin: 34px 0 0; padding: 0; color: #a8ada2; font: 400 9px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .045em; transition: color 240ms ease; }
 .broker-gate li::before { content: "+"; margin-right: 9px; color: var(--accent); }
 .broker-flow:hover .broker-gate > span, .broker-flow:hover .broker-gate strong, .broker-flow:hover .broker-gate ul, .broker-flow:hover .broker-gate li::before { color: var(--dark); }
+.consent-console { padding-top: 120px; }
+.consent-console-head { display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; align-items: end; padding-bottom: 40px; }
+.consent-console-head h3 { margin: 0; font-size: clamp(38px, 5.2vw, 76px); line-height: .94; letter-spacing: -.065em; }
+.consent-console-head > div:last-child { display: grid; gap: 20px; }
+.consent-console-head p:not(.eyebrow) { max-width: 560px; margin: 0; color: var(--muted); line-height: 1.7; }
+.consent-console-head a { justify-self: start; padding-bottom: 4px; color: var(--accent); border-bottom: 1px solid currentColor; font: 400 9px/1 var(--mono); text-transform: uppercase; letter-spacing: .07em; }
+.clawsembly-permission-prompt { border-top: 1px solid var(--accent); font-family: var(--mono); }
+.permission-row { display: grid; grid-template-columns: minmax(260px, .75fr) minmax(480px, 1.25fr); gap: 5vw; min-height: 150px; padding: 28px 0; align-items: center; border-bottom: 1px solid var(--line); transition: background 180ms ease, padding 180ms ease; }
+.permission-row:focus-within { padding-inline: 12px; background: rgba(184,255,61,.025); }
+.permission-identity { display: grid; grid-template-columns: auto 1fr; gap: 9px 18px; align-items: baseline; }
+.permission-status { grid-row: 1 / 4; width: 92px; color: #67b7ff; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+.permission-status::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 12px currentColor; }
+.permission-row[data-permission-status="granted"] .permission-status { color: var(--accent); }
+.permission-row[data-permission-status="denied"] .permission-status { color: #ff685f; }
+.permission-row[data-permission-status="revoked"] .permission-status, .permission-row[data-permission-status="expired"] .permission-status { color: #f6c85f; }
+.permission-identity strong { font-size: clamp(15px, 1.5vw, 21px); font-weight: 400; letter-spacing: -.025em; }
+.permission-identity code { grid-column: 2; color: #c8ccbf; font-size: 10px; }
+.permission-identity small { grid-column: 2; color: var(--muted); font-size: 8px; text-transform: uppercase; letter-spacing: .06em; }
+.permission-controls { display: grid; grid-template-columns: minmax(116px, 1fr) minmax(92px, .7fr) auto auto; gap: 14px; align-items: end; }
+.permission-field { display: grid; gap: 9px; color: var(--muted); font-size: 8px; text-transform: uppercase; letter-spacing: .07em; }
+.permission-field select, .permission-field input { width: 100%; min-height: 40px; padding: 0 10px; color: var(--ink); background: #0d0f0c; border: 1px solid var(--line); border-radius: 0; font: 400 10px/1 var(--mono); }
+.permission-action, .permission-prompt-export { min-height: 40px; padding: 0 14px; color: var(--ink); background: transparent; border: 1px solid var(--line); cursor: pointer; font: 400 9px/1 var(--mono); text-transform: uppercase; letter-spacing: .06em; transition: color 180ms ease, border-color 180ms ease, background 180ms ease; }
+.permission-action:hover, .permission-action:focus-visible, .permission-prompt-export:hover, .permission-prompt-export:focus-visible { color: var(--accent); border-color: var(--accent); }
+.permission-action-approve { color: var(--dark); background: var(--accent); border-color: var(--accent); }
+.permission-action-approve:hover, .permission-action-approve:focus-visible { color: var(--dark); background: #d0ff7f; }
+.permission-action-deny, .permission-action-revoke { color: #ff8b84; }
+.permission-expiry { align-self: center; color: var(--muted); font-size: 9px; }
+.permission-row[data-permission-status="granted"] .permission-controls { grid-template-columns: 1fr auto; }
+.permission-prompt-footer { display: flex; justify-content: space-between; gap: 24px; align-items: center; padding: 22px 0; border-bottom: 1px solid var(--line); }
+.permission-prompt-live { margin: 0; color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .05em; }
 .broker-proof { display: grid; grid-template-columns: 150px 1fr auto; gap: 24px; padding-top: 22px; color: var(--muted); font: 400 9px/1.65 var(--mono); }
 .broker-proof span { color: var(--accent); text-transform: uppercase; letter-spacing: .08em; }
 .broker-proof p { margin: 0; }
@@ -314,6 +344,8 @@ footer .wordmark { color: var(--ink); text-transform: none; letter-spacing: -.02
   .broker-gate { grid-column: 1 / -1; grid-row: 2; min-height: 360px; border-inline: 0; border-top: 1px solid var(--accent); }
   .broker-zone { min-height: 260px; }
   .broker-zone-host { border-left: 1px solid var(--line); }
+  .consent-console-head { grid-template-columns: 1fr; gap: 28px; }
+  .permission-row { grid-template-columns: 1fr; gap: 24px; }
   .broker-proof { grid-template-columns: 120px 1fr; }
   .broker-proof a { grid-column: 2; justify-self: start; }
   .runtime-direction-head { grid-template-columns: 1fr; gap: 28px; }
@@ -361,6 +393,15 @@ footer .wordmark { color: var(--ink); text-transform: none; letter-spacing: -.02
   .broker-zone, .broker-zone-host { min-height: 220px; padding: 40px 0; align-items: flex-start; text-align: left; border-left: 0; }
   .broker-zone-host { border-top: 1px solid var(--line); }
   .broker-gate { grid-column: 1; grid-row: auto; min-height: 330px; margin-inline: -24px; padding-inline: 24px; }
+  .consent-console { padding-top: 90px; }
+  .permission-row { padding-block: 24px; }
+  .permission-identity { grid-template-columns: 1fr; }
+  .permission-status { grid-row: auto; width: auto; }
+  .permission-identity code, .permission-identity small { grid-column: 1; overflow-wrap: anywhere; }
+  .permission-controls { grid-template-columns: 1fr 1fr; }
+  .permission-action { width: 100%; }
+  .permission-row[data-permission-status="granted"] .permission-controls { grid-template-columns: 1fr; }
+  .permission-prompt-footer { align-items: flex-start; flex-direction: column; }
   .broker-proof { grid-template-columns: 1fr; }
   .broker-proof a { grid-column: 1; }
   .runtime-row { grid-template-columns: 1fr auto; gap: 12px 18px; }

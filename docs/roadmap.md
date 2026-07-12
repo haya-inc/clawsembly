@@ -96,8 +96,9 @@ cost-bounded, cancellable, and complete-output-only; automation proves the gate
 without making a live request. User-workspace migration fixtures, the first
 owner-authorized live execution and broader moderation UX remain. The first
 default-deny capability broker now enforces exact artifact subjects, scopes,
-call limits, expiry, revocation, cancellation, and payload-free audit; user
-permission prompts and guest transport integration remain.
+call limits, expiry, revocation, cancellation, and payload-free audit. The typed
+guest transport and reusable permission prompt are integrated; workspace
+migration and owner-authorized provider evidence remain.
 
 The Chromium performance lane now measures a 57.1-second cold install, including
 49.7 seconds for the 293-package nested repair, a 2.9-second warm reinstall,
@@ -163,7 +164,10 @@ cancellation, strict parsing, and response limits. A headless consent
 controller now keeps manifest requests pending until exact user approval,
 bounds call count and duration, supports deny/revoke/expiry, and exports current
 state plus combined broker audit under stable schemas. A reusable rendered
-prompt component remains. The public reports now
+prompt component now exposes the same controller through bounded duration/call
+inputs, exact approve/deny/revoke controls, automatic expiry refresh, and
+explicit payload-free audit download. Its public demo uses an inert local broker
+and invokes no capability. The public reports now
 target `browserpod@2.12.1` and remain `probing` with no attached runtime
 evidence, so boot is correctly rejected before token consumption. The boot
 slice is not promoted as supported while owner-authorized BrowserPod evidence

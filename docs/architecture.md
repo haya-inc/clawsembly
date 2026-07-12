@@ -206,6 +206,12 @@ The active implementation follows the same boundary in code:
 transport. The project page and compatibility packages contain only BrowserPod
 runtime contracts.
 
+`permission-prompt.mjs` is the framework-neutral host UI for exact permission
+decisions. It derives DOM from the controller manifest, keeps authority in the
+controller rather than data attributes, allows only bounded duration/call
+inputs, refreshes on grant expiry, and exports the same schema-governed audit
+used by headless integrations.
+
 ## Persistence
 
 The first implementation should separate:

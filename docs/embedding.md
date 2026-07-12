@@ -101,6 +101,12 @@ can be denied or revoked. Current state and combined permission/broker audit are
 exported under stable schemas. See
 [Capability permission lifecycle](capability-permissions.md).
 
+Embedding hosts can mount `mountCapabilityPermissionPrompt` with
+`session.permissions` to expose bounded duration/call controls and exact
+approve, deny, and revoke actions. It derives each row from the controller,
+keeps authority out of DOM state, and exports audit JSON only after an explicit
+user action.
+
 ## Evidence-bound boot
 
 `bootVerifiedEmbed` is implemented, but remains unusable with the current
@@ -185,4 +191,5 @@ The SDK initializes the host side automatically and exposes
 client as a generated SHA-256-pinned artifact, reads both files back through the
 runtime, and exposes their exact paths plus non-secret command environment as
 `session.guestTransport`. Generated-source drift fails the release gate.
-Permission UX remains a later SDK slice.
+The reusable permission prompt covers the host decision UX; Gateway installation
+and owner-authorized BrowserPod evidence remain later SDK slices.
