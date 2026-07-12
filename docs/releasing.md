@@ -79,3 +79,20 @@ the fixed artifact allowlist, rejects traversal and symlinks, checks the SDK
 checksum, executes no npm code, and publishes the tag as a prerelease. A version
 bump must deliberately update the package, schema, and workflow allowlist
 together.
+
+## npm publishing
+
+A published GitHub prerelease triggers `.github/workflows/npm-publish.yml`.
+The job checks out the exact tag, pins npm CLI, repeats the complete release
+gate, downloads the GitHub Release tarball and provenance record, and requires
+those bytes to match the locally rebuilt package before publishing under the
+`alpha` dist-tag. It is idempotent only when the registry integrity matches.
+
+The first package publication requires an Environment-scoped granular
+`NPM_TOKEN` because npm trusted publishing cannot be configured before the
+package exists. The token enters only the final publish step. After the
+bootstrap publication, configure `npm-publish.yml` as the package's GitHub
+trusted publisher, retain `id-token: write`, remove `NPM_TOKEN`, and restrict
+traditional token publishing. GitHub-hosted OIDC publication automatically
+attaches npm provenance; the explicit `--provenance` flag also protects the
+bootstrap release.

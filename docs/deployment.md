@@ -37,6 +37,10 @@ it uses.
   to a separate write-capable job that executes no npm code. GitHub Release
   assets include the same tarball, checksum, report corpus, browser diagnostics,
   and source/tag/Pages provenance.
+- Publishing that GitHub prerelease triggers the npm workflow. It publishes
+  only the byte-identical verified tarball under the `alpha` dist-tag, with
+  provenance and an idempotent registry-integrity check. npm credentials never
+  enter build, browser-test, artifact-comparison, or GitHub Release jobs.
 - Cloudflare Pages reads `apps/web/public/_headers`.
 - Netlify uses `netlify.toml`.
 - Vercel uses `vercel.json`.

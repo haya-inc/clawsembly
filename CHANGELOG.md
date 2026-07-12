@@ -15,6 +15,9 @@ The project does not yet promise semantic-version compatibility.
 
 ### Added
 
+- provenance-backed npm alpha publishing with GitHub Release byte comparison,
+  idempotent registry-integrity checks, isolated bootstrap-token scope, and an
+  OIDC trusted-publisher migration path;
 - exact-artifact OpenClaw compatibility inspection and versioned JSON schemas;
 - browser-host credential vault, device identity, provider broker, session
   budgets, and protected live-provider gate;

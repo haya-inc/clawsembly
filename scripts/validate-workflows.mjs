@@ -23,6 +23,7 @@ for (const name of workflowFiles) {
 }
 
 const compatibility = readFileSync(resolve(workflowDirectory, "compatibility.yml"), "utf8");
+const npmPublish = readFileSync(resolve(workflowDirectory, "npm-publish.yml"), "utf8");
 const pages = readFileSync(resolve(workflowDirectory, "pages.yml"), "utf8");
 const runtimeBrowser = readFileSync(resolve(workflowDirectory, "runtime-browser.yml"), "utf8");
 const sdkRelease = readFileSync(resolve(workflowDirectory, "sdk-release.yml"), "utf8");
@@ -83,5 +84,18 @@ assert.match(sdkPublishJob, /gh release create/u, "SDK publishing must create a 
 assert.match(sdkPublishJob, /--verify-tag/u, "SDK publishing must bind the release to the pushed tag");
 assert.match(sdkPublishJob, /--prerelease/u, "SDK publishing must never mark the source alpha stable");
 assert.doesNotMatch(sdkPublishJob, /--latest/u, "SDK publishing must not promote the source alpha as latest");
+
+assert.match(npmPublish, /release:\n\s+types: \[published\]/u, "npm publishing must follow a published GitHub Release");
+assert.match(npmPublish, /workflow_dispatch:/u, "npm publishing must support an explicit bootstrap dispatch");
+assert.doesNotMatch(npmPublish, /pull_request:/u, "npm publishing must never run for pull requests");
+assert.match(npmPublish, /permissions:\n\s+contents: read\n\s+id-token: write/u, "npm publishing must use read-only source plus OIDC");
+assert.doesNotMatch(npmPublish, /contents: write/u, "npm publishing must not write repository contents");
+assert.match(npmPublish, /environment: npm-publish/u, "npm publishing must use its deployment environment");
+assert.match(npmPublish, /npm@12\.0\.1/u, "npm publishing must pin a trusted-publishing-capable CLI");
+assert.match(npmPublish, /npm run release:check/u, "npm publishing must repeat the full release gate");
+assert.match(npmPublish, /gh release download/u, "npm publishing must fetch the reviewed GitHub Release assets");
+assert.match(npmPublish, /cmp "\$tarball" "\$release_dir\/haya-inc-clawsembly-\$version\.tgz"/u, "npm publishing must compare the built and GitHub Release tarballs");
+assert.match(npmPublish, /npm publish .*--access public --tag alpha --provenance/u, "npm publishing must remain a provenance-backed alpha");
+assert.equal(npmPublish.match(/secrets\.NPM_TOKEN/gu)?.length, 1, "the bootstrap npm token must enter one publish step only");
 
 process.stdout.write(`Validated ${workflowFiles.length} pinned workflows and compatibility-job permissions.\n`);
