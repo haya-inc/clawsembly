@@ -64,7 +64,9 @@ npm run compat:inspect -- --package openclaw --version 2026.6.11
 
 ## Pull requests
 
-1. Open or reference an issue for behavior changes.
+1. Discuss broad proposals in
+   [Ideas](https://github.com/haya-inc/clawsembly/discussions/categories/ideas),
+   then open or reference an issue for a bounded behavior change.
 2. Keep each pull request to one compatibility finding or product change.
 3. Include a fixture or test for failure-path changes.
 4. State which capability and OpenClaw version are affected.
@@ -84,5 +86,9 @@ must come from the corresponding probe evidence.
 By participating, you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 Report vulnerabilities privately according to [SECURITY.md](SECURITY.md).
 For installation and integration help, use the paths in [SUPPORT.md](SUPPORT.md).
+New contributors can start with the
+[welcome discussion](https://github.com/haya-inc/clawsembly/discussions/17)
+and share completed integrations in
+[Show and tell](https://github.com/haya-inc/clawsembly/discussions/18).
 Project decisions and the contributor-to-maintainer path are documented in
 [GOVERNANCE.md](GOVERNANCE.md).

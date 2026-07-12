@@ -168,6 +168,8 @@ the release is reported as `probing` rather than production-compatible.
 - [Deployment requirements](docs/deployment.md)
 - [Support](SUPPORT.md)
 - [Governance](GOVERNANCE.md)
+- [Welcome discussion](https://github.com/haya-inc/clawsembly/discussions/17)
+- [Show and tell](https://github.com/haya-inc/clawsembly/discussions/18)
 
 ## Quick start
 

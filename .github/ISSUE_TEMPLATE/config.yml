@@ -1,5 +1,14 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Questions and integration guidance
+    url: https://github.com/haya-inc/clawsembly/discussions/categories/q-a
+    about: Ask how-to questions and get help interpreting reports before opening a reproducible issue.
+  - name: Ideas and product proposals
+    url: https://github.com/haya-inc/clawsembly/discussions/categories/ideas
+    about: Discuss a proposal and its evidence boundary before committing to implementation.
+  - name: Show your integration
+    url: https://github.com/haya-inc/clawsembly/discussions/18
+    about: Share an external report, policy, Action, SDK, or capability-broker integration.
   - name: Security vulnerability
     url: https://github.com/haya-inc/clawsembly/security/advisories/new
     about: Report credential, identity, sandbox, or authentication vulnerabilities privately.
