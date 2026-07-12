@@ -15,6 +15,6 @@ test("promotion policy Action is dependency-free and exposes stable outputs", ()
   assert.match(action, /default: https:\/\/haya-inc\.github\.io\/clawsembly\/data\/promotion-policy\.json/u);
   assert.match(runner, /\.\.\/\.\.\/examples\/release-policy\/check\.mjs/u);
   assert.doesNotMatch(runner, /@actions\//u);
-  assert.match(workflow, /uses: haya-inc\/clawsembly\/actions\/promotion-policy@main\n/u);
+  assert.match(workflow, /uses: haya-inc\/clawsembly\/actions\/promotion-policy@main/u);
   assert.match(workflow, /mode: observe/u);
 });

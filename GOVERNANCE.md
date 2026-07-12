@@ -1,9 +1,9 @@
 # Governance
 
 Clawsembly is currently maintained by [@yhay81](https://github.com/yhay81) on
-behalf of Haya Inc. The project is in its first public prerelease and uses a
-maintainer-led, evidence-first model while the runtime and security contracts
-stabilize.
+behalf of haya Inc. (haya株式会社). The project is in its first public
+prerelease and uses a maintainer-led, evidence-first model while the runtime
+and security contracts stabilize.
 
 ## Decisions
 
@@ -17,6 +17,13 @@ stabilize.
   credentials, identity, capabilities, audit, and teardown behavior.
 - Releases follow [docs/releasing.md](docs/releasing.md) and remain prereleases
   until its evidence and external-review gates are met.
+
+## Licensing intentions
+
+The project is licensed under the [MIT License](LICENSE) and intends to remain
+MIT-licensed. Contributions are accepted under Developer Certificate of Origin
+sign-off (see [CONTRIBUTING.md](CONTRIBUTING.md)), not a contributor license
+agreement.
 
 ## Contributor path
 

@@ -1,20 +1,29 @@
 # Product and adoption strategy
 
+Clawsembly is an evidence-gated embedding layer that runs upstream coding
+agents browser-locally, behind a host boundary the embedding application
+controls. OpenClaw is the first supported upstream (see
+[ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md)).
+
 ## Initial user
 
-The first user is an OpenClaw integrator or maintainer who needs to embed an
+The first user is a web application team that wants to embed an upstream
+coding agent browser-locally with explicit, adjustable authority. The first
+concrete persona is an OpenClaw integrator or maintainer who needs to embed an
 exact upstream release safely in a web application and prove what it can do.
-The first user is not a non-technical consumer looking for full OpenClaw parity.
+The first user is not a non-technical consumer looking for full OpenClaw
+parity.
 
 ## Five-minute value
 
-A visitor should be able to answer four questions without installing the
+A visitor should be able to answer five questions without installing the
 project:
 
 1. Which OpenClaw release was inspected?
 2. Which claims are proven, constrained, failed, or still pending?
 3. How can the result be reproduced or improved?
-4. Which host capabilities would an embedded session receive?
+4. Which host capabilities would the embedded session receive?
+5. How does the embedding application adjust those capabilities?
 
 When a release is verified, the same page should offer a one-click constrained
 browser-chat demo.
@@ -50,12 +59,25 @@ fix that preserves OpenClaw's platform boundaries.
 ## Suggested success metrics
 
 The north-star metric is **time to trustworthy compatibility evidence for the
-current stable OpenClaw release**. A report counts only when its artifact,
-runtime evidence, and reproduction path are public.
+current stable release of a bound upstream** (today: OpenClaw). It is
+published as two tiers:
+
+- **Automated-report latency**: a compatibility report is published within six
+  hours of a stable upstream release, fully unattended.
+- **Runtime-evidence latency**: owner-authorized runtime evidence is published
+  within 72 hours of the same release. The longer window accounts for the
+  manual, metered, owner-approved capture step and the maintainer timezone.
+
+A tier counts only when its artifact and reproduction path are public. Both
+tiers must be instrumented, not asserted: every report records the upstream
+publish timestamp so latency is computable from published artifacts alone, and
+external consumption — npm downloads, GitHub dependents, and report fetches —
+is tracked as the adoption signal. No owner-authorized runtime evidence exists
+yet, so the runtime-evidence tier has no measured baseline; all published
+reports are status probing.
 
 The first baseline must be measured before targets are made stricter.
 
-- compatibility freshness: report generated within six hours of a stable release;
 - coverage: latest verified stable, previous verified stable, and latest preview;
 - evidence: no green status without boot, handshake, and mocked chat artifacts;
 - maintenance: additive protocol updates require no handwritten runtime change;
@@ -75,9 +97,11 @@ See the [OSS success strategy](oss-strategy.md) for the competitive position and
 90-day gates.
 
 Current adoption surface: the public policy endpoint, schema, dependency-free
-Node consumer, and zero-install GitHub Action are implemented. This makes
-external consumption possible before npm publication; a first independent
-consumer is still the next distribution proof.
+Node consumer, and zero-install GitHub Action are implemented. These surfaces
+are the OpenClaw instance of the generic evidence gate — supporting trust
+infrastructure, not the product itself. They make external consumption
+possible before npm publication; a first independent consumer is still the
+next distribution proof.
 
 The reproducible SDK alpha is also directly installable from Pages with a
 machine-readable checksum/report binding. This removes registry access as an

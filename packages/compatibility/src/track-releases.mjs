@@ -54,6 +54,12 @@ function safeSegment(value) {
 const options = parseArgs(process.argv.slice(2));
 const distTags = JSON.parse(run("npm", ["view", options.packageName, "dist-tags", "--json"]));
 const versions = JSON.parse(run("npm", ["view", options.packageName, "versions", "--json"]));
+let publishTimes = {};
+try {
+  publishTimes = JSON.parse(run("npm", ["view", options.packageName, "time", "--json"])) ?? {};
+} catch {
+  process.stderr.write(`Could not read npm publish times for ${options.packageName}; reports will omit upstreamPublishedAt.\n`);
+}
 const channels = resolveReleaseChannels(distTags, versions);
 const outputDirectory = resolve(process.cwd(), options.outputDirectory);
 const indexPath = resolve(process.cwd(), options.index);
@@ -101,6 +107,9 @@ try {
       "--browser-baseline", options.browserBaseline
     ];
     if (options.runtimeVersion) args.push("--runtime-version", options.runtimeVersion);
+    if (typeof publishTimes[version] === "string") {
+      args.push("--upstream-published-at", publishTimes[version]);
+    }
     if (version === browserRuntimeEvidenceVersion) {
       args.push("--browserpod-evidence", options.browserRuntimeEvidence);
     }

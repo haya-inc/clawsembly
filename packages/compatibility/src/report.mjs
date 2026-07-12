@@ -72,6 +72,14 @@ export function evidenceDigest(value) {
   return createHash("sha256").update(JSON.stringify(canonicalize(value))).digest("hex");
 }
 
+export function computeReportLatencySeconds(upstreamPublishedAt, generatedAt) {
+  const published = Date.parse(upstreamPublishedAt ?? "");
+  const generated = Date.parse(generatedAt ?? "");
+  if (!Number.isFinite(published)) throw new Error("upstreamPublishedAt must be an ISO date-time.");
+  if (!Number.isFinite(generated)) throw new Error("generatedAt must be an ISO date-time.");
+  return Math.round((generated - published) / 1000);
+}
+
 export function assertBrowserRuntimeEvidence(evidence) {
   const failures = [];
   if (evidence?.schemaVersion !== 1 || !Number.isFinite(Date.parse(evidence?.capturedAt))) failures.push("identity");
@@ -185,7 +193,8 @@ export function buildReport({
   gatewayContract,
   generatedAt,
   browserRuntimeEvidence,
-  target
+  target,
+  upstreamPublishedAt
 }) {
   if (!manifest?.version) throw new Error("The npm manifest is missing a version.");
   if (!pack?.integrity) throw new Error("The npm pack result is missing integrity metadata.");
@@ -208,6 +217,17 @@ export function buildReport({
     }
   }
 
+  let publishTiming;
+  if (upstreamPublishedAt !== undefined) {
+    const published = Date.parse(upstreamPublishedAt);
+    if (!Number.isFinite(published)) throw new Error("upstreamPublishedAt must be an ISO date-time.");
+    const canonicalPublishedAt = new Date(published).toISOString();
+    publishTiming = {
+      upstreamPublishedAt: canonicalPublishedAt,
+      reportLatencySeconds: computeReportLatencySeconds(canonicalPublishedAt, generatedAt)
+    };
+  }
+
   const dependencies = normalizeDirectDependencies(manifest.dependencies ?? {}, shrinkwrap?.packages ?? {});
   const nativeRiskDependencies = findNativeRisks(shrinkwrap?.packages);
   const shrinkwrapRootDrift = findShrinkwrapRootDrift(manifest, shrinkwrap);
@@ -218,12 +238,14 @@ export function buildReport({
   return {
     schemaVersion: 1,
     generatedAt,
+    ...(publishTiming ? { reportLatencySeconds: publishTiming.reportLatencySeconds } : {}),
     status: runtimeStatuses[bootCheckId] === "pass" ? "partial" : "probing",
     target: reportTarget,
     artifact: {
       package: packageName,
       version: manifest.version,
       integrity: pack.integrity,
+      ...(publishTiming ? { upstreamPublishedAt: publishTiming.upstreamPublishedAt } : {}),
       nodeEngine: manifest.engines?.node ?? "unspecified",
       tarballBytes: pack.size ?? 0,
       unpackedBytes: pack.unpackedSize ?? 0,
@@ -320,6 +342,19 @@ export function assertReport(report) {
   if (!report?.artifact?.package || !report?.artifact?.version || !report?.artifact?.integrity) failures.push("artifact identity is incomplete");
   try { normalizeReportTarget(report?.target); }
   catch (error) { failures.push(error instanceof Error ? error.message : "target is invalid"); }
+  const hasUpstreamPublishedAt = report?.artifact?.upstreamPublishedAt !== undefined;
+  const hasReportLatency = report?.reportLatencySeconds !== undefined;
+  if (hasUpstreamPublishedAt !== hasReportLatency) {
+    failures.push("artifact.upstreamPublishedAt and reportLatencySeconds must be present together");
+  }
+  if (hasUpstreamPublishedAt) {
+    if (!Number.isFinite(Date.parse(report.artifact.upstreamPublishedAt))) {
+      failures.push("artifact.upstreamPublishedAt must be an ISO date-time");
+    } else if (hasReportLatency && Number.isFinite(Date.parse(report?.generatedAt))
+      && report.reportLatencySeconds !== computeReportLatencySeconds(report.artifact.upstreamPublishedAt, report.generatedAt)) {
+      failures.push("reportLatencySeconds must equal the whole seconds between artifact.upstreamPublishedAt and generatedAt");
+    }
+  }
   if (!Array.isArray(report?.evidence)) failures.push("evidence must be an array");
   if (!Array.isArray(report?.checks) || report.checks.length === 0) failures.push("checks must not be empty");
   if (report?.checks?.some((check) => !["pass", "warn", "fail", "pending"].includes(check.status))) failures.push("a check status is invalid");

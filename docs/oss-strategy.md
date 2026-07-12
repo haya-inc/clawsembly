@@ -6,17 +6,27 @@ Survey date: 2026-07-12.
 
 The documentation is unusually strong on architecture, security boundaries,
 and evidence discipline. The main strategic risk is not technical ambiguity;
-it is being mistaken for one more browser-native agent product. Clawsembly
-should therefore lead with a narrower promise:
+it is being mistaken for one more browser-native agent product, or being
+reduced to an OpenClaw release-tracking service. Clawsembly should therefore
+lead with the positioning fixed in
+[ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md):
 
-> Embed the current upstream OpenClaw in a browser with explicit authority and
-> evidence for every compatibility claim.
+> Clawsembly is an evidence-gated embedding layer that runs upstream coding
+> agents browser-locally, behind a host boundary the embedding application
+> controls. OpenClaw is the first supported upstream.
 
 The project should not compete on the number of providers, tools, channels, or
-agent features. Those are upstream OpenClaw's job. Clawsembly's defensible work
-is the release-to-evidence pipeline: inspect an exact artifact, boot the real
-runtime, exercise the documented protocol, publish failures, and keep the
-result current.
+agent features. Those are the upstream agent's job. Clawsembly's job is to run
+the upstream artifact in the embedder's browser and to give the embedding
+application an adjustable, auditable authority boundary, with evidence behind
+every compatibility claim.
+
+Honesty constraints apply to every claim derived from this framing: today only
+OpenClaw is bound; no owner-authorized runtime evidence exists yet, so all
+published reports are status `probing`; and multi-upstream is a design
+commitment whose next concrete step is a documented upstream-binding contract,
+not a shipped capability. No surface may state or imply that other agents
+already run.
 
 ## Market evidence
 
@@ -32,11 +42,35 @@ forms of demand:
 
 Star and fork counts are dated observations, not quality rankings. They show
 that a crisp story and a usable artifact distribute better than architecture
-documents alone. Clawsembly needs both, while keeping its evidence standard.
+documents alone. None of the surveyed projects offers an embedder-controlled,
+evidence-bound host boundary around a real upstream artifact; that gap — not
+report tooling — is the position Clawsembly claims. Clawsembly needs the crisp
+story and the usable artifact while keeping its evidence standard.
 
-## The wedge
+## Defensible value
 
-Clawsembly should own one job before broadening:
+Two assets compound over time and are hard for a replica to re-earn:
+
+1. **Browser-local runtime integration.** Booting exact upstream artifacts on
+   BrowserPod — cold and warm install, workspace persistence, the capability
+   mailbox, and readiness signaling — accumulates integration evidence and
+   failure knowledge release by release. A from-scratch competitor has to
+   re-derive that corpus against the same moving upstream.
+2. **The embedder-controlled host boundary.** The default-deny capability
+   broker, the evidence-bound embed manifest, the permission-prompt UI, and
+   payload-free audit form a boundary the embedding application controls and
+   can adjust easily. Per ADR 0004 this boundary is upstream-portable by
+   design: none of its components depend on OpenClaw specifics.
+
+The release-tracking pipeline is explicitly **not** the moat. It is
+straightforwardly replicable by a well-capitalized upstream or competitor: the
+OpenClaw Foundation is OpenAI-backed, and if it ships its own CITGM-style
+release pipeline, that work is commoditized overnight. A pipeline-specialist
+identity would therefore be a wasting asset. The pipeline remains essential
+trust infrastructure — the evidence-gate machinery is generic, and the
+OpenClaw reports are its first instance — but it is not the product.
+
+As supporting infrastructure, the pipeline keeps owning one job:
 
 1. detect a new stable OpenClaw release;
 2. publish a report for the exact npm artifact within six hours;
@@ -44,9 +78,12 @@ Clawsembly should own one job before broadening:
 4. attach a reproduction to every failure;
 5. turn recurring failures into a narrow adapter or an upstream report.
 
-The north-star metric is **time to trustworthy compatibility evidence for the
-current stable release**. Stars, demo sessions, and page traffic are useful
-distribution signals, but they do not replace freshness and reproducibility.
+The north-star metric is split into two tiers: **automated-report latency**
+(six-hour target, unattended) and **runtime-evidence latency** (72-hour
+target, accounting for manual owner-approved capture). The full definition
+lives in [docs/product.md](product.md). Stars, demo sessions, and page traffic
+are useful distribution signals, but they do not replace freshness and
+reproducibility.
 
 ## Distribution loop
 
@@ -61,10 +98,12 @@ flowchart LR
     Credit --> Report
 ```
 
-The report is the trust surface. The capability broker is the reusable product
-surface. The demo proves both are real, and the fixture is the contribution
-unit. This is a more sustainable community loop than accepting broad feature
-requests.
+The report is the trust surface. The host boundary — broker, manifest,
+permission UI, and audit — is the reusable product surface that the reports
+gate. The demo proves both are real, and the fixture is the contribution unit.
+This is a more sustainable community loop than accepting broad feature
+requests, and it survives even if an upstream ships its own release pipeline,
+because the loop feeds the boundary rather than being the product itself.
 
 ## 90-day gates
 
@@ -77,6 +116,12 @@ requests.
   and storage footprint; publish the numbers before optimizing them.
 - Report upstream only failures reproduced against the current BrowserPod
   boundary; do not carry removed-runtime patches into the active backlog.
+
+Status: **unmet** — the owner-authorized BrowserPod performance capture
+(cold/warm install, persistent reuse, Gateway-ready latency, storage
+footprint) is still outstanding. This gate blocks the runtime-evidence tier of
+the north-star metric; the automated-report tier is already operating
+(see [docs/product.md](product.md) for the two-tier definition).
 
 Exit signal: an OpenClaw integrator can reproduce a report without maintainer
 help and can identify why a check is not green.
@@ -121,9 +166,36 @@ dependency; the normal SDK gate rebuilds the package and rejects lock drift.
 Exit signal: three non-maintainer contributors land a useful change and one
 maintainer can process a new release without handwritten runtime changes.
 
+## Upstream scenarios
+
+Pre-committed responses to upstream moves, decided now rather than under
+deadline pressure:
+
+- **An official OpenClaw browser story ships.** The embedding layer and the
+  embedder-controlled boundary retain their value: an official runtime still
+  needs a host boundary that the embedding application, not the upstream,
+  controls, and evidence gating applies to whatever artifact ships. Response:
+  evaluate the official runtime as a candidate bound artifact under the same
+  evidence gates, and offer the report pipeline upstream as their release
+  input rather than competing with it.
+- **A restrictive upstream re-license.** Response: fork-freeze at the last
+  MIT-licensed version and decide continuation per the upstream-binding
+  contract — keep maintaining the frozen binding, bind a different upstream,
+  or both. No forward commitment to track a non-OSS artifact.
+- **Gateway protocol closure or obfuscation.** Response: a documented
+  threshold — when the protocol contract can no longer be regenerated and
+  verified from the published artifact — at which client regeneration for
+  that upstream stops. The last verified binding stays frozen and labeled as
+  such; the boundary and the upstream-agnostic embedding core remain, because
+  they do not depend on that upstream's protocol.
+
 ## Decisions that protect the strategy
 
 - Do not become a second OpenClaw implementation.
+- Do not let the project identity become OpenClaw-only; OpenClaw is the first
+  bound upstream, not the definition of the project.
+- Do not present the report pipeline as the product; it is trust
+  infrastructure that gates the embedding layer.
 - Do not hide unsupported native capabilities behind generic dummy packages.
 - Do not claim “runs locally” without disclosing runtime delivery, metering,
   license, and external provider traffic.
@@ -135,15 +207,29 @@ maintainer can process a new release without handwritten runtime changes.
 
 ## Immediate priority order
 
-1. Capture the owner-authorized BrowserPod readiness/Gateway record in
-   [issue #6](https://github.com/haya-inc/clawsembly/issues/6).
-2. Establish BrowserPod cold/warm/persistent performance baselines in
-   [issue #8](https://github.com/haya-inc/clawsembly/issues/8).
-3. Offer the install-free promotion-policy consumer as the first adoption path,
-   keep the packed-SDK host example reproducible, and seek a genuinely external
-   consumer; first-party examples prove usability, not adoption.
-4. Keep stable/previous/preview reports automated and preserve the last
-   provider-evidenced stable result once one exists.
-5. Invite review from OpenClaw integrators and BrowserPod maintainers; add
-   broader workspace persistence, remote mode, and capabilities only
-   when they improve a measured compatibility gate.
+1. Execute the owner-authorized BrowserPod evidence capture in
+   [issue #6](https://github.com/haya-inc/clawsembly/issues/6) and establish
+   the cold/warm/persistent performance baselines in
+   [issue #8](https://github.com/haya-inc/clawsembly/issues/8). Nothing else
+   converts `probing` into evidence.
+2. Apply to the BrowserPod OSS grant program, and keep disclosing plainly that
+   every downstream deployment needs its own metered BrowserPod API key and
+   that the free tier is non-commercial.
+3. File the two static-analysis findings upstream with neutral framing: the
+   stable release's shrinkwrap inconsistency and the preview release's
+   Gateway-contract break. Report observations and reproductions, not
+   judgments.
+4. Make one announcement, and only after the runtime evidence and the README
+   fixes land. Do not spend the single credible launch on a `probing`-only
+   state.
+5. Manufacture the first external consumer — for example, a pull request to a
+   stale-pinned downstream such as ClawLess that consumes the report or
+   promotion-policy endpoint. Keep the packed-SDK host example reproducible as
+   the copy-ready starting point; first-party examples prove usability, not
+   adoption.
+6. Publish the documented upstream-binding contract: exact artifact identity,
+   boot recipe, protocol client, capability requirements, and evidence gates.
+   This is the concrete next step for upstream portability, ahead of any
+   second binding.
+7. Ship the embedder-DX slice: make the host boundary easy for an embedding
+   application to adopt and adjust.

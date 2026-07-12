@@ -172,6 +172,12 @@ function summarizeReport(channel, report, reportPath, stableReport, dependencyRi
     status: report.status,
     reportPath,
     generatedAt: report.generatedAt,
+    ...(typeof report.artifact.upstreamPublishedAt === "string"
+      ? { upstreamPublishedAt: report.artifact.upstreamPublishedAt }
+      : {}),
+    ...(Number.isInteger(report.reportLatencySeconds)
+      ? { reportLatencySeconds: report.reportLatencySeconds }
+      : {}),
     runtimeEvidence: report.evidence.some((item) => item.id === "browserpod-runtime"),
     artifact: {
       integrity: report.artifact.integrity,

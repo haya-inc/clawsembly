@@ -33,6 +33,15 @@
           "status": { "enum": ["probing", "supported", "partial", "unsupported"] },
           "reportPath": { "type": "string", "minLength": 1 },
           "generatedAt": { "type": "string", "format": "date-time" },
+          "upstreamPublishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Optional npm registry publish timestamp mirrored from the release report's artifact.upstreamPublishedAt."
+          },
+          "reportLatencySeconds": {
+            "type": "integer",
+            "description": "Optional whole seconds between upstreamPublishedAt and the release report's generatedAt, mirrored from the report."
+          },
           "runtimeEvidence": { "type": "boolean" },
           "artifact": {
             "type": "object",

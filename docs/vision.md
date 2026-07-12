@@ -14,14 +14,19 @@ without giving the agent unrestricted access to the user's machine.
 
 ## Vision
 
-Clawsembly makes the official OpenClaw runtime safe to embed in a web
-application. It binds an exact upstream artifact to public compatibility
-evidence, a BrowserPod runtime, and explicit browser-host capabilities.
+Clawsembly is an evidence-gated embedding layer that runs upstream coding
+agents browser-locally, behind a host boundary the embedding application
+controls. OpenClaw is the first supported upstream: Clawsembly binds an exact
+OpenClaw artifact to public compatibility evidence, a BrowserPod runtime, and
+explicit browser-host capabilities.
 
-It should feel like OpenClaw running in a different host environment, rather
-than a separate agent that happens to resemble OpenClaw. BrowserPod supplies
-execution; Clawsembly supplies the verified artifact, authority boundary,
-Gateway integration, and evidence required to trust that execution.
+An embedded upstream should feel like the same agent running in a different
+host environment, rather than a separate agent that happens to resemble it.
+BrowserPod supplies execution; Clawsembly supplies the verified artifact, the
+upstream-portable authority boundary, protocol integration, and the evidence
+required to trust that execution. Today only OpenClaw is bound; upstream
+portability is a design property of the host boundary, not a demonstrated
+multi-upstream capability.
 
 ## Principles
 
@@ -48,6 +53,13 @@ startup succeed while breaking later is not considered compatibility.
 Model-generated code is untrusted. Secrets, host calls, persistence, and
 network access must cross narrow, auditable boundaries. Clawsembly must not
 ship a shared device identity or embedded secret.
+
+### Upstream-portable boundary
+
+Host-boundary APIs — the capability broker, embed manifest, permission UI, and
+capability mailbox — must not hard-code OpenClaw specifics. Anything
+upstream-specific belongs in a binding that satisfies a documented
+upstream-binding contract.
 
 ### Automated upstream tracking
 

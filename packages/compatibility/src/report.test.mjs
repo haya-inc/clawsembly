@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   assertReport,
   buildReport,
+  computeReportLatencySeconds,
   deriveRuntimeClaimStatuses,
   evidenceDigest,
   findNativeRisks,
@@ -201,4 +202,49 @@ test("buildReport rejects mismatched BrowserPod evidence", () => {
 
 test("assertReport rejects unsupported status values", () => {
   assert.throws(() => assertReport({ schemaVersion: 1, generatedAt: "bad", status: "green" }), /Invalid compatibility report/u);
+});
+
+test("computeReportLatencySeconds measures publish-to-report whole seconds", () => {
+  assert.equal(
+    computeReportLatencySeconds("2026-07-11T18:00:00.000Z", "2026-07-12T00:00:00.000Z"),
+    6 * 60 * 60
+  );
+  assert.equal(computeReportLatencySeconds("2026-07-12T00:00:00.400Z", "2026-07-12T00:00:01.000Z"), 1);
+  assert.throws(() => computeReportLatencySeconds("not-a-date", "2026-07-12T00:00:00.000Z"), /upstreamPublishedAt/u);
+  assert.throws(() => computeReportLatencySeconds("2026-07-12T00:00:00.000Z", "not-a-date"), /generatedAt/u);
+});
+
+test("buildReport records the upstream publish time and report latency when available", () => {
+  const report = buildReport(staticInput({ upstreamPublishedAt: "2026-07-11T18:00:00.000Z" }));
+  assert.equal(report.artifact.upstreamPublishedAt, "2026-07-11T18:00:00.000Z");
+  assert.equal(report.reportLatencySeconds, 6 * 60 * 60);
+  assert.doesNotThrow(() => assertReport(report));
+});
+
+test("buildReport canonicalizes the upstream publish time and rejects invalid values", () => {
+  const report = buildReport(staticInput({ upstreamPublishedAt: "2026-07-11T19:00:00+01:00" }));
+  assert.equal(report.artifact.upstreamPublishedAt, "2026-07-11T18:00:00.000Z");
+  assert.equal(report.reportLatencySeconds, 6 * 60 * 60);
+  assert.throws(() => buildReport(staticInput({ upstreamPublishedAt: "unknown" })), /upstreamPublishedAt/u);
+});
+
+test("buildReport omits publish timing when the upstream publish time is unknown", () => {
+  const report = buildReport(staticInput());
+  assert.equal("reportLatencySeconds" in report, false);
+  assert.equal("upstreamPublishedAt" in report.artifact, false);
+});
+
+test("assertReport rejects unpaired or inconsistent report latency", () => {
+  const report = buildReport(staticInput({ upstreamPublishedAt: "2026-07-11T18:00:00.000Z" }));
+  assert.throws(
+    () => assertReport({ ...report, reportLatencySeconds: report.reportLatencySeconds + 1 }),
+    /reportLatencySeconds must equal/u
+  );
+  const { reportLatencySeconds, ...unpaired } = report;
+  assert.throws(() => assertReport(unpaired), /present together/u);
+  const withoutTimestamp = buildReport(staticInput());
+  assert.throws(
+    () => assertReport({ ...withoutTimestamp, reportLatencySeconds: 60 }),
+    /present together/u
+  );
 });

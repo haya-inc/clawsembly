@@ -6,7 +6,7 @@ import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { deriveBrowserCapabilities } from "./dependency-risk.mjs";
 import { buildPromotionPolicy } from "./promotion-policy.mjs";
-import { deriveRuntimeClaimStatuses, evidenceDigest } from "./report.mjs";
+import { computeReportLatencySeconds, deriveRuntimeClaimStatuses, evidenceDigest } from "./report.mjs";
 import { compareDirectDependencies, compareGatewayContracts } from "./release-tracking.mjs";
 
 function readJson(path) {
@@ -90,6 +90,20 @@ for (const release of history.releases) {
   assertEvidenceClaims(report, release.reportPath);
   assert.equal(report.artifact.version, release.version, `${release.channel} summary version drift`);
   assert.equal(report.artifact.integrity, release.artifact.integrity, `${release.channel} summary integrity drift`);
+  assert.equal(
+    report.artifact.upstreamPublishedAt === undefined,
+    report.reportLatencySeconds === undefined,
+    `${release.reportPath} must pair artifact.upstreamPublishedAt with reportLatencySeconds`
+  );
+  if (report.artifact.upstreamPublishedAt !== undefined) {
+    assert.equal(
+      report.reportLatencySeconds,
+      computeReportLatencySeconds(report.artifact.upstreamPublishedAt, report.generatedAt),
+      `${release.reportPath} reportLatencySeconds drift`
+    );
+  }
+  assert.equal(release.upstreamPublishedAt, report.artifact.upstreamPublishedAt, `${release.channel} summary upstreamPublishedAt drift`);
+  assert.equal(release.reportLatencySeconds, report.reportLatencySeconds, `${release.channel} summary reportLatencySeconds drift`);
   assert.equal(report.artifact.directDependencies.length, report.artifact.directDependencyCount, `${release.channel} direct dependency count drift`);
   assert.deepEqual(
     report.artifact.directDependencies.map(({ name }) => name),

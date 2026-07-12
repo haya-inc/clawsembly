@@ -17,5 +17,6 @@ jobs:
         with:
           mode: observe
         # Use mode: gate when HOLD should block this workflow.
-        # Pin a reviewed commit SHA instead of the development branch in production.
+        # Pin the v0.1.0-alpha.1 tag or a reviewed commit SHA instead of the
+        # moving default branch in production.
       - run: echo "${{ steps.policy.outputs.decision }} / ${{ steps.policy.outputs.candidate_version }}"

@@ -32,7 +32,8 @@ test("resolveReleaseChannels rejects a stale latest tag", () => {
   );
 });
 
-function report(version, { status = "probing", runtimeEvidence = false, deps = 10, native = 2, missing = 3 } = {}) {
+function report(version, { status = "probing", runtimeEvidence = false, deps = 10, native = 2, missing = 3, publishedAt } = {}) {
+  const generatedAt = "2026-07-12T00:00:00.000Z";
   const directDependencies = Array.from({ length: deps }, (_, index) => ({
     name: `dep-${index}`,
     spec: "1.0.0",
@@ -40,10 +41,12 @@ function report(version, { status = "probing", runtimeEvidence = false, deps = 1
     integrity: `sha512-dep-${index}`
   }));
   return {
-    generatedAt: "2026-07-12T00:00:00.000Z",
+    generatedAt,
+    ...(publishedAt ? { reportLatencySeconds: Math.round((Date.parse(generatedAt) - Date.parse(publishedAt)) / 1000) } : {}),
     status,
     artifact: {
       version,
+      ...(publishedAt ? { upstreamPublishedAt: publishedAt } : {}),
       integrity: `sha512-${version}`,
       unpackedBytes: 1000 + deps,
       directDependencyCount: deps,
@@ -101,7 +104,14 @@ test("buildReleaseHistory preserves evidence levels and stable deltas", () => {
     packageName: "openclaw",
     channels,
     reports: {
-      stable: report(channels.stable, { status: "partial", runtimeEvidence: true, deps: 12, native: 3, missing: 2 }),
+      stable: report(channels.stable, {
+        status: "partial",
+        runtimeEvidence: true,
+        deps: 12,
+        native: 3,
+        missing: 2,
+        publishedAt: "2026-07-11T18:00:00.000Z"
+      }),
       previous: report(channels.previous, { deps: 10, native: 2, missing: 0 }),
       preview: report(channels.preview, { deps: 14, native: 4, missing: 5 })
     },
@@ -116,6 +126,10 @@ test("buildReleaseHistory preserves evidence levels and stable deltas", () => {
 
   assert.equal(history.releases[0].runtimeEvidence, true);
   assert.equal(history.releases[1].runtimeEvidence, false);
+  assert.equal(history.releases[0].upstreamPublishedAt, "2026-07-11T18:00:00.000Z");
+  assert.equal(history.releases[0].reportLatencySeconds, 6 * 60 * 60);
+  assert.equal("upstreamPublishedAt" in history.releases[1], false);
+  assert.equal("reportLatencySeconds" in history.releases[1], false);
   assert.deepEqual(history.releases[1].deltaFromStable, {
     unpackedBytes: -2,
     directDependencyCount: -2,

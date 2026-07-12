@@ -27,10 +27,16 @@ design does not become stale when OpenClaw changes.
 | [ADR 0001](decisions/0001-compatibility-lab-first.md) | Why compatibility evidence ships before a broad product UI |
 | [ADR 0002](decisions/0002-commercial-browser-runtime.md) | Commercial browser-local runtime decision and acceptance gates |
 | [ADR 0003](decisions/0003-verified-openclaw-embedding.md) | BrowserPod selection and verified capability-safe embedding position |
+| [ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md) | Upstream-portable embedding boundary; OpenClaw repositioned as the first bound upstream |
 
 ## Current position
 
-Clawsembly is the verified, capability-safe embedding layer around upstream
-OpenClaw, not a new implementation of OpenClaw and not a generic BrowserPod
-wrapper. Compatibility evidence, the host capability broker, and the embed
-manifest are the durable product surfaces.
+Clawsembly is an evidence-gated embedding layer that runs upstream coding
+agents browser-locally, behind a host boundary the embedding application
+controls. OpenClaw is the first supported upstream — not the project identity —
+and Clawsembly is neither a new implementation of OpenClaw nor a generic
+BrowserPod wrapper. The embedder-controlled host boundary — capability broker,
+embed manifest, permission prompts, and payload-free audit — plus browser-local
+execution are the durable product surfaces; the compatibility-evidence pipeline
+is supporting trust infrastructure ([ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md)).
+Today only OpenClaw is bound and all published reports are status `probing`.
