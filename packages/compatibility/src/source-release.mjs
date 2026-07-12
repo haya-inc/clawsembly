@@ -67,7 +67,7 @@ This is a source SDK prerelease for external integration and contract review. It
 - Compatibility: \`${provenance.compatibility.status}\`
 - OpenClaw: \`${provenance.compatibility.openclaw.version}\`
 - BrowserPod adapter: \`${provenance.compatibility.runtime.version}\`
-- npm publication: unavailable
+- npm channel: published separately after this GitHub release
 - Source commit: \`${provenance.sourceCommit}\`
 
 ## Install

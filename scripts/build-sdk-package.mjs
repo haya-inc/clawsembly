@@ -15,6 +15,7 @@ import { spawnSync } from "node:child_process";
 
 const root = process.cwd();
 const checkOnly = process.argv.includes("--check");
+const updateStarterLock = process.argv.includes("--update-starter-lock");
 const npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
 const sourceDirectories = ["browser-runtime", "capability-broker", "embed-sdk"];
 
@@ -38,12 +39,33 @@ async function sha512Integrity(path) {
   return `sha512-${createHash("sha512").update(await readFile(path)).digest("base64")}`;
 }
 
+function releaseTarballUrl(sdkManifest, tarball) {
+  return `https://github.com/haya-inc/clawsembly/releases/download/v${sdkManifest.version}/${basename(tarball)}`;
+}
+
+async function writeExternalStarterLock(tarball, sdkManifest) {
+  const exampleRoot = resolve(root, "examples", "sdk-host");
+  const manifestPath = resolve(exampleRoot, "package.json");
+  const lockPath = resolve(exampleRoot, "package-lock.json");
+  const exampleManifest = JSON.parse(await readFile(manifestPath, "utf8"));
+  const lock = JSON.parse(await readFile(lockPath, "utf8"));
+  const expectedUrl = releaseTarballUrl(sdkManifest, tarball);
+  const lockedPackage = lock.packages?.["node_modules/@haya-inc/clawsembly"];
+  if (!lock.packages?.[""] || !lockedPackage) throw new Error("external SDK starter lock structure is invalid");
+  exampleManifest.dependencies[sdkManifest.name] = expectedUrl;
+  lock.packages[""].dependencies[sdkManifest.name] = expectedUrl;
+  lockedPackage.version = sdkManifest.version;
+  lockedPackage.resolved = expectedUrl;
+  lockedPackage.integrity = await sha512Integrity(tarball);
+  await writeFile(manifestPath, `${JSON.stringify(exampleManifest, null, 2)}\n`);
+  await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
+}
+
 async function verifyExternalStarterLock(tarball, sdkManifest) {
   const exampleRoot = resolve(root, "examples", "sdk-host");
   const exampleManifest = JSON.parse(await readFile(resolve(exampleRoot, "package.json"), "utf8"));
   const lock = JSON.parse(await readFile(resolve(exampleRoot, "package-lock.json"), "utf8"));
-  const fileName = basename(tarball);
-  const expectedUrl = `https://github.com/haya-inc/clawsembly/releases/download/v${sdkManifest.version}/${fileName}`;
+  const expectedUrl = releaseTarballUrl(sdkManifest, tarball);
   const lockedPackage = lock.packages?.["node_modules/@haya-inc/clawsembly"];
   if (exampleManifest.dependencies?.[sdkManifest.name] !== expectedUrl
     || lock.packages?.[""]?.dependencies?.[sdkManifest.name] !== expectedUrl
@@ -236,6 +258,7 @@ async function main() {
     const firstHash = await sha256(first.path);
     const secondHash = await sha256(second.path);
     if (firstHash !== secondHash) throw new Error("SDK tarball is not byte-reproducible");
+    if (updateStarterLock) await writeExternalStarterLock(first.path, manifest);
     await verifyExternalStarterLock(first.path, manifest);
     await verifyConsumer(first.path, temporaryRoot);
     await verifyHostExample(first.path, temporaryRoot);

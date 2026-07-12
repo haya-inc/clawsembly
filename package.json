@@ -35,6 +35,7 @@
     "protocol:verify": "node scripts/generate-openclaw-gateway-contract.mjs --check",
     "protocol:check": "node scripts/validate-openclaw-gateway-contract.mjs",
     "sdk:check": "node scripts/build-sdk-package.mjs --check",
+    "sdk:lock": "node scripts/build-sdk-package.mjs --update-starter-lock",
     "sdk:pack": "node scripts/build-sdk-package.mjs",
     "sdk:release-assets": "node scripts/build-sdk-release-assets.mjs",
     "sdk:example": "node scripts/serve-sdk-host-example.mjs",

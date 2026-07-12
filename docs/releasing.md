@@ -17,6 +17,8 @@ push and a GitHub release are separate decisions from proving a browser result.
    an unreviewed compatibility claim directly to `main`.
 7. Run `npm run sdk:check`; if preparing a release asset, run `npm run sdk:pack`
    and verify the generated `.tgz` against its adjacent `.sha256` file.
+   During an intentional SDK version bump, run `npm run sdk:lock` once and
+   review the package manifest, starter URL, version, and SHA-512 lock diff.
 8. When the stable report bytes change, run `npm run report-pin:generate` and
    review the full report plus generated URL/SHA-256/artifact/runtime pin in the
    same change; CI must reject stale or hand-edited pin drift.

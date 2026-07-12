@@ -1,6 +1,6 @@
 {
   "name": "@haya-inc/clawsembly",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "Evidence-gated, capability-safe browser embedding SDK for upstream OpenClaw.",
   "private": false,
   "license": "MIT",
@@ -25,7 +25,9 @@
     "capability-security"
   ],
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true,
+    "tag": "alpha"
   },
   "files": [
     "packages/",

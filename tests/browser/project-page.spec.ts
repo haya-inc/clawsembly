@@ -1,4 +1,7 @@
 import { expect, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
+
+const sdkVersion = JSON.parse(readFileSync("packages/sdk-package/package.json", "utf8")).version as string;
 
 test("project page distinguishes stable, previous, and preview evidence", async ({ page, request }) => {
   const consoleErrors: string[] = [];
@@ -116,11 +119,11 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   );
   await expect(page.getByRole("link", { name: "Download SDK alpha ↓" })).toHaveAttribute(
     "href",
-    "./downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz"
+    `./downloads/haya-inc-clawsembly-${sdkVersion}.tgz`
   );
   await expect(page.getByRole("link", { name: "Release notes ↗" })).toHaveAttribute(
     "href",
-    "https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.0"
+    `https://github.com/haya-inc/clawsembly/releases/tag/v${sdkVersion}`
   );
   const preview = index.releases.find((release) => release.channel === "preview");
   const dependencyDelta = preview?.deltaFromStable.directDependencyCount ?? 0;

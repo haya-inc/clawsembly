@@ -2,7 +2,9 @@
 
 Evidence-gated browser embedding infrastructure for upstream OpenClaw.
 
-This package is prepared as `0.1.0-alpha.0`, but is not published to npm yet.
+This package is prepared as `0.1.0-alpha.1` for the npm `alpha` channel.
+Publication follows the matching provenance-bound GitHub prerelease; consumers
+can verify registry availability before preferring the npm install path.
 The checked-in BrowserPod report remains `probing`, so verified boot correctly
 fails before a provider key is consumed. A source tarball can still be built
 and tested without making a runtime-support claim.
@@ -10,14 +12,14 @@ and tested without making a runtime-support claim.
 ## Install the Pages-distributed source alpha
 
 ```bash
-npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz
+npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.1.tgz
 ```
 
 The identical checked tarball is also attached to the
-[GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.0):
+[GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.1):
 
 ```bash
-npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.0/haya-inc-clawsembly-0.1.0-alpha.0.tgz
+npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.1/haya-inc-clawsembly-0.1.0-alpha.1.tgz
 ```
 
 Verify the SHA-256 and compatibility binding through the public
@@ -26,10 +28,10 @@ Distribution does not change the public `probing` status or authorize
 BrowserPod boot. The release-attached `source-release.json` additionally binds
 those bytes to the Git tag and source commit.
 
-## Install after an npm prerelease is published
+## Install from npm after registry publication
 
 ```bash
-npm install @haya-inc/clawsembly@0.1.0-alpha.0
+npm install @haya-inc/clawsembly@alpha
 ```
 
 BrowserPod is dependency-injected by the embedding host. This package does not
@@ -76,6 +78,7 @@ From a Clawsembly checkout:
 
 ```bash
 npm run sdk:check
+npm run sdk:lock
 npm run sdk:pack
 ```
 
@@ -86,5 +89,7 @@ tarball into the repository's
 [external host example](https://github.com/haya-inc/clawsembly/tree/main/examples/sdk-host)
 and builds that application without a workspace alias. `sdk:pack` writes the
 verified prerelease tarball under the ignored `.artifacts/sdk/` directory.
+Use `sdk:lock` only during an intentional version bump; it updates the starter's
+future GitHub Release URL and SHA-512 from the newly packed bytes.
 
 The project remains unofficial and is not affiliated with the OpenClaw project.

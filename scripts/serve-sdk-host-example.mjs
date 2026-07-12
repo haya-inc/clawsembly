@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
+import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createServer } from "vite";
 
@@ -22,7 +23,8 @@ function run(command, args, options = {}) {
 }
 
 run(process.execPath, ["scripts/build-sdk-package.mjs"]);
-const tarball = resolve(root, ".artifacts", "sdk", "haya-inc-clawsembly-0.1.0-alpha.0.tgz");
+const sdkPackage = JSON.parse(await readFile(resolve(root, "packages/sdk-package/package.json"), "utf8"));
+const tarball = resolve(root, ".artifacts", "sdk", `haya-inc-clawsembly-${sdkPackage.version}.tgz`);
 const hostRoot = resolve(root, "examples", "sdk-host");
 run(npmExecutable, [
   "install",

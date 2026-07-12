@@ -27,6 +27,8 @@ function localMarkdownTargets(source) {
 }
 
 const root = process.cwd();
+const sdkPackageManifest = JSON.parse(readFileSync(resolve(root, "packages/sdk-package/package.json"), "utf8"));
+const sdkTarballFile = `haya-inc-clawsembly-${sdkPackageManifest.version}.tgz`;
 const required = [
   "actions/promotion-policy/action.yml",
   "actions/promotion-policy/run.mjs",
@@ -153,8 +155,8 @@ const required = [
   "dist/schemas/promotion-policy.schema.json",
   "dist/schemas/sdk-release.schema.json",
   "dist/schemas/source-release.schema.json",
-  "dist/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz",
-  "dist/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz.sha256",
+  `dist/downloads/${sdkTarballFile}`,
+  `dist/downloads/${sdkTarballFile}.sha256`,
   "dist/downloads/sdk-release.json",
   "dist/sdk-host/index.html"
 ];
@@ -199,9 +201,10 @@ for (const expected of ["Provider boot blocked", "Not attempted", "report status
 const sdkRelease = JSON.parse(readFileSync(resolve(root, "dist/downloads/sdk-release.json"), "utf8"));
 const sdkTarballName = sdkRelease.distribution?.tarball?.file;
 if (sdkRelease.schemaVersion !== 1 || sdkRelease.package?.name !== "@haya-inc/clawsembly"
+  || sdkRelease.package?.version !== sdkPackageManifest.version
   || sdkRelease.distribution?.npmPublished !== false
   || sdkRelease.install?.command !== `npm install ${sdkRelease.distribution?.tarball?.url}`
-  || !/^haya-inc-clawsembly-0\.1\.0-alpha\.[0-9]+\.tgz$/u.test(sdkTarballName ?? "")) {
+  || sdkTarballName !== sdkTarballFile) {
   throw new Error("The Pages SDK release manifest overstates or misidentifies the source alpha.");
 }
 const sdkTarball = readFileSync(resolve(root, "dist/downloads", sdkTarballName));
