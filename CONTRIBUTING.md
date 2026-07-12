@@ -19,6 +19,9 @@ BrowserPod runtime boundary. Findings for removed providers remain useful in
 Git history and decision records, but they are not active implementation tasks.
 Every submitted record must identify whether it came from static inspection, a
 provider-free contract test, or an owner-authorized BrowserPod run.
+When the stable compatibility JSON changes, run `npm run report-pin:generate`
+and review the generated URL/SHA-256/artifact/runtime diff in the same pull
+request. `npm run check` rejects stale or hand-edited pins.
 
 ## Development
 

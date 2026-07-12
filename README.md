@@ -166,6 +166,7 @@ into an installable prerelease artifact:
 npm run sdk:check
 npm run sdk:pack
 npm run sdk:example
+npm run report-pin:check
 ```
 
 `sdk:check` creates the tarball twice and requires byte-identical SHA-256
@@ -182,6 +183,11 @@ without workspace aliases and serves a launch inspector on
 the exact HTTPS report, verifies its pinned raw JSON SHA-256 plus artifact and
 runtime identity, and must show `Provider boot blocked` without calling
 BrowserPod while the report remains `probing`.
+
+The six-hour release tracker regenerates the host pin from the exact stable
+report in its read-only job and carries both through one validated artifact to
+the separate PR-publishing job. Pin changes therefore remain explicit review
+diffs without becoming a handwritten release step.
 
 To regenerate and byte-check the Gateway contract against the exact published
 npm artifact:

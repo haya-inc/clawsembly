@@ -205,8 +205,10 @@ provider-free browser test renders the exact artifact/runtime/blockers and
 proves that the current `probing` report leaves BrowserPod boot unattempted. A
 branded loader now pins the report's exact HTTPS source, raw JSON SHA-256, npm
 artifact, and BrowserPod version; raw or hand-edited `supported` objects cannot
-authorize launch. npm publication remains blocked on the same runtime evidence
-and maintainer release gates.
+authorize launch. The six-hour tracker deterministically rotates that pin in
+its read-only job and publishes it with the report through the isolated
+write-capable PR job. npm publication remains blocked on the same runtime
+evidence and maintainer release gates.
 
 Exit criterion: an external web application can embed one supported upstream
 OpenClaw version without granting ambient credentials, filesystem, or network

@@ -58,6 +58,8 @@ The project does not yet promise semantic-version compatibility.
   inspector that renders exact blockers without provider traffic;
 - branded compatibility-report loader that pins HTTPS source, raw JSON SHA-256,
   exact OpenClaw identity, and BrowserPod version before launch authorization;
+- deterministic stable-report pin generation in the read-only release tracker,
+  with path-safe artifact transfer into the isolated PR-publishing job;
 - ordered embed-session close that refuses runtime disposal while the Gateway
   is active and retains cleanup access when cooperative stop fails;
 - nonce-bound guest process supervisor for cooperative child shutdown without

@@ -32,7 +32,10 @@ const publishJob = compatibility.slice(publishIndex);
 assert.match(generationJob, /permissions:\n\s+contents: read/, "report generation must be read-only");
 assert.doesNotMatch(generationJob, /contents: write|pull-requests: write/, "report generation must not have write permissions");
 assert.match(generationJob, /npm ci/, "report generation must install the locked toolchain");
+assert.match(generationJob, /npm run report-pin:generate/, "report generation must update the reviewed SDK host pin");
+assert.match(generationJob, /npm run report-pin:check/, "report generation must verify the SDK host pin");
 assert.match(generationJob, /npm run compat:validate/, "report generation must validate evidence before upload");
+assert.match(generationJob, /examples\/sdk-host\/src\/report-pin\.ts/, "validated report artifacts must contain the SDK host pin");
 assert.ok(
   generationJob.indexOf("Package validated reports") < generationJob.indexOf("actions/upload-artifact@"),
   "validated reports must be packaged before artifact upload"
@@ -41,6 +44,9 @@ assert.ok(
 assert.match(publishJob, /contents: write/, "report publishing requires contents write permission");
 assert.match(publishJob, /pull-requests: write/, "report publishing requires pull-request write permission");
 assert.doesNotMatch(publishJob, /npm ci|npm install|npm run/, "the write-capable publishing job must not execute npm code");
+assert.match(publishJob, /Report artifact contains an unsafe path/, "report publishing must reject archive path traversal");
 assert.match(publishJob, /Report artifact must not contain symlinks/, "report publishing must reject artifact symlinks");
+assert.match(publishJob, /cp .*report-pin\.ts.*examples\/sdk-host\/src\/report-pin\.ts/, "report publishing must install the validated SDK host pin");
+assert.match(publishJob, /git add .*examples\/sdk-host\/src\/report-pin\.ts/, "report publishing must commit the SDK host pin with reports");
 
 process.stdout.write(`Validated ${workflowFiles.length} pinned workflows and compatibility-job permissions.\n`);

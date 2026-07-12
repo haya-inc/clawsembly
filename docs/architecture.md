@@ -133,6 +133,12 @@ version/integrity plus BrowserPod version. `createEmbedManifest` recognizes only
 the loader's branded result as verified; a structurally plausible caller object
 cannot make a launchable manifest.
 
+Release tracking regenerates this pin in the read-only inspection job. The
+report files and TypeScript pin travel together in one archive to a separate
+write-capable job, which rejects unsafe archive paths and symlinks, executes no
+npm code, and commits only the known report/pin paths. This preserves reviewable
+trust rotation without giving the inspection tool repository write permission.
+
 ### Browser runtime manager
 
 Boots and tears down a selected browser runtime, mounts workspace files,

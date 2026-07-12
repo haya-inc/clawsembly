@@ -20,6 +20,8 @@ jobs:
       - name: Track stable, previous, and preview
         run: >-
           npm run compat:track -- --skip-unchanged
+      - run: npm run report-pin:generate
+      - run: npm run report-pin:check
       - run: npm run compat:validate
       - name: Write summary
         run: |
@@ -32,6 +34,7 @@ jobs:
           apps/web/public/data/compatibility-badge.svg
           apps/web/public/data/release-history.json
           apps/web/public/data/releases/*.json
+          examples/sdk-host/src/report-pin.ts
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: compatibility-reports
@@ -53,7 +56,12 @@ jobs:
         run: |
           staging="$RUNNER_TEMP/compatibility-reports"
           mkdir -p "$staging"
-          tar -xzf "$RUNNER_TEMP/compatibility-reports.tgz" -C "$staging"
+          archive="$RUNNER_TEMP/compatibility-reports.tgz"
+          if tar -tzf "$archive" | grep -Eq '(^/|(^|/)\.\.(/|$))'; then
+            echo 'Report artifact contains an unsafe path.' >&2
+            exit 1
+          fi
+          tar --extract --gzip --file "$archive" --directory "$staging" --no-same-owner --no-same-permissions
           if find "$staging" -type l -print -quit | grep -q .; then
             echo 'Report artifact must not contain symlinks.' >&2
             exit 1
@@ -62,10 +70,11 @@ jobs:
           cp "$staging/apps/web/public/data/compatibility-badge.svg" apps/web/public/data/compatibility-badge.svg
           cp "$staging/apps/web/public/data/release-history.json" apps/web/public/data/release-history.json
           cp "$staging"/apps/web/public/data/releases/*.json apps/web/public/data/releases/
+          cp "$staging/examples/sdk-host/src/report-pin.ts" examples/sdk-host/src/report-pin.ts
       - name: Commit changed channel reports
         id: changes
         run: |
-          if git diff --quiet -- apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/releases; then
+          if git diff --quiet -- apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/releases examples/sdk-host/src/report-pin.ts; then
             echo 'changed=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -73,7 +82,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -c "$branch"
-          git add apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/releases
+          git add apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/releases examples/sdk-host/src/report-pin.ts
           git commit -m 'chore: update OpenClaw release reports'
           remote_sha="$(git ls-remote --heads origin "refs/heads/$branch" | cut -f1)"
           if [ -n "$remote_sha" ]; then
