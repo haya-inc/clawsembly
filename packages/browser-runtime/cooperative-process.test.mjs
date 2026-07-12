@@ -52,12 +52,13 @@ test("guest supervisor stops a real child through a nonce-bound control file", a
     stdio: ["ignore", "pipe", "pipe"]
   });
   const output = { value: "" };
-  await waitForOutput(child, output, '"event":"ready"');
+  await waitForOutput(child, output, "child-started");
   const exited = new Promise((resolve) => child.once("exit", resolve));
   await writeFile(controlPath, JSON.stringify({ action: "stop", nonce }), "utf8");
   const exitCode = await exited;
 
   assert.equal(exitCode, 0);
+  assert.equal(output.value.includes(`${COOPERATIVE_SUPERVISOR_PREFIX}{"event":"ready"}`), true);
   assert.match(output.value, /child-started/u);
   assert.match(output.value, /child-stopped/u);
   assert.equal(output.value.includes(`${COOPERATIVE_SUPERVISOR_PREFIX}{"event":"stopping"`), true);

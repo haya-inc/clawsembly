@@ -84,7 +84,11 @@ together.
 
 ## npm publishing
 
-A published GitHub prerelease triggers `.github/workflows/npm-publish.yml`.
+After publishing the GitHub prerelease, `.github/workflows/sdk-release.yml`
+explicitly dispatches `.github/workflows/npm-publish.yml`. The npm workflow's
+`release.published` trigger remains a fallback for releases created outside the
+tag workflow because events created with `GITHUB_TOKEN` do not recursively
+start ordinary event workflows.
 The job checks out the exact tag, pins npm CLI, repeats the complete release
 gate, downloads the GitHub Release tarball and provenance record, and requires
 those bytes to match the locally rebuilt package before publishing under the
@@ -98,3 +102,9 @@ trusted publisher, retain `id-token: write`, remove `NPM_TOKEN`, and restrict
 traditional token publishing. GitHub-hosted OIDC publication automatically
 attaches npm provenance; the explicit `--provenance` flag also protects the
 bootstrap release.
+
+`packages/compatibility/npm-publication.json` is the reviewed publication
+record. Keep it `pending` in a release tag. After npm confirms the exact
+registry integrity and provenance, change it to `published` with the matching
+SHA-512 integrity, publication time, and Sigstore log URL. Pages and its SDK
+manifest derive their npm status and install command from this file.

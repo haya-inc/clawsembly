@@ -3,8 +3,17 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const sdkPackage = JSON.parse(readFileSync(resolve(import.meta.dirname, "../../packages/sdk-package/package.json"), "utf8"));
+const npmPublication = JSON.parse(readFileSync(resolve(import.meta.dirname, "../../packages/compatibility/npm-publication.json"), "utf8"));
 const sdkTag = `v${sdkPackage.version}`;
 const sdkTarball = `haya-inc-clawsembly-${sdkPackage.version}.tgz`;
+const npmPublished = npmPublication.status === "published";
+const sdkRegistryLabel = npmPublished ? "Install alpha from npm ↗" : "npm bootstrap pending · manifest ↗";
+const sdkRegistryHref = npmPublished
+  ? `https://www.npmjs.com/package/@haya-inc/clawsembly/v/${sdkPackage.version}`
+  : "./downloads/sdk-release.json";
+const sdkDistributionStatus = npmPublished
+  ? `npm alpha published with provenance · npm install @haya-inc/clawsembly@${sdkPackage.version}`
+  : "npm bootstrap pending · verified GitHub and Pages tarballs are available now";
 
 const securityHeaders = {
   "Cross-Origin-Opener-Policy": "same-origin",
@@ -29,7 +38,10 @@ export default defineConfig({
     transformIndexHtml(html) {
       return html
         .replaceAll("__CLAWSEMBLY_SDK_TARBALL__", sdkTarball)
-        .replaceAll("__CLAWSEMBLY_SDK_TAG__", sdkTag);
+        .replaceAll("__CLAWSEMBLY_SDK_TAG__", sdkTag)
+        .replaceAll("__CLAWSEMBLY_SDK_REGISTRY_LABEL__", sdkRegistryLabel)
+        .replaceAll("__CLAWSEMBLY_SDK_REGISTRY_HREF__", sdkRegistryHref)
+        .replaceAll("__CLAWSEMBLY_SDK_DISTRIBUTION_STATUS__", sdkDistributionStatus);
     }
   }],
   build: {

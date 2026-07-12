@@ -25,19 +25,23 @@ it uses.
 
 ## Supported deployment configs
 
-- GitHub Pages publishes `dist` from the `gh-pages` branch.
+- GitHub Pages publishes the validated `dist` artifact through
+  `.github/workflows/pages.yml`; repository Pages settings must use the GitHub
+  Actions workflow source rather than a mutable deployment branch.
 - `npm run build:pages` also builds the packed-SDK host under
   `dist/sdk-host/`; that application consumes the generated tarball and must
   remain provider-free while the public report is `probing`.
 - The same build publishes the byte-reproducible SDK tarball, checksum, and
-  report-bound release manifest under `dist/downloads/`. This is a source-alpha
-  distribution channel, not an npm publication or runtime-support claim.
+  report-bound release manifest under `dist/downloads/`. The manifest derives
+  npm availability from the reviewed publication record without conflating
+  package distribution with runtime-support evidence.
 - A matching prerelease tag runs `.github/workflows/sdk-release.yml`. Its
   read-only job repeats the full release check and transfers an exact asset set
   to a separate write-capable job that executes no npm code. GitHub Release
   assets include the same tarball, checksum, report corpus, browser diagnostics,
   and source/tag/Pages provenance.
-- Publishing that GitHub prerelease triggers the npm workflow. It publishes
+- The GitHub prerelease workflow explicitly dispatches the npm workflow after
+  publishing the release. It publishes
   only the byte-identical verified tarball under the `alpha` dist-tag, with
   provenance and an idempotent registry-integrity check. npm credentials never
   enter build, browser-test, artifact-comparison, or GitHub Release jobs.

@@ -1,12 +1,54 @@
 const PACKAGE_NAME = "@haya-inc/clawsembly";
 const DOWNLOAD_BASE_URL = "https://haya-inc.github.io/clawsembly/downloads/";
+const NPM_REGISTRY_URL = "https://registry.npmjs.org/";
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
+const SHA512_INTEGRITY_PATTERN = /^sha512-[A-Za-z0-9+/]+={0,2}$/u;
+const PROVENANCE_URL_PATTERN = /^https:\/\/search\.sigstore\.dev\/\?logIndex=[0-9]+$/u;
 
 function expectedTarballName(version) {
   return `haya-inc-clawsembly-${version}.tgz`;
 }
 
-export function buildSdkReleaseManifest({ sdk, tarball, checksum, report, reportSha256 }) {
+function npmDistribution(publication, sdk, tarball) {
+  if (publication?.schemaVersion !== 1
+    || publication?.package?.name !== PACKAGE_NAME
+    || publication?.package?.version !== sdk.version
+    || Object.keys(publication?.package ?? {}).sort().join(",") !== "name,version"
+    || publication?.registry !== NPM_REGISTRY_URL
+    || publication?.distTag !== "alpha"
+    || !["pending", "published"].includes(publication?.status)) {
+    throw new Error("npm publication record is invalid.");
+  }
+  if (publication.status === "pending") {
+    if (Object.keys(publication).sort().join(",") !== "distTag,package,registry,schemaVersion,status") {
+      throw new Error("pending npm publication record contains unverified fields.");
+    }
+    return { published: false };
+  }
+  if (publication.integrity !== tarball.integrity
+    || !SHA512_INTEGRITY_PATTERN.test(publication.integrity ?? "")
+    || !PROVENANCE_URL_PATTERN.test(publication.provenanceUrl ?? "")
+    || !Number.isFinite(Date.parse(publication.publishedAt ?? ""))
+    || new Date(publication.publishedAt).toISOString() !== publication.publishedAt) {
+    throw new Error("published npm record is not bound to the SDK tarball and provenance.");
+  }
+  if (Object.keys(publication).sort().join(",") !== "distTag,integrity,package,provenanceUrl,publishedAt,registry,schemaVersion,status") {
+    throw new Error("published npm publication record contains unverified fields.");
+  }
+  return {
+    published: true,
+    record: {
+      registry: NPM_REGISTRY_URL,
+      packageUrl: `https://www.npmjs.com/package/${PACKAGE_NAME}/v/${sdk.version}`,
+      distTag: "alpha",
+      integrity: publication.integrity,
+      publishedAt: publication.publishedAt,
+      provenanceUrl: publication.provenanceUrl
+    }
+  };
+}
+
+export function buildSdkReleaseManifest({ sdk, tarball, checksum, report, reportSha256, publication }) {
   if (sdk?.name !== PACKAGE_NAME || !/^0\.1\.0-alpha\.[0-9]+$/u.test(sdk?.version ?? "")
     || sdk?.private !== false) {
     throw new Error("SDK release identity is invalid.");
@@ -28,13 +70,15 @@ export function buildSdkReleaseManifest({ sdk, tarball, checksum, report, report
     || !SHA256_PATTERN.test(reportSha256 ?? "")) {
     throw new Error("SDK release compatibility binding is invalid.");
   }
+  const npm = npmDistribution(publication, sdk, tarball);
   const tarballUrl = `${DOWNLOAD_BASE_URL}${fileName}`;
   return {
     schemaVersion: 1,
     package: { name: PACKAGE_NAME, version: sdk.version },
     distribution: {
       channel: "github-pages",
-      npmPublished: false,
+      npmPublished: npm.published,
+      ...(npm.record ? { npm: npm.record } : {}),
       tarball: { file: fileName, url: tarballUrl, bytes: tarball.bytes, sha256: tarball.sha256 },
       checksum: {
         file: checksumFile,
@@ -57,7 +101,9 @@ export function buildSdkReleaseManifest({ sdk, tarball, checksum, report, report
       }
     },
     install: {
-      command: `npm install ${tarballUrl}`
+      command: npm.published
+        ? `npm install ${PACKAGE_NAME}@${sdk.version}`
+        : `npm install ${tarballUrl}`
     }
   };
 }
