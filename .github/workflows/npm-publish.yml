@@ -35,8 +35,6 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
           package-manager-cache: false
-      - name: Pin a trusted-publishing-capable npm CLI
-        run: npm install --global npm@12.0.1 --ignore-scripts
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run release:check
@@ -68,6 +66,8 @@ jobs:
               throw new Error("GitHub Release provenance does not match the checked-out tag");
             }
           ' "$release_dir/source-release.json"
+      - name: Pin a trusted-publishing-capable npm CLI
+        run: npm install --global npm@12.0.1 --ignore-scripts
       - name: Publish exact SDK tarball with provenance
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

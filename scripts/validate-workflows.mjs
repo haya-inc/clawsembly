@@ -95,6 +95,10 @@ assert.doesNotMatch(npmPublish, /contents: write/u, "npm publishing must not wri
 assert.match(npmPublish, /environment: npm-publish/u, "npm publishing must use its deployment environment");
 assert.match(npmPublish, /npm@12\.0\.1/u, "npm publishing must pin a trusted-publishing-capable CLI");
 assert.match(npmPublish, /npm run release:check/u, "npm publishing must repeat the full release gate");
+assert.ok(
+  npmPublish.indexOf("npm run release:check") < npmPublish.indexOf("npm@12.0.1"),
+  "npm publishing must validate the tag with its locked toolchain before upgrading the publish-only CLI"
+);
 assert.match(npmPublish, /gh release download/u, "npm publishing must fetch the reviewed GitHub Release assets");
 assert.match(npmPublish, /cmp "\$tarball" "\$release_dir\/haya-inc-clawsembly-\$version\.tgz"/u, "npm publishing must compare the built and GitHub Release tarballs");
 assert.match(npmPublish, /npm publish .*--access public --tag alpha --provenance/u, "npm publishing must remain a provenance-backed alpha");
