@@ -25,7 +25,10 @@ request. `npm run check` rejects stale or hand-edited pins.
 
 ## Development
 
-Requirements: Node.js 22.19 or newer.
+Requirements: Node.js 22.19 or newer. Windows, macOS, and Linux are all
+supported; the repository enforces LF line endings through `.gitattributes`,
+so no `core.autocrlf` configuration is needed. CI runs the same `npm run
+check` gate on Linux and Windows.
 
 ```bash
 npm install

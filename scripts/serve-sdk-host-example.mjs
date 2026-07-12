@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { createServer } from "vite";
 
 const root = process.cwd();
-const npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
+const npmCli = process.env.npm_execpath;
 const portIndex = process.argv.indexOf("--port");
 const port = Number(portIndex === -1 ? "5174" : process.argv[portIndex + 1]);
 if (!Number.isSafeInteger(port) || port < 1 || port > 65_535) {
@@ -22,11 +22,17 @@ function run(command, args, options = {}) {
   if (result.status !== 0) throw new Error(`${args[0] ?? command} failed`);
 }
 
+// Windows cannot spawn npm's .cmd shim directly, so prefer the invoking npm's JS entry point.
+function runNpm(args, options = {}) {
+  if (npmCli && /\.[cm]?js$/u.test(npmCli)) return run(process.execPath, [npmCli, ...args], options);
+  return run("npm", args, { ...options, shell: process.platform === "win32" });
+}
+
 run(process.execPath, ["scripts/build-sdk-package.mjs"]);
 const sdkPackage = JSON.parse(await readFile(resolve(root, "packages/sdk-package/package.json"), "utf8"));
 const tarball = resolve(root, ".artifacts", "sdk", `haya-inc-clawsembly-${sdkPackage.version}.tgz`);
 const hostRoot = resolve(root, "examples", "sdk-host");
-run(npmExecutable, [
+runNpm([
   "install",
   "--prefix",
   hostRoot,

@@ -4,7 +4,7 @@ import { cp, readFile, rm } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = process.cwd();
-const npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
+const npmCli = process.env.npm_execpath;
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
@@ -16,6 +16,12 @@ function run(command, args, options = {}) {
   if (result.status !== 0) throw new Error(`${args[0] ?? command} failed`);
 }
 
+// Windows cannot spawn npm's .cmd shim directly, so prefer the invoking npm's JS entry point.
+function runNpm(args, options = {}) {
+  if (npmCli && /\.[cm]?js$/u.test(npmCli)) return run(process.execPath, [npmCli, ...args], options);
+  return run("npm", args, { ...options, shell: process.platform === "win32" });
+}
+
 run(process.execPath, ["node_modules/vite/bin/vite.js", "build", "--config", "apps/web/vite.config.js"], {
   env: { ...process.env, CLAWSEMBLY_BASE_PATH: "/clawsembly/" }
 });
@@ -25,7 +31,7 @@ run(process.execPath, ["scripts/publish-sdk-download.mjs"]);
 const sdkPackage = JSON.parse(await readFile(resolve(root, "packages/sdk-package/package.json"), "utf8"));
 const tarball = resolve(root, ".artifacts", "sdk", `haya-inc-clawsembly-${sdkPackage.version}.tgz`);
 const hostRoot = resolve(root, "examples", "sdk-host");
-run(npmExecutable, [
+runNpm([
   "install",
   "--prefix",
   hostRoot,
@@ -36,7 +42,7 @@ run(npmExecutable, [
   "--no-fund",
   tarball
 ]);
-run(npmExecutable, ["run", "build", "--prefix", hostRoot]);
+runNpm(["run", "build", "--prefix", hostRoot]);
 
 const publicHost = resolve(root, "dist", "sdk-host");
 await rm(publicHost, { recursive: true, force: true });

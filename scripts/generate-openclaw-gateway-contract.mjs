@@ -1,13 +1,20 @@
 #!/usr/bin/env node
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 
 const run = promisify(execFile);
 const root = process.cwd();
+const npmCli = process.env.npm_execpath;
+
+// Windows cannot spawn npm's .cmd shim directly, so prefer the invoking npm's JS entry point.
+function runNpm(args, options = {}) {
+  if (npmCli && /\.[cm]?js$/u.test(npmCli)) return run(process.execPath, [npmCli, ...args], options);
+  return run("npm", args, { ...options, shell: process.platform === "win32" });
+}
 const reportPath = resolve(root, "apps/web/public/data/compatibility.json");
 const outputPath = resolve(root, "packages/embed-sdk/openclaw-gateway-contract.generated.mjs");
 const check = process.argv.includes("--check");
@@ -78,7 +85,7 @@ try {
     || typeof artifact.integrity !== "string") {
     throw new Error("compatibility report does not contain an exact OpenClaw artifact");
   }
-  const { stdout } = await run("npm", [
+  const { stdout } = await runNpm([
     "pack",
     `${artifact.package}@${artifact.version}`,
     "--pack-destination",
@@ -91,7 +98,7 @@ try {
   }
   const tarball = join(temporary, packed.filename);
   const extracted = join(temporary, "extracted");
-  await run("mkdir", ["-p", extracted]);
+  await mkdir(extracted, { recursive: true });
   await run("tar", ["-xzf", tarball, "-C", extracted]);
   const sourceRoot = join(extracted, "package", "dist", "plugin-sdk", "packages");
   const contents = Object.fromEntries(await Promise.all(sourcePaths.map(async (path) => [

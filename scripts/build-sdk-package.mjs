@@ -16,7 +16,7 @@ import { spawnSync } from "node:child_process";
 const root = process.cwd();
 const checkOnly = process.argv.includes("--check");
 const updateStarterLock = process.argv.includes("--update-starter-lock");
-const npmExecutable = process.platform === "win32" ? "npm.cmd" : "npm";
+const npmCli = process.env.npm_execpath;
 const sourceDirectories = ["browser-runtime", "capability-broker", "embed-sdk"];
 
 function run(command, args, options = {}) {
@@ -26,9 +26,15 @@ function run(command, args, options = {}) {
     ...options
   });
   if (result.status !== 0) {
-    throw new Error(`${basename(command)} ${args[0] ?? ""} failed: ${(result.stderr || result.stdout).trim()}`);
+    throw new Error(`${basename(command)} ${args[0] ?? ""} failed: ${(result.stderr || result.stdout || result.error?.message || "").trim()}`);
   }
   return result.stdout.trim();
+}
+
+// Windows cannot spawn npm's .cmd shim directly, so prefer the invoking npm's JS entry point.
+function runNpm(args, options = {}) {
+  if (npmCli && /\.[cm]?js$/u.test(npmCli)) return run(process.execPath, [npmCli, ...args], options);
+  return run("npm", args, { ...options, shell: process.platform === "win32" });
 }
 
 async function sha256(path) {
@@ -91,7 +97,7 @@ async function copyCanonicalSources(staging) {
 
 async function pack(staging, destination) {
   await mkdir(destination, { recursive: true });
-  const output = run(npmExecutable, ["pack", "--json", "--pack-destination", destination], {
+  const output = runNpm(["pack", "--json", "--pack-destination", destination], {
     cwd: staging,
     env: { ...process.env, npm_config_ignore_scripts: "true" }
   });
@@ -131,7 +137,7 @@ async function verifyConsumer(tarball, temporaryRoot) {
   const consumer = resolve(temporaryRoot, "consumer");
   await mkdir(consumer, { recursive: true });
   await writeFile(resolve(consumer, "package.json"), `${JSON.stringify({ private: true, type: "module" }, null, 2)}\n`);
-  run(npmExecutable, [
+  runNpm([
     "install",
     "--ignore-scripts",
     "--no-audit",
@@ -220,7 +226,7 @@ async function verifyHostExample(tarball, temporaryRoot) {
     await mkdir(dirname(resolve(host, path)), { recursive: true });
     await cp(resolve(exampleRoot, path), resolve(host, path));
   }
-  run(npmExecutable, [
+  runNpm([
     "install",
     "--ignore-scripts",
     "--no-audit",
@@ -228,7 +234,7 @@ async function verifyHostExample(tarball, temporaryRoot) {
     "--no-package-lock",
     tarball
   ], { cwd: host, env: { ...process.env, npm_config_ignore_scripts: "true" } });
-  run(npmExecutable, ["run", "build"], { cwd: host });
+  runNpm(["run", "build"], { cwd: host });
 
   const output = await readFile(resolve(host, "dist", "index.html"), "utf8");
   if (!output.includes("Clawsembly launch inspector")) throw new Error("external SDK host build is incomplete");

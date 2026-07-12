@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import test from "node:test";
 
 import { CapabilityBroker } from "./capability-broker.mjs";
@@ -41,10 +40,18 @@ function nodeFilesystemRuntime() {
   };
 }
 
-async function setup(t, { grants = [], handlers = {}, maxResponseBytes = 256 * 1024 } = {}) {
-  const directory = await mkdtemp(join(tmpdir(), "clawsembly-mailbox-"));
+// Mailbox roots are guest POSIX paths; keep the directory repo-local and strip
+// the Windows drive prefix so the same string resolves through node:fs everywhere.
+async function guestTemporaryDirectory(t, prefix) {
+  await mkdir(join(".artifacts", "test-tmp"), { recursive: true });
+  const directory = await mkdtemp(join(".artifacts", "test-tmp", prefix));
   t.after(() => rm(directory, { recursive: true, force: true }));
-  const root = join(directory, "channel");
+  return resolve(directory).replaceAll("\\", "/").replace(/^[A-Za-z]:/u, "");
+}
+
+async function setup(t, { grants = [], handlers = {}, maxResponseBytes = 256 * 1024 } = {}) {
+  const directory = await guestTemporaryDirectory(t, "clawsembly-mailbox-");
+  const root = `${directory}/channel`;
   const broker = new CapabilityBroker({ subject: subject(), grants, handlers });
   const host = new FilesystemCapabilityMailboxHost({
     runtime: nodeFilesystemRuntime(),
