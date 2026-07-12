@@ -51,7 +51,10 @@ npm run sdk:pack
 
 `sdk:check` packs twice and requires byte-identical tarballs, installs one into
 an isolated consumer, imports every public ESM subpath, and compiles a strict
-TypeScript consumer against the packed declarations. `sdk:pack` writes the
+TypeScript consumer against the packed declarations. It also installs the same
+tarball into the repository's
+[external host example](https://github.com/haya-inc/clawsembly/tree/main/examples/sdk-host)
+and builds that application without a workspace alias. `sdk:pack` writes the
 verified prerelease tarball under the ignored `.artifacts/sdk/` directory.
 
 The project remains unofficial and is not affiliated with the OpenClaw project.

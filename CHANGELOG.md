@@ -54,6 +54,8 @@ The project does not yet promise semantic-version compatibility.
   a script-disabled isolated ESM/TypeScript consumer check and local checksum;
 - BrowserPod-specific compatibility intake with an explicit evidence source,
   current probe stages, and mandatory secret-redaction confirmation;
+- independent packed-SDK Vite/TypeScript host example and public launch
+  inspector that renders exact blockers without provider traffic;
 - ordered embed-session close that refuses runtime disposal while the Gateway
   is active and retains cleanup access when cooperative stop fails;
 - nonce-bound guest process supervisor for cooperative child shutdown without

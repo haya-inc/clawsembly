@@ -71,7 +71,19 @@ const required = [
   "packages/embed-sdk/gateway-pairing-prompt.d.mts",
   "packages/sdk-package/package.json",
   "packages/sdk-package/README.md",
+  "examples/sdk-host/README.md",
+  "examples/sdk-host/index.html",
+  "examples/sdk-host/package.json",
+  "examples/sdk-host/tsconfig.json",
+  "examples/sdk-host/vite.config.mjs",
+  "examples/sdk-host/src/launch-decision.ts",
+  "examples/sdk-host/src/main.ts",
+  "examples/sdk-host/src/styles.css",
+  "examples/sdk-host/src/styles.d.ts",
   "scripts/build-sdk-package.mjs",
+  "scripts/build-pages.mjs",
+  "scripts/serve-sdk-host-example.mjs",
+  "tests/browser/sdk-host-example.spec.ts",
   "packages/browser-runtime/openclaw-installer.mjs",
   "packages/browser-runtime/openclaw-installer.d.mts",
   "packages/browser-runtime/openclaw-gateway.mjs",
@@ -83,7 +95,8 @@ const required = [
   "dist/data/compatibility-badge.svg",
   "dist/data/release-history.json",
   "dist/schemas/capability-manifest.schema.json",
-  "dist/schemas/capability-audit.schema.json"
+  "dist/schemas/capability-audit.schema.json",
+  "dist/sdk-host/index.html"
 ];
 
 const missing = required.filter((path) => !existsSync(resolve(root, path)));
@@ -109,6 +122,18 @@ if (!builtIndex.includes(`'sha256-${structuredDataHash}'`)) {
 const builtHeaders = readFileSync(resolve(root, "dist/_headers"), "utf8");
 for (const expected of ["Content-Security-Policy:", "Referrer-Policy: strict-origin-when-cross-origin", "X-Content-Type-Options: nosniff"]) {
   if (!builtHeaders.includes(expected)) throw new Error(`The deployment headers are missing ${expected}.`);
+}
+
+const sdkHostIndex = readFileSync(resolve(root, "dist/sdk-host/index.html"), "utf8");
+if (!sdkHostIndex.includes("Clawsembly launch inspector")) {
+  throw new Error("The Pages build is missing the packed-SDK host example.");
+}
+const sdkHostJavaScript = readdirSync(resolve(root, "dist/sdk-host/assets"))
+  .filter((name) => name.endsWith(".js"));
+if (sdkHostJavaScript.length !== 1) throw new Error("The Pages SDK host bundle is ambiguous.");
+const sdkHostBundle = readFileSync(resolve(root, "dist/sdk-host/assets", sdkHostJavaScript[0]), "utf8");
+for (const expected of ["Provider boot blocked", "Not attempted", "report status is"]) {
+  if (!sdkHostBundle.includes(expected)) throw new Error(`The Pages SDK host is missing ${expected}.`);
 }
 
 const socialPreview = readFileSync(resolve(root, "apps/web/public/social-preview.png"));

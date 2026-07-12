@@ -36,6 +36,7 @@
     "protocol:check": "node scripts/validate-openclaw-gateway-contract.mjs",
     "sdk:check": "node scripts/build-sdk-package.mjs --check",
     "sdk:pack": "node scripts/build-sdk-package.mjs",
+    "sdk:example": "node scripts/serve-sdk-host-example.mjs",
     "schemas:sync": "node scripts/sync-public-schemas.mjs",
     "schemas:check": "node scripts/sync-public-schemas.mjs --check",
     "typecheck": "tsc -p apps/web/tsconfig.json --noEmit && npm run typecheck:api",
@@ -52,7 +53,7 @@
     "test:page": "playwright test tests/browser/project-page.spec.ts --config playwright.config.ts",
     "test:security": "playwright test tests/browser/security-probes.spec.ts --config playwright.config.ts",
     "social:render": "node scripts/render-social-preview.mjs",
-    "build:pages": "CLAWSEMBLY_BASE_PATH=/clawsembly/ vite build --config apps/web/vite.config.js && node scripts/validate-active-runtime.mjs --dist",
+    "build:pages": "node scripts/build-pages.mjs",
     "check": "npm run mailbox:check && npm run protocol:check && npm run schemas:check && npm run runtime:validate && npm run sdk:check && npm run test && npm run compat:validate && npm run workflows:validate && npm run typecheck && npm run build",
     "release:check": "npm run social:render && npm run check && npm run test:browser && npm run build:pages && node packages/compatibility/src/release-readiness.mjs"
   },

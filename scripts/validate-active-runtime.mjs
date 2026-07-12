@@ -70,7 +70,7 @@ assert.equal(roadmap.includes("Status: implementation complete; provider evidenc
 assert.equal(roadmap.includes("Replace or cache the 293-package repair path"), false, "roadmap promotes the removed runtime repair path");
 const ossStrategy = await read("docs/oss-strategy.md");
 assert.equal(ossStrategy.includes("Cache or replace the nested dependency repair path"), false, "OSS strategy promotes the removed runtime repair path");
-assert.equal(ossStrategy.includes("issue #7"), true, "OSS strategy must expose the external SDK starter contribution");
+assert.equal(ossStrategy.includes("packed-SDK host example"), true, "OSS strategy must retain the external SDK host adoption path");
 
 const reportSchema = await readJson("packages/compatibility/report.schema.json");
 assert.equal(reportSchema.properties.target.properties.runtime.const, "browserpod", "report schema must be BrowserPod-only");

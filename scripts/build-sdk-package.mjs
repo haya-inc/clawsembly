@@ -10,7 +10,7 @@ import {
   writeFile
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
 const root = process.cwd();
@@ -59,6 +59,7 @@ async function pack(staging, destination) {
   if (!packed?.filename || !Array.isArray(packed.files)) throw new Error("npm pack manifest is incomplete");
   const forbidden = packed.files.map((file) => file.path).filter((path) => (
     path.includes(".test.") || path.includes("node_modules") || path.startsWith("apps/")
+    || path.startsWith("examples/")
   ));
   if (forbidden.length) throw new Error(`SDK tarball contains forbidden files: ${forbidden.join(", ")}`);
   for (const required of [
@@ -145,6 +146,45 @@ export type { Manifest };
   });
 }
 
+async function verifyHostExample(tarball, temporaryRoot) {
+  const host = resolve(temporaryRoot, "external-host");
+  const exampleRoot = resolve(root, "examples", "sdk-host");
+  const exampleFiles = [
+    "README.md",
+    "index.html",
+    "package.json",
+    "tsconfig.json",
+    "vite.config.mjs",
+    "src/launch-decision.ts",
+    "src/main.ts",
+    "src/styles.css",
+    "src/styles.d.ts"
+  ];
+  for (const path of exampleFiles) {
+    await mkdir(dirname(resolve(host, path)), { recursive: true });
+    await cp(resolve(exampleRoot, path), resolve(host, path));
+  }
+  run(npmExecutable, [
+    "install",
+    "--ignore-scripts",
+    "--no-audit",
+    "--no-fund",
+    "--no-package-lock",
+    tarball
+  ], { cwd: host, env: { ...process.env, npm_config_ignore_scripts: "true" } });
+  run(npmExecutable, ["run", "build"], { cwd: host });
+
+  const output = await readFile(resolve(host, "dist", "index.html"), "utf8");
+  if (!output.includes("Clawsembly launch inspector")) throw new Error("external SDK host build is incomplete");
+  const assets = await readdir(resolve(host, "dist", "assets"));
+  const javascript = assets.filter((name) => name.endsWith(".js"));
+  if (javascript.length !== 1) throw new Error("external SDK host JavaScript bundle is ambiguous");
+  const bundle = await readFile(resolve(host, "dist", "assets", javascript[0]), "utf8");
+  if (bundle.includes(root) || bundle.includes("packages/embed-sdk")) {
+    throw new Error("external SDK host bundle leaked a workspace-relative source path");
+  }
+}
+
 async function main() {
   const temporaryRoot = await mkdtemp(join(tmpdir(), "clawsembly-sdk-"));
   try {
@@ -169,6 +209,7 @@ async function main() {
     const secondHash = await sha256(second.path);
     if (firstHash !== secondHash) throw new Error("SDK tarball is not byte-reproducible");
     await verifyConsumer(first.path, temporaryRoot);
+    await verifyHostExample(first.path, temporaryRoot);
 
     if (!checkOnly) {
       const output = resolve(root, ".artifacts", "sdk");

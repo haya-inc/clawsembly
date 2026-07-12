@@ -144,6 +144,7 @@ the release is reported as `probing` rather than production-compatible.
 - [Release-history schema](packages/compatibility/release-history.schema.json)
 - [Downstream consumption guide](docs/consuming-reports.md)
 - [SDK prerelease recipe](packages/sdk-package/README.md)
+- [Packed-SDK host example](examples/sdk-host/README.md)
 - [Maintainer release checklist](docs/releasing.md)
 - [Deployment requirements](docs/deployment.md)
 
@@ -164,6 +165,7 @@ into an installable prerelease artifact:
 ```bash
 npm run sdk:check
 npm run sdk:pack
+npm run sdk:example
 ```
 
 `sdk:check` creates the tarball twice and requires byte-identical SHA-256
@@ -172,6 +174,13 @@ ESM subpath, and compiles a strict TypeScript consumer. `sdk:pack` writes
 `@haya-inc/clawsembly@0.1.0-alpha.0` plus its checksum under ignored
 `.artifacts/sdk/`. The package is prepared but not published to npm while the
 BrowserPod report remains `probing`.
+
+`sdk:example` installs that tarball into an independent Vite/TypeScript package
+without workspace aliases and serves a launch inspector on
+`http://127.0.0.1:5174/`. The deployed copy is available at the
+[SDK host example](https://haya-inc.github.io/clawsembly/sdk-host/). It fetches
+the public report and must show `Provider boot blocked` without calling
+BrowserPod while the report remains `probing`.
 
 To regenerate and byte-check the Gateway contract against the exact published
 npm artifact:

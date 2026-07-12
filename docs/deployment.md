@@ -26,6 +26,9 @@ it uses.
 ## Supported deployment configs
 
 - GitHub Pages publishes `dist` from the `gh-pages` branch.
+- `npm run build:pages` also builds the packed-SDK host under
+  `dist/sdk-host/`; that application consumes the generated tarball and must
+  remain provider-free while the public report is `probing`.
 - Cloudflare Pages reads `apps/web/public/_headers`.
 - Netlify uses `netlify.toml`.
 - Vercel uses `vercel.json`.

@@ -128,8 +128,8 @@ maintainer can process a new release without handwritten runtime changes.
    [issue #6](https://github.com/haya-inc/clawsembly/issues/6).
 2. Establish BrowserPod cold/warm/persistent performance baselines in
    [issue #8](https://github.com/haya-inc/clawsembly/issues/8).
-3. Prove packed-SDK consumption from a minimal external host in
-   [issue #7](https://github.com/haya-inc/clawsembly/issues/7).
+3. Keep the packed-SDK host example reproducible and seek a genuinely external
+   consumer; the first-party example proves packaging, not adoption.
 4. Keep stable/previous/preview reports automated and preserve the last
    provider-evidenced stable result once one exists.
 5. Invite review from OpenClaw integrators and BrowserPod maintainers; add

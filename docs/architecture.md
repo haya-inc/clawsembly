@@ -119,9 +119,12 @@ the canonical non-test `.mjs`, `.d.mts`, and schema files in `browser-runtime`,
 The builder packs twice and requires byte-identical tarballs. It rejects tests,
 application files, and `node_modules`, installs the tarball with scripts disabled
 into a fresh consumer, imports every public subpath, and compiles a strict
-TypeScript consumer against the packed declarations. No BrowserPod or provider
-credential is required, and package construction cannot promote compatibility
-evidence. npm publication remains a separate maintainer decision.
+TypeScript consumer against the packed declarations. It also installs the same
+tarball into a separate Vite host and rejects workspace-relative source leakage.
+No BrowserPod or provider credential is required, and package construction
+cannot promote compatibility evidence. npm publication remains a separate
+maintainer decision. The host is published under `/sdk-host/` as a
+provider-free launch inspector.
 
 ### Browser runtime manager
 
