@@ -47,6 +47,7 @@ const required = [
   ".github/pull_request_template.md",
   ".github/workflows/ci.yml",
   ".github/workflows/compatibility.yml",
+  ".github/workflows/npm-publish.yml",
   ".github/workflows/pages.yml",
   ".github/workflows/runtime-browser.yml",
   ".github/workflows/sdk-release.yml",

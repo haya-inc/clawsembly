@@ -1,0 +1,100 @@
+name: Publish SDK to npm
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing GitHub prerelease tag to publish.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    environment: npm-publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Pin a trusted-publishing-capable npm CLI
+        run: npm install --global npm@12.0.1 --ignore-scripts
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run release:check
+      - name: Verify tag, provenance record, and GitHub Release bytes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(node -p "require('./packages/sdk-package/package.json').version")"
+          expected_tag="v$version"
+          if [ "$RELEASE_TAG" != "$expected_tag" ]; then
+            echo "Release tag $RELEASE_TAG does not match SDK $version." >&2
+            exit 1
+          fi
+          release_dir="$RUNNER_TEMP/github-release"
+          mkdir -p "$release_dir"
+          gh release download "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --pattern 'haya-inc-clawsembly-*.tgz' \
+            --pattern 'source-release.json' \
+            --dir "$release_dir"
+          tarball=".artifacts/sdk/haya-inc-clawsembly-$version.tgz"
+          cmp "$tarball" "$release_dir/haya-inc-clawsembly-$version.tgz"
+          node -e '
+            const fs = require("node:fs");
+            const provenance = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+            if (provenance.tag !== process.env.RELEASE_TAG
+              || provenance.sourceCommit !== require("node:child_process").execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim()
+              || provenance.artifact.file !== `haya-inc-clawsembly-${provenance.package.version}.tgz`) {
+              throw new Error("GitHub Release provenance does not match the checked-out tag");
+            }
+          ' "$release_dir/source-release.json"
+      - name: Publish exact SDK tarball with provenance
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          version="$(node -p "require('./packages/sdk-package/package.json').version")"
+          package='@haya-inc/clawsembly'
+          tarball=".artifacts/sdk/haya-inc-clawsembly-$version.tgz"
+          local_integrity="$(node -e 'const fs=require("node:fs"),c=require("node:crypto"); process.stdout.write(`sha512-${c.createHash("sha512").update(fs.readFileSync(process.argv[1])).digest("base64")}`)' "$tarball")"
+          if remote_integrity="$(npm view "$package@$version" dist.integrity --json 2>/dev/null)"; then
+            remote_integrity="${remote_integrity%\"}"
+            remote_integrity="${remote_integrity#\"}"
+            if [ "$remote_integrity" != "$local_integrity" ]; then
+              echo "Published npm bytes differ from the verified release." >&2
+              exit 1
+            fi
+            echo "$package@$version already matches the verified release." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ -n "$NPM_TOKEN" ]; then
+            export NODE_AUTH_TOKEN="$NPM_TOKEN"
+          fi
+          npm publish "$tarball" --access public --tag alpha --provenance --ignore-scripts
+          remote_integrity="$(npm view "$package@$version" dist.integrity --json)"
+          remote_integrity="${remote_integrity%\"}"
+          remote_integrity="${remote_integrity#\"}"
+          if [ "$remote_integrity" != "$local_integrity" ]; then
+            echo "npm registry integrity does not match the verified release." >&2
+            exit 1
+          fi
+          echo "Published $package@$version with matching provenance-bound bytes." >> "$GITHUB_STEP_SUMMARY"
