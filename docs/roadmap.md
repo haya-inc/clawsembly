@@ -3,6 +3,13 @@
 The roadmap prioritizes evidence about upstream compatibility before product UI
 or a broad feature set.
 
+As of ADR 0004 (2026-07-12), the phases below serve one positioning:
+Clawsembly is an evidence-gated embedding layer that runs upstream coding
+agents browser-locally, behind a host boundary the embedding application
+controls. OpenClaw is the first supported upstream. The dated execution plan at
+the end of this document tracks the repositioning work; the phase structure and
+its evidence gates are unchanged.
+
 ## Phase 0: feasibility gate and compatibility lab
 
 Deliverables:
@@ -289,3 +296,85 @@ agent runtime inside Clawsembly.
 4. Reproduce the full runtime slice on the selected commercial browser runtime.
 5. Add remote-mode pairing approval, device-token rotation, revocation,
    recovery, and bridge-process hardening.
+
+## Repositioning execution plan (ADR 0004, 2026-07-12)
+
+ADR 0004 concluded that the release-tracking and evidence pipeline is
+replicable and cannot be the moat; the durable value is browser-local execution
+of upstream agents on BrowserPod plus an embedder-controlled, easily adjustable
+host boundary — the default-deny capability broker, the evidence-bound embed
+manifest, the permission-prompt UI, and payload-free audit. The evidence
+pipeline is retained as supporting trust infrastructure: the evidence-gate
+machinery is generic, and the OpenClaw reports are one instance of it.
+
+Honesty constraints on every item below: today only OpenClaw is bound; no
+owner-authorized runtime evidence exists yet, and every published report is
+status `probing`; multi-upstream is a design commitment whose next concrete
+step is the documented upstream-binding contract, not a shipped capability. No
+resulting surface may state or imply that other agents already run.
+
+Items are marked `owner` (requires the repository owner's accounts,
+credentials, vendor relationship, or spending authority) or `contributor`
+(implementable from a fork under the normal review process).
+
+### Tranche 1: in the repository (2026-07-12)
+
+All items in this tranche are `contributor`-scoped and land with the
+repositioning change set:
+
+- ADR 0004, the upstream-portable embedding boundary decision;
+- README repositioned to the ADR 0004 framing, keeping the top section
+  accessible to first-time readers;
+- `docs/oss-strategy.md`, `docs/product.md`, and `docs/vision.md` aligned with
+  the same framing;
+- promotion-policy Action README pin fix: the usage example pins a non-default
+  branch ref rather than a stable ref;
+- DCO adoption for contributions;
+- north-star latency instrumentation: reports record the upstream npm publish
+  timestamp so upstream-publication-to-verified-report latency becomes
+  measurable.
+
+### Tranche 2: about 30 days
+
+Owner actions (`owner`):
+
+- capture owner-authorized BrowserPod runtime evidence (issue #6) and the
+  missing performance baselines (issue #8); this also unblocks immediate next
+  tasks 3 and 4 above;
+- apply to the BrowserPod OSS grant program;
+- file the two known upstream findings neutrally: the published stable
+  shrinkwrap root declaration inconsistency and the preview Gateway-contract
+  break;
+- make one coordinated announcement only after runtime evidence lands: Show
+  HN, the OpenClaw community, and a Japanese-language article;
+- reserve a non-claw fallback name (an accepted risk in ADR 0004 is that the
+  claw-family name now under-describes the scope);
+- place a custom domain in front of the pinned report URLs so evidence links
+  survive a hosting relocation.
+
+Code (`contributor`):
+
+- per-channel badge endpoints on Pages;
+- a promotion-policy blocker/advisory split, so upstream-caused defects (for
+  example `shrinkwrap-inconsistent`) become flagged advisories with a recorded
+  waiver rationale instead of a permanent hold;
+- a versioned schema-stability contract for the public JSON endpoints;
+- a Japanese-language README.
+
+### Tranche 3: about 90 days
+
+- a documented upstream-binding contract — exact artifact identity, boot
+  recipe, protocol client, capability requirements, and evidence gates — plus
+  a minimal reference binding (a trivial hello-agent used only in tests) that
+  proves the boundary is upstream-portable rather than a stated design
+  property (`contributor`);
+- an embedder-DX slice: a ten-line host integration, declarative capability
+  configuration, and a pluggable permission UI (`contributor`);
+- the compatibility dataset published as an npm data package and/or a Renovate
+  datasource (`contributor`);
+- a succession and sunset protocol: a second organization owner, key and
+  BrowserPod-contract handover, and defined downstream behavior when reports
+  stop refreshing (`owner`, with `contributor`-possible documentation);
+- project-page messaging realigned with ADR 0004, tracked as its own item
+  because the page carries browser-test text assertions that must move with it
+  (`contributor`).

@@ -78,6 +78,13 @@ npm run compat:inspect -- --package openclaw --version 2026.6.11
 Generated reports must not be edited to claim runtime success. Runtime statuses
 must come from the corresponding probe evidence.
 
+## Developer Certificate of Origin
+
+All commits must be signed off with `git commit -s`, certifying the
+[Developer Certificate of Origin](https://developercertificate.org/). Sign-off
+keeps contribution provenance clean without requiring a contributor license
+agreement.
+
 ## Review principles
 
 - upstream OpenClaw behavior remains authoritative;

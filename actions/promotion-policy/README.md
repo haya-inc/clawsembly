@@ -16,8 +16,9 @@ jobs:
 ```
 
 `observe` reports either result successfully. `gate` exits nonzero unless the
-validated candidate is `promote`. Pin a reviewed commit SHA instead of the
-moving development branch for production use.
+validated candidate is `promote`. `@main` follows the default branch as it
+moves; for a reproducible reference, pin the `v0.1.0-alpha.1` tag or, stricter
+still, a reviewed commit SHA for production use.
 
 Outputs:
 

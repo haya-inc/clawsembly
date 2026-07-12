@@ -46,3 +46,17 @@ test("report schema accepts version-bound BrowserPod targets", () => {
   }));
   assert.equal(validate(report), true, JSON.stringify(validate.errors));
 });
+
+test("report schema accepts optional upstream publish timing fields", () => {
+  const report = buildReport({
+    ...staticInput({
+      runtime: "browserpod",
+      runtimeVersion: "2.12.1",
+      browserBaseline: "Desktop Chromium"
+    }),
+    upstreamPublishedAt: "2026-07-11T18:00:00.000Z"
+  });
+  assert.equal(report.artifact.upstreamPublishedAt, "2026-07-11T18:00:00.000Z");
+  assert.equal(report.reportLatencySeconds, 6 * 60 * 60);
+  assert.equal(validate(report), true, JSON.stringify(validate.errors));
+});

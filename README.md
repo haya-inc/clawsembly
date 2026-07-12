@@ -1,6 +1,8 @@
 # Clawsembly
 
-> Verified OpenClaw embedding for the browser.
+> Run upstream coding agents browser-locally, behind a host boundary the
+> embedding application controls. Evidence-gated; OpenClaw is the first
+> supported upstream.
 
 [![CI](https://github.com/haya-inc/clawsembly/actions/workflows/ci.yml/badge.svg)](https://github.com/haya-inc/clawsembly/actions/workflows/ci.yml)
 [![Compatibility probe](https://github.com/haya-inc/clawsembly/actions/workflows/compatibility.yml/badge.svg)](https://github.com/haya-inc/clawsembly/actions/workflows/compatibility.yml)
@@ -10,25 +12,89 @@
 
 [![Clawsembly — OpenClaw, verified in the browser](apps/web/public/social-preview.png)](https://haya-inc.github.io/clawsembly/)
 
-Clawsembly is an unofficial, capability-safe embedding layer for upstream
-[OpenClaw](https://github.com/openclaw/openclaw). It binds the exact published
-package to public compatibility evidence, a browser-local runtime, and explicit
-host capabilities. It does not reimplement the agent loop and it is not a
-generic wrapper around a browser sandbox.
+Clawsembly is an evidence-gated embedding layer that runs upstream coding
+agents browser-locally, behind a host boundary the embedding application
+controls. [OpenClaw](https://github.com/openclaw/openclaw) is the first
+supported upstream: Clawsembly binds the exact published package to public
+compatibility evidence and refuses to launch it until that evidence verifies.
+Today every tracked release is **probing** — meaning the exact artifact has
+been statically inspected, but no owner-authorized runtime evidence exists
+yet, so verified launch stays blocked. Clawsembly is an experimental,
+single-maintainer project and is not affiliated with or endorsed by the
+OpenClaw project.
 
-The project is in an experimental compatibility-lab phase. It is not affiliated
-with or endorsed by the OpenClaw project.
+## What works today, what is blocked
 
-## Product boundary
+| Item | Status | Notes |
+| --- | --- | --- |
+| Zero-install promotion-policy check | **Works** | `node examples/release-policy/check.mjs --observe` prints the current promotion decision in a few seconds, no dependencies. |
+| Hosted project page | **Works** | [Live reports plus a permission-prompt demo](https://haya-inc.github.io/clawsembly/) against an inert local broker: approve, deny, revoke, export a payload-free audit. |
+| npm alpha package | **Published now** | `npm install @haya-inc/clawsembly@alpha` — the reviewed [publication record](packages/compatibility/npm-publication.json) records `status: published` with SHA-512 integrity and Sigstore provenance. |
+| Evidence-gated boot demo | **Works** | The [SDK host example](examples/sdk-host/README.md) verifies the pinned report and shows `Provider boot blocked`. Refusing an unverified report is the security feature, working. |
+| Verified BrowserPod boot | **Blocked** | Pending owner-authorized runtime evidence ([#6](https://github.com/haya-inc/clawsembly/issues/6)). |
+| Live provider smoke test | **Blocked** | The gated path exists but has never been executed. |
+| Performance baselines | **Blocked** | Not yet measured ([#8](https://github.com/haya-inc/clawsembly/issues/8)). |
 
-BrowserPod supplies browser-local Node execution. Clawsembly supplies the parts
-an embedding application still needs in order to trust upstream OpenClaw:
+## Try it
+
+Three steps, no API key required:
+
+1. **Watch the promotion gate decide** (plain Node 22.19+, no install):
+
+   ```bash
+   git clone https://github.com/haya-inc/clawsembly
+   cd clawsembly
+   node examples/release-policy/check.mjs --observe
+   ```
+
+2. **Open the hosted project page** at
+   <https://haya-inc.github.io/clawsembly/>. It tracks the npm `latest`,
+   previous stable, and `beta` OpenClaw channels and runs the reusable
+   permission-prompt component against an inert local broker — no runtime
+   boots, no host capability is invoked.
+
+3. **Install the published alpha and see evidence-gated boot refuse:**
+
+   ```bash
+   npm install @haya-inc/clawsembly@alpha
+   ```
+
+   Then follow the [copy-ready SDK host starter](examples/sdk-host/README.md)
+   or open the [deployed copy](https://haya-inc.github.io/clawsembly/sdk-host/).
+   It fetches the exact HTTPS compatibility report, verifies its pinned
+   SHA-256 plus artifact and runtime identity, and must show
+   `Provider boot blocked` without calling BrowserPod while the report
+   remains `probing`.
+
+## Runtime and cost disclosure
+
+Clawsembly's committed browser-local runtime is
+[BrowserPod](https://browserpod.io/docs/overview), which is proprietary and
+metered. Every downstream deployment needs its own BrowserPod API key; the
+free tier is limited to non-commercial use with attribution, and a BrowserPod
+OSS grant program exists for open-source projects. Clawsembly never spends
+runtime tokens on an unverified release: `bootVerifiedEmbed` blocks before
+token consumption while evidence is missing. See the
+[deployment requirements](docs/deployment.md) and
+[ADR 0002](docs/decisions/0002-commercial-browser-runtime.md) for the full
+licensing analysis.
+
+## Deep dive: product boundary
+
+BrowserPod supplies browser-local Node execution. Clawsembly supplies the
+parts an embedding application still needs in order to trust an upstream
+agent — implemented today against upstream OpenClaw, the first bound
+upstream, and designed to stay upstream-portable
+([ADR 0004](docs/decisions/0004-upstream-portable-embedding-boundary.md)):
 
 - exact-version compatibility reports and reproducible failure fixtures;
 - a default-deny capability broker for secrets, identity, storage, provider
   traffic, notifications, and future host APIs;
 - an evidence-bound embed manifest that rejects runtime-provider mismatch;
 - the generated Gateway client and narrow compatibility adapters.
+
+Clawsembly does not reimplement the agent loop and it is not a generic
+wrapper around a browser sandbox.
 
 The implemented broker supports exact scopes, call limits, expiry, revocation,
 cancellation, bounded metadata-only audit, and redacted handler errors. The
@@ -80,7 +146,7 @@ The source-level ESM entrypoint now exports the same boot functions declared by
 its `.d.mts` contract, and an exact runtime export-surface test prevents typed
 consumer examples from failing only after deployment.
 
-## Browser runtime direction
+## Deep dive: browser runtime direction
 
 Browser-local execution is a product invariant; a remote sandbox is not the
 replacement path. [BrowserPod](https://browserpod.io/docs/overview) is the only
@@ -92,10 +158,12 @@ evidence in
 [container2wasm](https://github.com/container2wasm/container2wasm) is retained
 as an archived feasibility result after its measured boot failure.
 
-## Current evidence
+## Deep dive: current evidence
 
-The first implementation is a static compatibility inspector and a public,
-report-driven project page. For the pinned `openclaw@2026.6.11` artifact it
+The evidence-gate machinery is generic trust infrastructure; the OpenClaw
+reports below are its first instance. The first implementation is a static
+compatibility inspector and a public, report-driven project page. For the
+pinned `openclaw@2026.6.11` artifact it
 records package integrity, Node requirements, artifact size, lifecycle scripts,
 and platform-specific dependency risks without executing install scripts.
 The same page tracks the npm `latest`, previous stable, and `beta` channels as
@@ -158,6 +226,7 @@ the release is reported as `probing` rather than production-compatible.
 - [Promotion policy](https://haya-inc.github.io/clawsembly/data/promotion-policy.json)
 - [SDK alpha release manifest](https://haya-inc.github.io/clawsembly/downloads/sdk-release.json)
 - [SDK source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.1)
+- [npm publication record](packages/compatibility/npm-publication.json)
 - [Report schema](packages/compatibility/report.schema.json)
 - [Release-history schema](packages/compatibility/release-history.schema.json)
 - [Downstream consumption guide](docs/consuming-reports.md)
@@ -171,21 +240,17 @@ the release is reported as `probing` rather than production-compatible.
 - [Welcome discussion](https://github.com/haya-inc/clawsembly/discussions/17)
 - [Show and tell](https://github.com/haya-inc/clawsembly/discussions/18)
 
-## Quick start
+## Try it in depth
 
-No install is required to observe the current promotion decision:
+The promotion-policy check from step 1 above is a dependency-free consumer
+that fetches the public policy over strict HTTPS and prints the exact preview
+decision. Remove `--observe` to make `HOLD` fail CI. See the
+[release-policy example](examples/release-policy/README.md) and its copyable
+[zero-install GitHub Action](actions/promotion-policy/README.md). The current
+preview is intentionally held; this command is useful before verified
+BrowserPod support exists.
 
-```bash
-node examples/release-policy/check.mjs --observe
-```
-
-The dependency-free consumer fetches the public policy over strict HTTPS and
-prints the exact preview decision. Remove `--observe` to make `HOLD` fail CI.
-See the [release-policy example](examples/release-policy/README.md) and its
-copyable [zero-install GitHub Action](actions/promotion-policy/README.md). The current preview is intentionally held;
-this command is useful before BrowserPod or the SDK package is available.
-
-Requirements: Node.js 22.19 or newer.
+Requirements for working in the repository: Node.js 22.19 or newer.
 
 ```bash
 npm install
@@ -193,82 +258,25 @@ npm run check
 npm run dev
 ```
 
-The compatibility-lab root intentionally remains a private npm package. A
-separate publish recipe assembles only the canonical SDK/runtime/broker sources
-into an installable prerelease artifact:
+The npm alpha installs the same reproducible bytes that were checked into the
+release. The exact tarball is also available from Pages and from the GitHub
+prerelease:
 
 ```bash
-npm run sdk:check
-npm run sdk:lock
-npm run sdk:pack
-npm run sdk:example
-npm run report-pin:check
-```
-
-`sdk:check` creates the tarball twice and requires byte-identical SHA-256
-digests, installs it into an isolated temporary consumer, imports every public
-ESM subpath, and compiles a strict TypeScript consumer. `sdk:lock` deliberately
-updates the copy-ready starter URL and SHA-512 when the SDK version changes;
-normal checks reject silent drift. `sdk:pack` writes
-`@haya-inc/clawsembly@0.1.0-alpha.1` plus its checksum under ignored
-`.artifacts/sdk/`. The matching GitHub prerelease triggers provenance-backed
-npm publication under the `alpha` dist-tag. Runtime support remains `probing`
-independently of package distribution, and the exact bytes are also available
-from Pages:
-
-```bash
+npm install @haya-inc/clawsembly@alpha
 npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.1.tgz
-```
-
-The same checked bytes are attached to the
-[GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.1)
-with provider-free browser diagnostics and a provenance record binding the tag,
-source commit, Pages manifest, and compatibility report:
-
-```bash
 npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.1/haya-inc-clawsembly-0.1.0-alpha.1.tgz
 ```
 
-The adjacent release manifest is the source of truth for package distribution.
-It binds the tarball SHA-256 to the exact public compatibility report and keeps
-the install command on the verified Pages tarball until the reviewed npm
-publication record supplies matching SHA-512 integrity and Sigstore provenance.
-Runtime support remains independently recorded as `status:probing`.
+The [GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.1)
+carries provider-free browser diagnostics and a provenance record binding the
+tag, source commit, Pages manifest, and compatibility report. Runtime support
+remains `probing` independently of package distribution.
 
-`sdk:example` installs that tarball into an independent Vite/TypeScript package
-without workspace aliases and serves a launch inspector on
+`npm run sdk:example` installs the tarball into an independent Vite/TypeScript
+package without workspace aliases and serves a launch inspector on
 `http://127.0.0.1:5174/`. The deployed copy is available at the
-[SDK host example](https://haya-inc.github.io/clawsembly/sdk-host/). It fetches
-the exact HTTPS report, verifies its pinned raw JSON SHA-256 plus artifact and
-runtime identity, and must show `Provider boot blocked` without calling
-BrowserPod while the report remains `probing`.
-
-The six-hour release tracker regenerates the host pin from the exact stable
-report in its read-only job and carries both through one validated artifact to
-the separate PR-publishing job. Pin changes therefore remain explicit review
-diffs without becoming a handwritten release step.
-
-To regenerate and byte-check the Gateway contract against the exact published
-npm artifact:
-
-```bash
-npm run protocol:generate
-npm run protocol:verify
-```
-
-The browser lane requires Playwright Chromium and verifies the public page,
-BrowserPod-only runtime presentation, deployment policy, and provider-free
-security surfaces:
-
-```bash
-npx playwright install chromium
-npm run test:browser
-```
-
-Maintainers can capture the first real BrowserPod readiness record through the
-manual, Environment-protected `Browser host, page, and evidence` workflow. It
-is opt-in, metered, installs the exact provider SDK from an isolated lock, and
-uploads evidence for review without committing or promoting it automatically.
+[SDK host example](https://haya-inc.github.io/clawsembly/sdk-host/).
 
 Generate a fresh static report for an exact upstream release:
 
@@ -297,16 +305,83 @@ Runtime evidence is attached only when its embedded OpenClaw version exactly
 matches the inspected artifact. `--skip-unchanged` leaves every generated file
 untouched when all three resolved channels are unchanged.
 
+## Maintainer release plumbing
+
+The compatibility-lab root intentionally remains a private npm package. A
+separate publish recipe assembles only the canonical SDK/runtime/broker sources
+into an installable prerelease artifact:
+
+```bash
+npm run sdk:check
+npm run sdk:lock
+npm run sdk:pack
+npm run sdk:example
+npm run report-pin:check
+```
+
+`sdk:check` creates the tarball twice and requires byte-identical SHA-256
+digests, installs it into an isolated temporary consumer, imports every public
+ESM subpath, and compiles a strict TypeScript consumer. `sdk:lock` deliberately
+updates the copy-ready starter URL and SHA-512 when the SDK version changes;
+normal checks reject silent drift. `sdk:pack` writes
+`@haya-inc/clawsembly@0.1.0-alpha.1` plus its checksum under ignored
+`.artifacts/sdk/`. The matching GitHub prerelease triggered provenance-backed
+npm publication under the `alpha` dist-tag; the reviewed
+[npm publication record](packages/compatibility/npm-publication.json) now
+records `status: published` with matching SHA-512 integrity and Sigstore
+provenance.
+
+The [release manifest](https://haya-inc.github.io/clawsembly/downloads/sdk-release.json)
+is the source of truth for package distribution. It binds the tarball SHA-256
+to the exact public compatibility report and admits the npm install path only
+because the reviewed publication record supplies matching SHA-512 integrity
+and Sigstore provenance. Runtime support remains independently recorded as
+`status:probing`.
+
+The six-hour release tracker regenerates the host pin from the exact stable
+report in its read-only job and carries both through one validated artifact to
+the separate PR-publishing job. Pin changes therefore remain explicit review
+diffs without becoming a handwritten release step.
+
+To regenerate and byte-check the Gateway contract against the exact published
+npm artifact:
+
+```bash
+npm run protocol:generate
+npm run protocol:verify
+```
+
+The browser lane requires Playwright Chromium and verifies the public page,
+BrowserPod-only runtime presentation, deployment policy, and provider-free
+security surfaces:
+
+```bash
+npx playwright install chromium
+npm run test:browser
+```
+
+Maintainers can capture the first real BrowserPod readiness record through the
+manual, Environment-protected `Browser host, page, and evidence` workflow. It
+is opt-in, metered, installs the exact provider SDK from an isolated lock, and
+uploads evidence for review without committing or promoting it automatically.
+
 ## Goals
 
-- Run upstream OpenClaw rather than maintaining an independent agent rewrite.
-- Make OpenClaw safe to embed through exact artifact identity, evidence-bound
-  launch, and explicit browser-host authority.
+- Run upstream coding agents rather than maintaining an independent agent
+  rewrite. OpenClaw is the first bound upstream; binding additional upstreams
+  is a design commitment whose next concrete step is a documented
+  upstream-binding contract, not a shipped capability.
+- Keep the host boundary — default-deny capability broker, evidence-bound
+  embed manifest, permission prompts, and payload-free audit — embedder-
+  controlled and upstream-portable, as the reusable product across upstreams.
+- Make each bound upstream safe to embed through exact artifact identity,
+  evidence-bound launch, and explicit browser-host authority.
 - Keep the useful default browser-local, with an optional native Gateway
   interoperability mode rather than a remote-sandbox dependency.
 - Expose browser limitations as explicit capabilities instead of silently
   emulating unavailable host features.
-- Detect and validate upstream releases automatically.
+- Detect and validate upstream releases automatically, as supporting trust
+  infrastructure rather than the product itself.
 - Keep local data and execution inside browser security boundaries where
   possible.
 
@@ -324,6 +399,7 @@ untouched when all three resolved channels are unchanged.
 - [Security model](docs/security-model.md)
 - [Commercial browser runtime decision](docs/decisions/0002-commercial-browser-runtime.md)
 - [Verified OpenClaw embedding decision](docs/decisions/0003-verified-openclaw-embedding.md)
+- [Upstream-portable embedding boundary decision](docs/decisions/0004-upstream-portable-embedding-boundary.md)
 - [Verified embedding contract](docs/embedding.md)
 
 ## Contributing

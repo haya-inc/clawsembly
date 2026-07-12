@@ -14,7 +14,8 @@ function parseArgs(argv) {
     runtime: "browserpod",
     runtimeVersion: "2.12.1",
     browserBaseline: "Desktop Chromium; Firefox and WebKit pending BrowserPod evidence.",
-    browserRuntimeEvidence: undefined
+    browserRuntimeEvidence: undefined,
+    upstreamPublishedAt: undefined
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -26,8 +27,21 @@ function parseArgs(argv) {
     if (argv[index] === "--runtime-version" && value) result.runtimeVersion = value;
     if (argv[index] === "--browser-baseline" && value) result.browserBaseline = value;
     if (argv[index] === "--browserpod-evidence" && value) result.browserRuntimeEvidence = value;
+    if (argv[index] === "--upstream-published-at" && value) result.upstreamPublishedAt = value;
   }
   return result;
+}
+
+function resolveUpstreamPublishedAt(options, version, cwd) {
+  if (options.upstreamPublishedAt !== undefined) return options.upstreamPublishedAt;
+  try {
+    const time = JSON.parse(run("npm", ["view", `${options.packageName}@${version}`, "time", "--json"], cwd));
+    if (typeof time?.[version] === "string") return time[version];
+    process.stderr.write(`The npm registry has no publish time for ${options.packageName}@${version}; omitting upstreamPublishedAt.\n`);
+  } catch {
+    process.stderr.write(`Could not read npm publish times for ${options.packageName}@${version}; omitting upstreamPublishedAt.\n`);
+  }
+  return undefined;
 }
 
 function run(command, args, cwd) {
@@ -54,6 +68,7 @@ try {
   const browserRuntimeEvidence = options.browserRuntimeEvidence
     ? JSON.parse(readFileSync(resolve(process.cwd(), options.browserRuntimeEvidence), "utf8"))
     : undefined;
+  const upstreamPublishedAt = resolveUpstreamPublishedAt(options, manifest.version, workingDirectory);
   const report = assertReport(buildReport({
     packageName: options.packageName,
     manifest,
@@ -61,6 +76,7 @@ try {
     shrinkwrap,
     gatewayContract,
     browserRuntimeEvidence,
+    ...(upstreamPublishedAt !== undefined ? { upstreamPublishedAt } : {}),
     target: {
       runtime: options.runtime,
       ...(options.runtimeVersion ? { runtimeVersion: options.runtimeVersion } : {}),

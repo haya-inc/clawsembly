@@ -8,6 +8,10 @@
   "properties": {
     "schemaVersion": { "const": 1 },
     "generatedAt": { "type": "string", "format": "date-time" },
+    "reportLatencySeconds": {
+      "type": "integer",
+      "description": "Optional whole seconds between artifact.upstreamPublishedAt and generatedAt; present only when the upstream npm publish time was available."
+    },
     "status": { "enum": ["probing", "supported", "partial", "unsupported"] },
     "target": {
       "type": "object",
@@ -27,6 +31,11 @@
         "package": { "type": "string", "minLength": 1 },
         "version": { "type": "string", "minLength": 1 },
         "integrity": { "type": "string", "minLength": 1 },
+        "upstreamPublishedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional npm registry publish timestamp for this exact version, from the packument time field."
+        },
         "nodeEngine": { "type": "string", "minLength": 1 },
         "tarballBytes": { "type": "integer", "minimum": 0 },
         "unpackedBytes": { "type": "integer", "minimum": 0 },

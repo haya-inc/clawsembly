@@ -1,6 +1,6 @@
 name: Clawsembly OpenClaw promotion policy
 description: Observe or enforce Clawsembly's fail-closed OpenClaw promotion decision without installing a package.
-author: Haya
+author: haya Inc.
 
 inputs:
   mode:

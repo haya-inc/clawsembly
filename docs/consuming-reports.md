@@ -44,6 +44,15 @@ Consumers should:
 7. retain the last verified stable report as a rollback reference;
 8. cache responses but revalidate when npm channel or runtime versions change.
 
+Reports may carry two optional freshness fields: `artifact.upstreamPublishedAt`
+(the npm registry publish timestamp for the exact inspected version) and a
+top-level `reportLatencySeconds` (whole seconds from that publish time to the
+report's `generatedAt`). Each release summary mirrors both when present. They
+exist so freshness and latency stay measurable from the public artifacts alone
+against the project's two-tier north star: an automated report within 6 hours
+of an upstream npm release, and runtime evidence within 72 hours. Artifacts
+generated before this instrumentation simply omit the fields and remain valid.
+
 Each release summary includes `dependencyChangesFromStable`. `added` and
 `removed` preserve the exact declared package spec; `changed` preserves both
 the stable and candidate specs. These are static manifest facts, not runtime
@@ -133,8 +142,9 @@ Downstream GitHub Actions users can skip checkout and Node setup entirely:
     mode: observe # change to gate to require PROMOTE
 ```
 
-The Action exposes `decision`, `candidate_version`, and `reasons`. Pin a
-reviewed commit SHA instead of the moving development branch in production.
+The Action exposes `decision`, `candidate_version`, and `reasons`. `@main`
+follows the default branch as it moves; pin the `v0.1.0-alpha.1` tag or a
+reviewed commit SHA for a reproducible reference in production.
 
 ## Evidence-bound SDK loading
 
