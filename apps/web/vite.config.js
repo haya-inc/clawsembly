@@ -1,5 +1,10 @@
 import { defineConfig } from "vite";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+
+const sdkPackage = JSON.parse(readFileSync(resolve(import.meta.dirname, "../../packages/sdk-package/package.json"), "utf8"));
+const sdkTag = `v${sdkPackage.version}`;
+const sdkTarball = `haya-inc-clawsembly-${sdkPackage.version}.tgz`;
 
 const securityHeaders = {
   "Cross-Origin-Opener-Policy": "same-origin",
@@ -19,6 +24,14 @@ export default defineConfig({
   preview: {
     headers: securityHeaders
   },
+  plugins: [{
+    name: "clawsembly-sdk-release-links",
+    transformIndexHtml(html) {
+      return html
+        .replaceAll("__CLAWSEMBLY_SDK_TARBALL__", sdkTarball)
+        .replaceAll("__CLAWSEMBLY_SDK_TAG__", sdkTag);
+    }
+  }],
   build: {
     outDir: resolve(import.meta.dirname, "../../dist"),
     emptyOutDir: true

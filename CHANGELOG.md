@@ -7,6 +7,10 @@ The project does not yet promise semantic-version compatibility.
 
 ## Unreleased
 
+No changes yet.
+
+## [0.1.0-alpha.1] - 2026-07-12
+
 ### Fixed
 
 - Pages deployment now runs the complete Pages build before release-readiness,
@@ -18,6 +22,15 @@ The project does not yet promise semantic-version compatibility.
 - provenance-backed npm alpha publishing with GitHub Release byte comparison,
   idempotent registry-integrity checks, isolated bootstrap-token scope, and an
   OIDC trusted-publisher migration path;
+- copy-ready external SDK host with a GitHub Release dependency, checked-in
+  SHA-512 lock, and local reproducible-tarball drift enforcement;
+- support and governance policies, a structured support-request template, and
+  an explicit security-support table for the first source prerelease.
+
+## [0.1.0-alpha.0] - 2026-07-12
+
+### Added
+
 - exact-artifact OpenClaw compatibility inspection and versioned JSON schemas;
 - browser-host credential vault, device identity, provider broker, session
   budgets, and protected live-provider gate;
@@ -98,10 +111,6 @@ The project does not yet promise semantic-version compatibility.
 - tag-gated GitHub source prerelease automation with read/write job separation,
   exact transferred-asset allowlisting, browser diagnostics, checksum validation,
   and tag/source/Pages/report provenance;
-- copy-ready external SDK host with a GitHub Release dependency, checked-in
-  SHA-512 lock, and local reproducible-tarball drift enforcement;
-- support and governance policies, a structured support-request template, and
-  an explicit security-support table for the first source prerelease;
 - report-driven project page, release ledger, compatibility badge, contribution
   templates, security policy, and downstream consumption guide.
 

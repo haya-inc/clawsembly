@@ -39,7 +39,7 @@ package:
 ```bash
 npm run sdk:pack
 npm install --prefix examples/sdk-host --no-save --no-package-lock \
-  ./.artifacts/sdk/haya-inc-clawsembly-0.1.0-alpha.0.tgz
+  ./.artifacts/sdk/haya-inc-clawsembly-0.1.0-alpha.1.tgz
 npm run dev --prefix examples/sdk-host
 ```
 
