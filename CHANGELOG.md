@@ -7,6 +7,12 @@ The project does not yet promise semantic-version compatibility.
 
 ## Unreleased
 
+### Fixed
+
+- Pages deployment now runs the complete Pages build before release-readiness,
+  and required browser checks report on every pull request instead of blocking
+  path-filtered contributor changes indefinitely.
+
 ### Added
 
 - exact-artifact OpenClaw compatibility inspection and versioned JSON schemas;
