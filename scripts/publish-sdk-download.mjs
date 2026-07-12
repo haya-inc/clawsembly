@@ -13,18 +13,21 @@ const checksumPath = resolve(artifactDirectory, `${fileName}.sha256`);
 const tarball = await readFile(tarballPath);
 const checksum = await readFile(checksumPath, "utf8");
 const sha256 = createHash("sha256").update(tarball).digest("hex");
+const integrity = `sha512-${createHash("sha512").update(tarball).digest("base64")}`;
 if (checksum !== `${sha256}  ${fileName}\n`) throw new Error("SDK checksum file does not match the tarball bytes.");
 
 const reportSource = await readFile(resolve(root, "apps/web/public/data/compatibility.json"), "utf8");
 const report = JSON.parse(reportSource);
 const reportSha256 = createHash("sha256").update(reportSource).digest("hex");
 const checksumStats = await stat(checksumPath);
+const publication = JSON.parse(await readFile(resolve(root, "packages/compatibility/npm-publication.json"), "utf8"));
 const release = buildSdkReleaseManifest({
   sdk,
-  tarball: { file: basename(tarballPath), bytes: tarball.byteLength, sha256 },
+  tarball: { file: basename(tarballPath), bytes: tarball.byteLength, sha256, integrity },
   checksum: { file: basename(checksumPath), bytes: checksumStats.size, value: sha256 },
   report,
-  reportSha256
+  reportSha256,
+  publication
 });
 
 const destination = resolve(root, "dist/downloads");

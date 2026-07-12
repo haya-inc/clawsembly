@@ -22,10 +22,18 @@
       "required": ["channel", "npmPublished", "tarball", "checksum"],
       "properties": {
         "channel": { "const": "github-pages" },
-        "npmPublished": { "const": false },
+        "npmPublished": { "type": "boolean" },
+        "npm": { "$ref": "#/$defs/npmDistribution" },
         "tarball": { "$ref": "#/$defs/download" },
         "checksum": { "$ref": "#/$defs/checksumDownload" }
-      }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "npmPublished": { "const": true } }, "required": ["npmPublished"] },
+          "then": { "properties": { "npm": { "$ref": "#/$defs/npmDistribution" } }, "required": ["npm"] },
+          "else": { "properties": { "npm": false } }
+        }
+      ]
     },
     "compatibility": {
       "type": "object",
@@ -60,12 +68,25 @@
       "additionalProperties": false,
       "required": ["command"],
       "properties": {
-        "command": { "type": "string", "pattern": "^npm install https://haya-inc\\.github\\.io/clawsembly/downloads/haya-inc-clawsembly-0\\.1\\.0-alpha\\.[0-9]+\\.tgz$" }
+        "command": { "type": "string", "pattern": "^npm install (https://haya-inc\\.github\\.io/clawsembly/downloads/haya-inc-clawsembly-0\\.1\\.0-alpha\\.[0-9]+\\.tgz|@haya-inc/clawsembly@0\\.1\\.0-alpha\\.[0-9]+)$" }
       }
     }
   },
   "$defs": {
     "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "npmDistribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["registry", "packageUrl", "distTag", "integrity", "publishedAt", "provenanceUrl"],
+      "properties": {
+        "registry": { "const": "https://registry.npmjs.org/" },
+        "packageUrl": { "type": "string", "format": "uri", "pattern": "^https://www\\.npmjs\\.com/package/@haya-inc/clawsembly/v/0\\.1\\.0-alpha\\.[0-9]+$" },
+        "distTag": { "const": "alpha" },
+        "integrity": { "type": "string", "pattern": "^sha512-[A-Za-z0-9+/]+={0,2}$" },
+        "publishedAt": { "type": "string", "format": "date-time" },
+        "provenanceUrl": { "type": "string", "format": "uri", "pattern": "^https://search\\.sigstore\\.dev/\\?logIndex=[0-9]+$" }
+      }
+    },
     "download": {
       "type": "object",
       "additionalProperties": false,

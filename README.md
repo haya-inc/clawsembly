@@ -227,9 +227,11 @@ source commit, Pages manifest, and compatibility report:
 npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.1/haya-inc-clawsembly-0.1.0-alpha.1.tgz
 ```
 
-The adjacent release manifest binds the tarball SHA-256 to the exact public
-compatibility report and explicitly records `npmPublished:false` and
-`status:probing`.
+The adjacent release manifest is the source of truth for package distribution.
+It binds the tarball SHA-256 to the exact public compatibility report and keeps
+the install command on the verified Pages tarball until the reviewed npm
+publication record supplies matching SHA-512 integrity and Sigstore provenance.
+Runtime support remains independently recorded as `status:probing`.
 
 `sdk:example` installs that tarball into an independent Vite/TypeScript package
 without workspace aliases and serves a launch inspector on

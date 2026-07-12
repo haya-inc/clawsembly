@@ -68,6 +68,7 @@ const required = [
   "packages/compatibility/release-history.schema.json",
   "packages/compatibility/browserpod-evidence.schema.json",
   "packages/compatibility/promotion-policy.schema.json",
+  "packages/compatibility/npm-publication.json",
   "packages/compatibility/sdk-release.schema.json",
   "packages/compatibility/source-release.schema.json",
   "packages/compatibility/src/dependency-risk.mjs",
@@ -199,19 +200,29 @@ for (const expected of ["Provider boot blocked", "Not attempted", "report status
 }
 
 const sdkRelease = JSON.parse(readFileSync(resolve(root, "dist/downloads/sdk-release.json"), "utf8"));
+const npmPublication = JSON.parse(readFileSync(resolve(root, "packages/compatibility/npm-publication.json"), "utf8"));
 const sdkTarballName = sdkRelease.distribution?.tarball?.file;
 if (sdkRelease.schemaVersion !== 1 || sdkRelease.package?.name !== "@haya-inc/clawsembly"
   || sdkRelease.package?.version !== sdkPackageManifest.version
-  || sdkRelease.distribution?.npmPublished !== false
-  || sdkRelease.install?.command !== `npm install ${sdkRelease.distribution?.tarball?.url}`
+  || sdkRelease.distribution?.npmPublished !== (npmPublication.status === "published")
   || sdkTarballName !== sdkTarballFile) {
-  throw new Error("The Pages SDK release manifest overstates or misidentifies the source alpha.");
+  throw new Error("The Pages SDK release manifest misidentifies the reviewed publication state.");
 }
 const sdkTarball = readFileSync(resolve(root, "dist/downloads", sdkTarballName));
 const sdkTarballSha256 = createHash("sha256").update(sdkTarball).digest("hex");
 if (sdkTarballSha256 !== sdkRelease.distribution.tarball.sha256
   || sdkTarball.byteLength !== sdkRelease.distribution.tarball.bytes) {
   throw new Error("The Pages SDK tarball bytes do not match the release manifest.");
+}
+const sdkTarballIntegrity = `sha512-${createHash("sha512").update(sdkTarball).digest("base64")}`;
+if (npmPublication.status === "published") {
+  if (sdkRelease.distribution.npm?.integrity !== sdkTarballIntegrity
+    || sdkRelease.install?.command !== `npm install @haya-inc/clawsembly@${sdkPackageManifest.version}`) {
+    throw new Error("The published npm record is not bound to the deployed SDK bytes.");
+  }
+} else if (sdkRelease.distribution.npm !== undefined
+  || sdkRelease.install?.command !== `npm install ${sdkRelease.distribution?.tarball?.url}`) {
+  throw new Error("The pending npm record must keep installation on the verified Pages tarball.");
 }
 const sdkChecksumName = sdkRelease.distribution.checksum.file;
 const sdkChecksum = readFileSync(resolve(root, "dist/downloads", sdkChecksumName), "utf8");

@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 
 const sdkVersion = JSON.parse(readFileSync("packages/sdk-package/package.json", "utf8")).version as string;
+const npmPublication = JSON.parse(readFileSync("packages/compatibility/npm-publication.json", "utf8")) as { status: "pending" | "published" };
 
 test("project page distinguishes stable, previous, and preview evidence", async ({ page, request }) => {
   const consoleErrors: string[] = [];
@@ -121,6 +122,20 @@ test("project page distinguishes stable, previous, and preview evidence", async 
     "href",
     `./downloads/haya-inc-clawsembly-${sdkVersion}.tgz`
   );
+  const registryLink = page.locator("[data-sdk-registry]");
+  const distributionStatus = page.locator("[data-sdk-distribution-status]");
+  if (npmPublication.status === "published") {
+    await expect(registryLink).toHaveText("Install alpha from npm ↗");
+    await expect(registryLink).toHaveAttribute(
+      "href",
+      `https://www.npmjs.com/package/@haya-inc/clawsembly/v/${sdkVersion}`
+    );
+    await expect(distributionStatus).toContainText(`npm install @haya-inc/clawsembly@${sdkVersion}`);
+  } else {
+    await expect(registryLink).toHaveText("npm bootstrap pending · manifest ↗");
+    await expect(registryLink).toHaveAttribute("href", "./downloads/sdk-release.json");
+    await expect(distributionStatus).toContainText("verified GitHub and Pages tarballs are available now");
+  }
   await expect(page.getByRole("link", { name: "Release notes ↗" })).toHaveAttribute(
     "href",
     `https://github.com/haya-inc/clawsembly/releases/tag/v${sdkVersion}`
