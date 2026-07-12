@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 
 import {
@@ -8,17 +9,41 @@ import {
 } from "./boot.mjs";
 import { createEmbedManifest } from "./embed-manifest.mjs";
 import { OPENCLAW_GATEWAY_CONTRACT } from "./openclaw-gateway-contract.generated.mjs";
+import { loadVerifiedCompatibilityReport } from "./report-loader.mjs";
 
 const INTEGRITY = `sha512-${"A".repeat(86)}==`;
 
 function report({ status = "supported", runtime = "browserpod", runtimeVersion = "2.12.1" } = {}) {
   return {
-    generatedAt: "2026-07-12T00:00:00.000Z",
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
     status,
-    target: { runtime, runtimeVersion },
-    artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY }
+    target: { runtime, runtimeVersion, browserBaseline: "Desktop Chromium" },
+    artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY },
+    evidence: status === "probing" ? [] : [{
+      id: "browserpod-runtime",
+      kind: "browser-runtime",
+      path: "evidence/browserpod-openclaw-2026.6.11.json",
+      sha256: "a".repeat(64)
+    }],
+    checks: [{ id: "runtime", status: status === "supported" ? "pass" : "pending" }]
   };
 }
+
+async function verifyReport(value) {
+  const body = `${JSON.stringify(value)}\n`;
+  return loadVerifiedCompatibilityReport({
+    url: "https://example.com/compatibility.json",
+    sha256: createHash("sha256").update(body).digest("hex"),
+    maxAgeMs: 24 * 60 * 60 * 1_000,
+    artifact: value.artifact,
+    target: { runtime: "browserpod", runtimeVersion: "2.12.1" }
+  }, {
+    fetchImpl: async () => new Response(body, { headers: { "content-type": "application/json" } })
+  });
+}
+
+const VERIFIED_REPORT = await verifyReport(report());
 
 function fakeBrowserPod() {
   const calls = [];
@@ -69,7 +94,7 @@ test("rejects an unsafe mailbox channel before BrowserPod boot", async () => {
   const fake = fakeBrowserPod();
   await assert.rejects(
     bootVerifiedEmbed({
-      manifest: createEmbedManifest({ report: report() }),
+      manifest: createEmbedManifest({ report: VERIFIED_REPORT }),
       BrowserPod: fake.BrowserPod,
       browserPodApiKey: "secret",
       mailboxChannelId: "../shared"
@@ -83,7 +108,7 @@ test("rejects unknown mailbox options before BrowserPod boot", async () => {
   const fake = fakeBrowserPod();
   await assert.rejects(
     bootVerifiedEmbed({
-      manifest: createEmbedManifest({ report: report() }),
+      manifest: createEmbedManifest({ report: VERIFIED_REPORT }),
       BrowserPod: fake.BrowserPod,
       browserPodApiKey: "secret",
       mailboxOptions: { root: "/workspace/shared" }
@@ -97,7 +122,7 @@ test("rejects invalid installer diagnostics before BrowserPod boot", async () =>
   const fake = fakeBrowserPod();
   await assert.rejects(
     bootVerifiedEmbed({
-      manifest: createEmbedManifest({ report: report() }),
+      manifest: createEmbedManifest({ report: VERIFIED_REPORT }),
       BrowserPod: fake.BrowserPod,
       browserPodApiKey: "secret",
       onInstallOutput: "console"
@@ -111,7 +136,7 @@ test("rejects invalid Gateway options before BrowserPod boot", async () => {
   const fake = fakeBrowserPod();
   await assert.rejects(
     bootVerifiedEmbed({
-      manifest: createEmbedManifest({ report: report() }),
+      manifest: createEmbedManifest({ report: VERIFIED_REPORT }),
       BrowserPod: fake.BrowserPod,
       browserPodApiKey: "secret",
       gatewayOptions: { port: 70_000 }
@@ -120,7 +145,7 @@ test("rejects invalid Gateway options before BrowserPod boot", async () => {
   );
   await assert.rejects(
     bootVerifiedEmbed({
-      manifest: createEmbedManifest({ report: report() }),
+      manifest: createEmbedManifest({ report: VERIFIED_REPORT }),
       BrowserPod: fake.BrowserPod,
       browserPodApiKey: "secret",
       gatewayOptions: { authToken: "ambient" }
@@ -129,7 +154,7 @@ test("rejects invalid Gateway options before BrowserPod boot", async () => {
   );
   await assert.rejects(
     bootVerifiedEmbed({
-      manifest: createEmbedManifest({ report: report() }),
+      manifest: createEmbedManifest({ report: VERIFIED_REPORT }),
       BrowserPod: fake.BrowserPod,
       browserPodApiKey: "secret",
       gatewayOptions: { allowedOrigins: ["*"] }
@@ -148,7 +173,7 @@ test("creates an artifact-bound protocol client without issuing connection autho
     integrity: OPENCLAW_GATEWAY_CONTRACT.artifact.integrity
   };
   const session = await bootVerifiedEmbed({
-    manifest: createEmbedManifest({ report: exactReport }),
+    manifest: createEmbedManifest({ report: await verifyReport(exactReport) }),
     BrowserPod: fake.BrowserPod,
     browserPodApiKey: "secret",
     gatewayOptions: { allowedOrigins: ["https://embed.example"] }
@@ -169,7 +194,7 @@ test("creates an artifact-bound protocol client without issuing connection autho
 test("boots a verified BrowserPod session and binds capability authority to its artifact", async () => {
   const fake = fakeBrowserPod();
   const manifest = createEmbedManifest({
-    report: report(),
+    report: VERIFIED_REPORT,
     capabilities: [{ capability: "storage.snapshot", scope: "workspace:primary", maxCalls: 1 }]
   });
   const session = await bootVerifiedEmbed({
@@ -258,7 +283,7 @@ test("binds persistent storage keys to the exact OpenClaw version", () => {
 test("closes the logical session without claiming undocumented hard disposal", async () => {
   const fake = fakeBrowserPod();
   const session = await bootVerifiedEmbed({
-    manifest: createEmbedManifest({ report: report() }),
+    manifest: createEmbedManifest({ report: VERIFIED_REPORT }),
     BrowserPod: fake.BrowserPod,
     browserPodApiKey: "secret"
   });

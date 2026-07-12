@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 
 import { assertVerifiedLaunch, createEmbedManifest } from "./embed-manifest.mjs";
+import { loadVerifiedCompatibilityReport } from "./report-loader.mjs";
 
 const INTEGRITY = `sha512-${"A".repeat(86)}==`;
 
@@ -12,6 +14,34 @@ const report = {
   artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY }
 };
 
+async function verifiedSupportedReport() {
+  const value = {
+    schemaVersion: 1,
+    generatedAt: new Date().toISOString(),
+    status: "supported",
+    target: { runtime: "browserpod", runtimeVersion: "2.12.1", browserBaseline: "Desktop Chromium" },
+    artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY },
+    evidence: [{
+      id: "browserpod-runtime",
+      kind: "browser-runtime",
+      path: "evidence/browserpod-openclaw-2026.6.11.json",
+      sha256: "a".repeat(64)
+    }],
+    checks: [{ id: "runtime", status: "pass" }]
+  };
+  const body = `${JSON.stringify(value)}\n`;
+  const sha256 = createHash("sha256").update(body).digest("hex");
+  return loadVerifiedCompatibilityReport({
+    url: "https://example.com/compatibility.json",
+    sha256,
+    maxAgeMs: 24 * 60 * 60 * 1_000,
+    artifact: value.artifact,
+    target: { runtime: "browserpod", runtimeVersion: "2.12.1" }
+  }, {
+    fetchImpl: async () => new Response(body, { headers: { "content-type": "application/json" } })
+  });
+}
+
 test("records BrowserPod adoption while blocking evidence from another runtime", () => {
   const manifest = createEmbedManifest({
     report,
@@ -20,6 +50,7 @@ test("records BrowserPod adoption while blocking evidence from another runtime",
   assert.equal(manifest.runtime, "browserpod");
   assert.equal(manifest.launchable, false);
   assert.deepEqual(manifest.blockers, [
+    "report source and SHA-256 are unverified",
     "report targets remote, not browserpod",
     "report runtime version is unreported, not 2.12.1",
     "report status is partial, not supported"
@@ -27,9 +58,9 @@ test("records BrowserPod adoption while blocking evidence from another runtime",
   assert.throws(() => assertVerifiedLaunch(manifest), /verified BrowserPod launch blocked/u);
 });
 
-test("authorizes only a supported report captured against BrowserPod", () => {
+test("authorizes only a digest-verified supported report captured against BrowserPod", async () => {
   const manifest = createEmbedManifest({
-    report: { ...report, status: "supported", target: { runtime: "browserpod", runtimeVersion: "2.12.1" } },
+    report: await verifiedSupportedReport(),
     capabilities: [
       { capability: "identity.sign", scope: "challenge:gateway" },
       { capability: "storage.snapshot", scope: "workspace:primary", maxCalls: 2 }
@@ -39,7 +70,18 @@ test("authorizes only a supported report captured against BrowserPod", () => {
   assert.equal(manifest.launchable, true);
   assert.equal(manifest.runtimeVersion, "2.12.1");
   assert.equal(manifest.evidence.verifiedForRuntime, true);
+  assert.equal(manifest.evidence.reportVerified, true);
+  assert.match(manifest.evidence.reportSha256, /^[a-f0-9]{64}$/u);
   assert.equal(Object.isFrozen(manifest.capabilities), true);
+});
+
+test("a caller-created supported object cannot authorize launch", () => {
+  const manifest = createEmbedManifest({
+    report: { ...report, status: "supported", target: { runtime: "browserpod", runtimeVersion: "2.12.1" } }
+  });
+  assert.equal(manifest.launchable, false);
+  assert.deepEqual(manifest.blockers, ["report source and SHA-256 are unverified"]);
+  assert.throws(() => assertVerifiedLaunch(manifest), /source and SHA-256 are unverified/u);
 });
 
 test("blocks supported evidence from another BrowserPod version", () => {
@@ -47,7 +89,10 @@ test("blocks supported evidence from another BrowserPod version", () => {
     report: { ...report, status: "supported", target: { runtime: "browserpod", runtimeVersion: "2.11.0" } }
   });
   assert.equal(manifest.launchable, false);
-  assert.deepEqual(manifest.blockers, ["report runtime version is 2.11.0, not 2.12.1"]);
+  assert.deepEqual(manifest.blockers, [
+    "report source and SHA-256 are unverified",
+    "report runtime version is 2.11.0, not 2.12.1"
+  ]);
 });
 
 test("rejects duplicate grants and non-BrowserPod embedded runtimes", () => {
@@ -72,9 +117,9 @@ test("rejects reports without exact artifact integrity", () => {
   );
 });
 
-test("rejects a forged launchable manifest with inconsistent evidence", () => {
+test("rejects a forged launchable manifest with inconsistent evidence", async () => {
   const manifest = createEmbedManifest({
-    report: { ...report, status: "supported", target: { runtime: "browserpod", runtimeVersion: "2.12.1" } }
+    report: await verifiedSupportedReport()
   });
   assert.throws(
     () => assertVerifiedLaunch({ ...manifest, evidence: { ...manifest.evidence, reportStatus: "partial" } }),

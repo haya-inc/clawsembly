@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { access, readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -71,6 +72,15 @@ assert.equal(roadmap.includes("Replace or cache the 293-package repair path"), f
 const ossStrategy = await read("docs/oss-strategy.md");
 assert.equal(ossStrategy.includes("Cache or replace the nested dependency repair path"), false, "OSS strategy promotes the removed runtime repair path");
 assert.equal(ossStrategy.includes("packed-SDK host example"), true, "OSS strategy must retain the external SDK host adoption path");
+
+const compatibilitySource = await read("apps/web/public/data/compatibility.json");
+const compatibilitySha256 = createHash("sha256").update(compatibilitySource).digest("hex");
+const sdkHostReportPin = await read("examples/sdk-host/src/report-pin.ts");
+assert.equal(sdkHostReportPin.includes(`sha256: "${compatibilitySha256}"`), true, "external SDK host report SHA-256 drift");
+const compatibility = JSON.parse(compatibilitySource);
+for (const expected of [compatibility.artifact.version, compatibility.artifact.integrity, compatibility.target.runtimeVersion]) {
+  assert.equal(sdkHostReportPin.includes(expected), true, `external SDK host report identity drift: ${expected}`);
+}
 
 const reportSchema = await readJson("packages/compatibility/report.schema.json");
 assert.equal(reportSchema.properties.target.properties.runtime.const, "browserpod", "report schema must be BrowserPod-only");

@@ -179,7 +179,8 @@ BrowserPod report remains `probing`.
 without workspace aliases and serves a launch inspector on
 `http://127.0.0.1:5174/`. The deployed copy is available at the
 [SDK host example](https://haya-inc.github.io/clawsembly/sdk-host/). It fetches
-the public report and must show `Provider boot blocked` without calling
+the exact HTTPS report, verifies its pinned raw JSON SHA-256 plus artifact and
+runtime identity, and must show `Provider boot blocked` without calling
 BrowserPod while the report remains `probing`.
 
 To regenerate and byte-check the Gateway contract against the exact published

@@ -20,9 +20,11 @@ import {
   bootVerifiedEmbed,
   createEmbedManifest
 } from "./packages/embed-sdk/embed-manifest.mjs";
+import { loadVerifiedCompatibilityReport } from "./packages/embed-sdk/report-loader.mjs";
 
+const verifiedReport = await loadVerifiedCompatibilityReport(reportExpectation);
 const manifest = createEmbedManifest({
-  report,
+  report: verifiedReport,
   runtime: "browserpod",
   capabilities: [
     {
@@ -44,7 +46,9 @@ assertVerifiedLaunch(manifest);
 The assertion currently rejects the checked-in `browserpod@2.12.1` report
 because it remains `probing` with no owner-authorized runtime evidence. This is
 intentional. Archived evidence from another provider cannot turn BrowserPod
-green.
+green. The report URL, raw JSON SHA-256, OpenClaw version/integrity, and
+BrowserPod version must also match the host's checked-in expectation. A plain or
+hand-edited report object is never launchable.
 
 ## Capability request contract
 

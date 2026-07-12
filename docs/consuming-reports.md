@@ -58,6 +58,26 @@ This policy deliberately allows warnings while rejecting missing runtime
 evidence and explicit failures. A downstream project with a stricter threat
 model may also reject `partial` or any nonzero pending count.
 
+## Evidence-bound SDK loading
+
+Display consumers may revalidate the channel index, but an application that can
+boot BrowserPod must pin one exact report in reviewed source. Use the SDK loader
+to bind the HTTPS URL, raw JSON SHA-256, npm artifact, and runtime version before
+creating a manifest:
+
+```js
+import { createEmbedManifest } from "@haya-inc/clawsembly";
+import { loadVerifiedCompatibilityReport } from "@haya-inc/clawsembly/report-loader";
+
+const verifiedReport = await loadVerifiedCompatibilityReport(reportExpectation);
+const manifest = createEmbedManifest({ report: verifiedReport, capabilities });
+```
+
+Updating `reportExpectation` is a review event, not a runtime “latest” lookup.
+Redirects, credentials in URLs, query/fragment aliases, non-JSON responses,
+payloads over 1 MB, digest drift, artifact/runtime drift, and inconsistent
+supported claims fail before the manifest becomes launchable.
+
 ## Trust boundary
 
 The JSON is a published observation, not a substitute for pinning npm integrity
@@ -70,3 +90,5 @@ SHA-512, and requires log, portal, `/healthz`, and `/readyz` readiness before
 the boot check passes. The checked-in validator also schema-checks the source evidence, verifies its
 canonical SHA-256 digest, and recomputes every evidence-derived check status so
 that edited or stale reports fail CI.
+The packed SDK performs the corresponding raw-byte/source/identity check for
+external hosts; HTTPS transport alone is not treated as report authorization.

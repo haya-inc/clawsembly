@@ -17,6 +17,9 @@ push and a GitHub release are separate decisions from proving a browser result.
    an unreviewed compatibility claim directly to `main`.
 7. Run `npm run sdk:check`; if preparing a release asset, run `npm run sdk:pack`
    and verify the generated `.tgz` against its adjacent `.sha256` file.
+8. When the stable report bytes change, review the full report and update the
+   external host's URL/SHA-256/artifact/runtime pin in the same change; CI must
+   reject an unreviewed pin drift.
 
 ## GitHub repository setup
 

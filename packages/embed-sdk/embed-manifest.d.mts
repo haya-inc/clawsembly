@@ -1,11 +1,7 @@
 import type { CapabilityGrant } from "../capability-broker/capability-broker.mjs";
+import type { CompatibilityReportInput, VerifiedCompatibilityReport } from "./report-loader.mjs";
 
-export interface CompatibilityReportInput {
-  generatedAt: string;
-  status: "probing" | "partial" | "supported" | "unsupported";
-  target: { runtime: string; runtimeVersion?: string };
-  artifact: { package: "openclaw"; version: string; integrity: string };
-}
+export type { CompatibilityReportInput, VerifiedCompatibilityReport } from "./report-loader.mjs";
 
 export interface EmbedManifest {
   schemaVersion: 1;
@@ -17,6 +13,11 @@ export interface EmbedManifest {
     reportStatus: CompatibilityReportInput["status"];
     reportRuntime: string;
     reportRuntimeVersion: string | null;
+    reportUrl: string | null;
+    reportSha256: string | null;
+    reportBytes: number | null;
+    reportExpiresAt: string | null;
+    reportVerified: boolean;
     verifiedForRuntime: boolean;
   }>;
   capabilities: readonly Readonly<Required<Pick<CapabilityGrant, "capability" | "scope" | "maxCalls">>>[];
@@ -25,7 +26,7 @@ export interface EmbedManifest {
 }
 
 export function createEmbedManifest(options: {
-  report: CompatibilityReportInput;
+  report: CompatibilityReportInput | VerifiedCompatibilityReport;
   runtime?: "browserpod";
   capabilities?: CapabilityGrant[];
 }): Readonly<EmbedManifest>;

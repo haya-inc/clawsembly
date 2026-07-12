@@ -24,8 +24,16 @@ import {
   bootVerifiedEmbed,
   createEmbedManifest
 } from "@haya-inc/clawsembly";
+import { loadVerifiedCompatibilityReport } from "@haya-inc/clawsembly/report-loader";
 
-const manifest = createEmbedManifest({ report, capabilities });
+const verifiedReport = await loadVerifiedCompatibilityReport({
+  url: "https://haya-inc.github.io/clawsembly/data/compatibility.json",
+  sha256: pinnedReportSha256,
+  maxAgeMs: 7 * 24 * 60 * 60 * 1000,
+  artifact: pinnedOpenClawArtifact,
+  target: { runtime: "browserpod", runtimeVersion: "2.12.1" }
+});
+const manifest = createEmbedManifest({ report: verifiedReport, capabilities });
 assertVerifiedLaunch(manifest);
 
 const session = await bootVerifiedEmbed({
@@ -36,6 +44,9 @@ const session = await bootVerifiedEmbed({
 });
 ```
 
+The loader rejects redirects, non-HTTPS sources, byte drift, identity drift,
+oversized or non-JSON responses, and internally inconsistent support claims.
+A caller-created object with `status: "supported"` cannot authorize launch.
 Additional narrow entrypoints are available for the explicit pairing prompt,
 capability permission prompt, BrowserPod evidence probe, and capability broker.
 There is no generic Gateway RPC export.

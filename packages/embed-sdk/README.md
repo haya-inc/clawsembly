@@ -4,15 +4,19 @@ This package contains the fail-closed launch-manifest and boot slices of the
 embedding SDK. `createEmbedManifest` binds a BrowserPod launch to:
 
 - one exact upstream OpenClaw package version and integrity;
-- a compatibility report captured for the same runtime;
+- the exact HTTPS source and SHA-256 bytes of a compatibility report captured
+  for the same runtime;
 - an explicit set of exact-scope capability grants.
 
 `assertVerifiedLaunch` accepts only an exact BrowserPod version and stays red
-until BrowserPod produces the full supported evidence set.
+until BrowserPod produces the full supported evidence set. Passing a plain
+report object, including one that says `supported`, leaves a source/digest
+blocker; only the branded result from `report-loader.mjs` can authorize boot.
 
 ```js
+const verifiedReport = await loadVerifiedCompatibilityReport(reportExpectation);
 const manifest = createEmbedManifest({
-  report,
+  report: verifiedReport,
   capabilities: [
     { capability: "provider.openai.responses", scope: "model:gpt-5.6-luna", maxCalls: 4 },
     { capability: "storage.snapshot", scope: "workspace:primary", maxCalls: 2 }

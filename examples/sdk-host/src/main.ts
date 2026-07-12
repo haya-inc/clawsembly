@@ -1,8 +1,7 @@
-import type { CompatibilityReportInput } from "@haya-inc/clawsembly";
+import { loadVerifiedCompatibilityReport } from "@haya-inc/clawsembly/report-loader";
 import { inspectLaunchReport, type LaunchDecision } from "./launch-decision";
+import { REPORT_EXPECTATION } from "./report-pin";
 import "./styles.css";
-
-const REPORT_URL = "https://haya-inc.github.io/clawsembly/data/compatibility.json";
 
 function required<T extends Element>(selector: string): T {
   const element = document.querySelector<T>(selector);
@@ -25,6 +24,7 @@ function renderDecision(decision: LaunchDecision): void {
   setText("[data-integrity]", manifest.artifact.integrity);
   setText("[data-runtime]", `${manifest.runtime}@${manifest.runtimeVersion}`);
   setText("[data-report-status]", manifest.evidence.reportStatus);
+  setText("[data-report-digest]", decision.reportSha256);
   setText("[data-generated]", new Intl.DateTimeFormat("en", {
     dateStyle: "medium",
     timeStyle: "short"
@@ -61,9 +61,7 @@ async function refresh(): Promise<void> {
   document.documentElement.dataset.decision = "checking";
   setText("[data-decision-state]", "checking");
   try {
-    const response = await fetch(REPORT_URL, { cache: "no-store", credentials: "omit" });
-    if (!response.ok) throw new Error("report request failed");
-    renderDecision(inspectLaunchReport(await response.json() as CompatibilityReportInput));
+    renderDecision(inspectLaunchReport(await loadVerifiedCompatibilityReport(REPORT_EXPECTATION)));
   } catch {
     renderFailure();
   } finally {
@@ -72,6 +70,6 @@ async function refresh(): Promise<void> {
   }
 }
 
-required<HTMLAnchorElement>("[data-report-link]").href = REPORT_URL;
+required<HTMLAnchorElement>("[data-report-link]").href = REPORT_EXPECTATION.url;
 required<HTMLButtonElement>("[data-refresh]").addEventListener("click", () => { void refresh(); });
 void refresh();

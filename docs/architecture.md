@@ -126,6 +126,13 @@ cannot promote compatibility evidence. npm publication remains a separate
 maintainer decision. The host is published under `/sdk-host/` as a
 provider-free launch inspector.
 
+The SDK report loader is the trust bridge between public JSON and launch. It
+accepts only one reviewed credential-free HTTPS URL, caps the response at 1 MB,
+hashes the raw bytes with Web Crypto, and matches the expected OpenClaw
+version/integrity plus BrowserPod version. `createEmbedManifest` recognizes only
+the loader's branded result as verified; a structurally plausible caller object
+cannot make a launchable manifest.
+
 ### Browser runtime manager
 
 Boots and tears down a selected browser runtime, mounts workspace files,

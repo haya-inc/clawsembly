@@ -1,10 +1,12 @@
 import { BROWSERPOD_ADAPTER_VERSION } from "../browser-runtime/browserpod-runtime.mjs";
+import { unwrapVerifiedCompatibilityReport } from "./report-loader.mjs";
 
 export { bootVerifiedEmbed, createArtifactStorageKey } from "./boot.mjs";
 
 const CAPABILITY_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/u;
 const VERSION_PATTERN = /^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/u;
 const INTEGRITY_PATTERN = /^sha512-[A-Za-z0-9+/]+={0,2}$/u;
+const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
 
 function plainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -48,32 +50,41 @@ function assertReport(report) {
  * captured against that exact runtime.
  */
 export function createEmbedManifest({ report, runtime = "browserpod", capabilities = [] }) {
-  assertReport(report);
+  const verifiedReport = unwrapVerifiedCompatibilityReport(report);
+  const reportValue = verifiedReport?.report ?? report;
+  assertReport(reportValue);
   if (runtime !== "browserpod") throw new TypeError("BrowserPod is the adopted embedded runtime");
   const grants = normalizeCapabilities(capabilities);
-  const providerMatched = report.target.runtime === runtime;
-  const versionMatched = report.target.runtimeVersion === BROWSERPOD_ADAPTER_VERSION;
-  const supported = report.status === "supported";
+  const providerMatched = reportValue.target.runtime === runtime;
+  const versionMatched = reportValue.target.runtimeVersion === BROWSERPOD_ADAPTER_VERSION;
+  const supported = reportValue.status === "supported";
+  const sourceVerified = Boolean(verifiedReport);
   const blockers = Object.freeze([
-    ...(!providerMatched ? [`report targets ${report.target.runtime}, not ${runtime}`] : []),
-    ...(!versionMatched ? [`report runtime version is ${report.target.runtimeVersion ?? "unreported"}, not ${BROWSERPOD_ADAPTER_VERSION}`] : []),
-    ...(!supported ? [`report status is ${report.status}, not supported`] : [])
+    ...(!sourceVerified ? ["report source and SHA-256 are unverified"] : []),
+    ...(!providerMatched ? [`report targets ${reportValue.target.runtime}, not ${runtime}`] : []),
+    ...(!versionMatched ? [`report runtime version is ${reportValue.target.runtimeVersion ?? "unreported"}, not ${BROWSERPOD_ADAPTER_VERSION}`] : []),
+    ...(!supported ? [`report status is ${reportValue.status}, not supported`] : [])
   ]);
   return Object.freeze({
     schemaVersion: 1,
     artifact: Object.freeze({
       package: "openclaw",
-      version: report.artifact.version,
-      integrity: report.artifact.integrity
+      version: reportValue.artifact.version,
+      integrity: reportValue.artifact.integrity
     }),
     runtime,
     runtimeVersion: BROWSERPOD_ADAPTER_VERSION,
     evidence: Object.freeze({
-      generatedAt: report.generatedAt,
-      reportStatus: report.status,
-      reportRuntime: report.target.runtime,
-      reportRuntimeVersion: report.target.runtimeVersion ?? null,
-      verifiedForRuntime: providerMatched && versionMatched && supported
+      generatedAt: reportValue.generatedAt,
+      reportStatus: reportValue.status,
+      reportRuntime: reportValue.target.runtime,
+      reportRuntimeVersion: reportValue.target.runtimeVersion ?? null,
+      reportUrl: verifiedReport?.verification.url ?? null,
+      reportSha256: verifiedReport?.verification.sha256 ?? null,
+      reportBytes: verifiedReport?.verification.bytes ?? null,
+      reportExpiresAt: verifiedReport?.verification.expiresAt ?? null,
+      reportVerified: sourceVerified,
+      verifiedForRuntime: sourceVerified && providerMatched && versionMatched && supported
     }),
     capabilities: grants,
     launchable: blockers.length === 0,
@@ -97,6 +108,12 @@ export function assertVerifiedLaunch(manifest) {
   if (manifest.evidence?.reportStatus !== "supported"
     || manifest.evidence?.reportRuntime !== "browserpod"
     || manifest.evidence?.reportRuntimeVersion !== BROWSERPOD_ADAPTER_VERSION
+    || manifest.evidence?.reportVerified !== true
+    || typeof manifest.evidence?.reportUrl !== "string" || !manifest.evidence.reportUrl.startsWith("https://")
+    || typeof manifest.evidence?.reportSha256 !== "string" || !SHA256_PATTERN.test(manifest.evidence.reportSha256)
+    || !Number.isSafeInteger(manifest.evidence?.reportBytes) || manifest.evidence.reportBytes < 1
+    || typeof manifest.evidence?.reportExpiresAt !== "string"
+    || Date.parse(manifest.evidence.reportExpiresAt) <= Date.now()
     || !Array.isArray(manifest.blockers) || manifest.blockers.length !== 0) {
     throw new TypeError("embed manifest evidence is inconsistent");
   }

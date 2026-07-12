@@ -63,7 +63,7 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   await expect(runtimes.getByRole("heading", { name: "BrowserPod executes. Clawsembly decides." })).toBeVisible();
   await expect(runtimes.getByText("BrowserPod 2.x", { exact: true })).toBeVisible();
   await expect(runtimes.getByText("SDK artifact ✓", { exact: true })).toBeVisible();
-  await expect(runtimes.getByText(/npm identity and browser origin/)).toBeVisible();
+  await expect(runtimes.getByText(/report bytes, npm identity, and browser origin/)).toBeVisible();
   await expect(runtimes.getByText(/rechecks exact pairing access/)).toBeVisible();
   await expect(runtimes.getByText(/byte-reproducible SDK tarball/)).toBeVisible();
   await expect(runtimes.getByText(/isolated ESM and TypeScript consumers/)).toBeVisible();

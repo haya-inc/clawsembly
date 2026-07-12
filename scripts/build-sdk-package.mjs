@@ -68,6 +68,8 @@ async function pack(staging, destination) {
     "LICENSE",
     "packages/embed-sdk/embed-manifest.mjs",
     "packages/embed-sdk/embed-manifest.d.mts",
+    "packages/embed-sdk/report-loader.mjs",
+    "packages/embed-sdk/report-loader.d.mts",
     "packages/embed-sdk/boot.mjs",
     "packages/browser-runtime/browserpod-runtime.mjs",
     "packages/capability-broker/capability-broker.mjs"
@@ -94,6 +96,7 @@ async function verifyConsumer(tarball, temporaryRoot) {
 import * as sdk from "@haya-inc/clawsembly";
 import * as pairing from "@haya-inc/clawsembly/pairing-prompt";
 import * as permission from "@haya-inc/clawsembly/permission-prompt";
+import * as reportLoader from "@haya-inc/clawsembly/report-loader";
 import * as probe from "@haya-inc/clawsembly/browserpod-probe";
 import * as broker from "@haya-inc/clawsembly/capability-broker";
 const required = [
@@ -101,6 +104,7 @@ const required = [
   sdk.createEmbedManifest,
   pairing.mountGatewayPairingPrompt,
   permission.mountCapabilityPermissionPrompt,
+  reportLoader.loadVerifiedCompatibilityReport,
   probe.runBrowserPodOpenClawProbe,
   broker.CapabilityBroker
 ];
@@ -119,14 +123,17 @@ import {
 } from "@haya-inc/clawsembly";
 import { mountGatewayPairingPrompt } from "@haya-inc/clawsembly/pairing-prompt";
 import { CapabilityBroker } from "@haya-inc/clawsembly/capability-broker";
+import { loadVerifiedCompatibilityReport, type CompatibilityReportExpectation } from "@haya-inc/clawsembly/report-loader";
 const boot: typeof bootVerifiedEmbed = bootVerifiedEmbed;
 const create: typeof createEmbedManifest = createEmbedManifest;
 const prompt: typeof mountGatewayPairingPrompt = mountGatewayPairingPrompt;
 const broker: typeof CapabilityBroker = CapabilityBroker;
+const loader: typeof loadVerifiedCompatibilityReport = loadVerifiedCompatibilityReport;
 type Manifest = EmbedManifest;
-const exports = [boot, create, prompt, broker] satisfies readonly unknown[];
+type ReportExpectation = CompatibilityReportExpectation;
+const exports = [boot, create, prompt, broker, loader] satisfies readonly unknown[];
 void exports;
-export type { Manifest };
+export type { Manifest, ReportExpectation };
 `;
   await writeFile(resolve(consumer, "consumer.ts"), typeSource.trimStart());
   await writeFile(resolve(consumer, "tsconfig.json"), `${JSON.stringify({
@@ -157,6 +164,7 @@ async function verifyHostExample(tarball, temporaryRoot) {
     "vite.config.mjs",
     "src/launch-decision.ts",
     "src/main.ts",
+    "src/report-pin.ts",
     "src/styles.css",
     "src/styles.d.ts"
   ];

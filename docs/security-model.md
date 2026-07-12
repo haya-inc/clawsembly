@@ -44,6 +44,10 @@ The browser sandbox is one boundary, not the only control.
 - Keep deny, revoke, and expiry reasons fixed and export permission/broker audit
   under strict schemas without accepting payloads or free-form notes.
 - Keep capability audit records payload-free and bounded.
+- Pin the compatibility report's credential-free HTTPS URL, raw JSON SHA-256,
+  exact OpenClaw identity, and BrowserPod version in reviewed host source. Reject
+  redirects, aliases, byte drift, and caller-created `supported` objects before
+  manifest authorization.
 - Pass the BrowserPod API key only to provider boot; never copy it into guest
   arguments, environment variables, filesystem, runtime objects, or audits.
 - Treat BrowserPod portal URLs as publicly reachable and retain Gateway

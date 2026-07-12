@@ -202,9 +202,11 @@ itself publishable. CI installs that tarball into an isolated ESM/TypeScript
 consumer, verifies every declared public subpath, and builds an independent
 host application from the packed dependency with no workspace alias. Its
 provider-free browser test renders the exact artifact/runtime/blockers and
-proves that the current `probing` report leaves BrowserPod boot unattempted. npm
-publication remains blocked on the same runtime evidence and maintainer release
-gates.
+proves that the current `probing` report leaves BrowserPod boot unattempted. A
+branded loader now pins the report's exact HTTPS source, raw JSON SHA-256, npm
+artifact, and BrowserPod version; raw or hand-edited `supported` objects cannot
+authorize launch. npm publication remains blocked on the same runtime evidence
+and maintainer release gates.
 
 Exit criterion: an external web application can embed one supported upstream
 OpenClaw version without granting ambient credentials, filesystem, or network

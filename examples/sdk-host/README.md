@@ -5,6 +5,11 @@ This intentionally small Vite application consumes the packed
 published compatibility report, creates an exact evidence-bound manifest, and
 shows why provider boot is allowed or blocked.
 
+`src/report-pin.ts` pins the report's HTTPS URL, raw JSON SHA-256, exact
+OpenClaw npm identity, and BrowserPod version. The host rejects an edited report
+before `createEmbedManifest` can authorize launch. Updating the public report
+therefore requires an explicit reviewed pin update.
+
 The example contains no BrowserPod or OpenAI credential field and never boots a
 provider automatically. With the current `probing` report it must display
 `Provider boot blocked` and `Not attempted`.

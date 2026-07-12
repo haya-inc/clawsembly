@@ -56,6 +56,8 @@ The project does not yet promise semantic-version compatibility.
   current probe stages, and mandatory secret-redaction confirmation;
 - independent packed-SDK Vite/TypeScript host example and public launch
   inspector that renders exact blockers without provider traffic;
+- branded compatibility-report loader that pins HTTPS source, raw JSON SHA-256,
+  exact OpenClaw identity, and BrowserPod version before launch authorization;
 - ordered embed-session close that refuses runtime disposal while the Gateway
   is active and retains cleanup access when cooperative stop fails;
 - nonce-bound guest process supervisor for cooperative child shutdown without

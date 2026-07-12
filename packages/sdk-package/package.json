@@ -45,6 +45,10 @@
       "types": "./packages/embed-sdk/permission-prompt.d.mts",
       "import": "./packages/embed-sdk/permission-prompt.mjs"
     },
+    "./report-loader": {
+      "types": "./packages/embed-sdk/report-loader.d.mts",
+      "import": "./packages/embed-sdk/report-loader.mjs"
+    },
     "./browserpod-probe": {
       "types": "./packages/browser-runtime/browserpod-openclaw-probe.d.mts",
       "import": "./packages/browser-runtime/browserpod-openclaw-probe.mjs"
