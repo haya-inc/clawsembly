@@ -6,7 +6,7 @@
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'; script-src 'self' 'sha256-en+/xIITjbJrdMpOzaDsjooWzrka/wezV0SAP84YUU0='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.openai.com https://stackblitz.com; frame-src https://stackblitz.com; worker-src 'self' blob:; manifest-src 'self'"
+      content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'; script-src 'self' 'sha256-en+/xIITjbJrdMpOzaDsjooWzrka/wezV0SAP84YUU0='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.openai.com; worker-src 'self' blob:; manifest-src 'self'"
     />
     <meta name="theme-color" content="#0a0b09" />
     <meta
@@ -40,8 +40,8 @@
         "programmingLanguage": ["TypeScript", "JavaScript"]
       }
     </script>
-    <script type="module" crossorigin src="/clawsembly/assets/index-CXDya1-i.js"></script>
-    <link rel="stylesheet" crossorigin href="/clawsembly/assets/index-BYugi8NN.css">
+    <script type="module" crossorigin src="/clawsembly/assets/index-JNH5-ndf.js"></script>
+    <link rel="stylesheet" crossorigin href="/clawsembly/assets/index-AfxaZenS.css">
   </head>
   <body>
     <div class="scroll-progress" aria-hidden="true"></div>
@@ -172,26 +172,13 @@
 
         <div class="environment-probe reveal" data-environment-probe>
           <div class="probe-intro">
-            <p class="eyebrow">Phase 0 / this browser</p>
-            <h3>Measure the host before testing OpenClaw.</h3>
+            <p class="eyebrow">Browser host / local authority</p>
+            <h3>Prove the host without booting a legacy runtime.</h3>
             <p>
-              Start with a clean host preflight. The following steps install the
-              exact artifact and verify readiness, chat, a constrained tool,
-              history recovery, reconnect, cancellation, and OPFS recovery in a
-              fresh runtime.
+              Credential, identity, budget, and consent controls execute in this
+              page. BrowserPod starts only through the verified SDK with an
+              owner-supplied key; this public page never falls back to WebContainer.
             </p>
-            <div class="probe-actions">
-              <button class="button button-primary" type="button" data-run-probe>Run environment probe</button>
-              <button class="button button-quiet" type="button" data-run-openclaw-probe disabled>Run host preflight first</button>
-              <button class="button button-quiet" type="button" data-run-gateway-probe disabled>Install OpenClaw first</button>
-            </div>
-            <div class="state-actions" aria-label="Mock state backup controls">
-              <button class="state-action" type="button" data-export-state disabled>Export backup</button>
-              <label class="state-action" for="state-import">Import backup</label>
-              <input class="sr-only" id="state-import" type="file" accept=".clawsembly-backup,application/vnd.clawsembly.backup" data-import-state />
-              <button class="state-action" type="button" data-clear-state>Clear saved state</button>
-              <span data-storage-status>No saved mock state</span>
-            </div>
             <form class="credential-vault" data-credential-vault>
               <div class="vault-head">
                 <span>Browser host credential vault</span>
@@ -253,15 +240,14 @@
             </div>
           </div>
           <div class="probe-terminal" role="status" aria-live="polite">
-            <div class="terminal-head"><span></span><span></span><span></span><strong>host-preflight.log</strong></div>
+            <div class="terminal-head"><span></span><span></span><span></span><strong>browserpod-contract.log</strong></div>
             <ol data-probe-output>
-              <li data-state="idle"><span>01</span><strong>crossOriginIsolated</strong><em>not measured</em></li>
-              <li data-state="idle"><span>02</span><strong>SharedArrayBuffer</strong><em>not measured</em></li>
-              <li data-state="idle"><span>03</span><strong>Legacy evidence runtime</strong><em>WebContainer · not started</em></li>
-              <li data-state="idle"><span>04</span><strong>node --version</strong><em>pending</em></li>
-              <li data-state="idle"><span>05</span><strong>node:sqlite close()</strong><em>pending</em></li>
+              <li data-state="pass"><span>01</span><strong>Production runtime</strong><em>BrowserPod 2.x · selected</em></li>
+              <li data-state="pass"><span>02</span><strong>Guest transport</strong><em>SHA-256 source + readback</em></li>
+              <li data-state="pass"><span>03</span><strong>Capability broker</strong><em>exact scope · default deny</em></li>
+              <li data-state="idle"><span>04</span><strong>Provider evidence</strong><em>owner key required</em></li>
+              <li data-state="pass"><span>05</span><strong>Legacy runtime fallback</strong><em>none in app bundle</em></li>
             </ol>
-            <pre class="install-output" data-install-output hidden></pre>
           </div>
         </div>
       </section>
@@ -303,7 +289,7 @@
 
         <div class="broker-proof reveal">
           <span>Implemented slice</span>
-          <p>Exact artifact → verified manifest → BrowserPod boot → typed mailbox → explicit grant → bounded handler → metadata-only audit. Replay and cross-runtime evidence fail closed.</p>
+          <p>Exact artifact → verified manifest → BrowserPod boot → digest-verified guest client → typed mailbox → exact grant → metadata-only audit. Drift, replay, and cross-runtime evidence fail closed.</p>
           <a href="https://github.com/haya-inc/clawsembly/blob/main/docs/embedding.md">Read the embedding contract ↗</a>
         </div>
       </section>
@@ -324,9 +310,9 @@
           <a class="runtime-row runtime-row-primary" href="https://browserpod.io/docs/more/licensing" target="_blank" rel="noreferrer">
             <span class="runtime-rank">01 / adopted</span>
             <div class="runtime-name"><strong>BrowserPod 2.x</strong><span>Node 22 · browser-local</span></div>
-            <p>Typed file mailbox carries broker calls and cancellation without terminal input; the guest supervisor stops the Gateway after exact-artifact readiness. Real provider evidence is unrun; hard dispose remains unavailable.</p>
+            <p>SDK stages and reads back a digest-pinned Node client; its typed mailbox carries broker calls and cancellation without terminal input. Real provider evidence is unrun; hard dispose remains unavailable.</p>
             <span class="runtime-license">Commercial</span>
-            <span class="runtime-state">Transport core ✓</span>
+            <span class="runtime-state">Guest transport ✓</span>
           </a>
           <a class="runtime-row" href="https://github.com/container2wasm/container2wasm" target="_blank" rel="noreferrer">
             <span class="runtime-rank">02 / archived probe</span>
@@ -335,15 +321,8 @@
             <span class="runtime-license">Apache-2.0 + guest</span>
             <span class="runtime-state runtime-state-open">Archived ↗</span>
           </a>
-          <a class="runtime-row" href="https://webcontainers.io/" target="_blank" rel="noreferrer">
-            <span class="runtime-rank">03 / baseline</span>
-            <div class="runtime-name"><strong>WebContainer</strong><span>Current Chromium evidence</span></div>
-            <p>The verified Gateway slice remains a regression baseline. It is not the selected commercial production runtime and gains no new coupling.</p>
-            <span class="runtime-license">Hosted terms</span>
-            <span class="runtime-state runtime-state-baseline">Evidence only ↗</span>
-          </a>
           <div class="runtime-row runtime-row-rejected">
-            <span class="runtime-rank">04 / rejected</span>
+            <span class="runtime-rank">03 / rejected</span>
             <div class="runtime-name"><strong>v86 / CheerpX</strong><span>32-bit execution</span></div>
             <p>OpenClaw requires Node 22.19+. Current 32-bit-only execution cannot run the official Linux x64 Node artifact.</p>
             <span class="runtime-license">Technically blocked</span>
@@ -381,7 +360,7 @@
             <span>03</span>
             <div>
               <h3>Boot on BrowserPod</h3>
-              <p>Run the pinned upstream artifact in the selected browser-local provider. WebContainer evidence cannot be reused to turn this gate green.</p>
+              <p>Run the pinned upstream artifact in BrowserPod. Historical evidence from another provider cannot turn this gate green.</p>
             </div>
           </li>
           <li class="reveal">
