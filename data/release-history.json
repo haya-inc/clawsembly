@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T06:57:58.515Z",
+  "generatedAt": "2026-07-12T07:19:25.754Z",
   "package": "openclaw",
   "channels": {
     "stable": "2026.6.11",
@@ -13,7 +13,7 @@
       "version": "2026.6.11",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.6.11.json",
-      "generatedAt": "2026-07-12T06:57:45.351Z",
+      "generatedAt": "2026-07-12T07:19:12.038Z",
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-T+P/g19IheeT1ckXMoPN61dYuE8vBF4MderI+kWkvpuFYxPkJxn8AXLpu9IXCnN9g36Acpm9+mMD/V+lsvOkyA==",
@@ -36,6 +36,55 @@
         "changed": []
       },
       "dependencyRiskFromStable": [],
+      "gatewayContractFromStable": {
+        "classification": "unchanged",
+        "inspection": {
+          "stable": "complete",
+          "release": "complete"
+        },
+        "protocol": {
+          "stable": {
+            "current": 4,
+            "minClient": 4,
+            "minProbe": 4,
+            "minNode": null
+          },
+          "release": {
+            "current": 4,
+            "minClient": 4,
+            "minProbe": 4,
+            "minNode": null
+          },
+          "changed": false
+        },
+        "distribution": {
+          "legacyPluginDeclarationCount": {
+            "stable": 38,
+            "release": 38,
+            "delta": 0
+          },
+          "publicDeclarationChanged": false,
+          "publicRuntimeChanged": false,
+          "versionModuleChanged": false,
+          "serverMethodsChanged": false
+        },
+        "coreMethods": {
+          "added": [],
+          "removed": []
+        },
+        "schemaExports": {
+          "added": [],
+          "removed": []
+        },
+        "validators": {
+          "added": [],
+          "removed": []
+        },
+        "eventSchemas": {
+          "added": [],
+          "removed": []
+        }
+      },
       "deltaFromStable": {
         "unpackedBytes": 0,
         "directDependencyCount": 0,
@@ -48,7 +97,7 @@
       "version": "2026.6.10",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.6.10.json",
-      "generatedAt": "2026-07-12T06:57:46.097Z",
+      "generatedAt": "2026-07-12T07:19:13.393Z",
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-LcooND2tBQw8A+kc1Ujltu3lg30bJ0w7XaeRy7eYzobb8BBdcW6DOGbwJL4vpj1vl9+gjRceOtlh5nh9OARcug==",
@@ -71,6 +120,55 @@
         "changed": []
       },
       "dependencyRiskFromStable": [],
+      "gatewayContractFromStable": {
+        "classification": "changed",
+        "inspection": {
+          "stable": "complete",
+          "release": "complete"
+        },
+        "protocol": {
+          "stable": {
+            "current": 4,
+            "minClient": 4,
+            "minProbe": 4,
+            "minNode": null
+          },
+          "release": {
+            "current": 4,
+            "minClient": 4,
+            "minProbe": 4,
+            "minNode": null
+          },
+          "changed": false
+        },
+        "distribution": {
+          "legacyPluginDeclarationCount": {
+            "stable": 38,
+            "release": 38,
+            "delta": 0
+          },
+          "publicDeclarationChanged": true,
+          "publicRuntimeChanged": true,
+          "versionModuleChanged": false,
+          "serverMethodsChanged": true
+        },
+        "coreMethods": {
+          "added": [],
+          "removed": []
+        },
+        "schemaExports": {
+          "added": [],
+          "removed": []
+        },
+        "validators": {
+          "added": [],
+          "removed": []
+        },
+        "eventSchemas": {
+          "added": [],
+          "removed": []
+        }
+      },
       "deltaFromStable": {
         "unpackedBytes": 314904,
         "directDependencyCount": 0,
@@ -83,7 +181,7 @@
       "version": "2026.7.1-beta.5",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.7.1-beta.5.json",
-      "generatedAt": "2026-07-12T06:57:46.865Z",
+      "generatedAt": "2026-07-12T07:19:14.649Z",
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-ejdttiBZwk5RJmZdGD3gQPW1+4819pb0gyw4ZbGg/NcEAdozk6UQWq4n3P2XfDBgOn2k7D8fSKLcN+YDdJ77TA==",
@@ -897,6 +995,168 @@
           }
         }
       ],
+      "gatewayContractFromStable": {
+        "classification": "breaking",
+        "inspection": {
+          "stable": "complete",
+          "release": "complete"
+        },
+        "protocol": {
+          "stable": {
+            "current": 4,
+            "minClient": 4,
+            "minProbe": 4,
+            "minNode": null
+          },
+          "release": {
+            "current": 4,
+            "minClient": 4,
+            "minProbe": 3,
+            "minNode": 3
+          },
+          "changed": true
+        },
+        "distribution": {
+          "legacyPluginDeclarationCount": {
+            "stable": 38,
+            "release": 0,
+            "delta": -38
+          },
+          "publicDeclarationChanged": true,
+          "publicRuntimeChanged": true,
+          "versionModuleChanged": true,
+          "serverMethodsChanged": true
+        },
+        "coreMethods": {
+          "added": [
+            "agents.workspace.get",
+            "agents.workspace.list",
+            "attach.grant",
+            "attach.revoke",
+            "audit.list",
+            "controlUi.githubPreview",
+            "crestodian.chat",
+            "crestodian.setup.activate",
+            "crestodian.setup.detect",
+            "device.pair.setupCode",
+            "skills.curator.pin",
+            "skills.curator.restore",
+            "skills.curator.status",
+            "skills.curator.unpin",
+            "system.info",
+            "terminal.attach",
+            "terminal.close",
+            "terminal.input",
+            "terminal.list",
+            "terminal.open",
+            "terminal.resize",
+            "terminal.text",
+            "tts.speak",
+            "worktrees.create",
+            "worktrees.gc",
+            "worktrees.list",
+            "worktrees.remove",
+            "worktrees.restore"
+          ],
+          "removed": []
+        },
+        "schemaExports": {
+          "added": [
+            "AgentsWorkspaceEntrySchema",
+            "AgentsWorkspaceFileSchema",
+            "AgentsWorkspaceGetParamsSchema",
+            "AgentsWorkspaceGetResultSchema",
+            "AgentsWorkspaceListParamsSchema",
+            "AgentsWorkspaceListResultSchema",
+            "AuditEventSchema",
+            "AuditListParamsSchema",
+            "AuditListResultSchema",
+            "CrestodianChatParamsSchema",
+            "CrestodianChatResultSchema",
+            "CrestodianSetupActivateParamsSchema",
+            "CrestodianSetupActivateResultSchema",
+            "CrestodianSetupDetectParamsSchema",
+            "CrestodianSetupDetectResultSchema",
+            "CronAddResultSchema",
+            "CronDeclarativeAddResultSchema",
+            "SessionsCreateResultSchema",
+            "SessionWorktreeInfoSchema",
+            "SkillsCuratorActionParamsSchema",
+            "SkillsCuratorActionResultSchema",
+            "SkillsCuratorStatusParamsSchema",
+            "SkillsCuratorStatusResultSchema",
+            "SystemInfoParamsSchema",
+            "SystemInfoResultSchema",
+            "TerminalAckResultSchema",
+            "TerminalAttachParamsSchema",
+            "TerminalAttachResultSchema",
+            "TerminalCloseParamsSchema",
+            "TerminalDataEventSchema",
+            "TerminalEventSchema",
+            "TerminalExitEventSchema",
+            "TerminalInputParamsSchema",
+            "TerminalListResultSchema",
+            "TerminalOpenParamsSchema",
+            "TerminalOpenResultSchema",
+            "TerminalResizeParamsSchema",
+            "TerminalSessionInfoSchema",
+            "TerminalTextParamsSchema",
+            "TerminalTextResultSchema",
+            "TtsSpeakParamsSchema",
+            "TtsSpeakResultSchema",
+            "WorktreeRecordSchema",
+            "WorktreesCreateParamsSchema",
+            "WorktreesGcParamsSchema",
+            "WorktreesGcResultSchema",
+            "WorktreesListParamsSchema",
+            "WorktreesListResultSchema",
+            "WorktreesRemoveParamsSchema",
+            "WorktreesRemoveResultSchema",
+            "WorktreesRestoreParamsSchema"
+          ],
+          "removed": []
+        },
+        "validators": {
+          "added": [
+            "validateAgentsWorkspaceGetParams",
+            "validateAgentsWorkspaceListParams",
+            "validateAuditListParams",
+            "validateCrestodianChatParams",
+            "validateCrestodianSetupActivateParams",
+            "validateCrestodianSetupDetectParams",
+            "validateDevicePairSetupCodeParams",
+            "validateExecApprovalsNodeSnapshot",
+            "validateSkillsCuratorActionParams",
+            "validateSkillsCuratorStatusParams",
+            "validateSystemInfoParams",
+            "validateSystemInfoResult",
+            "validateTerminalAttachParams",
+            "validateTerminalCloseParams",
+            "validateTerminalEvent",
+            "validateTerminalInputParams",
+            "validateTerminalOpenParams",
+            "validateTerminalResizeParams",
+            "validateTerminalTextParams",
+            "validateTtsSpeakParams",
+            "validateTtsSpeakResult",
+            "validateWorktreesCreateParams",
+            "validateWorktreesGcParams",
+            "validateWorktreesListParams",
+            "validateWorktreesRemoveParams",
+            "validateWorktreesRestoreParams"
+          ],
+          "removed": []
+        },
+        "eventSchemas": {
+          "added": [
+            "AuditEventSchema",
+            "TerminalDataEventSchema",
+            "TerminalEventSchema",
+            "TerminalExitEventSchema"
+          ],
+          "removed": []
+        }
+      },
       "deltaFromStable": {
         "unpackedBytes": 1255885,
         "directDependencyCount": 2,
