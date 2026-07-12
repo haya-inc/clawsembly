@@ -14,6 +14,8 @@ export class OpenClawGatewayClientError extends Error {
   readonly code: string;
   readonly gatewayCode?: string;
   readonly pairing?: Readonly<GatewayPairingRequirement>;
+  readonly retryable?: true;
+  readonly retryAfterMs?: number;
 }
 
 export interface OpenClawGatewayHello {
@@ -43,9 +45,58 @@ export interface GatewayConnectionMaterial {
 export interface OpenClawGatewayClient {
   readonly schemaVersion: 1;
   readonly contract: Readonly<OpenClawGatewayContract>;
-  readonly state: "idle" | "connecting" | "ready" | "failed" | "closed";
+  readonly state: "idle" | "connecting" | "ready" | "disconnected" | "failed" | "closed";
   connect(options?: { signal?: AbortSignal }): Promise<Readonly<OpenClawGatewayHello>>;
+  readonly chat: Readonly<OpenClawGatewayChatClient>;
   close(): boolean;
+}
+
+export interface GatewayRpcOptions {
+  signal?: AbortSignal;
+  requestTimeoutMs?: number;
+}
+
+export interface OpenClawChatEvent {
+  readonly runId: string;
+  readonly sessionKey: string;
+  readonly agentId?: string;
+  readonly spawnedBy?: string;
+  readonly seq: number;
+  readonly state: "delta" | "final" | "aborted" | "error";
+  readonly deltaText?: string;
+  readonly replace?: boolean;
+  readonly message?: unknown;
+  readonly usage?: unknown;
+  readonly stopReason?: string;
+  readonly errorMessage?: string;
+  readonly errorKind?: "refusal" | "timeout" | "rate_limit" | "context_length" | "unknown";
+}
+
+export interface OpenClawGatewayChatClient {
+  send(params: {
+    sessionKey: string;
+    agentId?: string;
+    message: string;
+    thinking?: string;
+    timeoutMs?: number;
+    runId?: string;
+  }, options?: GatewayRpcOptions): Promise<Readonly<{ runId: string; status: string }>>;
+  history(params: {
+    sessionKey: string;
+    agentId?: string;
+    limit?: number;
+    maxChars?: number;
+  }, options?: GatewayRpcOptions): Promise<Readonly<Record<string, unknown> & { messages: readonly unknown[] }>>;
+  abort(params: {
+    sessionKey: string;
+    agentId?: string;
+    runId?: string;
+  }, options?: GatewayRpcOptions): Promise<Readonly<{
+    ok: true;
+    aborted: boolean;
+    runIds: readonly string[];
+  }>>;
+  onEvent(listener: (event: Readonly<OpenClawChatEvent>) => void): () => boolean;
 }
 
 export function resolveGatewayWebSocketConnection(
@@ -62,5 +113,6 @@ export function createOpenClawGatewayClient(options: {
   requestIdFactory?: () => string;
   timeoutMs?: number;
   onAudit?: (event: Readonly<Record<string, unknown>>) => void;
+  onGap?: (gap: Readonly<{ expected: number; received: number }>) => void;
   now?: () => number;
 }): Readonly<OpenClawGatewayClient>;

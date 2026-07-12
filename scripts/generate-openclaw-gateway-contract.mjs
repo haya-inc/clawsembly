@@ -15,7 +15,8 @@ const sourcePaths = [
   "gateway-protocol/src/version.d.ts",
   "gateway-protocol/src/schema/frames.d.ts",
   "gateway-protocol/src/schema/primitives.d.ts",
-  "gateway-client/src/device-auth.d.ts"
+  "gateway-client/src/device-auth.d.ts",
+  "gateway-protocol/src/schema/logs-chat.d.ts"
 ];
 
 const sha256 = (value) => `sha256-${createHash("sha256").update(value).digest("hex")}`;
@@ -50,9 +51,16 @@ export const OPENCLAW_GATEWAY_CONTRACT = Object.freeze({
     scopes: Object.freeze(["operator.read", "operator.write"]),
     caps: Object.freeze([])
   }),
+  rpc: Object.freeze({
+    methods: Object.freeze(["chat.send", "chat.history", "chat.abort"]),
+    event: "chat"
+  }),
   limits: Object.freeze({
     preauthPayloadBytes: 64 * 1024,
-    handshakeTimeoutMs: 15_000
+    authenticatedPayloadBytes: 4 * 1024 * 1024,
+    handshakeTimeoutMs: 15_000,
+    requestTimeoutMs: 30_000,
+    maxPendingRequests: 64
   }),
   sources: Object.freeze({
 ${sourceLines}
@@ -94,6 +102,7 @@ try {
   const primitives = contents["gateway-protocol/src/schema/primitives.d.ts"];
   const frames = contents["gateway-protocol/src/schema/frames.d.ts"];
   const deviceAuth = contents["gateway-client/src/device-auth.d.ts"];
+  const chat = contents["gateway-protocol/src/schema/logs-chat.d.ts"];
   for (const required of ["webchat-ui", "webchat"]) {
     if (!primitives.includes(quoted(required))) throw new Error(`Gateway schema is missing ${required}`);
   }
@@ -102,6 +111,9 @@ try {
   }
   if (!deviceAuth.includes("buildDeviceAuthPayloadV3")) {
     throw new Error("Gateway device auth contract has no v3 signer");
+  }
+  for (const required of ["ChatSendParamsSchema", "ChatHistoryParamsSchema", "ChatAbortParamsSchema", "ChatEventSchema"]) {
+    if (!chat.includes(required)) throw new Error(`Gateway chat contract is missing ${required}`);
   }
   const generated = render({
     artifact: { ...artifact, shasum: packed.shasum },

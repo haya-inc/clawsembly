@@ -180,8 +180,11 @@ generated-client slice is artifact-bound: it persists a non-extractable
 Ed25519 device identity, signs the protocol 4 challenge, sends the shared token
 only in the connect frame, validates and redacts `hello-ok`, and exposes bounded
 explicit-pairing metadata. Provider-free contract tests pass;
-owner-authorized BrowserPod handshake evidence, approval UI, issued-token
-persistence, streamed RPC, and reconnect remain. Ordered session close now prevents logical runtime disposal from
+the post-authentication client now limits itself to chat send/history/abort,
+forces local-only delivery, validates streamed chat events, detects gaps,
+rejects pending RPCs on disconnect, and supports an explicit fresh signed
+reconnect. Owner-authorized BrowserPod handshake/turn evidence, approval UI,
+issued-token persistence, automatic retry, and attachments remain. Ordered session close now prevents logical runtime disposal from
 cutting off an active Gateway's cooperative stop path. The boot slice is not promoted as supported while
 owner-authorized BrowserPod evidence remains missing.
 

@@ -64,6 +64,11 @@ non-extractable Ed25519 identity, signs `connect.challenge`, sends the ephemeral
 token only in the connect frame, and validates a token-free `hello-ok` summary.
 Mock contract tests cover pairing-required and secret-redaction paths; this is
 not yet real BrowserPod handshake evidence.
+The same client now exposes only bounded `chat.send`, `chat.history`, and
+`chat.abort` operations after authentication. It forces `deliver:false`,
+validates stream events, reports sequence gaps without payloads, rejects pending
+work on disconnect, and supports an explicit freshly signed reconnect. It does
+not expose arbitrary Gateway methods.
 
 ## Browser runtime direction
 

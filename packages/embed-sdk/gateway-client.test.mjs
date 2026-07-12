@@ -62,7 +62,7 @@ function identity() {
   };
 }
 
-function helloFrame(id = "connect-1") {
+function helloFrame(id = "connect-1", methods = ["chat.send", "chat.history", "chat.abort"]) {
   return {
     type: "res",
     id,
@@ -71,7 +71,7 @@ function helloFrame(id = "connect-1") {
       type: "hello-ok",
       protocol: 4,
       server: { version: "2026.6.11", connId: "connection-1" },
-      features: { methods: ["chat.send", "chat.history", "chat.abort"], events: ["chat", "tick"] },
+      features: { methods, events: ["chat", "tick"] },
       snapshot: { presence: [], health: {}, stateVersion: { presence: 1, health: 1 }, uptimeMs: 10 },
       auth: {
         role: "operator",
@@ -91,20 +91,34 @@ async function waitFor(predicate) {
   throw new Error("condition was not reached");
 }
 
-function fixture() {
+function fixture(options = {}) {
   let socket;
   const audit = [];
+  const gaps = [];
+  let requestSequence = 0;
   const client = createOpenClawGatewayClient({
     artifact: OPENCLAW_GATEWAY_CONTRACT.artifact,
     getConnection: () => connection,
     identity: identity(),
     browserOrigin: "https://embed.example",
     createWebSocket(url) { socket = new FakeWebSocket(url); return socket; },
-    requestIdFactory: () => "connect-1",
+    requestIdFactory: () => requestSequence++ === 0 ? "connect-1" : `request-${requestSequence}`,
     onAudit: (event) => audit.push(event),
+    onGap: (gap) => { gaps.push(gap); options.onGap?.(gap); },
     now: (() => { let value = 1_000; return () => value += 10; })()
   });
-  return { client, audit, get socket() { return socket; } };
+  return { client, audit, gaps, get socket() { return socket; } };
+}
+
+async function completeHandshake(current, methods) {
+  const connecting = current.client.connect();
+  current.socket.emit("message", {
+    data: JSON.stringify({ type: "event", event: "connect.challenge", payload: { nonce: "server-nonce", ts: 1 } })
+  });
+  await waitFor(() => current.socket.sent.length === 1);
+  const request = JSON.parse(current.socket.sent[0]);
+  current.socket.emit("message", { data: JSON.stringify(helloFrame(request.id, methods)) });
+  return connecting;
 }
 
 test("derives a WSS portal only for an explicitly allowed browser origin", () => {
@@ -179,6 +193,222 @@ test("waits for challenge, signs protocol 4 connect, and redacts bearer tokens f
   assert.equal(JSON.stringify(hello).includes("issued-device-token"), false);
   assert.equal(JSON.stringify(current.audit).includes("gateway-private-token"), false);
   assert.equal(JSON.stringify(current.client).includes("gateway-private-token"), false);
+});
+
+test("sends only the generated chat RPC surface and delivers bounded stream events", async () => {
+  const current = fixture();
+  await completeHandshake(current);
+  const events = [];
+  current.client.chat.onEvent((event) => events.push(event));
+  current.client.chat.onEvent(() => { throw new Error("listener failure"); });
+
+  const sending = current.client.chat.send({
+    sessionKey: "agent:main:clawsembly",
+    message: "private user message",
+    thinking: "low",
+    timeoutMs: 20_000,
+    runId: "run-1"
+  });
+  await waitFor(() => current.socket.sent.length === 2);
+  const request = JSON.parse(current.socket.sent[1]);
+  assert.deepEqual(request, {
+    type: "req",
+    id: "request-2",
+    method: "chat.send",
+    params: {
+      sessionKey: "agent:main:clawsembly",
+      message: "private user message",
+      thinking: "low",
+      deliver: false,
+      timeoutMs: 20_000,
+      idempotencyKey: "run-1"
+    }
+  });
+  current.socket.emit("message", {
+    data: JSON.stringify({ type: "res", id: request.id, ok: true, payload: { runId: "run-1", status: "started" } })
+  });
+  assert.deepEqual(await sending, { runId: "run-1", status: "started" });
+
+  current.socket.emit("message", {
+    data: JSON.stringify({
+      type: "event",
+      event: "chat",
+      seq: 10,
+      payload: {
+        runId: "run-1",
+        sessionKey: "agent:main:clawsembly",
+        seq: 1,
+        state: "delta",
+        deltaText: "private assistant delta"
+      }
+    })
+  });
+  current.socket.emit("message", {
+    data: JSON.stringify({
+      type: "event",
+      event: "chat",
+      seq: 12,
+      payload: {
+        runId: "run-1",
+        sessionKey: "agent:main:clawsembly",
+        seq: 2,
+        state: "final",
+        message: { role: "assistant", content: "private final" },
+        stopReason: "stop"
+      }
+    })
+  });
+  assert.equal(events.length, 2);
+  assert.equal(events[0].deltaText, "private assistant delta");
+  assert.equal(events[1].state, "final");
+  assert.deepEqual(current.gaps, [{ expected: 11, received: 12 }]);
+  assert.equal(JSON.stringify(current.audit).includes("private user message"), false);
+  assert.equal(JSON.stringify(current.audit).includes("private assistant delta"), false);
+});
+
+test("loads bounded history and confirms exact-run cancellation", async () => {
+  const current = fixture();
+  await completeHandshake(current);
+
+  const historyPromise = current.client.chat.history({
+    sessionKey: "agent:main:clawsembly",
+    limit: 2,
+    maxChars: 4_096
+  });
+  await waitFor(() => current.socket.sent.length === 2);
+  const historyRequest = JSON.parse(current.socket.sent[1]);
+  assert.equal(historyRequest.method, "chat.history");
+  assert.deepEqual(historyRequest.params, {
+    sessionKey: "agent:main:clawsembly",
+    limit: 2,
+    maxChars: 4_096
+  });
+  current.socket.emit("message", {
+    data: JSON.stringify({
+      type: "res",
+      id: historyRequest.id,
+      ok: true,
+      payload: { messages: [{ role: "user", content: "private history" }], sessionKey: "agent:main:clawsembly" }
+    })
+  });
+  const history = await historyPromise;
+  assert.equal(history.messages.length, 1);
+  assert.equal(Object.isFrozen(history.messages), true);
+
+  const abortPromise = current.client.chat.abort({
+    sessionKey: "agent:main:clawsembly",
+    runId: "run-1"
+  });
+  await waitFor(() => current.socket.sent.length === 3);
+  const abortRequest = JSON.parse(current.socket.sent[2]);
+  assert.equal(abortRequest.method, "chat.abort");
+  current.socket.emit("message", {
+    data: JSON.stringify({
+      type: "res",
+      id: abortRequest.id,
+      ok: true,
+      payload: { ok: true, aborted: true, runIds: ["run-1"] }
+    })
+  });
+  assert.deepEqual(await abortPromise, { ok: true, aborted: true, runIds: ["run-1"] });
+  assert.equal(JSON.stringify(current.audit).includes("private history"), false);
+});
+
+test("rejects unadvertised methods and redacts Gateway RPC errors", async () => {
+  const current = fixture();
+  await completeHandshake(current, ["chat.send", "chat.history"]);
+  await assert.rejects(
+    current.client.chat.abort({ sessionKey: "global", runId: "run-1" }),
+    (error) => error.code === "method_unavailable"
+  );
+  assert.equal(current.socket.sent.length, 1);
+
+  const history = current.client.chat.history({ sessionKey: "global" });
+  await waitFor(() => current.socket.sent.length === 2);
+  const request = JSON.parse(current.socket.sent[1]);
+  current.socket.emit("message", {
+    data: JSON.stringify({
+      type: "res",
+      id: request.id,
+      ok: false,
+      error: {
+        code: "UNAVAILABLE",
+        message: "private-token private server detail",
+        retryable: true,
+        retryAfterMs: 500,
+        details: { secret: "private-token" }
+      }
+    })
+  });
+  await assert.rejects(history, (error) => {
+    assert.equal(error.code, "request_rejected");
+    assert.equal(error.gatewayCode, "UNAVAILABLE");
+    assert.equal(error.retryable, true);
+    assert.equal(error.retryAfterMs, 500);
+    assert.equal(JSON.stringify(error).includes("private-token"), false);
+    return true;
+  });
+  assert.equal(JSON.stringify(current.audit).includes("private-token"), false);
+});
+
+test("rejects pending RPCs on disconnect and reconnects with a new signed handshake", async () => {
+  const current = fixture();
+  await completeHandshake(current);
+  const pending = current.client.chat.history({ sessionKey: "global" });
+  await waitFor(() => current.socket.sent.length === 2);
+  const firstSocket = current.socket;
+  firstSocket.emit("close", { code: 1006, reason: "private close reason" });
+  await assert.rejects(pending, (error) => error.code === "connection_lost");
+  assert.equal(current.client.state, "disconnected");
+  assert.equal(JSON.stringify(current.audit).includes("private close reason"), false);
+
+  const reconnecting = current.client.connect();
+  assert.notEqual(current.socket, firstSocket);
+  current.socket.emit("message", {
+    data: JSON.stringify({ type: "event", event: "connect.challenge", payload: { nonce: "reconnect-nonce" } })
+  });
+  await waitFor(() => current.socket.sent.length === 1);
+  const reconnectRequest = JSON.parse(current.socket.sent[0]);
+  current.socket.emit("message", { data: JSON.stringify(helloFrame(reconnectRequest.id)) });
+  assert.equal((await reconnecting).protocol, 4);
+  assert.equal(current.client.state, "ready");
+});
+
+test("cancels a pending local RPC without exposing or accepting a late response", async () => {
+  const current = fixture();
+  await completeHandshake(current);
+  const controller = new AbortController();
+  const history = current.client.chat.history(
+    { sessionKey: "global" },
+    { signal: controller.signal }
+  );
+  await waitFor(() => current.socket.sent.length === 2);
+  const request = JSON.parse(current.socket.sent[1]);
+  controller.abort();
+  await assert.rejects(history, (error) => error.code === "aborted");
+  current.socket.emit("message", {
+    data: JSON.stringify({ type: "res", id: request.id, ok: true, payload: { messages: ["late private data"] } })
+  });
+  assert.equal(current.client.state, "ready");
+  assert.equal(JSON.stringify(current.audit).includes("late private data"), false);
+});
+
+test("rejects chat fields outside the bounded generated surface", async () => {
+  const current = fixture();
+  await completeHandshake(current);
+  await assert.rejects(
+    current.client.chat.send({ sessionKey: "global", message: "hello", attachments: [] }),
+    /chat\.send parameters are invalid/u
+  );
+  await assert.rejects(
+    current.client.chat.send({ sessionKey: "global", message: " ", runId: "run-1" }),
+    /chat message is invalid/u
+  );
+  await assert.rejects(
+    current.client.chat.history({ sessionKey: "global", limit: 201 }),
+    /history limit is invalid/u
+  );
+  assert.equal(current.socket.sent.length, 1);
 });
 
 test("surfaces bounded pairing metadata without echoing Gateway error details", async () => {

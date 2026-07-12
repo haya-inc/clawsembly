@@ -70,6 +70,11 @@ The browser sandbox is one boundary, not the only control.
   the server-provided challenge nonce with the exact OpenClaw v3 payload, cap
   pre-authentication frames, and never copy shared/device tokens into hello
   summaries, pairing errors, or protocol audit.
+- Expose no generic post-authentication RPC escape hatch. Allow only the
+  artifact-generated chat send/history/abort surface, force outbound delivery
+  off, reject unsupported fields, cap authenticated frames and pending calls,
+  and keep chat inputs, outputs, history, close reasons, and Gateway error
+  details out of protocol audit.
 - Refuse logical runtime disposal while the Gateway is active; ordered session
   close must preserve the filesystem control path until cooperative stop is
   acknowledged, and a failed stop must leave runtime access available for

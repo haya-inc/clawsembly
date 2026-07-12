@@ -86,7 +86,8 @@ The canonical promise is:
 - `packages/embed-sdk/gateway-device-identity.mjs` and `gateway-client.mjs`
   implement non-extractable Ed25519 identity, challenge-bound v3 signing,
   exact-origin WSS connection, token-private connect, strict `hello-ok`
-  validation, and explicit pairing-required metadata.
+  validation, explicit pairing-required metadata, and a bounded generated
+  chat/history/abort event/RPC surface with explicit reconnect.
 - `packages/compatibility/browserpod-evidence.schema.json` and the report
   generator bind that evidence to runtime version, browser, and artifact while
   leaving later protocol gates pending.
@@ -102,7 +103,8 @@ The canonical promise is:
   these operations;
 - an owner-authorized run of the implemented exact-artifact readiness harness;
 - an explicit device-pairing approval UI and issued-token lifecycle;
-- streamed chat/history/cancellation RPC and reconnect on the generated client;
+- automatic reconnect/backoff, issued-token persistence, attachments, and
+  broader generated RPC coverage;
 - a small public `boot()` SDK after BrowserPod reaches the Gateway evidence
   gate.
 

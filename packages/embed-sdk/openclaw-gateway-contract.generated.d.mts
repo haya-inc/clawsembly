@@ -17,9 +17,16 @@ export interface OpenClawGatewayContract {
     scopes: readonly ["operator.read", "operator.write"];
     caps: readonly [];
   }>;
+  readonly rpc: Readonly<{
+    methods: readonly ["chat.send", "chat.history", "chat.abort"];
+    event: "chat";
+  }>;
   readonly limits: Readonly<{
     preauthPayloadBytes: number;
+    authenticatedPayloadBytes: number;
     handshakeTimeoutMs: number;
+    requestTimeoutMs: number;
+    maxPendingRequests: number;
   }>;
   readonly sources: Readonly<Record<string, `sha256-${string}`>>;
 }

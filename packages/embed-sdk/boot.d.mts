@@ -74,6 +74,7 @@ export function bootVerifiedEmbed(options: {
     requestIdFactory?: () => string;
     timeoutMs?: number;
     onAudit?: (event: Readonly<Record<string, unknown>>) => void;
+    onGap?: (gap: Readonly<{ expected: number; received: number }>) => void;
     now?: () => number;
   }): Readonly<OpenClawGatewayClient>;
   readonly closed: boolean;

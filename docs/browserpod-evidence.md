@@ -30,6 +30,9 @@ provider-free, exact-artifact contract test for challenge signing and
 `hello-ok`, but no owner-authorized BrowserPod record has exercised that client.
 The real Gateway handshake, broker turn, tool execution, reconnect,
 cancellation, persistence, and performance-distribution checks remain pending.
+Provider-free tests now also cover the bounded chat send/history/abort contract,
+stream event delivery, sequence gaps, disconnect rejection, and a fresh signed
+reconnect. None of those tests substitute for a metered BrowserPod record.
 
 ## Capture from an embedding host
 

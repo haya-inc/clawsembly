@@ -125,6 +125,21 @@ const session = await bootVerifiedEmbed({
 await session.gateway.start();
 const gatewayClient = session.createGatewayClient();
 const hello = await gatewayClient.connect();
+const removeChatListener = gatewayClient.chat.onEvent(renderChatEvent);
+const accepted = await gatewayClient.chat.send({
+  sessionKey: "agent:main:clawsembly",
+  message: "Hello from the host"
+});
+await gatewayClient.chat.history({
+  sessionKey: "agent:main:clawsembly",
+  limit: 50,
+  maxChars: 200_000
+});
+await gatewayClient.chat.abort({
+  sessionKey: "agent:main:clawsembly",
+  runId: accepted.runId
+});
+removeChatListener();
 
 const audit = session.capabilities.auditSnapshot();
 const result = await session.close();
@@ -215,9 +230,20 @@ sign OpenClaw's v3 payload, sends the ephemeral Gateway token only inside the
 returns no bearer token. Pre-authentication frames are capped at 64 KiB and all
 errors/audits are reduced to fixed metadata. A first-use or scope-upgrade
 `PAIRING_REQUIRED` response returns only the bounded request/device/role/scope
-contract; approval remains an explicit owner action. The real BrowserPod
-handshake evidence, pairing approval UI, device-token persistence, RPC
-streaming, reconnect, and remote-mode parity remain pending.
+contract; approval remains an explicit owner action.
+
+After authentication, the client admits only `chat.send`, `chat.history`, and
+`chat.abort`; it does not expose a generic Gateway request escape hatch.
+`chat.send` forces `deliver:false`, excludes attachment and provenance fields,
+and returns the exact accepted run id. Chat events are validated as
+delta/final/aborted/error, sequence gaps are reported without payloads, history
+is count/character bounded, and abort must confirm the requested run id.
+Authenticated frames are capped at 4 MiB and pending requests at 64. A socket
+loss rejects every pending RPC and moves the client to `disconnected`; calling
+`connect()` performs a new signed handshake with the same IndexedDB identity.
+The real BrowserPod handshake/turn evidence, pairing approval UI, issued-token
+persistence, automatic retry policy, attachments, and remote-mode parity remain
+pending.
 
 Use `await session.close()` for ordered teardown. It first requires a successful
 cooperative Gateway stop, then closes the logical runtime adapter. The legacy

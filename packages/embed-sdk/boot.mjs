@@ -282,6 +282,7 @@ export async function bootVerifiedEmbed({
         "requestIdFactory",
         "timeoutMs",
         "onAudit",
+        "onGap",
         "now"
       ]);
       if (Object.keys(options).some((key) => !allowed.has(key))) {
@@ -296,6 +297,7 @@ export async function bootVerifiedEmbed({
         ...(options.requestIdFactory === undefined ? {} : { requestIdFactory: options.requestIdFactory }),
         ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
         onAudit: options.onAudit ?? onProtocolAudit,
+        ...(options.onGap === undefined ? {} : { onGap: options.onGap }),
         ...(options.now === undefined ? {} : { now: options.now })
       });
       protocolClients.add(client);

@@ -39,6 +39,9 @@ The project does not yet promise semantic-version compatibility.
   configuration, persistent non-extractable Ed25519 device identity,
   challenge-bound v3 connect signing, redacted `hello-ok` validation, and
   bounded pairing-required results;
+- generated chat send/history/abort RPC allowlist with local-only delivery,
+  bounded history/payloads/pending calls, validated stream events, sequence-gap
+  reporting, disconnect rejection, and explicit signed reconnect;
 - ordered embed-session close that refuses runtime disposal while the Gateway
   is active and retains cleanup access when cooperative stop fails;
 - nonce-bound guest process supervisor for cooperative child shutdown without

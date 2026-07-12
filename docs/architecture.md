@@ -88,10 +88,16 @@ transport layer. The implemented handshake slice:
 - validates the exact-version `hello-ok` and returns method/event discovery
   plus advertised limits without returning issued bearer tokens;
 - caps pre-authentication frames and emits payload-free audit metadata;
+- admits only generated chat send/history/abort RPCs after authentication,
+  forces local-only delivery, validates stream events, and bounds payloads,
+  pending requests, history, cancellation, and sequence-gap diagnostics;
+- rejects pending RPCs on disconnect and allows an explicit fresh signed
+  handshake with the same persistent identity;
 - avoids depending on private OpenClaw workspace packages at runtime.
 
-General RPC dispatch, event delivery, reconnect, device-token persistence, and
-forward-compatible unknown post-authentication frames remain to be generated.
+Broader RPC generation, automatic reconnect/backoff, device-token persistence,
+attachments, and forward-compatible unknown post-authentication events remain
+to be generated.
 
 OpenClaw documents its Gateway protocol and TypeBox code-generation pipeline in
 [Gateway protocol](https://docs.openclaw.ai/gateway/protocol) and

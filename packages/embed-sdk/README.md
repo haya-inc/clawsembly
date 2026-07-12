@@ -56,6 +56,22 @@ try {
   throw error;
 }
 
+const unsubscribe = client.chat.onEvent((event) => renderChatEvent(event));
+const accepted = await client.chat.send({
+  sessionKey: "agent:main:clawsembly",
+  message: "Hello from the embedding host"
+});
+const history = await client.chat.history({
+  sessionKey: "agent:main:clawsembly",
+  limit: 50,
+  maxChars: 200_000
+});
+await client.chat.abort({
+  sessionKey: "agent:main:clawsembly",
+  runId: accepted.runId
+});
+unsubscribe();
+
 // Manifest capabilities start pending, not granted.
 session.permissions.approve("storage.snapshot", "workspace:primary", {
   durationMs: 5 * 60_000,
@@ -110,8 +126,13 @@ only in `connect.params.auth.token`, validates `hello-ok`, and returns a
 token-free summary. First-use or scope-upgrade pairing is surfaced as bounded
 metadata for explicit approval; it is never auto-approved. The generated
 contract is pinned to the same npm artifact and can be reproduced with
-`npm run protocol:verify`. Streamed RPC, reconnect, device-token persistence,
-and approval UI remain later slices.
+`npm run protocol:verify`. The post-authentication surface is deliberately
+limited to generated `chat.send`, `chat.history`, and `chat.abort` contracts.
+It caps payloads and pending requests, delivers validated delta/final/aborted/
+error events, detects sequence gaps, rejects pending work on disconnect, and
+can perform a fresh signed `connect()` with the same device identity. Arbitrary
+Gateway RPC, outbound delivery, attachments, device-token persistence, and
+pairing approval UI remain unavailable.
 `session.close()` orders cooperative Gateway stop before logical runtime
 disposal; synchronous `dispose()` refuses to close a session while a Gateway is
 active, so the stop control path cannot be cut off accidentally.
