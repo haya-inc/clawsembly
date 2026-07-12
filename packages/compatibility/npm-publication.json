@@ -6,5 +6,8 @@
   },
   "registry": "https://registry.npmjs.org/",
   "distTag": "alpha",
-  "status": "pending"
+  "status": "published",
+  "integrity": "sha512-VJlApuNHms/xsV1SCtNFDUc54fubRaLPLicp9AgJoCuT5on/xh91UzxquUWjYBgUa6BZW/4GEAsrDph+sFBJvw==",
+  "publishedAt": "2026-07-12T11:50:14.625Z",
+  "provenanceUrl": "https://search.sigstore.dev/?logIndex=2151530229"
 }
