@@ -177,7 +177,7 @@
             <p>
               Credential, identity, budget, and consent controls execute in this
               page. BrowserPod starts only through the verified SDK with an
-              owner-supplied key; this public page never falls back to WebContainer.
+              owner-supplied key; this public page and report contract are BrowserPod-only.
             </p>
             <form class="credential-vault" data-credential-vault>
               <div class="vault-head">
@@ -244,7 +244,7 @@
             <ol data-probe-output>
               <li data-state="pass"><span>01</span><strong>Production runtime</strong><em>BrowserPod 2.x · selected</em></li>
               <li data-state="pass"><span>02</span><strong>Guest transport</strong><em>SHA-256 source + readback</em></li>
-              <li data-state="pass"><span>03</span><strong>Capability broker</strong><em>exact scope · default deny</em></li>
+              <li data-state="pass"><span>03</span><strong>Permission lifecycle</strong><em>pending · approve · expire/revoke</em></li>
               <li data-state="idle"><span>04</span><strong>Provider evidence</strong><em>owner key required</em></li>
               <li data-state="pass"><span>05</span><strong>Legacy runtime fallback</strong><em>none in app bundle</em></li>
             </ol>
@@ -274,9 +274,9 @@
             <span>02 / Clawsembly</span>
             <strong>DEFAULT<br />DENY</strong>
             <ul>
-              <li>exact capability + scope</li>
-              <li>call limit + expiry</li>
-              <li>cancel + revoke</li>
+              <li>pending exact request</li>
+              <li>user approve + expiry</li>
+              <li>cancel + deny + revoke</li>
               <li>payload-free audit</li>
             </ul>
           </div>
@@ -289,7 +289,7 @@
 
         <div class="broker-proof reveal">
           <span>Implemented slice</span>
-          <p>Exact artifact → verified manifest → BrowserPod boot → digest-verified guest client → typed mailbox → exact grant → metadata-only audit. Drift, replay, and cross-runtime evidence fail closed.</p>
+          <p>Exact artifact → verified manifest → pending permission → user approval → expiring exact grant → typed mailbox → payload-free audit. Drift, replay, and cross-runtime evidence fail closed.</p>
           <a href="https://github.com/haya-inc/clawsembly/blob/main/docs/embedding.md">Read the embedding contract ↗</a>
         </div>
       </section>

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T02:39:00.555Z",
+  "generatedAt": "2026-07-12T03:08:06.432Z",
   "status": "probing",
   "target": {
     "runtime": "browserpod",
@@ -102,13 +102,13 @@
       "id": "lifecycle-scripts",
       "label": "Lifecycle scripts classified",
       "status": "warn",
-      "detail": "The artifact declares lifecycle scripts; the browser probe must capture their behavior without silently skipping them."
+      "detail": "The artifact declares lifecycle scripts; the BrowserPod probe must capture their behavior without silently skipping them."
     },
     {
       "id": "shrinkwrap-root-consistency",
       "label": "Published shrinkwrap consistency",
       "status": "warn",
-      "detail": "The published manifest has 31 root declarations missing from shrinkwrap lockfile v3 and 0 mismatched declarations (31 missing dev dependencies); npm ci rejects the artifact even when dev dependencies are omitted."
+      "detail": "The published manifest has 31 missing and 0 mismatched root declarations in shrinkwrap lockfile v3."
     },
     {
       "id": "native-dependencies",
@@ -118,15 +118,15 @@
     },
     {
       "id": "host-preflight",
-      "label": "Browser host preflight",
+      "label": "BrowserPod preflight",
       "status": "pending",
-      "detail": "A dated browser-host evidence record has not been attached."
+      "detail": "A dated BrowserPod evidence record has not been attached."
     },
     {
       "id": "openclaw-browserpod-boot",
       "label": "OpenClaw BrowserPod boot",
       "status": "pending",
-      "detail": "The host runtime works, but this exact OpenClaw artifact has not booted in it yet."
+      "detail": "This exact OpenClaw artifact has not booted in BrowserPod yet."
     },
     {
       "id": "gateway-handshake",
@@ -144,7 +144,7 @@
       "id": "mocked-tool-call",
       "label": "Constrained tool execution",
       "status": "pending",
-      "detail": "The model received the real tool catalog; a deterministic tool request and result round-trip is still required."
+      "detail": "A deterministic tool request and result round-trip is required."
     },
     {
       "id": "history-reconnect",
@@ -162,7 +162,7 @@
       "id": "credential-vault",
       "label": "Encrypted credential boundary",
       "status": "pending",
-      "detail": "Provider credentials must remain encrypted in the browser host and outside the selected guest runtime."
+      "detail": "Provider credentials must remain encrypted in the browser host and outside BrowserPod."
     },
     {
       "id": "provider-broker",
@@ -174,7 +174,7 @@
       "id": "host-broker-turn",
       "label": "OpenClaw host-broker turn",
       "status": "pending",
-      "detail": "A real OpenClaw agent turn must cross the browser-host provider broker without mounting or logging provider credentials in the guest."
+      "detail": "A real OpenClaw agent turn must cross the browser-host provider broker without mounting or logging credentials in BrowserPod."
     },
     {
       "id": "provider-budget",
@@ -192,19 +192,19 @@
       "id": "device-identity",
       "label": "Device pairing and token reconnect",
       "status": "pending",
-      "detail": "A browser-owned non-extractable device key must complete Control UI pairing and a token-authenticated reconnect without leaking credentials."
+      "detail": "A browser-owned non-extractable device key must complete pairing and token-authenticated reconnect without leaking credentials."
     },
     {
       "id": "opfs-recovery",
       "label": "Runtime state recovery",
       "status": "pending",
-      "detail": "The mock session must survive persisted save, fresh runtime boot, restore, and document reload."
+      "detail": "The mock session must survive persisted save, fresh BrowserPod boot, restore, and document reload."
     },
     {
       "id": "runtime-performance",
       "label": "Measured browser runtime cost",
       "status": "pending",
-      "detail": "Cold/warm install time, actual filesystem footprint, and Gateway-ready latency have not been measured in the browser lane."
+      "detail": "Cold/warm install time, filesystem footprint, and Gateway-ready latency have not been measured in BrowserPod."
     }
   ]
 }
