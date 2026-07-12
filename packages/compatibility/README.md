@@ -20,7 +20,11 @@ directory. It does not install the package or execute its lifecycle scripts.
 The report preserves a name-sorted direct-dependency inventory with each exact
 declared spec. Release tracking uses those inventories to generate added,
 removed, and changed entries against stable without turning static drift into a
-runtime PASS.
+runtime PASS. Every added or changed dependency is then inspected from its
+shrinkwrap-resolved, SHA-512-verified npm tarball with scripts disabled. The
+release index records lifecycle scripts, native/Wasm artifacts, runtime Node
+built-ins, network signals, derived browser capabilities, and whether the
+bounded scan was complete.
 
 Generate a static BrowserPod-target report without runtime evidence:
 

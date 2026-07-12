@@ -51,6 +51,13 @@ for (const change of preview.dependencyChangesFromStable.changed) {
 }
 ```
 
+`dependencyRiskFromStable` covers every added or changed dependency. Each entry
+binds the declared spec to the shrinkwrap-resolved version and SHA-512, reports
+whether the bounded source scan was truncated, and records only observed
+lifecycle scripts, native/Wasm files, Node built-ins, network APIs/package
+imports, and derived browser-capability signals. An empty signal list is not a
+compatibility PASS; if `scan.truncated` is true it is not even an absence claim.
+
 ## Minimal policy example
 
 ```js

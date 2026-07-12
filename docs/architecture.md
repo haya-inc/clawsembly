@@ -179,6 +179,22 @@ after a grace period, without persisting process environment values. This
 closes the Gateway task used by the evidence probe, but does not imply provider
 process termination or Pod hard disposal.
 
+### Release artifact risk inspection
+
+The release tracker keeps declared direct-dependency specs together with the
+resolved version and integrity from the exact OpenClaw shrinkwrap. Only added
+or changed dependencies are downloaded. `npm pack --ignore-scripts` retrieves
+the published tarball; generation fails if its package identity or SHA-512 does
+not match the shrinkwrap.
+
+The scanner extracts only a path-validated, size-bounded set of runtime source
+files into a fresh temporary directory. It records lifecycle declarations,
+native and Wasm paths, Node built-in imports, network API/package imports, and
+derived browser-capability signals. It never executes dependency code or
+lifecycle scripts, deletes the temporary artifact after inspection, and marks
+budget-limited scans as truncated so missing signals cannot be treated as
+proof of browser safety.
+
 ### Compatibility adapter
 
 Contains browser-specific behavior that upstream OpenClaw does not provide.

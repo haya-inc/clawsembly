@@ -78,6 +78,11 @@ generates a report for each exact artifact, and writes a release-history index.
 Each report preserves a sorted exact direct-dependency inventory from its
 packed manifest. The index recomputes added, removed, and changed specs against
 stable, so preview drift is reviewable without inferring support from a count.
+For every added or changed entry, the tracker downloads the exact
+shrinkwrap-resolved tarball with scripts disabled, verifies its SHA-512, and
+performs a bounded static risk scan. It records lifecycle scripts, native and
+Wasm artifacts, runtime Node built-ins, network signals, and derived browser
+capabilities together with scan completeness.
 Checked-in Gateway evidence is attached to whichever channel has the exact same
 OpenClaw version; the report builder rejects mismatched runtime evidence. The
 scheduled workflow exits without rewriting timestamps when channel versions are
@@ -101,8 +106,9 @@ flowchart LR
 
 ### Static checks
 
-- Diff direct dependency names and exact specs automatically; classify optional
-  and transitive capability risk before promotion.
+- Diff direct dependency names and exact specs, then classify exact-tarball
+  lifecycle, native/Wasm, Node built-in, network, and browser-capability signals
+  automatically. Optional and transitive ownership still requires review.
 - Compare the published manifest with the shrinkwrap root; report missing or
   mismatched declarations that make deterministic `npm ci` impossible.
 - Identify native addons, install scripts, and Node built-in imports.

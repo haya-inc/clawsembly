@@ -42,6 +42,12 @@ interface ReleaseHistory {
       removed: Array<{ name: string; spec: string }>;
       changed: Array<{ name: string; stableSpec: string; releaseSpec: string }>;
     };
+    dependencyRiskFromStable: Array<{
+      name: string;
+      change: "added" | "changed";
+      scan: { truncated: boolean };
+      signals: { browserCapabilities: string[] };
+    }>;
     deltaFromStable: {
       unpackedBytes: number;
       directDependencyCount: number;
@@ -88,7 +94,7 @@ function formatSizeDelta(bytes: number): string {
 
 function renderDependencyGroup(
   label: string,
-  entries: Array<{ name: string; detail: string }>
+  entries: Array<{ name: string; detail: string; capabilities?: string[]; truncated?: boolean }>
 ): HTMLElement {
   const group = document.createElement("section");
   group.className = "release-diff-group";
@@ -108,6 +114,15 @@ function renderDependencyGroup(
       const detail = document.createElement("span");
       detail.textContent = entry.detail;
       item.append(name, detail);
+      if (entry.capabilities) {
+        const signals = document.createElement("small");
+        signals.className = "release-diff-signals";
+        const capabilitySummary = entry.capabilities.length
+          ? entry.capabilities.join(" · ")
+          : "no package-level capability signal";
+        signals.textContent = `${capabilitySummary}${entry.truncated ? " · scan truncated" : ""}`;
+        item.append(signals);
+      }
       return item;
     }));
   }
@@ -122,10 +137,19 @@ function renderReleaseDependencyDiff(history: ReleaseHistory): void {
   const preview = history.releases.find((release) => release.channel === "preview");
   if (!container || !summary || !list || !preview) return;
   const changes = preview.dependencyChangesFromStable;
-  summary.textContent = `${changes.added.length} added · ${changes.changed.length} changed · ${changes.removed.length} removed`;
+  const riskByName = new Map(preview.dependencyRiskFromStable.map((risk) => [risk.name, risk]));
+  summary.textContent = `${changes.added.length} added · ${changes.changed.length} changed · ${changes.removed.length} removed · ${preview.dependencyRiskFromStable.length} classified`;
+  const withRisk = ({ name, detail }: { name: string; detail: string }) => {
+    const risk = riskByName.get(name);
+    return {
+      name,
+      detail,
+      ...(risk ? { capabilities: risk.signals.browserCapabilities, truncated: risk.scan.truncated } : {})
+    };
+  };
   list.replaceChildren(
-    renderDependencyGroup("Added", changes.added.map(({ name, spec }) => ({ name, detail: spec }))),
-    renderDependencyGroup("Changed", changes.changed.map(({ name, stableSpec, releaseSpec }) => ({
+    renderDependencyGroup("Added", changes.added.map(({ name, spec }) => withRisk({ name, detail: spec }))),
+    renderDependencyGroup("Changed", changes.changed.map(({ name, stableSpec, releaseSpec }) => withRisk({
       name,
       detail: `${stableSpec} → ${releaseSpec}`
     }))),

@@ -69,9 +69,35 @@ export function compareDirectDependencies(stableDependencies, releaseDependencie
   };
 }
 
-function summarizeReport(channel, report, reportPath, stableReport) {
+function validateDependencyRisks(channel, report, changes, risks = []) {
+  const expected = new Map([
+    ...changes.added.map(({ name }) => [name, "added"]),
+    ...changes.changed.map(({ name }) => [name, "changed"])
+  ]);
+  if (!Array.isArray(risks) || risks.length !== expected.size) {
+    throw new Error(`${channel} dependency risk inventory is incomplete.`);
+  }
+  const dependencies = new Map(report.artifact.directDependencies.map((dependency) => [dependency.name, dependency]));
+  const seen = new Set();
+  for (const risk of risks) {
+    const dependency = dependencies.get(risk?.name);
+    if (!dependency || seen.has(risk.name) || expected.get(risk.name) !== risk.change
+      || risk.declaredSpec !== dependency.spec || risk.resolvedVersion !== dependency.resolvedVersion
+      || risk.integrity !== dependency.integrity) {
+      throw new Error(`${channel} dependency risk identity drift: ${risk?.name ?? "unknown"}.`);
+    }
+    seen.add(risk.name);
+  }
+  return [...risks].sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function summarizeReport(channel, report, reportPath, stableReport, dependencyRisks) {
   const shrinkwrap = report.artifact.shrinkwrapRootConsistency;
   const stableArtifact = stableReport.artifact;
+  const dependencyChangesFromStable = compareDirectDependencies(
+    stableArtifact.directDependencies,
+    report.artifact.directDependencies
+  );
   return {
     channel,
     version: report.artifact.version,
@@ -89,9 +115,12 @@ function summarizeReport(channel, report, reportPath, stableReport) {
       shrinkwrapMismatchedCount: shrinkwrap.mismatchedCount
     },
     checks: countStatuses(report.checks),
-    dependencyChangesFromStable: compareDirectDependencies(
-      stableArtifact.directDependencies,
-      report.artifact.directDependencies
+    dependencyChangesFromStable,
+    dependencyRiskFromStable: validateDependencyRisks(
+      channel,
+      report,
+      dependencyChangesFromStable,
+      dependencyRisks
     ),
     deltaFromStable: {
       unpackedBytes: report.artifact.unpackedBytes - stableArtifact.unpackedBytes,
@@ -102,7 +131,7 @@ function summarizeReport(channel, report, reportPath, stableReport) {
   };
 }
 
-export function buildReleaseHistory({ packageName, channels, reports, reportPaths, generatedAt }) {
+export function buildReleaseHistory({ packageName, channels, reports, reportPaths, dependencyRisks = {}, generatedAt }) {
   for (const channel of CHANNEL_ORDER) {
     if (!channels[channel] || !reports[channel] || !reportPaths[channel]) {
       throw new Error(`Release history is missing ${channel} data.`);
@@ -121,7 +150,8 @@ export function buildReleaseHistory({ packageName, channels, reports, reportPath
       channel,
       reports[channel],
       reportPaths[channel],
-      reports.stable
+      reports.stable,
+      dependencyRisks[channel] ?? []
     ))
   };
 }

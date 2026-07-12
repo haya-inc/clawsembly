@@ -105,7 +105,11 @@ separate reports. At the 2026-07-12 snapshot those resolve to `2026.6.11`,
 scheduled workflow skips unchanged channels and opens or updates a generated
 report pull request when a channel moves. Each report retains its exact direct
 dependency specs; the release index and project page expose added, removed, and
-changed preview dependencies against stable.
+changed preview dependencies against stable. Added and changed packages are
+then fetched by their shrinkwrap-resolved version, verified against SHA-512,
+and scanned without lifecycle execution for install scripts, native/Wasm
+artifacts, Node built-ins, network signals, and browser-authority risk. These
+remain static review signals and never promote a runtime check.
 
 The main branch is BrowserPod-only: it contains no legacy runtime adapter,
 dependency, fixture, evidence record, report target, fallback, or vendor CSP

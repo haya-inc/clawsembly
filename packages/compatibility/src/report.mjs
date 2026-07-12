@@ -157,7 +157,7 @@ export function findShrinkwrapRootDrift(manifest = {}, shrinkwrap = {}) {
   };
 }
 
-export function normalizeDirectDependencies(dependencies = {}) {
+export function normalizeDirectDependencies(dependencies = {}, shrinkwrapPackages = {}) {
   if (!dependencies || typeof dependencies !== "object" || Array.isArray(dependencies)) {
     throw new TypeError("Direct dependencies must be a package-to-spec object.");
   }
@@ -166,7 +166,13 @@ export function normalizeDirectDependencies(dependencies = {}) {
       if (!name || typeof spec !== "string" || spec.length === 0) {
         throw new TypeError("Every direct dependency requires a name and exact declared spec.");
       }
-      return { name, spec };
+      const locked = shrinkwrapPackages[`node_modules/${name}`];
+      return {
+        name,
+        spec,
+        resolvedVersion: typeof locked?.version === "string" ? locked.version : null,
+        integrity: typeof locked?.integrity === "string" ? locked.integrity : null
+      };
     })
     .sort((left, right) => left.name.localeCompare(right.name));
 }
@@ -198,7 +204,7 @@ export function buildReport({
     }
   }
 
-  const dependencies = normalizeDirectDependencies(manifest.dependencies ?? {});
+  const dependencies = normalizeDirectDependencies(manifest.dependencies ?? {}, shrinkwrap?.packages ?? {});
   const nativeRiskDependencies = findNativeRisks(shrinkwrap?.packages);
   const shrinkwrapRootDrift = findShrinkwrapRootDrift(manifest, shrinkwrap);
   const hasLifecycleScript = Boolean(manifest.scripts?.preinstall || manifest.scripts?.install || manifest.scripts?.postinstall);

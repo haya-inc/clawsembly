@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve, sep } from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
+import { deriveBrowserCapabilities } from "./dependency-risk.mjs";
 import { deriveRuntimeClaimStatuses, evidenceDigest } from "./report.mjs";
 import { compareDirectDependencies } from "./release-tracking.mjs";
 
@@ -92,11 +93,34 @@ for (const release of history.releases) {
 }
 
 for (let index = 0; index < history.releases.length; index += 1) {
+  const release = history.releases[index];
+  const changes = compareDirectDependencies(reports[0].artifact.directDependencies, reports[index].artifact.directDependencies);
   assert.deepEqual(
-    history.releases[index].dependencyChangesFromStable,
-    compareDirectDependencies(reports[0].artifact.directDependencies, reports[index].artifact.directDependencies),
-    `${history.releases[index].channel} direct dependency changes drift`
+    release.dependencyChangesFromStable,
+    changes,
+    `${release.channel} direct dependency changes drift`
   );
+  const expectedRiskChanges = new Map([
+    ...changes.added.map(({ name }) => [name, "added"]),
+    ...changes.changed.map(({ name }) => [name, "changed"])
+  ]);
+  assert.equal(release.dependencyRiskFromStable.length, expectedRiskChanges.size, `${release.channel} dependency risk coverage drift`);
+  const dependencies = new Map(reports[index].artifact.directDependencies.map((dependency) => [dependency.name, dependency]));
+  const riskNames = new Set();
+  for (const risk of release.dependencyRiskFromStable) {
+    const dependency = dependencies.get(risk.name);
+    assert.ok(dependency && !riskNames.has(risk.name), `${release.channel} dependency risk identity drift`);
+    riskNames.add(risk.name);
+    assert.equal(risk.change, expectedRiskChanges.get(risk.name), `${release.channel} dependency risk change drift`);
+    assert.equal(risk.declaredSpec, dependency.spec, `${release.channel} dependency risk spec drift`);
+    assert.equal(risk.resolvedVersion, dependency.resolvedVersion, `${release.channel} dependency risk version drift`);
+    assert.equal(risk.integrity, dependency.integrity, `${release.channel} dependency risk integrity drift`);
+    assert.deepEqual(
+      risk.signals.browserCapabilities,
+      deriveBrowserCapabilities(risk.signals),
+      `${release.channel} dependency capability derivation drift: ${risk.name}`
+    );
+  }
 }
 
 const latest = readJson(latestPath);

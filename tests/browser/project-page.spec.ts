@@ -20,6 +20,11 @@ test("project page distinguishes stable, previous, and preview evidence", async 
         removed: Array<{ name: string; spec: string }>;
         changed: Array<{ name: string; stableSpec: string; releaseSpec: string }>;
       };
+      dependencyRiskFromStable: Array<{
+        name: string;
+        scan: { truncated: boolean };
+        signals: { browserCapabilities: string[] };
+      }>;
     }>;
   };
   expect(index.releases.map((release) => release.channel)).toEqual(["stable", "previous", "preview"]);
@@ -94,8 +99,12 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   const dependencyDiff = page.locator("[data-release-diff]");
   await expect(dependencyDiff).toBeVisible();
   const changes = preview?.dependencyChangesFromStable;
+  expect(preview?.dependencyRiskFromStable.length).toBe(
+    (changes?.added.length ?? 0) + (changes?.changed.length ?? 0)
+  );
+  expect(preview?.dependencyRiskFromStable.every((risk) => !risk.scan.truncated)).toBe(true);
   await expect(dependencyDiff.getByText(
-    `${changes?.added.length ?? 0} added · ${changes?.changed.length ?? 0} changed · ${changes?.removed.length ?? 0} removed`,
+    `${changes?.added.length ?? 0} added · ${changes?.changed.length ?? 0} changed · ${changes?.removed.length ?? 0} removed · ${preview?.dependencyRiskFromStable.length ?? 0} classified`,
     { exact: true }
   )).toBeVisible();
   await dependencyDiff.locator("summary").click();
@@ -103,6 +112,11 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   if (firstAdded) {
     await expect(dependencyDiff.getByText(firstAdded.name, { exact: true })).toBeVisible();
     await expect(dependencyDiff.getByText(firstAdded.spec, { exact: true })).toBeVisible();
+    const firstRisk = preview?.dependencyRiskFromStable.find((risk) => risk.name === firstAdded.name);
+    const riskRow = dependencyDiff.locator("li").filter({ hasText: firstAdded.name });
+    await expect(riskRow.locator(".release-diff-signals")).toHaveText(
+      firstRisk?.signals.browserCapabilities.join(" · ") || "no package-level capability signal"
+    );
   }
   expect(consoleErrors).toEqual([]);
 });

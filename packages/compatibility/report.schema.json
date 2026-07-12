@@ -36,10 +36,22 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["name", "spec"],
+            "required": ["name", "spec", "resolvedVersion", "integrity"],
             "properties": {
               "name": { "type": "string", "minLength": 1 },
-              "spec": { "type": "string", "minLength": 1 }
+              "spec": { "type": "string", "minLength": 1 },
+              "resolvedVersion": {
+                "oneOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              },
+              "integrity": {
+                "oneOf": [
+                  { "type": "string", "minLength": 1 },
+                  { "type": "null" }
+                ]
+              }
             }
           }
         },

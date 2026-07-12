@@ -234,13 +234,17 @@ versioned release-history index; refuses cross-version Gateway evidence; and
 skips unchanged channels. Every report now preserves its sorted direct
 dependency names and specs, and the index derives exact added, removed, and
 changed entries against stable for machine and project-page review. The
-six-hour workflow uploads all reports and opens
+tracker now also resolves every added or changed dependency through the
+published shrinkwrap, verifies its exact npm SHA-512, and records bounded
+script-disabled lifecycle, native/Wasm, Node built-in, network, and browser
+capability signals with explicit scan completeness. The six-hour workflow
+uploads all reports and opens
 or refreshes a fixed-branch pull request when a channel moves. Full runtime
 execution on that pull request derives the version from the generated stable
 report and retains a redacted, versioned evidence artifact on success. Promotion
-of that CI artifact into the durable checked-in report, dependency risk
-classification, schema/protocol diff generation, and automatic rollback
-promotion remain.
+of that CI artifact into the durable checked-in report, optional/transitive
+ownership classification, schema/protocol diff generation, and automatic
+rollback promotion remain.
 
 ## Phase 5: extensibility and broader capabilities
 

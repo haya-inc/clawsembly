@@ -67,6 +67,9 @@ The project does not yet promise semantic-version compatibility.
 - stable / previous / preview release tracking with generated update pull
   requests, exact direct-dependency manifest diffs, and cross-version evidence
   rejection;
+- script-disabled exact-tarball risk classification for added and changed
+  dependencies, covering lifecycle scripts, native/Wasm artifacts, Node
+  built-ins, network APIs, scan completeness, and derived browser capabilities;
 - report-driven project page, release ledger, compatibility badge, contribution
   templates, security policy, and downstream consumption guide.
 

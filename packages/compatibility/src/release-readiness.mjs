@@ -54,6 +54,8 @@ const required = [
   "packages/compatibility/report.schema.json",
   "packages/compatibility/release-history.schema.json",
   "packages/compatibility/browserpod-evidence.schema.json",
+  "packages/compatibility/src/dependency-risk.mjs",
+  "packages/compatibility/src/dependency-risk.test.mjs",
   "packages/capability-broker/capability-manifest.schema.json",
   "packages/capability-broker/capability-audit.schema.json",
   "packages/embed-sdk/permission-prompt.mjs",

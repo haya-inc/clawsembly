@@ -28,7 +28,12 @@ test("resolveReleaseChannels rejects a stale latest tag", () => {
 });
 
 function report(version, { status = "probing", runtimeEvidence = false, deps = 10, native = 2, missing = 3 } = {}) {
-  const directDependencies = Array.from({ length: deps }, (_, index) => ({ name: `dep-${index}`, spec: "1.0.0" }));
+  const directDependencies = Array.from({ length: deps }, (_, index) => ({
+    name: `dep-${index}`,
+    spec: "1.0.0",
+    resolvedVersion: "1.0.0",
+    integrity: `sha512-dep-${index}`
+  }));
   return {
     generatedAt: "2026-07-12T00:00:00.000Z",
     status,
@@ -60,6 +65,18 @@ test("buildReleaseHistory preserves evidence levels and stable deltas", () => {
     previous: "2026.6.10",
     preview: "2026.7.1-beta.5"
   };
+  const previewRisks = [12, 13].map((index) => ({
+    name: `dep-${index}`,
+    change: "added",
+    declaredSpec: "1.0.0",
+    resolvedVersion: "1.0.0",
+    integrity: `sha512-dep-${index}`,
+    scan: { packageFileCount: 1, sourceFileCount: 1, sourceBytes: 1, truncated: false },
+    signals: {
+      lifecycleScripts: [], nativeArtifacts: [], wasmArtifacts: [], nodeBuiltins: [],
+      networkApis: [], sourceSignals: [], browserCapabilities: []
+    }
+  }));
   const history = buildReleaseHistory({
     packageName: "openclaw",
     channels,
@@ -73,6 +90,7 @@ test("buildReleaseHistory preserves evidence levels and stable deltas", () => {
       previous: "releases/openclaw-2026.6.10.json",
       preview: "releases/openclaw-2026.7.1-beta.5.json"
     },
+    dependencyRisks: { stable: [], previous: [], preview: previewRisks },
     generatedAt: "2026-07-12T00:00:00.000Z"
   });
 
@@ -88,6 +106,7 @@ test("buildReleaseHistory preserves evidence levels and stable deltas", () => {
   assert.deepEqual(history.releases[0].dependencyChangesFromStable, { added: [], removed: [], changed: [] });
   assert.deepEqual(history.releases[1].dependencyChangesFromStable.removed.map(({ name }) => name), ["dep-10", "dep-11"]);
   assert.deepEqual(history.releases[2].dependencyChangesFromStable.added.map(({ name }) => name), ["dep-12", "dep-13"]);
+  assert.deepEqual(history.releases[2].dependencyRiskFromStable.map(({ name }) => name), ["dep-12", "dep-13"]);
 });
 
 test("compareDirectDependencies reports exact added, removed, and changed specs", () => {

@@ -166,6 +166,7 @@ nav a:hover, nav a:focus-visible { color: var(--accent); }
 .release-diff-group li { display: grid; gap: 4px; min-width: 0; }
 .release-diff-group code { overflow-wrap: anywhere; color: var(--ink); font: 400 10px/1.4 var(--mono); }
 .release-diff-group li > span, .release-diff-empty { overflow-wrap: anywhere; color: var(--muted); font-size: 8px; line-height: 1.5; }
+.release-diff-signals { overflow-wrap: anywhere; color: #67b7ff; font-size: 7px; line-height: 1.55; letter-spacing: .04em; text-transform: uppercase; }
 @keyframes release-diff-reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 .release-history-foot { display: flex; justify-content: space-between; gap: 24px; padding-top: 18px; color: var(--muted); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
 .release-history-foot a { color: var(--accent); border-bottom: 1px solid currentColor; padding-bottom: 3px; }

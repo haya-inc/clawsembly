@@ -4,7 +4,8 @@ import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync,
 import { tmpdir } from "node:os";
 import { dirname, relative, resolve } from "node:path";
 import { renderCompatibilityBadge } from "./compatibility-badge.mjs";
-import { buildReleaseHistory, resolveReleaseChannels } from "./release-tracking.mjs";
+import { inspectDependencyRisk } from "./dependency-risk.mjs";
+import { buildReleaseHistory, compareDirectDependencies, resolveReleaseChannels } from "./release-tracking.mjs";
 
 function parseArgs(argv) {
   const options = {
@@ -104,11 +105,44 @@ try {
     reportPaths[channel] = relative(dirname(indexPath), finalOutputs[channel]).split("\\").join("/");
   }
 
+  const dependencyRisks = {};
+  const riskCache = new Map();
+  for (const channel of Object.keys(channels)) {
+    const changes = compareDirectDependencies(
+      reports.stable.artifact.directDependencies,
+      reports[channel].artifact.directDependencies
+    );
+    const dependencyByName = new Map(
+      reports[channel].artifact.directDependencies.map((dependency) => [dependency.name, dependency])
+    );
+    const candidates = [
+      ...changes.added.map(({ name }) => ({ name, change: "added" })),
+      ...changes.changed.map(({ name }) => ({ name, change: "changed" }))
+    ];
+    dependencyRisks[channel] = candidates.map(({ name, change }) => {
+      const dependency = dependencyByName.get(name);
+      const identity = {
+        name,
+        change,
+        declaredSpec: dependency?.spec,
+        resolvedVersion: dependency?.resolvedVersion,
+        integrity: dependency?.integrity
+      };
+      const cacheKey = JSON.stringify(identity);
+      if (!riskCache.has(cacheKey)) {
+        riskCache.set(cacheKey, inspectDependencyRisk(identity));
+        process.stdout.write(`Classified ${change} dependency ${name}@${identity.resolvedVersion}.\n`);
+      }
+      return riskCache.get(cacheKey);
+    });
+  }
+
   const history = buildReleaseHistory({
     packageName: options.packageName,
     channels,
     reports,
     reportPaths,
+    dependencyRisks,
     generatedAt: new Date().toISOString()
   });
   const badge = renderCompatibilityBadge({

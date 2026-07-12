@@ -26,7 +26,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["channel", "version", "status", "reportPath", "generatedAt", "runtimeEvidence", "artifact", "checks", "dependencyChangesFromStable", "deltaFromStable"],
+        "required": ["channel", "version", "status", "reportPath", "generatedAt", "runtimeEvidence", "artifact", "checks", "dependencyChangesFromStable", "dependencyRiskFromStable", "deltaFromStable"],
         "properties": {
           "channel": { "enum": ["stable", "previous", "preview"] },
           "version": { "type": "string", "minLength": 1 },
@@ -77,6 +77,10 @@
               }
             }
           },
+          "dependencyRiskFromStable": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/dependencyRisk" }
+          },
           "deltaFromStable": {
             "type": "object",
             "additionalProperties": false,
@@ -93,6 +97,65 @@
     }
   },
   "$defs": {
+    "dependencyRisk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "change", "declaredSpec", "resolvedVersion", "integrity", "scan", "signals"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "change": { "enum": ["added", "changed"] },
+        "declaredSpec": { "type": "string", "minLength": 1 },
+        "resolvedVersion": { "type": "string", "minLength": 1 },
+        "integrity": { "type": "string", "minLength": 1 },
+        "scan": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["packageFileCount", "sourceFileCount", "sourceBytes", "truncated"],
+          "properties": {
+            "packageFileCount": { "type": "integer", "minimum": 1 },
+            "sourceFileCount": { "type": "integer", "minimum": 0 },
+            "sourceBytes": { "type": "integer", "minimum": 0 },
+            "truncated": { "type": "boolean" }
+          }
+        },
+        "signals": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lifecycleScripts", "nativeArtifacts", "wasmArtifacts", "nodeBuiltins", "networkApis", "sourceSignals", "browserCapabilities"],
+          "properties": {
+            "lifecycleScripts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "command"],
+                "properties": {
+                  "name": { "enum": ["preinstall", "install", "postinstall"] },
+                  "command": { "type": "string", "minLength": 1, "maxLength": 4096 }
+                }
+              }
+            },
+            "nativeArtifacts": { "$ref": "#/$defs/stringList" },
+            "wasmArtifacts": { "$ref": "#/$defs/stringList" },
+            "nodeBuiltins": { "$ref": "#/$defs/stringList" },
+            "networkApis": { "$ref": "#/$defs/stringList" },
+            "sourceSignals": { "$ref": "#/$defs/stringList" },
+            "browserCapabilities": {
+              "type": "array",
+              "items": {
+                "enum": ["cryptography", "database", "environment", "filesystem", "install-script", "native-code", "network", "os", "subprocess", "terminal", "wasm", "workers"]
+              },
+              "uniqueItems": true
+            }
+          }
+        }
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
     "dependencySpec": {
       "type": "object",
       "additionalProperties": false,

@@ -136,9 +136,20 @@ test("findShrinkwrapRootDrift detects root validation failures", () => {
 });
 
 test("normalizeDirectDependencies preserves exact specs in stable name order", () => {
-  assert.deepEqual(normalizeDirectDependencies({ zod: "4.4.3", "@openclaw/ai": "2026.7.1-beta.5" }), [
-    { name: "@openclaw/ai", spec: "2026.7.1-beta.5" },
-    { name: "zod", spec: "4.4.3" }
+  assert.deepEqual(normalizeDirectDependencies(
+    { zod: "4.4.3", "@openclaw/ai": "2026.7.1-beta.5" },
+    {
+      "node_modules/@openclaw/ai": { version: "2026.7.1-beta.5", integrity: "sha512-ai" },
+      "node_modules/zod": { version: "4.4.3", integrity: "sha512-zod" }
+    }
+  ), [
+    {
+      name: "@openclaw/ai",
+      spec: "2026.7.1-beta.5",
+      resolvedVersion: "2026.7.1-beta.5",
+      integrity: "sha512-ai"
+    },
+    { name: "zod", spec: "4.4.3", resolvedVersion: "4.4.3", integrity: "sha512-zod" }
   ]);
   assert.throws(() => normalizeDirectDependencies({ invalid: "" }), /exact declared spec/u);
 });

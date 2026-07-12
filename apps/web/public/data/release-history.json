@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T06:34:38.736Z",
+  "generatedAt": "2026-07-12T06:57:58.515Z",
   "package": "openclaw",
   "channels": {
     "stable": "2026.6.11",
@@ -13,7 +13,7 @@
       "version": "2026.6.11",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.6.11.json",
-      "generatedAt": "2026-07-12T06:34:37.323Z",
+      "generatedAt": "2026-07-12T06:57:45.351Z",
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-T+P/g19IheeT1ckXMoPN61dYuE8vBF4MderI+kWkvpuFYxPkJxn8AXLpu9IXCnN9g36Acpm9+mMD/V+lsvOkyA==",
@@ -35,6 +35,7 @@
         "removed": [],
         "changed": []
       },
+      "dependencyRiskFromStable": [],
       "deltaFromStable": {
         "unpackedBytes": 0,
         "directDependencyCount": 0,
@@ -47,7 +48,7 @@
       "version": "2026.6.10",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.6.10.json",
-      "generatedAt": "2026-07-12T06:34:38.014Z",
+      "generatedAt": "2026-07-12T06:57:46.097Z",
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-LcooND2tBQw8A+kc1Ujltu3lg30bJ0w7XaeRy7eYzobb8BBdcW6DOGbwJL4vpj1vl9+gjRceOtlh5nh9OARcug==",
@@ -69,6 +70,7 @@
         "removed": [],
         "changed": []
       },
+      "dependencyRiskFromStable": [],
       "deltaFromStable": {
         "unpackedBytes": 314904,
         "directDependencyCount": 0,
@@ -81,7 +83,7 @@
       "version": "2026.7.1-beta.5",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.7.1-beta.5.json",
-      "generatedAt": "2026-07-12T06:34:38.723Z",
+      "generatedAt": "2026-07-12T06:57:46.865Z",
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-ejdttiBZwk5RJmZdGD3gQPW1+4819pb0gyw4ZbGg/NcEAdozk6UQWq4n3P2XfDBgOn2k7D8fSKLcN+YDdJ77TA==",
@@ -193,6 +195,708 @@
           }
         ]
       },
+      "dependencyRiskFromStable": [
+        {
+          "name": "@agentclientprotocol/sdk",
+          "change": "changed",
+          "declaredSpec": "1.1.0",
+          "resolvedVersion": "1.1.0",
+          "integrity": "sha512-NT2KqphUJ3w6EksUL51ZhJgIYgq/ZLGcBPkyMKgRSO5PMVwe9DnKKX+Htnvk6KHh6dUuh34UHK4gKp+4te1Mdg==",
+          "scan": {
+            "packageFileCount": 121,
+            "sourceFileCount": 39,
+            "sourceBytes": 753323,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "child_process",
+              "events",
+              "http",
+              "path",
+              "readline/promises",
+              "stream",
+              "url"
+            ],
+            "networkApis": [
+              "fetch",
+              "WebSocket",
+              "ws"
+            ],
+            "sourceSignals": [
+              "process.env"
+            ],
+            "browserCapabilities": [
+              "environment",
+              "network",
+              "subprocess",
+              "terminal"
+            ]
+          }
+        },
+        {
+          "name": "@anthropic-ai/sdk",
+          "change": "changed",
+          "declaredSpec": "0.109.1",
+          "resolvedVersion": "0.109.1",
+          "integrity": "sha512-q9OnEKLr5H9nxSuXdgDgJhxfYMiE+AaUEBze2Gk91UcaaLnsN+Lx5fbCYywiqurU/APLdwv23x03Wm6WN3EBsg==",
+          "scan": {
+            "packageFileCount": 1339,
+            "sourceFileCount": 296,
+            "sourceBytes": 1328599,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "buffer",
+              "child_process",
+              "crypto",
+              "fs",
+              "fs/promises",
+              "path",
+              "readline",
+              "stream",
+              "stream/promises",
+              "util"
+            ],
+            "networkApis": [
+              "@anthropic-ai/sdk",
+              "@modelcontextprotocol/sdk",
+              "fetch"
+            ],
+            "sourceSignals": [
+              "process.env"
+            ],
+            "browserCapabilities": [
+              "cryptography",
+              "environment",
+              "filesystem",
+              "network",
+              "subprocess",
+              "terminal"
+            ]
+          }
+        },
+        {
+          "name": "@clack/core",
+          "change": "changed",
+          "declaredSpec": "1.4.2",
+          "resolvedVersion": "1.4.2",
+          "integrity": "sha512-0Ty/1Gfm+Kb07sXcuESjyKfwEhSy4Ns1AgeEisHb/bDY5fWme0tTeTkU14T1Gmcs17YIjB/teiDe4uaCghbYqQ==",
+          "scan": {
+            "packageFileCount": 6,
+            "sourceFileCount": 1,
+            "sourceBytes": 33948,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "process",
+              "readline",
+              "tty",
+              "util"
+            ],
+            "networkApis": [],
+            "sourceSignals": [],
+            "browserCapabilities": [
+              "terminal"
+            ]
+          }
+        },
+        {
+          "name": "@clack/prompts",
+          "change": "changed",
+          "declaredSpec": "1.6.0",
+          "resolvedVersion": "1.6.0",
+          "integrity": "sha512-EYlRokl8szrP9Z25qT5aepMdBjzBvHF9ZEhzIiUBc9guz/T31EqRgvD0QSgZcpE93xiwrr+OkB4nz0BZyF6fSA==",
+          "scan": {
+            "packageFileCount": 6,
+            "sourceFileCount": 1,
+            "sourceBytes": 49737,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "fs",
+              "path",
+              "process",
+              "util"
+            ],
+            "networkApis": [],
+            "sourceSignals": [
+              "process.env"
+            ],
+            "browserCapabilities": [
+              "environment",
+              "filesystem"
+            ]
+          }
+        },
+        {
+          "name": "@earendil-works/pi-tui",
+          "change": "changed",
+          "declaredSpec": "0.80.3",
+          "resolvedVersion": "0.80.3",
+          "integrity": "sha512-2BJI6qwRQfnM0Q7seL1+SbacU/jRRjBnN7Hu3n9BjAn7/s5FaBNnvdD1qBQYRsFTHfjqMaDsjYqanPyqwXj99w==",
+          "scan": {
+            "packageFileCount": 118,
+            "sourceFileCount": 28,
+            "sourceBytes": 401359,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [
+              "native/darwin/prebuilds/darwin-arm64/darwin-modifiers.node",
+              "native/darwin/prebuilds/darwin-x64/darwin-modifiers.node",
+              "native/win32/prebuilds/win32-arm64/win32-console-mode.node",
+              "native/win32/prebuilds/win32-x64/win32-console-mode.node"
+            ],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "child_process",
+              "events",
+              "fs",
+              "module",
+              "os",
+              "path",
+              "perf_hooks",
+              "url"
+            ],
+            "networkApis": [],
+            "sourceSignals": [
+              "process.env"
+            ],
+            "browserCapabilities": [
+              "environment",
+              "filesystem",
+              "native-code",
+              "os",
+              "subprocess"
+            ]
+          }
+        },
+        {
+          "name": "@google/genai",
+          "change": "changed",
+          "declaredSpec": "2.10.0",
+          "resolvedVersion": "2.10.0",
+          "integrity": "sha512-e4cFxj3tiuMtsgOT4G9c1hXyGJhg7/Buj7VVeBacRY3fRtkRZZ59Q3nuVp2xbq8BGQXLXCDB253qMhklMOeUDg==",
+          "scan": {
+            "packageFileCount": 25,
+            "sourceFileCount": 9,
+            "sourceBytes": 5626162,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [
+              {
+                "name": "preinstall",
+                "command": "echo 'preinstall: no-op'"
+              }
+            ],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "crypto",
+              "fs",
+              "fs/promises",
+              "os",
+              "path",
+              "stream",
+              "stream/promises"
+            ],
+            "networkApis": [
+              "@google/genai",
+              "fetch",
+              "WebSocket",
+              "ws"
+            ],
+            "sourceSignals": [
+              "process.env"
+            ],
+            "browserCapabilities": [
+              "cryptography",
+              "environment",
+              "filesystem",
+              "install-script",
+              "network",
+              "os"
+            ]
+          }
+        },
+        {
+          "name": "@mistralai/mistralai",
+          "change": "changed",
+          "declaredSpec": "2.4.0",
+          "resolvedVersion": "2.4.0",
+          "integrity": "sha512-t6hCx242MTGolB76CI+17jDtPIe/bzLsMdUTMMoMn9Qo1h02N2G5jQYHmKDGU3X//OgR2wvngTD7tO6tPp5poQ==",
+          "scan": {
+            "packageFileCount": 6209,
+            "sourceFileCount": 1187,
+            "sourceBytes": 2234624,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "buffer"
+            ],
+            "networkApis": [
+              "fetch",
+              "WebSocket",
+              "ws"
+            ],
+            "sourceSignals": [
+              "process.env"
+            ],
+            "browserCapabilities": [
+              "environment",
+              "network"
+            ]
+          }
+        },
+        {
+          "name": "@openclaw/ai",
+          "change": "added",
+          "declaredSpec": "2026.7.1-beta.5",
+          "resolvedVersion": "2026.7.1-beta.5",
+          "integrity": "sha512-6EB875Ge0tXZaI4boe0wGBSR7kSwUFutIezhOpprBlAHXr0Jouk97jGsz/xbLTV/pJ4JC8hb9HYisktCsdzeQA==",
+          "scan": {
+            "packageFileCount": 64,
+            "sourceFileCount": 42,
+            "sourceBytes": 385680,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "crypto",
+              "module"
+            ],
+            "networkApis": [
+              "@anthropic-ai/sdk",
+              "@google/genai",
+              "@mistralai/mistralai",
+              "fetch",
+              "openai"
+            ],
+            "sourceSignals": [
+              "process.env"
+            ],
+            "browserCapabilities": [
+              "cryptography",
+              "environment",
+              "network"
+            ]
+          }
+        },
+        {
+          "name": "@openclaw/fs-safe",
+          "change": "changed",
+          "declaredSpec": "0.4.1",
+          "resolvedVersion": "0.4.1",
+          "integrity": "sha512-hQi+BxO10KdRFlYUot1syC+hTaUnGeQNdqX5kwkKJig8CFq1tKsYJLPm+zkiiGsSKOprPAquQl/txejEhpKPgg==",
+          "scan": {
+            "packageFileCount": 308,
+            "sourceFileCount": 89,
+            "sourceBytes": 434231,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "child_process",
+              "crypto",
+              "fs",
+              "fs/promises",
+              "os",
+              "path",
+              "stream",
+              "stream/promises",
+              "url",
+              "util"
+            ],
+            "networkApis": [],
+            "sourceSignals": [
+              "process.env"
+            ],
+            "browserCapabilities": [
+              "cryptography",
+              "environment",
+              "filesystem",
+              "os",
+              "subprocess"
+            ]
+          }
+        },
+        {
+          "name": "@silvia-odwyer/photon-node",
+          "change": "added",
+          "declaredSpec": "0.3.4",
+          "resolvedVersion": "0.3.4",
+          "integrity": "sha512-bnly4BKB3KDTFxrUIcgCLbaeVVS8lrAkri1pEzskpmxu9MdfGQTy8b8EgcD83ywD3RPMsIulY8xJH5Awa+t9fA==",
+          "scan": {
+            "packageFileCount": 7,
+            "sourceFileCount": 2,
+            "sourceBytes": 262118,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [
+              "photon_rs_bg.wasm"
+            ],
+            "nodeBuiltins": [
+              "fs",
+              "path"
+            ],
+            "networkApis": [],
+            "sourceSignals": [
+              "WebAssembly"
+            ],
+            "browserCapabilities": [
+              "filesystem",
+              "wasm"
+            ]
+          }
+        },
+        {
+          "name": "commander",
+          "change": "changed",
+          "declaredSpec": "15.0.0",
+          "resolvedVersion": "15.0.0",
+          "integrity": "sha512-z67u4ZhzCL/Tydu1lJARtEZYWbWaN7oYLHbsuzocr6y4N6WZAagG3RQ4FW61V1/0+jImpj293XfrcYnd1qxtPg==",
+          "scan": {
+            "packageFileCount": 12,
+            "sourceFileCount": 7,
+            "sourceBytes": 126365,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "child_process",
+              "events",
+              "fs",
+              "path",
+              "process",
+              "util"
+            ],
+            "networkApis": [],
+            "sourceSignals": [
+              "process.env"
+            ],
+            "browserCapabilities": [
+              "environment",
+              "filesystem",
+              "subprocess"
+            ]
+          }
+        },
+        {
+          "name": "grammy",
+          "change": "changed",
+          "declaredSpec": "1.44.0",
+          "resolvedVersion": "1.44.0",
+          "integrity": "sha512-gGVykS5+c5f1tPV97LuU6IDRMawE2NzpwM9pNz58HQ35IZXDnYL3VOLvNzYognPSeBIOSzQXRu5w96V0aY8y8A==",
+          "scan": {
+            "packageFileCount": 45,
+            "sourceFileCount": 21,
+            "sourceBytes": 721048,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "fs",
+              "http",
+              "https",
+              "path",
+              "stream"
+            ],
+            "networkApis": [
+              "fetch"
+            ],
+            "sourceSignals": [
+              "process.env"
+            ],
+            "browserCapabilities": [
+              "environment",
+              "filesystem",
+              "network"
+            ]
+          }
+        },
+        {
+          "name": "openai",
+          "change": "changed",
+          "declaredSpec": "6.45.0",
+          "resolvedVersion": "6.45.0",
+          "integrity": "sha512-5DQVNErssk0afNpTTHUm/qZPU4iKR9OYdNid8Ib4puq4gHNNvGWZht2zY4h9a8JMF949Ik6m8gQutllVPbjdnw==",
+          "scan": {
+            "packageFileCount": 2575,
+            "sourceFileCount": 570,
+            "sourceBytes": 1354291,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "buffer",
+              "child_process",
+              "fs/promises",
+              "process",
+              "stream"
+            ],
+            "networkApis": [
+              "fetch",
+              "openai",
+              "undici",
+              "WebSocket",
+              "ws"
+            ],
+            "sourceSignals": [
+              "process.env"
+            ],
+            "browserCapabilities": [
+              "environment",
+              "filesystem",
+              "network",
+              "subprocess"
+            ]
+          }
+        },
+        {
+          "name": "playwright-core",
+          "change": "changed",
+          "declaredSpec": "1.61.1",
+          "resolvedVersion": "1.61.1",
+          "integrity": "sha512-h7Qlt6m4REp25qvIdvbDtVmD4LqVXfpRxhORv9L0jzETM05p4fuPJ3dKyuSXQxDSbXnmS79HAgi9589lGSpLkg==",
+          "scan": {
+            "packageFileCount": 106,
+            "sourceFileCount": 34,
+            "sourceBytes": 9650618,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "assert",
+              "async_hooks",
+              "buffer",
+              "child_process",
+              "constants",
+              "crypto",
+              "dns",
+              "events",
+              "fs",
+              "http",
+              "http2",
+              "https",
+              "inspector",
+              "module",
+              "net",
+              "os",
+              "path",
+              "process",
+              "readline",
+              "stream",
+              "tls",
+              "tty",
+              "url",
+              "util",
+              "vm",
+              "zlib"
+            ],
+            "networkApis": [
+              "@modelcontextprotocol/sdk",
+              "EventSource",
+              "fetch",
+              "WebSocket"
+            ],
+            "sourceSignals": [
+              "process.env",
+              "WebAssembly"
+            ],
+            "browserCapabilities": [
+              "cryptography",
+              "environment",
+              "filesystem",
+              "network",
+              "os",
+              "subprocess",
+              "terminal",
+              "wasm"
+            ]
+          }
+        },
+        {
+          "name": "quickjs-wasi",
+          "change": "changed",
+          "declaredSpec": "3.0.2",
+          "resolvedVersion": "3.0.2",
+          "integrity": "sha512-SyfPzlrfz67/kv0SogmQgW4c2I1klkLcbvj9Y2gc1h7+VylmvuGevFljLXibGKajKJKiJV29d4S6FQLA6Sc80A==",
+          "scan": {
+            "packageFileCount": 24,
+            "sourceFileCount": 4,
+            "sourceBytes": 100297,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [
+              "extensions/crypto/crypto.so",
+              "extensions/encoding/encoding.so",
+              "extensions/headers/headers.so",
+              "extensions/structured-clone/structured-clone.so",
+              "extensions/url/url.so"
+            ],
+            "wasmArtifacts": [
+              "quickjs.wasm"
+            ],
+            "nodeBuiltins": [],
+            "networkApis": [
+              "fetch"
+            ],
+            "sourceSignals": [
+              "WebAssembly"
+            ],
+            "browserCapabilities": [
+              "native-code",
+              "network",
+              "wasm"
+            ]
+          }
+        },
+        {
+          "name": "tar",
+          "change": "changed",
+          "declaredSpec": "7.5.19",
+          "resolvedVersion": "7.5.19",
+          "integrity": "sha512-4LeEWl96twnS2Q7Bz4MGqgazLqO+hJN63GZxXoIqh1T3VweYD997gbU1ItNsQafqqXTXd5WFyFdReLtwvRBNiw==",
+          "scan": {
+            "packageFileCount": 249,
+            "sourceFileCount": 62,
+            "sourceBytes": 527242,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [
+              "assert",
+              "buffer",
+              "crypto",
+              "events",
+              "fs",
+              "fs/promises",
+              "path",
+              "stream",
+              "string_decoder",
+              "zlib"
+            ],
+            "networkApis": [],
+            "sourceSignals": [
+              "process.env"
+            ],
+            "browserCapabilities": [
+              "cryptography",
+              "environment",
+              "filesystem"
+            ]
+          }
+        },
+        {
+          "name": "typebox",
+          "change": "changed",
+          "declaredSpec": "1.3.3",
+          "resolvedVersion": "1.3.3",
+          "integrity": "sha512-URXGUE31PJDQC+PtRMJeLdF4kmmOdFoVPikPCtV2oOIhUpNpppEdIz7W8bH8cFYPYHdDpaRvqwdegMTmHliudg==",
+          "scan": {
+            "packageFileCount": 1367,
+            "sourceFileCount": 682,
+            "sourceBytes": 820691,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [],
+            "nodeBuiltins": [],
+            "networkApis": [],
+            "sourceSignals": [],
+            "browserCapabilities": []
+          }
+        },
+        {
+          "name": "web-tree-sitter",
+          "change": "changed",
+          "declaredSpec": "0.26.10",
+          "resolvedVersion": "0.26.10",
+          "integrity": "sha512-vengBGYS7FpAerkR3o04oBL4L8MkVmjawK50AFBu7v0HZBkmF9ZavPGKoXLSSmRhp7T/YgsJ7joAS3yAxHPEqQ==",
+          "scan": {
+            "packageFileCount": 19,
+            "sourceFileCount": 4,
+            "sourceBytes": 736552,
+            "truncated": false
+          },
+          "signals": {
+            "lifecycleScripts": [],
+            "nativeArtifacts": [],
+            "wasmArtifacts": [
+              "debug/web-tree-sitter.wasm",
+              "web-tree-sitter.wasm"
+            ],
+            "nodeBuiltins": [
+              "fs",
+              "fs/promises",
+              "module",
+              "path",
+              "url"
+            ],
+            "networkApis": [
+              "fetch"
+            ],
+            "sourceSignals": [
+              "WebAssembly"
+            ],
+            "browserCapabilities": [
+              "filesystem",
+              "network",
+              "wasm"
+            ]
+          }
+        }
+      ],
       "deltaFromStable": {
         "unpackedBytes": 1255885,
         "directDependencyCount": 2,

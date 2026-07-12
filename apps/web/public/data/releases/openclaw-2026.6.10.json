@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T06:34:38.014Z",
+  "generatedAt": "2026-07-12T06:57:46.097Z",
   "status": "probing",
   "target": {
     "runtime": "browserpod",
@@ -18,219 +18,327 @@
     "directDependencies": [
       {
         "name": "@agentclientprotocol/sdk",
-        "spec": "0.22.1"
+        "spec": "0.22.1",
+        "resolvedVersion": "0.22.1",
+        "integrity": "sha512-DfqXtl/8gO9NImq094MTaCXEU2vkhh6v7q/kT+9UjZxUqj8hYaya2OjLVIqn16MzNHcXEpShTR2RIauLSYeDQQ=="
       },
       {
         "name": "@anthropic-ai/sdk",
-        "spec": "0.100.1"
+        "spec": "0.100.1",
+        "resolvedVersion": "0.100.1",
+        "integrity": "sha512-RANcEe7LpiLczkKGOwoXOTuFdPhuubS0i4xaAKOMpcqc55YO0mukgxppV7eygx3DXNjxWT6RYOLPyOy0aIAmwg=="
       },
       {
         "name": "@clack/core",
-        "spec": "1.3.1"
+        "spec": "1.3.1",
+        "resolvedVersion": "1.3.1",
+        "integrity": "sha512-fT1qHVGAag4IEkrupZ6lRRbNCs1vS9P01KB/sG8zKgvUztbYtFBtQpjSITNwooDZ83tpsPzP0mRNs1/KVszCRA=="
       },
       {
         "name": "@clack/prompts",
-        "spec": "1.4.0"
+        "spec": "1.4.0",
+        "resolvedVersion": "1.4.0",
+        "integrity": "sha512-S0My7XPGIgpRWMDG8uRqalbgT+a6FmCUdOW+HaIOVVpUPHOb7RrpvjTjiODadKp06fsrVDJZlIzc6yCTp4AnxA=="
       },
       {
         "name": "@earendil-works/pi-tui",
-        "spec": "0.78.0"
+        "spec": "0.78.0",
+        "resolvedVersion": "0.78.0",
+        "integrity": "sha512-3a705FnsVVUhAyceShNB3kS2rpxcxLcx+hqB0u6MMMpHwQGbW+m++MqA6r7eOzq/8FLx5e3vDh38h/SVTk2qzw=="
       },
       {
         "name": "@google/genai",
-        "spec": "2.7.0"
+        "spec": "2.7.0",
+        "resolvedVersion": "2.7.0",
+        "integrity": "sha512-tv0DRtcndt2oEhBYy+5mA0TaXH98+L1Gt0AP9unBfH7DP20KhB7+O3QqAN1Lz+laMARGTHS7BFQSNpLbl4gm1g=="
       },
       {
         "name": "@grammyjs/runner",
-        "spec": "2.0.3"
+        "spec": "2.0.3",
+        "resolvedVersion": "2.0.3",
+        "integrity": "sha512-nckmTs1dPWfVQteK9cxqxzE+0m1VRvluLWB8UgFzsjg62w3qthPJt0TYtJBEdG7OedvfQq4vnFAyE6iaMkR42A=="
       },
       {
         "name": "@grammyjs/transformer-throttler",
-        "spec": "1.2.1"
+        "spec": "1.2.1",
+        "resolvedVersion": "1.2.1",
+        "integrity": "sha512-CpWB0F3rJdUiKsq7826QhQsxbZi4wqfz1ccKX+fr+AOC+o8K7ZvS+wqX0suSu1QCsyUq2MDpNiKhyL2ZOJUS4w=="
       },
       {
         "name": "@homebridge/ciao",
-        "spec": "1.3.9"
+        "spec": "1.3.9",
+        "resolvedVersion": "1.3.9",
+        "integrity": "sha512-TMy9zy173jDOpnFXDqL3BPIQn5lfcAkSsivYQatCCakoHk4fLGd7QjfAaNGYE3Ox+/ZI6Lq0e1gGcz1qdw/IbA=="
       },
       {
         "name": "@lydell/node-pty",
-        "spec": "1.2.0-beta.12"
+        "spec": "1.2.0-beta.12",
+        "resolvedVersion": "1.2.0-beta.12",
+        "integrity": "sha512-qIK890UwPupoj07osVvgOIa++1mxeHbcGry4PKRHhNVNs81V2SCG34eJr46GybiOmBtc8Sj5PB1/GGM5PL549g=="
       },
       {
         "name": "@mistralai/mistralai",
-        "spec": "2.2.5"
+        "spec": "2.2.5",
+        "resolvedVersion": "2.2.5",
+        "integrity": "sha512-ATbWzKkNzNAZ+gtw9MI/c/ULTMG80tKUiRNIbQFfg4OP0uEZZpTfXZeBCNfs5Dq0uqMQ/tQWc4o6RRJQtMrpDA=="
       },
       {
         "name": "@modelcontextprotocol/sdk",
-        "spec": "1.29.0"
+        "spec": "1.29.0",
+        "resolvedVersion": "1.29.0",
+        "integrity": "sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ=="
       },
       {
         "name": "@mozilla/readability",
-        "spec": "0.6.0"
+        "spec": "0.6.0",
+        "resolvedVersion": "0.6.0",
+        "integrity": "sha512-juG5VWh4qAivzTAeMzvY9xs9HY5rAcr2E4I7tiSSCokRFi7XIZCAu92ZkSTsIj1OPceCifL3cpfteP3pDT9/QQ=="
       },
       {
         "name": "@openclaw/fs-safe",
-        "spec": "0.3.0"
+        "spec": "0.3.0",
+        "resolvedVersion": "0.3.0",
+        "integrity": "sha512-uIBE441CIt1kIURoP9qRGKZ8LkGyfD9ZzeESjwAd29ZPWtghws/5GR3Pjb67jKdcJHP1I6roNXcvnhzAU7lHlA=="
       },
       {
         "name": "@openclaw/proxyline",
-        "spec": "0.3.3"
+        "spec": "0.3.3",
+        "resolvedVersion": "0.3.3",
+        "integrity": "sha512-sftHnW69NHQqLjCxBTvQ8f/eQl+peZ5pHCBQtuTWBbeuYRHZ0/GXVTmw/O/YKsShMbqPWhJB0UYtPPdvCUSS8w=="
       },
       {
         "name": "chalk",
-        "spec": "5.6.2"
+        "spec": "5.6.2",
+        "resolvedVersion": "5.6.2",
+        "integrity": "sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA=="
       },
       {
         "name": "chokidar",
-        "spec": "5.0.0"
+        "spec": "5.0.0",
+        "resolvedVersion": "5.0.0",
+        "integrity": "sha512-TQMmc3w+5AxjpL8iIiwebF73dRDF4fBIieAqGn9RGCWaEVwQ6Fb2cGe31Yns0RRIzii5goJ1Y7xbMwo1TxMplw=="
       },
       {
         "name": "clawpdf",
-        "spec": "0.3.0"
+        "spec": "0.3.0",
+        "resolvedVersion": "0.3.0",
+        "integrity": "sha512-41+3AnKk9yek2sm+/9XvUlDTN8Wi+ag7fmxZuqw+ySn4lqaf/fCgLeamqPLiXY4gVbizKEHGoTG/JrIIFNE2rw=="
       },
       {
         "name": "commander",
-        "spec": "14.0.3"
+        "spec": "14.0.3",
+        "resolvedVersion": "14.0.3",
+        "integrity": "sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw=="
       },
       {
         "name": "croner",
-        "spec": "10.0.1"
+        "spec": "10.0.1",
+        "resolvedVersion": "10.0.1",
+        "integrity": "sha512-ixNtAJndqh173VQ4KodSdJEI6nuioBWI0V1ITNKhZZsO0pEMoDxz539T4FTTbSZ/xIOSuDnzxLVRqBVSvPNE2g=="
       },
       {
         "name": "diff",
-        "spec": "9.0.0"
+        "spec": "9.0.0",
+        "resolvedVersion": "9.0.0",
+        "integrity": "sha512-svtcdpS8CgJyqAjEQIXdb3OjhFVVYjzGAPO8WGCmRbrml64SPw/jJD4GoE98aR7r25A0XcgrK3F02yw9R/vhQw=="
       },
       {
         "name": "dotenv",
-        "spec": "17.4.2"
+        "spec": "17.4.2",
+        "resolvedVersion": "17.4.2",
+        "integrity": "sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw=="
       },
       {
         "name": "express",
-        "spec": "5.2.1"
+        "spec": "5.2.1",
+        "resolvedVersion": "5.2.1",
+        "integrity": "sha512-hIS4idWWai69NezIdRt2xFVofaF4j+6INOpJlVOLDO8zXGpUVEVzIYk12UUi2JzjEzWL3IOAxcTubgz9Po0yXw=="
       },
       {
         "name": "file-type",
-        "spec": "22.0.1"
+        "spec": "22.0.1",
+        "resolvedVersion": "22.0.1",
+        "integrity": "sha512-ww5Mhre0EE+jmBvOXTmXAbEMuZE7uX4a3+oRCQFNj8w++g3ev913N6tXQz0XTXbueQ5TWQfm6BdaViEHHn8bhA=="
       },
       {
         "name": "glob",
-        "spec": "13.0.6"
+        "spec": "13.0.6",
+        "resolvedVersion": "13.0.6",
+        "integrity": "sha512-Wjlyrolmm8uDpm/ogGyXZXb1Z+Ca2B8NbJwqBVg0axK9GbBeoS7yGV6vjXnYdGm6X53iehEuxxbyiKp8QmN4Vw=="
       },
       {
         "name": "grammy",
-        "spec": "1.43.0"
+        "spec": "1.43.0",
+        "resolvedVersion": "1.43.0",
+        "integrity": "sha512-7dYm06A945mXuIk/5HUlSjeyIYChW8vCEiU2dkOKKqJJzwAWxTkCc91Eqbz7TgODh2rtFFKWI/fekowWHOkmjQ=="
       },
       {
         "name": "highlight.js",
-        "spec": "11.11.1"
+        "spec": "11.11.1",
+        "resolvedVersion": "11.11.1",
+        "integrity": "sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w=="
       },
       {
         "name": "hosted-git-info",
-        "spec": "10.1.1"
+        "spec": "10.1.1",
+        "resolvedVersion": "10.1.1",
+        "integrity": "sha512-DeOnSPAvOndYKfw075gt8yZzQ7S2hNztw34zBTfhIzLhmBTswIBg5/y+pqu/VD5cYWm5goAFTusDmUEmKZ0PEQ=="
       },
       {
         "name": "ignore",
-        "spec": "7.0.5"
+        "spec": "7.0.5",
+        "resolvedVersion": "7.0.5",
+        "integrity": "sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg=="
       },
       {
         "name": "jiti",
-        "spec": "2.7.0"
+        "spec": "2.7.0",
+        "resolvedVersion": "2.7.0",
+        "integrity": "sha512-AC/7JofJvZGrrneWNaEnJeOLUx+JlGt7tNa0wZiRPT4MY1wmfKjt2+6O2p2uz2+skll8OZZmJMNqeke7kKbNgQ=="
       },
       {
         "name": "json5",
-        "spec": "2.2.3"
+        "spec": "2.2.3",
+        "resolvedVersion": "2.2.3",
+        "integrity": "sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg=="
       },
       {
         "name": "jszip",
-        "spec": "3.10.1"
+        "spec": "3.10.1",
+        "resolvedVersion": "3.10.1",
+        "integrity": "sha512-xXDvecyTpGLrqFrvkrUSoxxfJI5AH7U8zxxtVclpsUtMCq4JQ290LY8AW5c7Ggnr/Y/oK+bQMbqK2qmtk3pN4g=="
       },
       {
         "name": "kysely",
-        "spec": "0.29.2"
+        "spec": "0.29.2",
+        "resolvedVersion": "0.29.2",
+        "integrity": "sha512-s6WVJyEZrbm6jhBpiKHsGHyePMrVQKJ85wZCFCr9W4QHv6WTjWIrdvTmO9hDEA3bNK0xkrE2DqrHsXMLWuZpQg=="
       },
       {
         "name": "linkedom",
-        "spec": "0.18.12"
+        "spec": "0.18.12",
+        "resolvedVersion": "0.18.12",
+        "integrity": "sha512-jalJsOwIKuQJSeTvsgzPe9iJzyfVaEJiEXl+25EkKevsULHvMJzpNqwvj1jOESWdmgKDiXObyjOYwlUqG7wo1Q=="
       },
       {
         "name": "minimatch",
-        "spec": "10.2.5"
+        "spec": "10.2.5",
+        "resolvedVersion": "10.2.5",
+        "integrity": "sha512-MULkVLfKGYDFYejP07QOurDLLQpcjk7Fw+7jXS2R2czRQzR56yHRveU5NDJEOviH+hETZKSkIk5c+T23GjFUMg=="
       },
       {
         "name": "node-edge-tts",
-        "spec": "1.2.10"
+        "spec": "1.2.10",
+        "resolvedVersion": "1.2.10",
+        "integrity": "sha512-bV2i4XU54D45+US0Zm1HcJRkifuB3W438dWyuJEHLQdKxnuqlI1kim2MOvR6Q3XUQZvfF9PoDyR1Rt7aeXhPdQ=="
       },
       {
         "name": "openai",
-        "spec": "6.39.1"
+        "spec": "6.39.1",
+        "resolvedVersion": "6.39.1",
+        "integrity": "sha512-z3dO9fEWOXBzlXynVb/xZ/tujzUjFWQWn3C0n0mw6Vo0zJTbEkaN4b2cLWjhJ6haJQx8LlREoafHRl+Gu/Hl+A=="
       },
       {
         "name": "partial-json",
-        "spec": "0.1.7"
+        "spec": "0.1.7",
+        "resolvedVersion": "0.1.7",
+        "integrity": "sha512-Njv/59hHaokb/hRUjce3Hdv12wd60MtM9Z5Olmn+nehe0QDAsRtRbJPvJ0Z91TusF0SuZRIvnM+S4l6EIP8leA=="
       },
       {
         "name": "playwright-core",
-        "spec": "1.60.0"
+        "spec": "1.60.0",
+        "resolvedVersion": "1.60.0",
+        "integrity": "sha512-9bW6zvX/m0lEbgTKJ6YppOKx8H3VOPBMOCFh2irXFOT4BbHgrx5hPjwJYLT40Lu+4qtD36qKc/Hn56StUW57IA=="
       },
       {
         "name": "proper-lockfile",
-        "spec": "4.1.2"
+        "spec": "4.1.2",
+        "resolvedVersion": "4.1.2",
+        "integrity": "sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA=="
       },
       {
         "name": "qrcode",
-        "spec": "1.5.4"
+        "spec": "1.5.4",
+        "resolvedVersion": "1.5.4",
+        "integrity": "sha512-1ca71Zgiu6ORjHqFBDpnSMTR2ReToX4l1Au1VFLyVeBTFavzQnv5JxMFr3ukHVKpSrSA2MCk0lNJSykjUfz7Zg=="
       },
       {
         "name": "quickjs-wasi",
-        "spec": "3.0.0"
+        "spec": "3.0.0",
+        "resolvedVersion": "3.0.0",
+        "integrity": "sha512-X7ouKC4ZVf9bXQ8rsE7+L6TeBbesejAJH61x16xRaGAQGfBHHRcniWgzJZZVtHc8rS9yVsY+Tvk8/usAosg4bg=="
       },
       {
         "name": "rastermill",
-        "spec": "0.3.1"
+        "spec": "0.3.1",
+        "resolvedVersion": "0.3.1",
+        "integrity": "sha512-CX4nij6+ZLHYIaojJNfLTr7W+AiH/IPJi6E9Aw1br2///1KZL2KBOHd68rkcLedc47MPvb4hhH+fzYeGFa4A/Q=="
       },
       {
         "name": "tar",
-        "spec": "7.5.16"
+        "spec": "7.5.16",
+        "resolvedVersion": "7.5.16",
+        "integrity": "sha512-56adEpPMouktRlBLXiaYFFzZ/3+JXa8P9n7WbR+ibIjtviN55mEaOkiysCnPnWm+7kkui1Dn8J9l+g6zV8731w=="
       },
       {
         "name": "tree-sitter-bash",
-        "spec": "0.25.1"
+        "spec": "0.25.1",
+        "resolvedVersion": "0.25.1",
+        "integrity": "sha512-7hMytuYIMoXOq24yRulgIxthE9YmggZIOHCyPTTuJcu6EU54tYD+4G39cUb28kxC6jMf/AbPfWGLQtgPTdh3xw=="
       },
       {
         "name": "tslog",
-        "spec": "4.10.2"
+        "spec": "4.10.2",
+        "resolvedVersion": "4.10.2",
+        "integrity": "sha512-XuELoRpMR+sq8fuWwX7P0bcj+PRNiicOKDEb3fGNURhxWVyykCi9BNq7c4uVz7h7P0sj8qgBsr5SWS6yBClq3g=="
       },
       {
         "name": "typebox",
-        "spec": "1.1.39"
+        "spec": "1.1.39",
+        "resolvedVersion": "1.1.39",
+        "integrity": "sha512-vj0afVtOfLQvv0GR0VxVagYxsXN64btL7Z9XoaG0ZggH3mruMMkOO6hXdgMsjCY3shZgEvooAWVeznQVs5c43w=="
       },
       {
         "name": "typescript",
-        "spec": "6.0.3"
+        "spec": "6.0.3",
+        "resolvedVersion": "6.0.3",
+        "integrity": "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw=="
       },
       {
         "name": "undici",
-        "spec": "8.5.0"
+        "spec": "8.5.0",
+        "resolvedVersion": "8.5.0",
+        "integrity": "sha512-xamtWoB1EshgjpmlXd7GGm2VfdDtw1+rD8uhry8pSNW3If6S8E0m2T2+orSKeZXEn/aPJMviCpDBA65WJt8zhg=="
       },
       {
         "name": "web-push",
-        "spec": "3.6.7"
+        "spec": "3.6.7",
+        "resolvedVersion": "3.6.7",
+        "integrity": "sha512-OpiIUe8cuGjrj3mMBFWY+e4MMIkW3SVT+7vEIjvD9kejGUypv8GPDf84JdPWskK8zMRIJ6xYGm+Kxr8YkPyA0A=="
       },
       {
         "name": "web-tree-sitter",
-        "spec": "0.26.9"
+        "spec": "0.26.9",
+        "resolvedVersion": "0.26.9",
+        "integrity": "sha512-YJwSHANl6XFgeEjB8nitgj0qZYt5gkIesJ4w2srS2wcLB4GUa4xcOkM0YaMsU6WNR53YVIkDSY7Ej4pf3IXtCA=="
       },
       {
         "name": "ws",
-        "spec": "8.21.0"
+        "spec": "8.21.0",
+        "resolvedVersion": "8.21.0",
+        "integrity": "sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g=="
       },
       {
         "name": "yaml",
-        "spec": "2.9.0"
+        "spec": "2.9.0",
+        "resolvedVersion": "2.9.0",
+        "integrity": "sha512-2AvhNX3mb8zd6Zy7INTtSpl1F15HW6Wnqj0srWlkKLcpYl/gMIMJiyuGq2KeI2YFxUPjdlB+3Lc10seMLtL4cA=="
       },
       {
         "name": "zod",
-        "spec": "4.4.3"
+        "spec": "4.4.3",
+        "resolvedVersion": "4.4.3",
+        "integrity": "sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ=="
       }
     ],
     "nativeRiskDependencies": [
