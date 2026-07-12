@@ -303,7 +303,7 @@
 
         <div class="broker-proof reveal">
           <span>Implemented slice</span>
-          <p>Exact artifact → verified manifest → BrowserPod boot → explicit grant → bounded handler → metadata-only audit. Cross-runtime evidence is rejected before tokens are spent.</p>
+          <p>Exact artifact → verified manifest → BrowserPod boot → typed mailbox → explicit grant → bounded handler → metadata-only audit. Replay and cross-runtime evidence fail closed.</p>
           <a href="https://github.com/haya-inc/clawsembly/blob/main/docs/embedding.md">Read the embedding contract ↗</a>
         </div>
       </section>
@@ -324,9 +324,9 @@
           <a class="runtime-row runtime-row-primary" href="https://browserpod.io/docs/more/licensing" target="_blank" rel="noreferrer">
             <span class="runtime-rank">01 / adopted</span>
             <div class="runtime-name"><strong>BrowserPod 2.x</strong><span>Node 22 · browser-local</span></div>
-            <p>Harness binds exact npm SHA-512 to Node preflight, Gateway log, HTTPS portal, /healthz, and /readyz. Real provider evidence is still unrun; public 2.12.1 APIs expose no terminate or hard dispose.</p>
+            <p>Typed file mailbox carries broker calls and cancellation without terminal input; the guest supervisor stops the Gateway after exact-artifact readiness. Real provider evidence is unrun; hard dispose remains unavailable.</p>
             <span class="runtime-license">Commercial</span>
-            <span class="runtime-state">Probe path ✓</span>
+            <span class="runtime-state">Transport core ✓</span>
           </a>
           <a class="runtime-row" href="https://github.com/container2wasm/container2wasm" target="_blank" rel="noreferrer">
             <span class="runtime-rank">02 / archived probe</span>
