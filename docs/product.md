@@ -84,3 +84,6 @@ machine-readable checksum/report binding. This removes registry access as an
 adoption prerequisite without relabeling the `probing` runtime as supported.
 The matching GitHub prerelease adds a conventional discovery surface, browser
 diagnostics, and tag/source/Pages/report provenance for independent review.
+The external host example pins that release URL and its SHA-512 in a standalone
+lockfile, so copying the directory and running `npm ci` does not depend on the
+repository workspace or an unpublished npm package.

@@ -104,6 +104,8 @@ channel, not a prerequisite for the first external integration. The same bytes
 also ship as a GitHub prerelease with an exact tag/source/report provenance
 record and provider-free browser diagnostics, giving reviewers a conventional
 release surface without weakening the `probing` gate.
+The SDK host example is a copy-ready consumer with an integrity-pinned Release
+dependency; the normal SDK gate rebuilds the package and rejects lock drift.
 
 ### Gate 3 — contributor flywheel
 

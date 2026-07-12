@@ -89,6 +89,10 @@ The project does not yet promise semantic-version compatibility.
 - tag-gated GitHub source prerelease automation with read/write job separation,
   exact transferred-asset allowlisting, browser diagnostics, checksum validation,
   and tag/source/Pages/report provenance;
+- copy-ready external SDK host with a GitHub Release dependency, checked-in
+  SHA-512 lock, and local reproducible-tarball drift enforcement;
+- support and governance policies, a structured support-request template, and
+  an explicit security-support table for the first source prerelease;
 - report-driven project page, release ledger, compatibility badge, contribution
   templates, security policy, and downstream consumption guide.
 

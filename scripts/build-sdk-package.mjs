@@ -34,6 +34,26 @@ async function sha256(path) {
   return createHash("sha256").update(await readFile(path)).digest("hex");
 }
 
+async function sha512Integrity(path) {
+  return `sha512-${createHash("sha512").update(await readFile(path)).digest("base64")}`;
+}
+
+async function verifyExternalStarterLock(tarball, sdkManifest) {
+  const exampleRoot = resolve(root, "examples", "sdk-host");
+  const exampleManifest = JSON.parse(await readFile(resolve(exampleRoot, "package.json"), "utf8"));
+  const lock = JSON.parse(await readFile(resolve(exampleRoot, "package-lock.json"), "utf8"));
+  const fileName = basename(tarball);
+  const expectedUrl = `https://github.com/haya-inc/clawsembly/releases/download/v${sdkManifest.version}/${fileName}`;
+  const lockedPackage = lock.packages?.["node_modules/@haya-inc/clawsembly"];
+  if (exampleManifest.dependencies?.[sdkManifest.name] !== expectedUrl
+    || lock.packages?.[""]?.dependencies?.[sdkManifest.name] !== expectedUrl
+    || lockedPackage?.version !== sdkManifest.version
+    || lockedPackage?.resolved !== expectedUrl
+    || lockedPackage?.integrity !== await sha512Integrity(tarball)) {
+    throw new Error("external SDK starter lock drifted from the reproducible GitHub prerelease");
+  }
+}
+
 async function copyCanonicalSources(staging) {
   for (const directory of sourceDirectories) {
     const source = resolve(root, "packages", directory);
@@ -216,6 +236,7 @@ async function main() {
     const firstHash = await sha256(first.path);
     const secondHash = await sha256(second.path);
     if (firstHash !== secondHash) throw new Error("SDK tarball is not byte-reproducible");
+    await verifyExternalStarterLock(first.path, manifest);
     await verifyConsumer(first.path, temporaryRoot);
     await verifyHostExample(first.path, temporaryRoot);
 

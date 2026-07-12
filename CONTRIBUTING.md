@@ -83,3 +83,6 @@ must come from the corresponding probe evidence.
 
 By participating, you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 Report vulnerabilities privately according to [SECURITY.md](SECURITY.md).
+For installation and integration help, use the paths in [SUPPORT.md](SUPPORT.md).
+Project decisions and the contributor-to-maintainer path are documented in
+[GOVERNANCE.md](GOVERNANCE.md).

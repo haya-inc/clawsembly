@@ -162,10 +162,12 @@ the release is reported as `probing` rather than production-compatible.
 - [Release-history schema](packages/compatibility/release-history.schema.json)
 - [Downstream consumption guide](docs/consuming-reports.md)
 - [SDK prerelease recipe](packages/sdk-package/README.md)
-- [Packed-SDK host example](examples/sdk-host/README.md)
+- [Copy-ready SDK host starter](examples/sdk-host/README.md)
 - [Owner-authorized BrowserPod evidence workflow](docs/browserpod-evidence.md)
 - [Maintainer release checklist](docs/releasing.md)
 - [Deployment requirements](docs/deployment.md)
+- [Support](SUPPORT.md)
+- [Governance](GOVERNANCE.md)
 
 ## Quick start
 

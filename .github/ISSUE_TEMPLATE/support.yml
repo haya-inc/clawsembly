@@ -1,0 +1,48 @@
+name: Support request
+description: Ask for help installing, integrating, or interpreting Clawsembly.
+title: "support: "
+labels: ["needs-triage"]
+body:
+  - type: input
+    id: clawsembly-version
+    attributes:
+      label: Clawsembly release or commit
+      placeholder: v0.1.0-alpha.0
+    validations:
+      required: true
+  - type: input
+    id: openclaw-version
+    attributes:
+      label: OpenClaw version
+      placeholder: 2026.6.11
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser, operating system, and BrowserPod version
+      placeholder: Chrome 140 / macOS 16 / BrowserPod 2.12.1
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+      description: Include the install source, report status, and expected host behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal redacted reproduction
+      description: Remove API keys, Gateway and device tokens, private keys, user payloads, and workspace contents.
+      render: shell
+    validations:
+      required: true
+  - type: checkboxes
+    id: evidence
+    attributes:
+      label: Evidence boundary
+      options:
+        - label: I understand that a `probing`, `partial`, or `unsupported` report does not authorize verified BrowserPod launch.
+          required: true

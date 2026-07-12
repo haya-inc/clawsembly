@@ -16,6 +16,14 @@ within five business days and coordinate disclosure after a fix is available.
 
 ## Supported versions
 
-Until the first release, only the latest commit on the default branch receives
-security fixes. A versioned support table will be added with the first tagged
-release.
+Only the latest source prerelease and the current default branch receive
+security fixes. Older prereleases are unsupported after a replacement ships.
+
+| Version | Security fixes |
+| --- | --- |
+| `0.1.0-alpha.0` | Yes |
+| Older or untagged source archives | No |
+
+This policy covers defects in the SDK, evidence pipeline, capability boundary,
+and release artifacts. It does not make the current `probing` BrowserPod result
+suitable for production credentials or sensitive workspaces.

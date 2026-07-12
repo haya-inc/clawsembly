@@ -16,6 +16,21 @@ The example contains no BrowserPod or OpenAI credential field and never boots a
 provider automatically. With the current `probing` report it must display
 `Provider boot blocked` and `Not attempted`.
 
+## Run as an external starter
+
+Copy this directory outside the Clawsembly checkout, then install the exact
+GitHub prerelease pinned by `package-lock.json`:
+
+```bash
+npm ci
+npm run dev
+```
+
+The lock records the Release URL and its SHA-512 integrity. The repository's
+`sdk:check` independently rebuilds the source package and rejects the starter
+lock if either the resolved URL or those exact bytes drift. This path does not
+require npm registry publication.
+
 ## Run from a checkout
 
 Build the local prerelease first, then install that tarball into this separate
@@ -29,9 +44,10 @@ npm run dev --prefix examples/sdk-host
 ```
 
 The application imports `@haya-inc/clawsembly`; it does not use a Vite alias or
-a relative path into the repository packages. External hosts can now install
-the exact Pages tarball URL from `downloads/sdk-release.json`; after an npm
-prerelease exists, the ordinary registry flow can use the declared version.
+a relative path into the repository packages. The checked-in dependency uses
+the exact GitHub prerelease; hosts may instead resolve the byte-identical Pages
+tarball through `downloads/sdk-release.json`. After an npm prerelease exists,
+the ordinary registry flow can use the declared version.
 
 ## Owner-controlled boot
 
