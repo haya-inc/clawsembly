@@ -96,8 +96,14 @@ async function pack(staging, destination) {
     env: { ...process.env, npm_config_ignore_scripts: "true" }
   });
   let packed;
-  try { [packed] = JSON.parse(output); }
-  catch { throw new Error("npm pack did not return its JSON manifest"); }
+  try {
+    const manifest = JSON.parse(output);
+    const entries = Array.isArray(manifest) ? manifest : Object.values(manifest);
+    if (entries.length !== 1) throw new Error("unexpected npm pack manifest count");
+    [packed] = entries;
+  } catch {
+    throw new Error("npm pack did not return its JSON manifest");
+  }
   if (!packed?.filename || !Array.isArray(packed.files)) throw new Error("npm pack manifest is incomplete");
   const forbidden = packed.files.map((file) => file.path).filter((path) => (
     path.includes(".test.") || path.includes("node_modules") || path.startsWith("apps/")

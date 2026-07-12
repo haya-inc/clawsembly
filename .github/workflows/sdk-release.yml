@@ -44,6 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: write
     steps:
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
@@ -103,3 +104,11 @@ jobs:
             "$staging/sdk-release.json" \
             "$staging/source-release.json" \
             "$staging/source-release.schema.json"
+      - name: Dispatch provenance-backed npm publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh workflow run npm-publish.yml
+          --repo "$GITHUB_REPOSITORY"
+          --ref main
+          -f tag="$GITHUB_REF_NAME"
