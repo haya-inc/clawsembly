@@ -65,7 +65,8 @@ The project does not yet promise semantic-version compatibility.
 - nonce-bound guest process supervisor for cooperative child shutdown without
   overstating BrowserPod process-termination or Pod-disposal capabilities;
 - stable / previous / preview release tracking with generated update pull
-  requests and cross-version evidence rejection;
+  requests, exact direct-dependency manifest diffs, and cross-version evidence
+  rejection;
 - report-driven project page, release ledger, compatibility badge, contribution
   templates, security policy, and downstream consumption guide.
 

@@ -35,6 +35,40 @@ function countStatuses(checks = []) {
   }, { pass: 0, warn: 0, fail: 0, pending: 0 });
 }
 
+function dependencyMap(dependencies, label) {
+  if (!Array.isArray(dependencies)) throw new Error(`${label} direct dependency inventory is missing.`);
+  const entries = new Map();
+  for (const dependency of dependencies) {
+    if (!dependency?.name || typeof dependency.spec !== "string" || dependency.spec.length === 0) {
+      throw new Error(`${label} direct dependency inventory is invalid.`);
+    }
+    if (entries.has(dependency.name)) throw new Error(`${label} direct dependency inventory contains duplicates.`);
+    entries.set(dependency.name, dependency.spec);
+  }
+  return entries;
+}
+
+export function compareDirectDependencies(stableDependencies, releaseDependencies) {
+  const stable = dependencyMap(stableDependencies, "Stable");
+  const release = dependencyMap(releaseDependencies, "Release");
+  const added = [];
+  const removed = [];
+  const changed = [];
+  for (const [name, spec] of release) {
+    if (!stable.has(name)) added.push({ name, spec });
+    else if (stable.get(name) !== spec) changed.push({ name, stableSpec: stable.get(name), releaseSpec: spec });
+  }
+  for (const [name, spec] of stable) {
+    if (!release.has(name)) removed.push({ name, spec });
+  }
+  const byName = (left, right) => left.name.localeCompare(right.name);
+  return {
+    added: added.sort(byName),
+    removed: removed.sort(byName),
+    changed: changed.sort(byName)
+  };
+}
+
 function summarizeReport(channel, report, reportPath, stableReport) {
   const shrinkwrap = report.artifact.shrinkwrapRootConsistency;
   const stableArtifact = stableReport.artifact;
@@ -55,6 +89,10 @@ function summarizeReport(channel, report, reportPath, stableReport) {
       shrinkwrapMismatchedCount: shrinkwrap.mismatchedCount
     },
     checks: countStatuses(report.checks),
+    dependencyChangesFromStable: compareDirectDependencies(
+      stableArtifact.directDependencies,
+      report.artifact.directDependencies
+    ),
     deltaFromStable: {
       unpackedBytes: report.artifact.unpackedBytes - stableArtifact.unpackedBytes,
       directDependencyCount: report.artifact.directDependencyCount - stableArtifact.directDependencyCount,

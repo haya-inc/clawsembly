@@ -5,6 +5,7 @@ import { dirname, resolve, sep } from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { deriveRuntimeClaimStatuses, evidenceDigest } from "./report.mjs";
+import { compareDirectDependencies } from "./release-tracking.mjs";
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -81,7 +82,21 @@ for (const release of history.releases) {
   assertEvidenceClaims(report, release.reportPath);
   assert.equal(report.artifact.version, release.version, `${release.channel} summary version drift`);
   assert.equal(report.artifact.integrity, release.artifact.integrity, `${release.channel} summary integrity drift`);
+  assert.equal(report.artifact.directDependencies.length, report.artifact.directDependencyCount, `${release.channel} direct dependency count drift`);
+  assert.deepEqual(
+    report.artifact.directDependencies.map(({ name }) => name),
+    report.artifact.directDependencies.map(({ name }) => name).toSorted(),
+    `${release.channel} direct dependency inventory must be sorted`
+  );
   reports.push(report);
+}
+
+for (let index = 0; index < history.releases.length; index += 1) {
+  assert.deepEqual(
+    history.releases[index].dependencyChangesFromStable,
+    compareDirectDependencies(reports[0].artifact.directDependencies, reports[index].artifact.directDependencies),
+    `${history.releases[index].channel} direct dependency changes drift`
+  );
 }
 
 const latest = readJson(latestPath);

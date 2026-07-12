@@ -157,6 +157,20 @@ export function findShrinkwrapRootDrift(manifest = {}, shrinkwrap = {}) {
   };
 }
 
+export function normalizeDirectDependencies(dependencies = {}) {
+  if (!dependencies || typeof dependencies !== "object" || Array.isArray(dependencies)) {
+    throw new TypeError("Direct dependencies must be a package-to-spec object.");
+  }
+  return Object.entries(dependencies)
+    .map(([name, spec]) => {
+      if (!name || typeof spec !== "string" || spec.length === 0) {
+        throw new TypeError("Every direct dependency requires a name and exact declared spec.");
+      }
+      return { name, spec };
+    })
+    .sort((left, right) => left.name.localeCompare(right.name));
+}
+
 export function buildReport({
   packageName,
   manifest,
@@ -184,7 +198,7 @@ export function buildReport({
     }
   }
 
-  const dependencies = manifest.dependencies ?? {};
+  const dependencies = normalizeDirectDependencies(manifest.dependencies ?? {});
   const nativeRiskDependencies = findNativeRisks(shrinkwrap?.packages);
   const shrinkwrapRootDrift = findShrinkwrapRootDrift(manifest, shrinkwrap);
   const hasLifecycleScript = Boolean(manifest.scripts?.preinstall || manifest.scripts?.install || manifest.scripts?.postinstall);
@@ -203,7 +217,8 @@ export function buildReport({
       nodeEngine: manifest.engines?.node ?? "unspecified",
       tarballBytes: pack.size ?? 0,
       unpackedBytes: pack.unpackedSize ?? 0,
-      directDependencyCount: Object.keys(dependencies).length,
+      directDependencyCount: dependencies.length,
+      directDependencies: dependencies,
       nativeRiskDependencies,
       shrinkwrapRootConsistency: {
         lockfileVersion: shrinkwrapRootDrift.lockfileVersion,

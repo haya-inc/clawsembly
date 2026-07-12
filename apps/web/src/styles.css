@@ -149,6 +149,24 @@ nav a:hover, nav a:focus-visible { color: var(--accent); }
 .release-arrow { justify-self: end; color: var(--accent); font-size: 14px; transition: transform 180ms ease; }
 .release-row:hover .release-arrow, .release-row:focus-visible .release-arrow { transform: translate(3px, -3px); }
 .release-skeleton { display: flex; color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
+.release-diff { border-bottom: 1px solid var(--line); }
+.release-diff summary { display: grid; grid-template-columns: 190px 1fr auto; gap: 24px; align-items: center; padding: 23px 0; cursor: pointer; list-style: none; transition: color 180ms ease, padding 180ms ease, background 180ms ease; }
+.release-diff summary::-webkit-details-marker { display: none; }
+.release-diff summary:hover, .release-diff summary:focus-visible, .release-diff[open] summary { padding-inline: 12px; color: var(--accent); background: rgba(184,255,61,.025); outline-offset: -2px; }
+.release-diff summary > span { color: #67b7ff; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+.release-diff summary strong { color: var(--ink); font-size: 12px; font-weight: 400; }
+.release-diff summary em { color: var(--muted); font-size: 8px; font-style: normal; letter-spacing: .06em; text-transform: uppercase; }
+.release-diff summary i { display: inline-block; margin-left: 8px; color: var(--accent); font-style: normal; transition: transform 180ms ease; }
+.release-diff[open] summary i { transform: rotate(180deg); }
+.release-diff-list { display: grid; grid-template-columns: .8fr 1.4fr .8fr; border-top: 1px solid var(--line); animation: release-diff-reveal 220ms ease both; }
+.release-diff-group { min-width: 0; padding: 28px 24px 32px 0; }
+.release-diff-group + .release-diff-group { padding-left: 24px; border-left: 1px solid var(--line); }
+.release-diff-group h4 { margin: 0 0 18px; color: var(--muted); font-size: 8px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; }
+.release-diff-group ol { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.release-diff-group li { display: grid; gap: 4px; min-width: 0; }
+.release-diff-group code { overflow-wrap: anywhere; color: var(--ink); font: 400 10px/1.4 var(--mono); }
+.release-diff-group li > span, .release-diff-empty { overflow-wrap: anywhere; color: var(--muted); font-size: 8px; line-height: 1.5; }
+@keyframes release-diff-reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 .release-history-foot { display: flex; justify-content: space-between; gap: 24px; padding-top: 18px; color: var(--muted); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
 .release-history-foot a { color: var(--accent); border-bottom: 1px solid currentColor; padding-bottom: 3px; }
 
@@ -349,6 +367,9 @@ footer .wordmark { color: var(--ink); text-transform: none; letter-spacing: -.02
   .release-metrics, .release-checks { grid-column: 2; }
   .release-state { grid-column: 3; grid-row: 1; }
   .release-arrow { grid-column: 4; grid-row: 1; }
+  .release-diff summary { grid-template-columns: 170px 1fr auto; gap: 18px; }
+  .release-diff-list { grid-template-columns: 1fr 1fr; }
+  .release-diff-group:last-child { grid-column: 1 / -1; padding-left: 0; border-top: 1px solid var(--line); border-left: 0; }
   .environment-probe { grid-template-columns: 1fr; gap: 55px; padding-top: 90px; }
   .broker-boundary-head { grid-template-columns: 1fr; gap: 28px; }
   .broker-flow { grid-template-columns: 1fr 1fr; }
@@ -393,6 +414,12 @@ footer .wordmark { color: var(--ink); text-transform: none; letter-spacing: -.02
   .release-channel, .release-identity, .release-metrics, .release-checks { grid-column: 1; }
   .release-state { grid-column: 2; grid-row: 1; }
   .release-arrow { grid-column: 2; grid-row: 2; }
+  .release-diff summary { grid-template-columns: 1fr auto; gap: 10px 18px; padding: 20px 0; }
+  .release-diff summary strong { grid-column: 1 / -1; grid-row: 2; }
+  .release-diff summary em { grid-column: 2; grid-row: 1; align-self: center; }
+  .release-diff-list { grid-template-columns: 1fr; }
+  .release-diff-group, .release-diff-group + .release-diff-group, .release-diff-group:last-child { grid-column: 1; padding: 24px 0; border-top: 1px solid var(--line); border-left: 0; }
+  .release-diff-group:first-child { border-top: 0; }
   .release-history-foot { flex-direction: column; }
   .probe-terminal li { grid-template-columns: 26px 1fr; }
   .probe-terminal li em { grid-column: 2; text-align: left; }

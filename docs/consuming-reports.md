@@ -20,7 +20,7 @@ passed every production gate. It must not be interpreted as fully supported.
 | Artifact | Stable URL | Purpose |
 | --- | --- | --- |
 | Current stable report | `https://haya-inc.github.io/clawsembly/data/compatibility.json` | Complete checks and evidence for npm `latest` |
-| Release index | `https://haya-inc.github.io/clawsembly/data/release-history.json` | Stable, previous, and preview summaries with report paths |
+| Release index | `https://haya-inc.github.io/clawsembly/data/release-history.json` | Stable, previous, and preview summaries, exact direct-dependency changes, and report paths |
 | Report schema | repository `packages/compatibility/report.schema.json` | Validation contract for a complete report |
 | History schema | repository `packages/compatibility/release-history.schema.json` | Validation contract for the channel index |
 | BrowserPod evidence schema | repository `packages/compatibility/browserpod-evidence.schema.json` | Raw exact-artifact BrowserPod readiness contract |
@@ -38,6 +38,18 @@ Consumers should:
    top-level status;
 7. retain the last verified stable report as a rollback reference;
 8. cache responses but revalidate when npm channel or runtime versions change.
+
+Each release summary includes `dependencyChangesFromStable`. `added` and
+`removed` preserve the exact declared package spec; `changed` preserves both
+the stable and candidate specs. These are static manifest facts, not runtime
+compatibility claims:
+
+```js
+const preview = history.releases.find((release) => release.channel === "preview");
+for (const change of preview.dependencyChangesFromStable.changed) {
+  console.log(`${change.name}: ${change.stableSpec} -> ${change.releaseSpec}`);
+}
+```
 
 ## Minimal policy example
 

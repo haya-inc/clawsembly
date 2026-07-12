@@ -17,6 +17,10 @@ npm run compat:inspect -- \
 
 The command downloads the exact npm tarball into an operating-system temporary
 directory. It does not install the package or execute its lifecycle scripts.
+The report preserves a name-sorted direct-dependency inventory with each exact
+declared spec. Release tracking uses those inventories to generate added,
+removed, and changed entries against stable without turning static drift into a
+runtime PASS.
 
 Generate a static BrowserPod-target report without runtime evidence:
 

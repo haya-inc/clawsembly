@@ -103,7 +103,9 @@ separate reports. At the 2026-07-12 snapshot those resolve to `2026.6.11`,
 `2026.6.10`, and `2026.7.1-beta.5`. All three public reports now target
 `browserpod@2.12.1`, contain zero runtime evidence, and remain `probing`. A
 scheduled workflow skips unchanged channels and opens or updates a generated
-report pull request when a channel moves.
+report pull request when a channel moves. Each report retains its exact direct
+dependency specs; the release index and project page expose added, removed, and
+changed preview dependencies against stable.
 
 The main branch is BrowserPod-only: it contains no legacy runtime adapter,
 dependency, fixture, evidence record, report target, fallback, or vendor CSP

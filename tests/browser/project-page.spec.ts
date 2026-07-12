@@ -15,6 +15,11 @@ test("project page distinguishes stable, previous, and preview evidence", async 
       version: string;
       runtimeEvidence: boolean;
       deltaFromStable: { directDependencyCount: number };
+      dependencyChangesFromStable: {
+        added: Array<{ name: string; spec: string }>;
+        removed: Array<{ name: string; spec: string }>;
+        changed: Array<{ name: string; stableSpec: string; releaseSpec: string }>;
+      };
     }>;
   };
   expect(index.releases.map((release) => release.channel)).toEqual(["stable", "previous", "preview"]);
@@ -86,6 +91,19 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   const expectedDelta = dependencyDelta === 0 ? "±0 deps" : `${dependencyDelta > 0 ? "+" : "−"}${Math.abs(dependencyDelta)} deps`;
   const previewRow = history.locator(".release-row").filter({ hasText: preview?.version ?? "preview" });
   await expect(previewRow.getByText(expectedDelta, { exact: true })).toBeVisible();
+  const dependencyDiff = page.locator("[data-release-diff]");
+  await expect(dependencyDiff).toBeVisible();
+  const changes = preview?.dependencyChangesFromStable;
+  await expect(dependencyDiff.getByText(
+    `${changes?.added.length ?? 0} added · ${changes?.changed.length ?? 0} changed · ${changes?.removed.length ?? 0} removed`,
+    { exact: true }
+  )).toBeVisible();
+  await dependencyDiff.locator("summary").click();
+  const firstAdded = changes?.added[0];
+  if (firstAdded) {
+    await expect(dependencyDiff.getByText(firstAdded.name, { exact: true })).toBeVisible();
+    await expect(dependencyDiff.getByText(firstAdded.spec, { exact: true })).toBeVisible();
+  }
   expect(consoleErrors).toEqual([]);
 });
 

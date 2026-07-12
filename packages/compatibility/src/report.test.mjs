@@ -7,6 +7,7 @@ import {
   evidenceDigest,
   findNativeRisks,
   findShrinkwrapRootDrift,
+  normalizeDirectDependencies,
   normalizeReportTarget
 } from "./report.mjs";
 
@@ -134,10 +135,19 @@ test("findShrinkwrapRootDrift detects root validation failures", () => {
   assert.equal(drift.mismatched[0].name, "ws");
 });
 
+test("normalizeDirectDependencies preserves exact specs in stable name order", () => {
+  assert.deepEqual(normalizeDirectDependencies({ zod: "4.4.3", "@openclaw/ai": "2026.7.1-beta.5" }), [
+    { name: "@openclaw/ai", spec: "2026.7.1-beta.5" },
+    { name: "zod", spec: "4.4.3" }
+  ]);
+  assert.throws(() => normalizeDirectDependencies({ invalid: "" }), /exact declared spec/u);
+});
+
 test("buildReport emits a BrowserPod-only probing report", () => {
   const report = buildReport(staticInput());
   assert.equal(report.target.runtime, "browserpod");
   assert.equal(report.status, "probing");
+  assert.deepEqual(report.artifact.directDependencies, []);
   assert.equal(report.evidence.length, 0);
   assert.equal(report.checks.find((check) => check.id === "openclaw-browserpod-boot")?.status, "pending");
   assert.doesNotThrow(() => assertReport(report));

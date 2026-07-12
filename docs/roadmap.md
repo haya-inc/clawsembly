@@ -231,12 +231,16 @@ proposed without handwritten code changes.
 Status: partial. The tracker resolves npm `latest`, the immediately preceding
 non-prerelease version, and `beta`; emits three exact-artifact reports plus a
 versioned release-history index; refuses cross-version Gateway evidence; and
-skips unchanged channels. The six-hour workflow uploads all reports and opens
+skips unchanged channels. Every report now preserves its sorted direct
+dependency names and specs, and the index derives exact added, removed, and
+changed entries against stable for machine and project-page review. The
+six-hour workflow uploads all reports and opens
 or refreshes a fixed-branch pull request when a channel moves. Full runtime
 execution on that pull request derives the version from the generated stable
 report and retains a redacted, versioned evidence artifact on success. Promotion
-of that CI artifact into the durable checked-in report, schema/protocol diff
-generation, and automatic rollback promotion remain.
+of that CI artifact into the durable checked-in report, dependency risk
+classification, schema/protocol diff generation, and automatic rollback
+promotion remain.
 
 ## Phase 5: extensibility and broader capabilities
 

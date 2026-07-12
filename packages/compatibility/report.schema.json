@@ -22,7 +22,7 @@
     "artifact": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["package", "version", "integrity", "nodeEngine", "tarballBytes", "unpackedBytes", "directDependencyCount", "nativeRiskDependencies", "shrinkwrapRootConsistency"],
+      "required": ["package", "version", "integrity", "nodeEngine", "tarballBytes", "unpackedBytes", "directDependencyCount", "directDependencies", "nativeRiskDependencies", "shrinkwrapRootConsistency"],
       "properties": {
         "package": { "type": "string", "minLength": 1 },
         "version": { "type": "string", "minLength": 1 },
@@ -31,6 +31,18 @@
         "tarballBytes": { "type": "integer", "minimum": 0 },
         "unpackedBytes": { "type": "integer", "minimum": 0 },
         "directDependencyCount": { "type": "integer", "minimum": 0 },
+        "directDependencies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "spec"],
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "spec": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
         "shrinkwrapRootConsistency": {
           "type": "object",
           "additionalProperties": false,

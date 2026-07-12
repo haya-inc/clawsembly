@@ -37,6 +37,11 @@ interface ReleaseHistory {
       shrinkwrapConsistent: boolean;
     };
     checks: Record<CheckStatus, number>;
+    dependencyChangesFromStable: {
+      added: Array<{ name: string; spec: string }>;
+      removed: Array<{ name: string; spec: string }>;
+      changed: Array<{ name: string; stableSpec: string; releaseSpec: string }>;
+    };
     deltaFromStable: {
       unpackedBytes: number;
       directDependencyCount: number;
@@ -79,6 +84,54 @@ function signed(value: number): string {
 function formatSizeDelta(bytes: number): string {
   if (bytes === 0) return "baseline";
   return `${bytes > 0 ? "+" : "−"}${(Math.abs(bytes) / 1_000_000).toFixed(1)} MB`;
+}
+
+function renderDependencyGroup(
+  label: string,
+  entries: Array<{ name: string; detail: string }>
+): HTMLElement {
+  const group = document.createElement("section");
+  group.className = "release-diff-group";
+  const heading = document.createElement("h4");
+  heading.textContent = `${label} / ${entries.length}`;
+  const list = document.createElement("ol");
+  if (entries.length === 0) {
+    const item = document.createElement("li");
+    item.className = "release-diff-empty";
+    item.textContent = "No manifest changes";
+    list.append(item);
+  } else {
+    list.append(...entries.map((entry) => {
+      const item = document.createElement("li");
+      const name = document.createElement("code");
+      name.textContent = entry.name;
+      const detail = document.createElement("span");
+      detail.textContent = entry.detail;
+      item.append(name, detail);
+      return item;
+    }));
+  }
+  group.append(heading, list);
+  return group;
+}
+
+function renderReleaseDependencyDiff(history: ReleaseHistory): void {
+  const container = document.querySelector<HTMLDetailsElement>("[data-release-diff]");
+  const summary = document.querySelector<HTMLElement>("[data-release-diff-summary]");
+  const list = document.querySelector<HTMLElement>("[data-release-diff-list]");
+  const preview = history.releases.find((release) => release.channel === "preview");
+  if (!container || !summary || !list || !preview) return;
+  const changes = preview.dependencyChangesFromStable;
+  summary.textContent = `${changes.added.length} added · ${changes.changed.length} changed · ${changes.removed.length} removed`;
+  list.replaceChildren(
+    renderDependencyGroup("Added", changes.added.map(({ name, spec }) => ({ name, detail: spec }))),
+    renderDependencyGroup("Changed", changes.changed.map(({ name, stableSpec, releaseSpec }) => ({
+      name,
+      detail: `${stableSpec} → ${releaseSpec}`
+    }))),
+    renderDependencyGroup("Removed", changes.removed.map(({ name, spec }) => ({ name, detail: spec })))
+  );
+  container.hidden = false;
 }
 
 function renderReleaseHistory(history: ReleaseHistory): void {
@@ -131,6 +184,7 @@ function renderReleaseHistory(history: ReleaseHistory): void {
   setText("[data-release-generated]", new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(history.generatedAt)));
   const indexLink = document.querySelector<HTMLAnchorElement>("[data-release-index]");
   if (indexLink) indexLink.href = `${import.meta.env.BASE_URL}data/release-history.json`;
+  renderReleaseDependencyDiff(history);
 }
 
 async function loadReleaseHistory(): Promise<void> {
