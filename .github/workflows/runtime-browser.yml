@@ -1,0 +1,84 @@
+name: Browser host, page, and evidence
+
+on:
+  workflow_dispatch:
+    inputs:
+      capture_browserpod:
+        description: Run one owner-authorized, metered BrowserPod evidence capture.
+        required: true
+        type: boolean
+        default: false
+  schedule:
+    - cron: "17 3 * * 6"
+  pull_request:
+    paths:
+      - "apps/web/**"
+      - "packages/browser-runtime/**"
+      - "packages/capability-broker/**"
+      - "packages/embed-sdk/**"
+      - "tests/browser/**"
+      - "examples/browserpod-evidence-host/**"
+      - "playwright.config.ts"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/runtime-browser.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-host-page:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - name: Upload browser evidence and diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: browser-host-page-diagnostics
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: error
+          retention-days: 30
+
+  browserpod-evidence:
+    name: owner-authorized-browserpod-evidence
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.capture_browserpod == true }}
+    environment: browserpod-evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Install the exact BrowserPod evidence-host dependency
+        run: npm ci --prefix examples/browserpod-evidence-host --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Capture one exact-artifact BrowserPod record
+        env:
+          BROWSERPOD_API_KEY: ${{ secrets.BROWSERPOD_API_KEY }}
+        run: node examples/browserpod-evidence-host/capture.mjs
+      - name: Upload redacted evidence and payload-free status
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: browserpod-evidence-${{ github.run_id }}
+          path: test-results/browserpod-evidence
+          if-no-files-found: error
+          retention-days: 30

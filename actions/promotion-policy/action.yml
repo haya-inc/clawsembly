@@ -1,0 +1,29 @@
+name: Clawsembly OpenClaw promotion policy
+description: Observe or enforce Clawsembly's fail-closed OpenClaw promotion decision without installing a package.
+author: Haya
+
+inputs:
+  mode:
+    description: Use "observe" to report HOLD without failing, or "gate" to require PROMOTE.
+    required: false
+    default: observe
+  policy_url:
+    description: Credential-free HTTPS promotion-policy endpoint without query or fragment aliases.
+    required: false
+    default: https://haya-inc.github.io/clawsembly/data/promotion-policy.json
+
+outputs:
+  decision:
+    description: The validated "promote" or "hold" decision.
+  candidate_version:
+    description: The exact OpenClaw preview version evaluated by the policy.
+  reasons:
+    description: Comma-separated fail-closed blocker identifiers, or an empty string.
+
+runs:
+  using: node24
+  main: run.mjs
+
+branding:
+  icon: shield
+  color: green

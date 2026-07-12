@@ -1,0 +1,21 @@
+name: OpenClaw promotion observation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 */6 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  clawsembly-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - id: policy
+        uses: haya-inc/clawsembly/actions/promotion-policy@codex/oss-launch
+        with:
+          mode: observe
+        # Use mode: gate when HOLD should block this workflow.
+        # Pin a reviewed commit SHA instead of the development branch in production.
+      - run: echo "${{ steps.policy.outputs.decision }} / ${{ steps.policy.outputs.candidate_version }}"

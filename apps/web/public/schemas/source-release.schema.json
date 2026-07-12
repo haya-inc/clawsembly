@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clawsembly.dev/schemas/source-release.v1.json",
+  "title": "Clawsembly source release provenance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "tag", "sourceCommit", "package", "artifact", "checksum", "pagesManifest", "compatibility"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "tag": { "type": "string", "pattern": "^v0\\.1\\.0-alpha\\.[0-9]+$" },
+    "sourceCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": { "const": "@haya-inc/clawsembly" },
+        "version": { "type": "string", "pattern": "^0\\.1\\.0-alpha\\.[0-9]+$" }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "bytes", "sha256"],
+      "properties": {
+        "file": { "type": "string", "pattern": "^haya-inc-clawsembly-0\\.1\\.0-alpha\\.[0-9]+\\.tgz$" },
+        "bytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "checksum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "value"],
+      "properties": {
+        "file": { "type": "string", "pattern": "\\.tgz\\.sha256$" },
+        "value": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "pagesManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "sha256"],
+      "properties": {
+        "url": { "const": "https://haya-inc.github.io/clawsembly/downloads/sdk-release.json" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reportUrl", "reportSha256", "openclaw", "runtime"],
+      "properties": {
+        "status": { "enum": ["probing", "supported", "partial", "unsupported"] },
+        "reportUrl": { "const": "https://haya-inc.github.io/clawsembly/data/compatibility.json" },
+        "reportSha256": { "$ref": "#/$defs/sha256" },
+        "openclaw": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["version", "integrity"],
+          "properties": {
+            "version": { "type": "string", "minLength": 1 },
+            "integrity": { "type": "string", "minLength": 1 }
+          }
+        },
+        "runtime": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["provider", "version"],
+          "properties": {
+            "provider": { "const": "browserpod" },
+            "version": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

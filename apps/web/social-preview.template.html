@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      * { box-sizing: border-box; }
+      html, body { width: 1200px; height: 630px; margin: 0; overflow: hidden; }
+      body {
+        position: relative;
+        color: #f2f3ed;
+        background: #0a0b09;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      body::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: .18;
+        background-image:
+          linear-gradient(rgba(255,255,255,.09) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,.09) 1px, transparent 1px);
+        background-size: 72px 72px;
+        mask-image: linear-gradient(90deg, #000, transparent 72%);
+      }
+      .topline { position: absolute; inset: 0 0 auto; height: 7px; background: #b8ff3d; }
+      .brand { position: absolute; top: 56px; left: 64px; display: flex; align-items: center; gap: 16px; font-size: 22px; font-weight: 700; }
+      .mark { display: grid; place-items: center; width: 48px; height: 48px; color: #0a0b09; background: #b8ff3d; font: 700 17px/1 ui-monospace, monospace; }
+      .kicker { position: absolute; top: 164px; left: 66px; color: #b8ff3d; font: 500 12px/1 ui-monospace, monospace; letter-spacing: .18em; text-transform: uppercase; }
+      h1 { position: absolute; top: 190px; left: 56px; margin: 0; font-size: 112px; line-height: .82; letter-spacing: -.085em; font-weight: 800; }
+      .promise { position: absolute; left: 64px; bottom: 133px; width: 650px; margin: 0; color: #b9bdb2; font-size: 22px; line-height: 1.45; letter-spacing: -.025em; }
+      .orbit { position: absolute; width: 520px; height: 520px; right: -68px; top: 64px; border: 1px solid rgba(184,255,61,.38); border-radius: 50%; }
+      .orbit::before, .orbit::after { content: ""; position: absolute; border-radius: 50%; }
+      .orbit::before { inset: 82px; border: 1px dashed rgba(184,255,61,.48); }
+      .orbit::after { inset: 166px; border: 1px solid rgba(242,243,237,.52); }
+      .core { position: absolute; display: grid; place-items: center; width: 76px; height: 76px; right: 154px; top: 286px; color: #f2f3ed; border: 1px solid #b8ff3d; font: 500 25px/1 ui-monospace, monospace; }
+      .node { position: absolute; width: 12px; height: 12px; border: 2px solid #0a0b09; border-radius: 50%; background: #b8ff3d; box-shadow: 0 0 0 1px #b8ff3d; }
+      .node-a { right: 356px; top: 128px; }
+      .node-b { right: 58px; top: 382px; }
+      .ledger { position: absolute; display: grid; grid-template-columns: 1.2fr .8fr .7fr; left: 0; right: 0; bottom: 0; height: 92px; border-top: 1px solid #b8ff3d; background: rgba(10,11,9,.96); font: 500 11px/1.3 ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; }
+      .ledger div { display: grid; align-content: center; gap: 7px; padding: 0 64px; border-right: 1px solid rgba(242,243,237,.16); }
+      .ledger div:last-child { border-right: 0; }
+      .ledger span { color: #7f857a; font-size: 9px; }
+      .ledger strong { color: #f2f3ed; font-weight: 500; }
+      .ledger .status { color: #f6c85f; }
+    </style>
+  </head>
+  <body>
+    <div class="topline"></div>
+    <div class="brand"><span class="mark">C/</span><span>Clawsembly</span></div>
+    <p class="kicker">Verified OpenClaw embedding</p>
+    <h1>GRANT ONLY<br />WHAT IT NEEDS.</h1>
+    <p class="promise">Exact upstream artifacts. Explicit browser authority. Evidence-bound BrowserPod launch.</p>
+    <div class="orbit"></div>
+    <div class="core">OC</div>
+    <span class="node node-a"></span>
+    <span class="node node-b"></span>
+    <div class="ledger">
+      <div><span>Exact artifact</span><strong>openclaw@{{VERSION}}</strong></div>
+      <div><span>Host authority</span><strong>Default deny</strong></div>
+      <div><span>Current status</span><strong class="status">{{STATUS}}</strong></div>
+    </div>
+  </body>
+</html>

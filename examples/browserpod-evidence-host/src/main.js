@@ -1,0 +1,38 @@
+import { BrowserPod } from "@leaningtech/browserpod";
+import { runBrowserPodOpenClawProbe } from "../../../packages/browser-runtime/browserpod-openclaw-probe.mjs";
+
+const status = document.querySelector("[data-capture-status]");
+const encoder = new TextEncoder();
+globalThis.__CLAWSEMBLY_PHASE_COUNTS__ = Object.create(null);
+
+globalThis.__RUN_CLAWSEMBLY_BROWSERPOD_EVIDENCE__ = async (options) => {
+  const apiKey = options?.apiKey;
+  const artifact = options?.artifact;
+  const source = options?.source;
+  if (typeof apiKey !== "string" || !apiKey || !artifact || typeof source !== "string") {
+    throw new Error("Owner-authorized BrowserPod capture options are incomplete.");
+  }
+  options.apiKey = undefined;
+  status.textContent = "Owner-authorized BrowserPod evidence capture is running.";
+  let session;
+  try {
+    session = await runBrowserPodOpenClawProbe({
+      BrowserPod,
+      apiKey,
+      artifact,
+      browser: navigator.userAgent,
+      source,
+      onOutput({ phase, chunk }) {
+        const current = globalThis.__CLAWSEMBLY_PHASE_COUNTS__[phase] ?? { chunks: 0, bytes: 0 };
+        globalThis.__CLAWSEMBLY_PHASE_COUNTS__[phase] = {
+          chunks: current.chunks + 1,
+          bytes: current.bytes + encoder.encode(chunk).byteLength
+        };
+      }
+    });
+    status.textContent = "Evidence captured and Gateway cooperatively stopped.";
+    return session.evidence;
+  } finally {
+    session?.dispose();
+  }
+};

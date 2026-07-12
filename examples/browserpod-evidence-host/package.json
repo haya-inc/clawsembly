@@ -1,0 +1,10 @@
+{
+  "name": "clawsembly-browserpod-evidence-host",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "@leaningtech/browserpod": "2.12.1"
+  }
+}

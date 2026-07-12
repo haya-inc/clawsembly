@@ -1,0 +1,17 @@
+{
+  "name": "clawsembly-sdk-host-example",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && vite build",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@haya-inc/clawsembly": "https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.0/haya-inc-clawsembly-0.1.0-alpha.0.tgz"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vite": "8.1.4"
+  }
+}

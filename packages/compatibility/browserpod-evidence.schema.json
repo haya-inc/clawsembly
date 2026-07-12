@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clawsembly.dev/schemas/browserpod-evidence.v1.json",
+  "title": "Clawsembly BrowserPod OpenClaw evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "capturedAt", "source", "target", "artifact", "preflight", "install", "gateway", "limitations"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "capturedAt": { "type": "string", "format": "date-time" },
+    "source": { "type": "string", "minLength": 1 },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtime", "runtimeVersion", "browser", "browserLocal"],
+      "properties": {
+        "runtime": { "const": "browserpod" },
+        "runtimeVersion": { "type": "string", "minLength": 1 },
+        "browser": { "type": "string", "minLength": 1 },
+        "browserLocal": { "const": true }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package", "version", "integrity"],
+      "properties": {
+        "package": { "const": "openclaw" },
+        "version": { "type": "string", "minLength": 1 },
+        "integrity": { "type": "string", "pattern": "^sha512-[A-Za-z0-9+/]+={0,2}$" }
+      }
+    },
+    "preflight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node", "platform", "arch", "checks", "lifecycle"],
+      "properties": {
+        "node": { "type": "string", "pattern": "^22\\.(1[9]|[2-9][0-9])\\.[0-9]+" },
+        "platform": { "type": "string", "minLength": 1 },
+        "arch": { "type": "string", "minLength": 1 },
+        "checks": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["nodeBaseline", "cryptoVerify", "sqlite"],
+          "properties": {
+            "nodeBaseline": { "const": true },
+            "cryptoVerify": { "const": true },
+            "sqlite": { "const": true }
+          }
+        },
+        "lifecycle": { "$ref": "#/$defs/lifecycle" }
+      }
+    },
+    "install": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result", "command", "durationMs", "installedVersion", "lockIntegrity", "integrityMatched", "outputTruncated"],
+      "properties": {
+        "result": { "const": "pass" },
+        "command": { "const": "npm install --save-exact openclaw@<version>" },
+        "durationMs": { "type": "integer", "minimum": 0 },
+        "installedVersion": { "type": "string", "minLength": 1 },
+        "lockIntegrity": { "type": "string", "pattern": "^sha512-[A-Za-z0-9+/]+={0,2}$" },
+        "integrityMatched": { "const": true },
+        "outputTruncated": { "type": "boolean" }
+      }
+    },
+    "gateway": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result", "port", "bind", "auth", "taskId", "durationMs", "readiness", "portal", "healthz", "readyz", "termination", "outputTruncated"],
+      "properties": {
+        "result": { "const": "pass" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "bind": { "const": "loopback" },
+        "auth": { "const": "token" },
+        "taskId": { "type": "string", "minLength": 1 },
+        "durationMs": { "type": "integer", "minimum": 0 },
+        "readiness": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["output", "portal", "healthz", "readyz"],
+          "properties": {
+            "output": { "const": true },
+            "portal": { "const": true },
+            "healthz": { "const": true },
+            "readyz": { "const": true }
+          }
+        },
+        "portal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["port", "url", "visibility"],
+          "properties": {
+            "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+            "url": { "type": "string", "format": "uri", "pattern": "^https://" },
+            "visibility": { "const": "public-url" }
+          }
+        },
+        "healthz": { "$ref": "#/$defs/httpProbe" },
+        "readyz": { "$ref": "#/$defs/httpProbe" },
+        "termination": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "result", "durationMs", "providerProcessTermination", "hardDispose"],
+          "properties": {
+            "mode": { "const": "guest-supervisor" },
+            "result": { "const": "pass" },
+            "durationMs": { "type": "integer", "minimum": 0 },
+            "providerProcessTermination": { "const": false },
+            "hardDispose": { "const": false }
+          }
+        },
+        "outputTruncated": { "type": "boolean" }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": ["interactive-input-unavailable", "provider-process-termination-unavailable", "hard-dispose-unavailable", "portal-is-public-url"]
+      }
+    }
+  },
+  "$defs": {
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["browserLocal", "nodeMajor", "persistentFilesystem", "portals", "portalVisibility", "fileApi", "interactiveInput", "processTermination", "hardDispose"],
+      "properties": {
+        "browserLocal": { "const": true },
+        "nodeMajor": { "const": 22 },
+        "persistentFilesystem": { "type": "boolean" },
+        "portals": { "const": true },
+        "portalVisibility": { "const": "public-url" },
+        "fileApi": { "const": true },
+        "interactiveInput": { "const": false },
+        "processTermination": { "const": false },
+        "hardDispose": { "const": false }
+      }
+    },
+    "httpProbe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "body"],
+      "properties": {
+        "status": { "const": 200 },
+        "body": { "type": "string", "maxLength": 4096 }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+name: Bug report
+description: Report a reproducible problem in Clawsembly itself.
+title: "bug: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include commands, browser, operating system, and minimal inputs.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Redacted logs
+      render: shell

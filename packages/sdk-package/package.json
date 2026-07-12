@@ -1,0 +1,62 @@
+{
+  "name": "@haya-inc/clawsembly",
+  "version": "0.1.0-alpha.0",
+  "description": "Evidence-gated, capability-safe browser embedding SDK for upstream OpenClaw.",
+  "private": false,
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "homepage": "https://haya-inc.github.io/clawsembly/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haya-inc/clawsembly.git"
+  },
+  "bugs": {
+    "url": "https://github.com/haya-inc/clawsembly/issues"
+  },
+  "keywords": [
+    "openclaw",
+    "browserpod",
+    "browser",
+    "embedding",
+    "capability-security"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "packages/",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./packages/embed-sdk/embed-manifest.d.mts",
+      "import": "./packages/embed-sdk/embed-manifest.mjs"
+    },
+    "./pairing-prompt": {
+      "types": "./packages/embed-sdk/gateway-pairing-prompt.d.mts",
+      "import": "./packages/embed-sdk/gateway-pairing-prompt.mjs"
+    },
+    "./permission-prompt": {
+      "types": "./packages/embed-sdk/permission-prompt.d.mts",
+      "import": "./packages/embed-sdk/permission-prompt.mjs"
+    },
+    "./report-loader": {
+      "types": "./packages/embed-sdk/report-loader.d.mts",
+      "import": "./packages/embed-sdk/report-loader.mjs"
+    },
+    "./browserpod-probe": {
+      "types": "./packages/browser-runtime/browserpod-openclaw-probe.d.mts",
+      "import": "./packages/browser-runtime/browserpod-openclaw-probe.mjs"
+    },
+    "./capability-broker": {
+      "types": "./packages/capability-broker/capability-broker.d.mts",
+      "import": "./packages/capability-broker/capability-broker.mjs"
+    },
+    "./package.json": "./package.json"
+  }
+}

@@ -1,0 +1,110 @@
+name: Compatibility probe
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  static-inspection:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Track stable, previous, and preview
+        run: >-
+          npm run compat:track -- --skip-unchanged
+      - run: npm run report-pin:generate
+      - run: npm run report-pin:check
+      - run: npm run compat:validate
+      - name: Write summary
+        run: |
+          echo '## OpenClaw release-channel inspection' >> "$GITHUB_STEP_SUMMARY"
+          node -e 'const h=require("./apps/web/public/data/release-history.json"); for (const r of h.releases) console.log(`- ${r.channel}: ${r.version} · ${r.status} · ${r.runtimeEvidence ? "runtime evidenced" : "static only"}`)' >> "$GITHUB_STEP_SUMMARY"
+      - name: Package validated reports
+        run: >-
+          tar -czf "$RUNNER_TEMP/compatibility-reports.tgz"
+          apps/web/public/data/compatibility.json
+          apps/web/public/data/compatibility-badge.svg
+          apps/web/public/data/release-history.json
+          apps/web/public/data/promotion-policy.json
+          apps/web/public/data/releases/*.json
+          examples/sdk-host/src/report-pin.ts
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: compatibility-reports
+          path: ${{ runner.temp }}/compatibility-reports.tgz
+
+  publish-report-pr:
+    needs: static-inspection
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: compatibility-reports
+          path: ${{ runner.temp }}
+      - name: Install validated reports
+        run: |
+          staging="$RUNNER_TEMP/compatibility-reports"
+          mkdir -p "$staging"
+          archive="$RUNNER_TEMP/compatibility-reports.tgz"
+          if tar -tzf "$archive" | grep -Eq '(^/|(^|/)\.\.(/|$))'; then
+            echo 'Report artifact contains an unsafe path.' >&2
+            exit 1
+          fi
+          tar --extract --gzip --file "$archive" --directory "$staging" --no-same-owner --no-same-permissions
+          if find "$staging" -type l -print -quit | grep -q .; then
+            echo 'Report artifact must not contain symlinks.' >&2
+            exit 1
+          fi
+          cp "$staging/apps/web/public/data/compatibility.json" apps/web/public/data/compatibility.json
+          cp "$staging/apps/web/public/data/compatibility-badge.svg" apps/web/public/data/compatibility-badge.svg
+          cp "$staging/apps/web/public/data/release-history.json" apps/web/public/data/release-history.json
+          cp "$staging/apps/web/public/data/promotion-policy.json" apps/web/public/data/promotion-policy.json
+          cp "$staging"/apps/web/public/data/releases/*.json apps/web/public/data/releases/
+          cp "$staging/examples/sdk-host/src/report-pin.ts" examples/sdk-host/src/report-pin.ts
+      - name: Commit changed channel reports
+        id: changes
+        run: |
+          if git diff --quiet -- apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/promotion-policy.json apps/web/public/data/releases examples/sdk-host/src/report-pin.ts; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          branch='codex/openclaw-release-tracking'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -c "$branch"
+          git add apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/promotion-policy.json apps/web/public/data/releases examples/sdk-host/src/report-pin.ts
+          git commit -m 'chore: update OpenClaw release reports'
+          remote_sha="$(git ls-remote --heads origin "refs/heads/$branch" | cut -f1)"
+          if [ -n "$remote_sha" ]; then
+            git push --force-with-lease="refs/heads/$branch:$remote_sha" origin "HEAD:refs/heads/$branch"
+          else
+            git push origin "HEAD:refs/heads/$branch"
+          fi
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+      - name: Open or update tracking pull request
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.changes.outputs.branch }}
+        run: |
+          existing="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
+          if [ -z "$existing" ]; then
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title 'chore: update OpenClaw release reports' \
+              --body "Automated stable / previous / preview compatibility inspection. Runtime evidence is attached only when its exact OpenClaw version matches. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi

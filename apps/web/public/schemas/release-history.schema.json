@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clawsembly.dev/schemas/release-history.v1.json",
+  "title": "Clawsembly release history",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "package", "channels", "releases"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "package": { "type": "string", "minLength": 1 },
+    "channels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stable", "previous", "preview"],
+      "properties": {
+        "stable": { "type": "string", "minLength": 1 },
+        "previous": { "type": "string", "minLength": 1 },
+        "preview": { "type": "string", "minLength": 1 }
+      }
+    },
+    "releases": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["channel", "version", "status", "reportPath", "generatedAt", "runtimeEvidence", "artifact", "checks", "dependencyChangesFromStable", "dependencyRiskFromStable", "gatewayContractFromStable", "deltaFromStable"],
+        "properties": {
+          "channel": { "enum": ["stable", "previous", "preview"] },
+          "version": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["probing", "supported", "partial", "unsupported"] },
+          "reportPath": { "type": "string", "minLength": 1 },
+          "generatedAt": { "type": "string", "format": "date-time" },
+          "runtimeEvidence": { "type": "boolean" },
+          "artifact": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["integrity", "unpackedBytes", "directDependencyCount", "nativeRiskCount", "shrinkwrapConsistent", "shrinkwrapMissingCount", "shrinkwrapMismatchedCount"],
+            "properties": {
+              "integrity": { "type": "string", "minLength": 1 },
+              "unpackedBytes": { "type": "integer", "minimum": 0 },
+              "directDependencyCount": { "type": "integer", "minimum": 0 },
+              "nativeRiskCount": { "type": "integer", "minimum": 0 },
+              "shrinkwrapConsistent": { "type": "boolean" },
+              "shrinkwrapMissingCount": { "type": "integer", "minimum": 0 },
+              "shrinkwrapMismatchedCount": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "checks": { "$ref": "#/$defs/statusCounts" },
+          "dependencyChangesFromStable": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["added", "removed", "changed"],
+            "properties": {
+              "added": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/dependencySpec" }
+              },
+              "removed": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/dependencySpec" }
+              },
+              "changed": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["name", "stableSpec", "releaseSpec"],
+                  "properties": {
+                    "name": { "type": "string", "minLength": 1 },
+                    "stableSpec": { "type": "string", "minLength": 1 },
+                    "releaseSpec": { "type": "string", "minLength": 1 }
+                  }
+                }
+              }
+            }
+          },
+          "dependencyRiskFromStable": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/dependencyRisk" }
+          },
+          "gatewayContractFromStable": { "$ref": "#/$defs/gatewayContractComparison" },
+          "deltaFromStable": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["unpackedBytes", "directDependencyCount", "nativeRiskCount", "shrinkwrapMissingCount"],
+            "properties": {
+              "unpackedBytes": { "type": "integer" },
+              "directDependencyCount": { "type": "integer" },
+              "nativeRiskCount": { "type": "integer" },
+              "shrinkwrapMissingCount": { "type": "integer" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "gatewayContractComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "inspection", "protocol", "distribution", "coreMethods", "schemaExports", "validators", "eventSchemas"],
+      "properties": {
+        "classification": { "enum": ["unchanged", "changed", "additive", "breaking", "incomplete"] },
+        "inspection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stable", "release"],
+          "properties": {
+            "stable": { "enum": ["complete", "incomplete"] },
+            "release": { "enum": ["complete", "incomplete"] }
+          }
+        },
+        "protocol": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stable", "release", "changed"],
+          "properties": {
+            "stable": { "$ref": "#/$defs/gatewayProtocol" },
+            "release": { "$ref": "#/$defs/gatewayProtocol" },
+            "changed": { "type": "boolean" }
+          }
+        },
+        "distribution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["legacyPluginDeclarationCount", "publicDeclarationChanged", "publicRuntimeChanged", "versionModuleChanged", "serverMethodsChanged"],
+          "properties": {
+            "legacyPluginDeclarationCount": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["stable", "release", "delta"],
+              "properties": {
+                "stable": { "type": "integer", "minimum": 0 },
+                "release": { "type": "integer", "minimum": 0 },
+                "delta": { "type": "integer" }
+              }
+            },
+            "publicDeclarationChanged": { "type": "boolean" },
+            "publicRuntimeChanged": { "type": "boolean" },
+            "versionModuleChanged": { "type": "boolean" },
+            "serverMethodsChanged": { "type": "boolean" }
+          }
+        },
+        "coreMethods": { "$ref": "#/$defs/inventoryDelta" },
+        "schemaExports": { "$ref": "#/$defs/inventoryDelta" },
+        "validators": { "$ref": "#/$defs/inventoryDelta" },
+        "eventSchemas": { "$ref": "#/$defs/inventoryDelta" }
+      }
+    },
+    "gatewayProtocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current", "minClient", "minProbe", "minNode"],
+      "properties": {
+        "current": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "minClient": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "minProbe": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "minNode": { "$ref": "#/$defs/nullableNonnegativeInteger" }
+      }
+    },
+    "nullableNonnegativeInteger": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "null" }
+      ]
+    },
+    "inventoryDelta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["added", "removed"],
+      "properties": {
+        "added": { "$ref": "#/$defs/stringList" },
+        "removed": { "$ref": "#/$defs/stringList" }
+      }
+    },
+    "dependencyRisk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "change", "declaredSpec", "resolvedVersion", "integrity", "scan", "signals"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "change": { "enum": ["added", "changed"] },
+        "declaredSpec": { "type": "string", "minLength": 1 },
+        "resolvedVersion": { "type": "string", "minLength": 1 },
+        "integrity": { "type": "string", "minLength": 1 },
+        "scan": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["packageFileCount", "sourceFileCount", "sourceBytes", "truncated"],
+          "properties": {
+            "packageFileCount": { "type": "integer", "minimum": 1 },
+            "sourceFileCount": { "type": "integer", "minimum": 0 },
+            "sourceBytes": { "type": "integer", "minimum": 0 },
+            "truncated": { "type": "boolean" }
+          }
+        },
+        "signals": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lifecycleScripts", "nativeArtifacts", "wasmArtifacts", "nodeBuiltins", "networkApis", "sourceSignals", "browserCapabilities"],
+          "properties": {
+            "lifecycleScripts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "command"],
+                "properties": {
+                  "name": { "enum": ["preinstall", "install", "postinstall"] },
+                  "command": { "type": "string", "minLength": 1, "maxLength": 4096 }
+                }
+              }
+            },
+            "nativeArtifacts": { "$ref": "#/$defs/stringList" },
+            "wasmArtifacts": { "$ref": "#/$defs/stringList" },
+            "nodeBuiltins": { "$ref": "#/$defs/stringList" },
+            "networkApis": { "$ref": "#/$defs/stringList" },
+            "sourceSignals": { "$ref": "#/$defs/stringList" },
+            "browserCapabilities": {
+              "type": "array",
+              "items": {
+                "enum": ["cryptography", "database", "environment", "filesystem", "install-script", "native-code", "network", "os", "subprocess", "terminal", "wasm", "workers"]
+              },
+              "uniqueItems": true
+            }
+          }
+        }
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "dependencySpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "spec"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "spec": { "type": "string", "minLength": 1 }
+      }
+    },
+    "statusCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pass", "warn", "fail", "pending"],
+      "properties": {
+        "pass": { "type": "integer", "minimum": 0 },
+        "warn": { "type": "integer", "minimum": 0 },
+        "fail": { "type": "integer", "minimum": 0 },
+        "pending": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

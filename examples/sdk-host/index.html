@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="Inspect an evidence-bound Clawsembly launch decision without spending BrowserPod tokens." />
+    <title>Clawsembly launch inspector</title>
+  </head>
+  <body>
+    <main>
+      <header class="masthead entrance">
+        <a class="brand" href="https://haya-inc.github.io/clawsembly/" rel="noreferrer">C/ <span>Clawsembly</span></a>
+        <p>External SDK host / provider-free</p>
+      </header>
+
+      <section class="decision entrance" aria-labelledby="decision-title">
+        <p class="eyebrow">Verified launch decision</p>
+        <div class="decision-heading">
+          <div>
+            <h1 id="decision-title" data-decision-title>Loading evidence…</h1>
+            <p class="decision-summary" data-decision-summary aria-live="polite">
+              Fetching the public compatibility report.
+            </p>
+          </div>
+          <span class="decision-state" data-decision-state>checking</span>
+        </div>
+        <div class="decision-rule" aria-hidden="true"><span data-decision-rule></span></div>
+      </section>
+
+      <section class="identity entrance" aria-labelledby="identity-title">
+        <div class="section-heading">
+          <p class="eyebrow">Exact subject</p>
+          <h2 id="identity-title">Artifact and runtime</h2>
+        </div>
+        <dl>
+          <div><dt>Package</dt><dd data-package>—</dd></div>
+          <div><dt>OpenClaw</dt><dd data-version>—</dd></div>
+          <div><dt>npm integrity</dt><dd data-integrity>—</dd></div>
+          <div><dt>Runtime</dt><dd data-runtime>—</dd></div>
+          <div><dt>Report status</dt><dd data-report-status>—</dd></div>
+          <div><dt>Generated</dt><dd data-generated>—</dd></div>
+          <div class="identity-full"><dt>Report SHA-256</dt><dd data-report-digest>—</dd></div>
+        </dl>
+      </section>
+
+      <section class="blockers entrance" aria-labelledby="blockers-title">
+        <div class="section-heading">
+          <p class="eyebrow">Default deny</p>
+          <h2 id="blockers-title">Launch blockers</h2>
+        </div>
+        <ol data-blockers>
+          <li>Waiting for the report.</li>
+        </ol>
+      </section>
+
+      <section class="provider-boundary entrance" aria-labelledby="provider-title">
+        <div>
+          <p class="eyebrow">Provider boundary</p>
+          <h2 id="provider-title">BrowserPod boot</h2>
+        </div>
+        <strong data-provider-state>Not attempted</strong>
+        <p>No API key field exists here. A host may add an explicit owner action only after evidence is accepted.</p>
+      </section>
+
+      <footer class="actions entrance">
+        <button type="button" data-refresh>Recheck evidence <span aria-hidden="true">↻</span></button>
+        <a data-report-link href="https://haya-inc.github.io/clawsembly/data/compatibility.json" rel="noreferrer">Open source report ↗</a>
+      </footer>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
