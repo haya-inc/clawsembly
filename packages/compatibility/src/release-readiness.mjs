@@ -44,6 +44,7 @@ const required = [
   ".github/ISSUE_TEMPLATE/bug.yml",
   ".github/ISSUE_TEMPLATE/compatibility.yml",
   ".github/ISSUE_TEMPLATE/support.yml",
+  ".github/ISSUE_TEMPLATE/config.yml",
   ".github/CODEOWNERS",
   ".github/dependabot.yml",
   ".github/pull_request_template.md",

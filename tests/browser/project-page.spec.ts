@@ -140,6 +140,14 @@ test("project page distinguishes stable, previous, and preview evidence", async 
     "href",
     `https://github.com/haya-inc/clawsembly/releases/tag/v${sdkVersion}`
   );
+  await expect(page.getByRole("link", { name: "Join the discussion ↗" })).toHaveAttribute(
+    "href",
+    "https://github.com/haya-inc/clawsembly/discussions/17"
+  );
+  await expect(page.getByRole("link", { name: "Show your integration ↗" })).toHaveAttribute(
+    "href",
+    "https://github.com/haya-inc/clawsembly/discussions/18"
+  );
   const preview = index.releases.find((release) => release.channel === "preview");
   const dependencyDelta = preview?.deltaFromStable.directDependencyCount ?? 0;
   const expectedDelta = dependencyDelta === 0 ? "±0 deps" : `${dependencyDelta > 0 ? "+" : "−"}${Math.abs(dependencyDelta)} deps`;
