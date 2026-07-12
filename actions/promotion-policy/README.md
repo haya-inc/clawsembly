@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: clawsembly
-        uses: haya-inc/clawsembly/actions/promotion-policy@codex/oss-launch
+        uses: haya-inc/clawsembly/actions/promotion-policy@main
         with:
           mode: observe
       - run: echo "${{ steps.clawsembly.outputs.decision }}"

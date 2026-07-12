@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - id: policy
-        uses: haya-inc/clawsembly/actions/promotion-policy@codex/oss-launch
+        uses: haya-inc/clawsembly/actions/promotion-policy@main
         with:
           mode: observe
         # Use mode: gate when HOLD should block this workflow.

@@ -53,12 +53,13 @@
     "compat:validate": "node packages/compatibility/src/validate-artifacts.mjs",
     "runtime:validate": "node scripts/validate-active-runtime.mjs",
     "workflows:validate": "node scripts/validate-workflows.mjs",
+    "docs:validate": "node scripts/validate-doc-refs.mjs",
     "pretest:page": "npm run build",
     "test:page": "playwright test tests/browser/project-page.spec.ts --config playwright.config.ts",
     "test:security": "playwright test tests/browser/security-probes.spec.ts --config playwright.config.ts",
     "social:render": "node scripts/render-social-preview.mjs",
     "build:pages": "node scripts/build-pages.mjs",
-    "check": "npm run mailbox:check && npm run protocol:check && npm run schemas:check && npm run report-pin:check && npm run runtime:validate && npm run sdk:check && npm run test && npm run compat:validate && npm run workflows:validate && npm run typecheck && npm run build",
+    "check": "npm run mailbox:check && npm run protocol:check && npm run schemas:check && npm run report-pin:check && npm run runtime:validate && npm run sdk:check && npm run test && npm run compat:validate && npm run workflows:validate && npm run docs:validate && npm run typecheck && npm run build",
     "release:check": "npm run social:render && npm run check && npm run test:browser && npm run build:pages && node packages/compatibility/src/release-readiness.mjs"
   },
   "devDependencies": {
