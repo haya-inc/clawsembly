@@ -79,6 +79,8 @@ The project does not yet promise semantic-version compatibility.
   rollback gates, public schema URLs, and checked-in derivation validation;
 - dependency-free strict-HTTPS Node/CI consumer and copyable GitHub Actions
   template for install-free external adoption;
+- zero-install Node 24 GitHub Action with observe/gate modes and validated
+  decision, candidate-version, and blocker outputs;
 - report-driven project page, release ledger, compatibility badge, contribution
   templates, security policy, and downstream consumption guide.
 

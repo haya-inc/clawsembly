@@ -12,10 +12,10 @@ jobs:
   clawsembly-policy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      - id: policy
+        uses: haya-inc/clawsembly/actions/promotion-policy@codex/oss-launch
         with:
-          node-version: 24
-      - name: Observe the Clawsembly promotion decision
-        run: node examples/release-policy/check.mjs --observe
-        # Remove --observe when HOLD should block this workflow.
+          mode: observe
+        # Use mode: gate when HOLD should block this workflow.
+        # Pin a reviewed commit SHA instead of the development branch in production.
+      - run: echo "${{ steps.policy.outputs.decision }} / ${{ steps.policy.outputs.candidate_version }}"

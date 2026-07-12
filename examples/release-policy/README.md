@@ -17,8 +17,9 @@ missing, checks remain pending, the published shrinkwrap is inconsistent, and
 the preview Gateway contract is classified breaking. This is the useful
 result—an integration should not silently promote that candidate.
 
-Copy `check.mjs` into a downstream repository or use the workflow template in
-this directory. Set `CLAWSEMBLY_POLICY_URL` only to another credential-free
+Copy `check.mjs` into a downstream repository, call the zero-install
+[`actions/promotion-policy`](../../actions/promotion-policy/README.md), or use
+the workflow template in this directory. Set `CLAWSEMBLY_POLICY_URL` only to another credential-free
 HTTPS mirror of the same schema. The consumer rejects redirects, query/fragment
 aliases, non-JSON responses, bodies over 1 MiB, unknown reason identifiers, and
 decision/gate contradictions.

@@ -56,7 +56,8 @@ function assertGate(gate, channel) {
   const checks = observations?.checks;
   const countsValid = checks && ["pass", "warn", "fail", "pending"]
     .every((key) => Number.isSafeInteger(checks[key]) && checks[key] >= 0);
-  if (gate?.channel !== channel || typeof gate?.version !== "string" || !gate.version
+  if (gate?.channel !== channel || typeof gate?.version !== "string"
+    || !/^[0-9A-Za-z][0-9A-Za-z._+-]{0,127}$/u.test(gate.version)
     || typeof gate?.eligible !== "boolean" || !Array.isArray(gate?.reasons)
     || gate.reasons.some((reason) => !REASON_IDS.has(reason))
     || new Set(gate.reasons).size !== gate.reasons.length

@@ -75,6 +75,6 @@ See the [OSS success strategy](oss-strategy.md) for the competitive position and
 90-day gates.
 
 Current adoption surface: the public policy endpoint, schema, dependency-free
-Node consumer, and copyable GitHub Actions template are implemented. This makes
+Node consumer, and zero-install GitHub Action are implemented. This makes
 external consumption possible before npm publication; a first independent
 consumer is still the next distribution proof.

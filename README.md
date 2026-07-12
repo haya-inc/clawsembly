@@ -175,7 +175,7 @@ node examples/release-policy/check.mjs --observe
 The dependency-free consumer fetches the public policy over strict HTTPS and
 prints the exact preview decision. Remove `--observe` to make `HOLD` fail CI.
 See the [release-policy example](examples/release-policy/README.md) and its
-copyable GitHub Actions template. The current preview is intentionally held;
+copyable [zero-install GitHub Action](actions/promotion-policy/README.md). The current preview is intentionally held;
 this command is useful before BrowserPod or the SDK package is available.
 
 Requirements: Node.js 22.19 or newer.

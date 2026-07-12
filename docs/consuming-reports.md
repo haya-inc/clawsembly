@@ -121,6 +121,18 @@ The copyable consumer rejects redirects, URL aliases, non-JSON content,
 responses over 1 MiB, unknown reason identifiers, and contradictory decisions.
 See [`examples/release-policy`](../examples/release-policy/README.md).
 
+Downstream GitHub Actions users can skip checkout and Node setup entirely:
+
+```yaml
+- id: clawsembly
+  uses: haya-inc/clawsembly/actions/promotion-policy@codex/oss-launch
+  with:
+    mode: observe # change to gate to require PROMOTE
+```
+
+The Action exposes `decision`, `candidate_version`, and `reasons`. Pin a
+reviewed commit SHA instead of the moving development branch in production.
+
 ## Evidence-bound SDK loading
 
 Display consumers may revalidate the channel index, but an application that can

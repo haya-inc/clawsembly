@@ -28,6 +28,9 @@ function localMarkdownTargets(source) {
 
 const root = process.cwd();
 const required = [
+  "actions/promotion-policy/action.yml",
+  "actions/promotion-policy/run.mjs",
+  "actions/promotion-policy/README.md",
   "LICENSE",
   "README.md",
   "CHANGELOG.md",
@@ -62,6 +65,7 @@ const required = [
   "packages/compatibility/src/gateway-contract-inspection.test.mjs",
   "packages/compatibility/src/promotion-policy.mjs",
   "packages/compatibility/src/promotion-policy.test.mjs",
+  "packages/compatibility/src/promotion-action-metadata.test.mjs",
   "packages/capability-broker/capability-manifest.schema.json",
   "packages/capability-broker/capability-audit.schema.json",
   "packages/embed-sdk/permission-prompt.mjs",

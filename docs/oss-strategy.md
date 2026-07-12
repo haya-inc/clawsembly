@@ -95,7 +95,7 @@ Exit signal: at least one external project links to or consumes the report.
 Current implementation: stable / previous / preview resolution, exact-artifact
 reports, release-history JSON, project-page comparison, unchanged-channel
 suppression, generated-report pull requests, public schemas, and a fail-closed
-promotion policy with a dependency-free CI consumer are implemented. External
+promotion policy with dependency-free Node and GitHub Action consumers are implemented. External
 consumption and multi-release runtime evidence are not yet proven.
 
 ### Gate 3 — contributor flywheel
