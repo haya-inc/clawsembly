@@ -4,6 +4,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { buildReport, assertReport } from "./report.mjs";
+import { inspectGatewayContract } from "./gateway-contract-inspection.mjs";
 
 function parseArgs(argv) {
   const result = {
@@ -49,6 +50,7 @@ try {
 
   const manifest = JSON.parse(readFileSync(resolve(workingDirectory, "package/package.json"), "utf8"));
   const shrinkwrap = JSON.parse(readFileSync(resolve(workingDirectory, "package/npm-shrinkwrap.json"), "utf8"));
+  const gatewayContract = inspectGatewayContract({ tarball, pack: packed });
   const browserRuntimeEvidence = options.browserRuntimeEvidence
     ? JSON.parse(readFileSync(resolve(process.cwd(), options.browserRuntimeEvidence), "utf8"))
     : undefined;
@@ -57,6 +59,7 @@ try {
     manifest,
     pack: packed,
     shrinkwrap,
+    gatewayContract,
     browserRuntimeEvidence,
     target: {
       runtime: options.runtime,

@@ -69,6 +69,74 @@ export function compareDirectDependencies(stableDependencies, releaseDependencie
   };
 }
 
+function inventoryDelta(stable = [], release = []) {
+  const stableSet = new Set(stable);
+  const releaseSet = new Set(release);
+  return {
+    added: [...releaseSet].filter((value) => !stableSet.has(value)).sort((left, right) => left.localeCompare(right)),
+    removed: [...stableSet].filter((value) => !releaseSet.has(value)).sort((left, right) => left.localeCompare(right))
+  };
+}
+
+function sourceChanged(stable, release, key) {
+  return stable?.sources?.[key]?.sha256 !== release?.sources?.[key]?.sha256;
+}
+
+export function compareGatewayContracts(stable, release) {
+  if (!stable?.inspection || !release?.inspection || !stable?.protocol || !release?.protocol) {
+    throw new Error("Gateway contract comparison requires inspected artifacts.");
+  }
+  const coreMethods = inventoryDelta(stable.inventories?.coreMethods, release.inventories?.coreMethods);
+  const schemaExports = inventoryDelta(stable.inventories?.schemaExports, release.inventories?.schemaExports);
+  const validators = inventoryDelta(stable.inventories?.validators, release.inventories?.validators);
+  const eventSchemas = inventoryDelta(stable.inventories?.eventSchemas, release.inventories?.eventSchemas);
+  const protocol = {
+    stable: stable.protocol,
+    release: release.protocol,
+    changed: JSON.stringify(stable.protocol) !== JSON.stringify(release.protocol)
+  };
+  const distribution = {
+    legacyPluginDeclarationCount: {
+      stable: stable.distribution?.legacyPluginDeclarationCount ?? 0,
+      release: release.distribution?.legacyPluginDeclarationCount ?? 0,
+      delta: (release.distribution?.legacyPluginDeclarationCount ?? 0)
+        - (stable.distribution?.legacyPluginDeclarationCount ?? 0)
+    },
+    publicDeclarationChanged: sourceChanged(stable, release, "publicDeclaration"),
+    publicRuntimeChanged: sourceChanged(stable, release, "publicRuntime"),
+    versionModuleChanged: sourceChanged(stable, release, "versionModule"),
+    serverMethodsChanged: sourceChanged(stable, release, "serverMethods")
+  };
+  const inventoryRemoved = [coreMethods, schemaExports, validators, eventSchemas]
+    .some((delta) => delta.removed.length > 0);
+  const minimumNarrowed = ["minClient", "minProbe", "minNode"].some((key) => {
+    const before = stable.protocol[key];
+    const after = release.protocol[key];
+    return before !== null && (after === null || after > before);
+  });
+  const protocolBreaking = stable.protocol.current !== release.protocol.current || minimumNarrowed;
+  const legacyDeclarationsRemoved = distribution.legacyPluginDeclarationCount.delta < 0;
+  const hasAdditions = [coreMethods, schemaExports, validators, eventSchemas]
+    .some((delta) => delta.added.length > 0);
+  const anySourceChanged = distribution.publicDeclarationChanged || distribution.publicRuntimeChanged
+    || distribution.versionModuleChanged || distribution.serverMethodsChanged;
+  let classification = "unchanged";
+  if (stable.inspection.status !== "complete" || release.inspection.status !== "complete") classification = "incomplete";
+  else if (protocolBreaking || inventoryRemoved || legacyDeclarationsRemoved) classification = "breaking";
+  else if (protocol.changed || hasAdditions || distribution.legacyPluginDeclarationCount.delta > 0) classification = "additive";
+  else if (anySourceChanged) classification = "changed";
+  return {
+    classification,
+    inspection: { stable: stable.inspection.status, release: release.inspection.status },
+    protocol,
+    distribution,
+    coreMethods,
+    schemaExports,
+    validators,
+    eventSchemas
+  };
+}
+
 function validateDependencyRisks(channel, report, changes, risks = []) {
   const expected = new Map([
     ...changes.added.map(({ name }) => [name, "added"]),
@@ -121,6 +189,10 @@ function summarizeReport(channel, report, reportPath, stableReport, dependencyRi
       report,
       dependencyChangesFromStable,
       dependencyRisks
+    ),
+    gatewayContractFromStable: compareGatewayContracts(
+      stableArtifact.gatewayContract,
+      report.artifact.gatewayContract
     ),
     deltaFromStable: {
       unpackedBytes: report.artifact.unpackedBytes - stableArtifact.unpackedBytes,

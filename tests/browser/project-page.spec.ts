@@ -25,6 +25,16 @@ test("project page distinguishes stable, previous, and preview evidence", async 
         scan: { truncated: boolean };
         signals: { browserCapabilities: string[] };
       }>;
+      gatewayContractFromStable: {
+        classification: string;
+        protocol: {
+          stable: { current: number | null; minClient: number | null; minProbe: number | null; minNode: number | null };
+          release: { current: number | null; minClient: number | null; minProbe: number | null; minNode: number | null };
+        };
+        distribution: { legacyPluginDeclarationCount: { stable: number; release: number; delta: number } };
+        coreMethods: { added: string[]; removed: string[] };
+        schemaExports: { added: string[]; removed: string[] };
+      };
     }>;
   };
   expect(index.releases.map((release) => release.channel)).toEqual(["stable", "previous", "preview"]);
@@ -118,6 +128,20 @@ test("project page distinguishes stable, previous, and preview evidence", async 
       firstRisk?.signals.browserCapabilities.join(" · ") || "no package-level capability signal"
     );
   }
+  const gatewayDiff = page.locator("[data-gateway-diff]");
+  const contract = preview?.gatewayContractFromStable;
+  await expect(gatewayDiff).toBeVisible();
+  await expect(gatewayDiff.getByText(
+    `${contract?.classification} · +${contract?.coreMethods.added.length} methods · +${contract?.schemaExports.added.length} schemas · protocol ${contract?.protocol.release.current}`,
+    { exact: true }
+  )).toBeVisible();
+  await gatewayDiff.locator("summary").click();
+  await expect(gatewayDiff.getByText(
+    `${contract?.distribution.legacyPluginDeclarationCount.stable} → ${contract?.distribution.legacyPluginDeclarationCount.release}`,
+    { exact: true }
+  )).toBeVisible();
+  const firstMethod = contract?.coreMethods.added[0];
+  if (firstMethod) await expect(gatewayDiff.getByText(firstMethod, { exact: true })).toBeVisible();
   expect(consoleErrors).toEqual([]);
 });
 
@@ -131,6 +155,13 @@ test("release ledger remains readable at a mobile viewport", async ({ page }) =>
   expect(bounds).not.toBeNull();
   expect(bounds!.x).toBeGreaterThanOrEqual(0);
   expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390);
+  const gatewayDiff = section.locator("[data-gateway-diff]");
+  await gatewayDiff.locator("summary").click();
+  const gatewayBounds = await gatewayDiff.boundingBox();
+  expect(gatewayBounds).not.toBeNull();
+  expect(gatewayBounds!.x).toBeGreaterThanOrEqual(0);
+  expect(gatewayBounds!.x + gatewayBounds!.width).toBeLessThanOrEqual(390);
+  await expect(gatewayDiff.locator(".gateway-diff-group")).toHaveCount(4);
   const brokerBounds = await page.locator("#broker").boundingBox();
   expect(brokerBounds).not.toBeNull();
   expect(brokerBounds!.x).toBeGreaterThanOrEqual(0);

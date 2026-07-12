@@ -111,6 +111,15 @@ and scanned without lifecycle execution for install scripts, native/Wasm
 artifacts, Node built-ins, network signals, and browser-authority risk. These
 remain static review signals and never promote a runtime check.
 
+The same exact tarballs are inspected for their public Gateway declaration,
+runtime entrypoint, protocol constants, server-method inventory, and legacy
+plugin declaration distribution. The release index publishes a stable-relative
+contract diff with exact added/removed method and schema names. At this
+snapshot, preview is classified `breaking`: protocol 4 remains current, while
+legacy plugin declarations move from 38 to 0 and the public surface adds 28
+core methods and 51 schema exports. This is a static upgrade warning, not a
+claim that those methods run successfully in BrowserPod.
+
 The main branch is BrowserPod-only: it contains no legacy runtime adapter,
 dependency, fixture, evidence record, report target, fallback, or vendor CSP
 permission. Browser-host vault, identity, budget, and consent checks remain

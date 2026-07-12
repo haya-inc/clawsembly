@@ -70,6 +70,11 @@ The project does not yet promise semantic-version compatibility.
 - script-disabled exact-tarball risk classification for added and changed
   dependencies, covering lifecycle scripts, native/Wasm artifacts, Node
   built-ins, network APIs, scan completeness, and derived browser capabilities;
+- non-executing exact-tarball Gateway contract inspection with stable-relative
+  protocol, distribution, method, schema, validator, and event diffs plus
+  fail-closed breaking/incomplete classification;
+- project-page Gateway upgrade inspector exposing the preview classification,
+  protocol movement, legacy declaration removal, and bounded exact-name lists;
 - report-driven project page, release ledger, compatibility badge, contribution
   templates, security policy, and downstream consumption guide.
 

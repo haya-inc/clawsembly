@@ -6,7 +6,7 @@ import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { deriveBrowserCapabilities } from "./dependency-risk.mjs";
 import { deriveRuntimeClaimStatuses, evidenceDigest } from "./report.mjs";
-import { compareDirectDependencies } from "./release-tracking.mjs";
+import { compareDirectDependencies, compareGatewayContracts } from "./release-tracking.mjs";
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -99,6 +99,14 @@ for (let index = 0; index < history.releases.length; index += 1) {
     release.dependencyChangesFromStable,
     changes,
     `${release.channel} direct dependency changes drift`
+  );
+  assert.deepEqual(
+    release.gatewayContractFromStable,
+    compareGatewayContracts(
+      reports[0].artifact.gatewayContract,
+      reports[index].artifact.gatewayContract
+    ),
+    `${release.channel} Gateway contract changes drift`
   );
   const expectedRiskChanges = new Map([
     ...changes.added.map(({ name }) => [name, "added"]),

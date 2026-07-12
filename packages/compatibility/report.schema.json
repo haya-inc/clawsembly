@@ -22,7 +22,7 @@
     "artifact": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["package", "version", "integrity", "nodeEngine", "tarballBytes", "unpackedBytes", "directDependencyCount", "directDependencies", "nativeRiskDependencies", "shrinkwrapRootConsistency"],
+      "required": ["package", "version", "integrity", "nodeEngine", "tarballBytes", "unpackedBytes", "directDependencyCount", "directDependencies", "gatewayContract", "nativeRiskDependencies", "shrinkwrapRootConsistency"],
       "properties": {
         "package": { "type": "string", "minLength": 1 },
         "version": { "type": "string", "minLength": 1 },
@@ -51,6 +51,63 @@
                   { "type": "string", "minLength": 1 },
                   { "type": "null" }
                 ]
+              }
+            }
+          }
+        },
+        "gatewayContract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["inspection", "protocol", "distribution", "inventories", "sources"],
+          "properties": {
+            "inspection": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["status", "limitations"],
+              "properties": {
+                "status": { "enum": ["complete", "incomplete"] },
+                "limitations": { "$ref": "#/$defs/stringList" }
+              }
+            },
+            "protocol": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["current", "minClient", "minProbe", "minNode"],
+              "properties": {
+                "current": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+                "minClient": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+                "minProbe": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+                "minNode": { "$ref": "#/$defs/nullableNonnegativeInteger" }
+              }
+            },
+            "distribution": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["legacyPluginDeclarationCount"],
+              "properties": {
+                "legacyPluginDeclarationCount": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "inventories": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["coreMethods", "schemaExports", "validators", "eventSchemas"],
+              "properties": {
+                "coreMethods": { "$ref": "#/$defs/stringList" },
+                "schemaExports": { "$ref": "#/$defs/stringList" },
+                "validators": { "$ref": "#/$defs/stringList" },
+                "eventSchemas": { "$ref": "#/$defs/stringList" }
+              }
+            },
+            "sources": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["publicDeclaration", "publicRuntime", "versionModule", "serverMethods"],
+              "properties": {
+                "publicDeclaration": { "$ref": "#/$defs/nullableSourceRecord" },
+                "publicRuntime": { "$ref": "#/$defs/nullableSourceRecord" },
+                "versionModule": { "$ref": "#/$defs/nullableSourceRecord" },
+                "serverMethods": { "$ref": "#/$defs/nullableSourceRecord" }
               }
             }
           }
@@ -111,6 +168,33 @@
           "detail": { "type": "string", "minLength": 1 }
         }
       }
+    }
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "nullableNonnegativeInteger": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "null" }
+      ]
+    },
+    "nullableSourceRecord": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "sha256"],
+          "properties": {
+            "path": { "type": "string", "minLength": 1 },
+            "sha256": { "type": "string", "pattern": "^sha256-[a-f0-9]{64}$" }
+          }
+        },
+        { "type": "null" }
+      ]
     }
   }
 }

@@ -182,12 +182,16 @@ export function buildReport({
   manifest,
   pack,
   shrinkwrap,
+  gatewayContract,
   generatedAt,
   browserRuntimeEvidence,
   target
 }) {
   if (!manifest?.version) throw new Error("The npm manifest is missing a version.");
   if (!pack?.integrity) throw new Error("The npm pack result is missing integrity metadata.");
+  if (!gatewayContract?.inspection || !gatewayContract?.protocol || !gatewayContract?.inventories) {
+    throw new Error("The npm artifact is missing its Gateway contract inspection.");
+  }
   const reportTarget = normalizeReportTarget(target);
   if (browserRuntimeEvidence) {
     assertBrowserRuntimeEvidence(browserRuntimeEvidence);
@@ -225,6 +229,7 @@ export function buildReport({
       unpackedBytes: pack.unpackedSize ?? 0,
       directDependencyCount: dependencies.length,
       directDependencies: dependencies,
+      gatewayContract,
       nativeRiskDependencies,
       shrinkwrapRootConsistency: {
         lockfileVersion: shrinkwrapRootDrift.lockfileVersion,

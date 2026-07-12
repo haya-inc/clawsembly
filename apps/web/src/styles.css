@@ -167,6 +167,11 @@ nav a:hover, nav a:focus-visible { color: var(--accent); }
 .release-diff-group code { overflow-wrap: anywhere; color: var(--ink); font: 400 10px/1.4 var(--mono); }
 .release-diff-group li > span, .release-diff-empty { overflow-wrap: anywhere; color: var(--muted); font-size: 8px; line-height: 1.5; }
 .release-diff-signals { overflow-wrap: anywhere; color: #67b7ff; font-size: 7px; line-height: 1.55; letter-spacing: .04em; text-transform: uppercase; }
+.gateway-diff[data-classification="breaking"] summary > span { color: #ff685f; }
+.gateway-diff[data-classification="additive"] summary > span { color: var(--accent); }
+.gateway-diff-list { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.gateway-diff-group:last-child { grid-column: auto; padding-left: 24px; border-top: 0; border-left: 1px solid var(--line); }
+.gateway-diff-group li > span { text-transform: none; }
 @keyframes release-diff-reveal { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 .release-history-foot { display: flex; justify-content: space-between; gap: 24px; padding-top: 18px; color: var(--muted); font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
 .release-history-foot a { color: var(--accent); border-bottom: 1px solid currentColor; padding-bottom: 3px; }
@@ -371,6 +376,8 @@ footer .wordmark { color: var(--ink); text-transform: none; letter-spacing: -.02
   .release-diff summary { grid-template-columns: 170px 1fr auto; gap: 18px; }
   .release-diff-list { grid-template-columns: 1fr 1fr; }
   .release-diff-group:last-child { grid-column: 1 / -1; padding-left: 0; border-top: 1px solid var(--line); border-left: 0; }
+  .gateway-diff-list { grid-template-columns: 1fr 1fr; }
+  .gateway-diff-group:last-child { grid-column: auto; padding-left: 24px; border-top: 0; border-left: 1px solid var(--line); }
   .environment-probe { grid-template-columns: 1fr; gap: 55px; padding-top: 90px; }
   .broker-boundary-head { grid-template-columns: 1fr; gap: 28px; }
   .broker-flow { grid-template-columns: 1fr 1fr; }
@@ -421,6 +428,7 @@ footer .wordmark { color: var(--ink); text-transform: none; letter-spacing: -.02
   .release-diff-list { grid-template-columns: 1fr; }
   .release-diff-group, .release-diff-group + .release-diff-group, .release-diff-group:last-child { grid-column: 1; padding: 24px 0; border-top: 1px solid var(--line); border-left: 0; }
   .release-diff-group:first-child { border-top: 0; }
+  .gateway-diff-group:last-child { grid-column: 1; padding: 24px 0; border-top: 1px solid var(--line); border-left: 0; }
   .release-history-foot { flex-direction: column; }
   .probe-terminal li { grid-template-columns: 26px 1fr; }
   .probe-terminal li em { grid-column: 2; text-align: left; }

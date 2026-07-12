@@ -48,12 +48,44 @@ interface ReleaseHistory {
       scan: { truncated: boolean };
       signals: { browserCapabilities: string[] };
     }>;
+    gatewayContractFromStable: {
+      classification: "unchanged" | "changed" | "additive" | "breaking" | "incomplete";
+      inspection: { stable: "complete" | "incomplete"; release: "complete" | "incomplete" };
+      protocol: {
+        stable: GatewayProtocol;
+        release: GatewayProtocol;
+        changed: boolean;
+      };
+      distribution: {
+        legacyPluginDeclarationCount: { stable: number; release: number; delta: number };
+        publicDeclarationChanged: boolean;
+        publicRuntimeChanged: boolean;
+        versionModuleChanged: boolean;
+        serverMethodsChanged: boolean;
+      };
+      coreMethods: GatewayInventoryDelta;
+      schemaExports: GatewayInventoryDelta;
+      validators: GatewayInventoryDelta;
+      eventSchemas: GatewayInventoryDelta;
+    };
     deltaFromStable: {
       unpackedBytes: number;
       directDependencyCount: number;
       nativeRiskCount: number;
     };
   }>;
+}
+
+interface GatewayProtocol {
+  current: number | null;
+  minClient: number | null;
+  minProbe: number | null;
+  minNode: number | null;
+}
+
+interface GatewayInventoryDelta {
+  added: string[];
+  removed: string[];
 }
 
 const selectAll = <T extends Element>(selector: string) => Array.from(document.querySelectorAll<T>(selector));
@@ -158,6 +190,89 @@ function renderReleaseDependencyDiff(history: ReleaseHistory): void {
   container.hidden = false;
 }
 
+function protocolValue(value: number | null): string {
+  return value === null ? "not declared" : String(value);
+}
+
+function renderContractGroup(
+  label: string,
+  count: string,
+  entries: Array<{ name: string; detail: string }>
+): HTMLElement {
+  const group = document.createElement("section");
+  group.className = "release-diff-group gateway-diff-group";
+  const heading = document.createElement("h4");
+  heading.textContent = `${label} / ${count}`;
+  const list = document.createElement("ol");
+  list.append(...entries.map((entry) => {
+    const item = document.createElement("li");
+    const name = document.createElement("code");
+    name.textContent = entry.name;
+    const detail = document.createElement("span");
+    detail.textContent = entry.detail;
+    item.append(name, detail);
+    return item;
+  }));
+  group.append(heading, list);
+  return group;
+}
+
+function inventoryEntries(delta: GatewayInventoryDelta, limit = 6): Array<{ name: string; detail: string }> {
+  const entries = [
+    ...delta.removed.map((name) => ({ name, detail: "removed" })),
+    ...delta.added.map((name) => ({ name, detail: "added" }))
+  ];
+  const visible = entries.slice(0, limit);
+  if (entries.length > limit) {
+    visible.push({ name: `+${entries.length - limit} more`, detail: "Open release JSON for the complete inventory" });
+  }
+  return visible.length ? visible : [{ name: "No inventory changes", detail: "Exact names match stable" }];
+}
+
+function inventoryCount(delta: GatewayInventoryDelta): string {
+  return `+${delta.added.length} −${delta.removed.length}`;
+}
+
+function renderGatewayContractDiff(history: ReleaseHistory): void {
+  const container = document.querySelector<HTMLDetailsElement>("[data-gateway-diff]");
+  const summary = document.querySelector<HTMLElement>("[data-gateway-diff-summary]");
+  const list = document.querySelector<HTMLElement>("[data-gateway-diff-list]");
+  const preview = history.releases.find((release) => release.channel === "preview");
+  if (!container || !summary || !list || !preview) return;
+  const contract = preview.gatewayContractFromStable;
+  container.dataset.classification = contract.classification;
+  summary.textContent = `${contract.classification} · +${contract.coreMethods.added.length} methods · +${contract.schemaExports.added.length} schemas · protocol ${protocolValue(contract.protocol.release.current)}`;
+  const protocol = ([
+    ["current", "current"],
+    ["minimum client", "minClient"],
+    ["minimum probe", "minProbe"],
+    ["minimum node", "minNode"]
+  ] as const).map(([label, key]) => ({
+    name: label,
+    detail: `${protocolValue(contract.protocol.stable[key])} → ${protocolValue(contract.protocol.release[key])}`
+  }));
+  const changedSources = [
+    ["public declaration", contract.distribution.publicDeclarationChanged],
+    ["public runtime", contract.distribution.publicRuntimeChanged],
+    ["version module", contract.distribution.versionModuleChanged],
+    ["server methods", contract.distribution.serverMethodsChanged]
+  ].filter((entry) => entry[1]).map(([name]) => String(name));
+  const legacy = contract.distribution.legacyPluginDeclarationCount;
+  list.replaceChildren(
+    renderContractGroup("Protocol", contract.protocol.changed ? "changed" : "unchanged", protocol),
+    renderContractGroup("Distribution", contract.classification, [
+      { name: "legacy declarations", detail: `${legacy.stable} → ${legacy.release}` },
+      {
+        name: "source artifacts",
+        detail: changedSources.length ? `${changedSources.join(", ")} changed` : "Exact source digests match stable"
+      }
+    ]),
+    renderContractGroup("Core methods", inventoryCount(contract.coreMethods), inventoryEntries(contract.coreMethods)),
+    renderContractGroup("Schema exports", inventoryCount(contract.schemaExports), inventoryEntries(contract.schemaExports))
+  );
+  container.hidden = false;
+}
+
 function renderReleaseHistory(history: ReleaseHistory): void {
   const ledger = document.querySelector<HTMLElement>("[data-release-history]");
   if (!ledger) return;
@@ -209,6 +324,7 @@ function renderReleaseHistory(history: ReleaseHistory): void {
   const indexLink = document.querySelector<HTMLAnchorElement>("[data-release-index]");
   if (indexLink) indexLink.href = `${import.meta.env.BASE_URL}data/release-history.json`;
   renderReleaseDependencyDiff(history);
+  renderGatewayContractDiff(history);
 }
 
 async function loadReleaseHistory(): Promise<void> {

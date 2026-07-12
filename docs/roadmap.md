@@ -237,14 +237,18 @@ changed entries against stable for machine and project-page review. The
 tracker now also resolves every added or changed dependency through the
 published shrinkwrap, verifies its exact npm SHA-512, and records bounded
 script-disabled lifecycle, native/Wasm, Node built-in, network, and browser
-capability signals with explicit scan completeness. The six-hour workflow
+capability signals with explicit scan completeness. The tracker also publishes
+exact stable-relative Gateway protocol, distribution, method, schema,
+validator, and event changes from every tracked npm tarball. At the current
+snapshot, preview retains protocol 4 but is classified breaking because its
+legacy declaration distribution is removed. The six-hour workflow
 uploads all reports and opens
 or refreshes a fixed-branch pull request when a channel moves. Full runtime
 execution on that pull request derives the version from the generated stable
 report and retains a redacted, versioned evidence artifact on success. Promotion
 of that CI artifact into the durable checked-in report, optional/transitive
-ownership classification, schema/protocol diff generation, and automatic
-rollback promotion remain.
+ownership classification, automatic rollback promotion, and owner-authorized
+end-to-end Gateway evidence remain.
 
 ## Phase 5: extensibility and broader capabilities
 
@@ -255,7 +259,8 @@ Possible follow-up work:
 - browser notifications and best-effort background work;
 - selected HTTPS-only messaging channels;
 - mobile and installable PWA support;
-- a compatibility dashboard covering OpenClaw release history.
+- richer compatibility-dashboard filtering over the implemented release and
+  Gateway-contract history.
 
 These features should not delay the compatibility harness or create a new
 agent runtime inside Clawsembly.

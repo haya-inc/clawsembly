@@ -20,7 +20,7 @@ passed every production gate. It must not be interpreted as fully supported.
 | Artifact | Stable URL | Purpose |
 | --- | --- | --- |
 | Current stable report | `https://haya-inc.github.io/clawsembly/data/compatibility.json` | Complete checks and evidence for npm `latest` |
-| Release index | `https://haya-inc.github.io/clawsembly/data/release-history.json` | Stable, previous, and preview summaries, exact direct-dependency changes, and report paths |
+| Release index | `https://haya-inc.github.io/clawsembly/data/release-history.json` | Stable, previous, and preview summaries, exact dependency and Gateway contract changes, and report paths |
 | Report schema | repository `packages/compatibility/report.schema.json` | Validation contract for a complete report |
 | History schema | repository `packages/compatibility/release-history.schema.json` | Validation contract for the channel index |
 | BrowserPod evidence schema | repository `packages/compatibility/browserpod-evidence.schema.json` | Raw exact-artifact BrowserPod readiness contract |
@@ -58,6 +58,22 @@ lifecycle scripts, native/Wasm files, Node built-ins, network APIs/package
 imports, and derived browser-capability signals. An empty signal list is not a
 compatibility PASS; if `scan.truncated` is true it is not even an absence claim.
 
+`gatewayContractFromStable` compares the inspected Gateway surface without
+executing OpenClaw. It includes protocol constants, legacy declaration counts,
+source-digest changes, and exact `added`/`removed` lists for core methods,
+schema exports, validators, and event schemas. Classification is fail-closed:
+an incomplete inspection yields `incomplete`; a protocol incompatibility,
+removed inventory member, or removed legacy declaration yields `breaking`.
+`additive` and `unchanged` remain static contract observations and do not imply
+runtime support.
+
+```js
+const gateway = preview.gatewayContractFromStable;
+if (["breaking", "incomplete"].includes(gateway.classification)) {
+  throw new Error(`Review OpenClaw Gateway contract: ${gateway.classification}`);
+}
+```
+
 ## Minimal policy example
 
 ```js
@@ -70,6 +86,11 @@ if (history.schemaVersion !== 1) throw new Error("Unsupported compatibility sche
 const stable = history.releases.find((release) => release.channel === "stable");
 if (!stable?.runtimeEvidence || stable.checks.fail > 0) {
   throw new Error(`OpenClaw ${stable?.version ?? "stable"} is not runtime-verified`);
+}
+
+const preview = history.releases.find((release) => release.channel === "preview");
+if (["breaking", "incomplete"].includes(preview?.gatewayContractFromStable?.classification)) {
+  console.warn(`Preview promotion requires Gateway review: ${preview.gatewayContractFromStable.classification}`);
 }
 ```
 

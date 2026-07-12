@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildReleaseHistory, compareDirectDependencies, resolveReleaseChannels } from "./release-tracking.mjs";
+import {
+  buildReleaseHistory,
+  compareDirectDependencies,
+  compareGatewayContracts,
+  resolveReleaseChannels
+} from "./release-tracking.mjs";
 
 test("resolveReleaseChannels follows latest, previous stable, and beta", () => {
   assert.deepEqual(resolveReleaseChannels({
@@ -43,6 +48,21 @@ function report(version, { status = "probing", runtimeEvidence = false, deps = 1
       unpackedBytes: 1000 + deps,
       directDependencyCount: deps,
       directDependencies,
+      gatewayContract: {
+        inspection: { status: "complete", limitations: [] },
+        protocol: { current: 4, minClient: 4, minProbe: 4, minNode: null },
+        distribution: { legacyPluginDeclarationCount: 38 },
+        inventories: {
+          coreMethods: ["chat.send"], schemaExports: ["ChatEventSchema"],
+          validators: ["validateChatEvent"], eventSchemas: ["ChatEventSchema"]
+        },
+        sources: {
+          publicDeclaration: { path: "dist/gateway/protocol/index.d.ts", sha256: `sha256-${version}` },
+          publicRuntime: { path: "dist/gateway/protocol/index.js", sha256: `sha256-${version}` },
+          versionModule: { path: "dist/version.js", sha256: `sha256-${version}` },
+          serverMethods: { path: "dist/server-methods.js", sha256: `sha256-${version}` }
+        }
+      },
       nativeRiskDependencies: Array.from({ length: native }, (_, index) => ({ name: `native-${index}` })),
       shrinkwrapRootConsistency: {
         compatible: missing === 0,
@@ -107,6 +127,8 @@ test("buildReleaseHistory preserves evidence levels and stable deltas", () => {
   assert.deepEqual(history.releases[1].dependencyChangesFromStable.removed.map(({ name }) => name), ["dep-10", "dep-11"]);
   assert.deepEqual(history.releases[2].dependencyChangesFromStable.added.map(({ name }) => name), ["dep-12", "dep-13"]);
   assert.deepEqual(history.releases[2].dependencyRiskFromStable.map(({ name }) => name), ["dep-12", "dep-13"]);
+  assert.equal(history.releases[0].gatewayContractFromStable.classification, "unchanged");
+  assert.equal(history.releases[2].gatewayContractFromStable.classification, "changed");
 });
 
 test("compareDirectDependencies reports exact added, removed, and changed specs", () => {
@@ -123,4 +145,20 @@ test("compareDirectDependencies reports exact added, removed, and changed specs"
     removed: [{ name: "removed", spec: "2.0.0" }],
     changed: [{ name: "changed", stableSpec: "1.0.0", releaseSpec: "1.1.0" }]
   });
+});
+
+test("compareGatewayContracts classifies additive and breaking protocol surfaces", () => {
+  const stable = report("stable").artifact.gatewayContract;
+  const additive = structuredClone(stable);
+  additive.protocol.minProbe = 3;
+  additive.protocol.minNode = 3;
+  additive.inventories.coreMethods.push("terminal.open");
+  assert.equal(compareGatewayContracts(stable, additive).classification, "additive");
+
+  const breaking = structuredClone(additive);
+  breaking.distribution.legacyPluginDeclarationCount = 0;
+  breaking.inventories.coreMethods = ["terminal.open"];
+  const result = compareGatewayContracts(stable, breaking);
+  assert.equal(result.classification, "breaking");
+  assert.deepEqual(result.coreMethods.removed, ["chat.send"]);
 });

@@ -103,6 +103,15 @@ Broader RPC generation, automatic reconnect/backoff, token
 rotation/revocation/recovery, attachments, and forward-compatible unknown
 post-authentication events remain to be generated.
 
+Release compatibility uses a separate non-executing inspection path. It reads
+fixed entries from the exact OpenClaw npm tarball, resolves only the referenced
+version module and unique generated server-methods file, and hashes all source
+inputs. The release-history builder compares protocol constants, public schema
+and validator exports, event schemas, core methods, and legacy plugin
+declaration distribution against stable. The checked-in validator recomputes
+the diff from each source report so a hand-edited classification cannot pass
+CI.
+
 OpenClaw documents its Gateway protocol and TypeBox code-generation pipeline in
 [Gateway protocol](https://docs.openclaw.ai/gateway/protocol) and
 [TypeBox](https://docs.openclaw.ai/concepts/typebox).

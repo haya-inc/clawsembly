@@ -26,6 +26,14 @@ release index records lifecycle scripts, native/Wasm artifacts, runtime Node
 built-ins, network signals, derived browser capabilities, and whether the
 bounded scan was complete.
 
+The same artifact inspection reads the canonical public Gateway declaration
+and runtime entry, its protocol constants, the unique generated server-methods
+module, and legacy plugin declaration count. It never executes OpenClaw. The
+release index publishes exact stable-relative method, schema, validator, event,
+protocol, and distribution changes in `gatewayContractFromStable`; missing or
+ambiguous source artifacts produce `incomplete` rather than an empty-compatible
+result.
+
 Generate a static BrowserPod-target report without runtime evidence:
 
 ```bash

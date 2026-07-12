@@ -26,7 +26,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["channel", "version", "status", "reportPath", "generatedAt", "runtimeEvidence", "artifact", "checks", "dependencyChangesFromStable", "dependencyRiskFromStable", "deltaFromStable"],
+        "required": ["channel", "version", "status", "reportPath", "generatedAt", "runtimeEvidence", "artifact", "checks", "dependencyChangesFromStable", "dependencyRiskFromStable", "gatewayContractFromStable", "deltaFromStable"],
         "properties": {
           "channel": { "enum": ["stable", "previous", "preview"] },
           "version": { "type": "string", "minLength": 1 },
@@ -81,6 +81,7 @@
             "type": "array",
             "items": { "$ref": "#/$defs/dependencyRisk" }
           },
+          "gatewayContractFromStable": { "$ref": "#/$defs/gatewayContractComparison" },
           "deltaFromStable": {
             "type": "object",
             "additionalProperties": false,
@@ -97,6 +98,84 @@
     }
   },
   "$defs": {
+    "gatewayContractComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "inspection", "protocol", "distribution", "coreMethods", "schemaExports", "validators", "eventSchemas"],
+      "properties": {
+        "classification": { "enum": ["unchanged", "changed", "additive", "breaking", "incomplete"] },
+        "inspection": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stable", "release"],
+          "properties": {
+            "stable": { "enum": ["complete", "incomplete"] },
+            "release": { "enum": ["complete", "incomplete"] }
+          }
+        },
+        "protocol": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stable", "release", "changed"],
+          "properties": {
+            "stable": { "$ref": "#/$defs/gatewayProtocol" },
+            "release": { "$ref": "#/$defs/gatewayProtocol" },
+            "changed": { "type": "boolean" }
+          }
+        },
+        "distribution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["legacyPluginDeclarationCount", "publicDeclarationChanged", "publicRuntimeChanged", "versionModuleChanged", "serverMethodsChanged"],
+          "properties": {
+            "legacyPluginDeclarationCount": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["stable", "release", "delta"],
+              "properties": {
+                "stable": { "type": "integer", "minimum": 0 },
+                "release": { "type": "integer", "minimum": 0 },
+                "delta": { "type": "integer" }
+              }
+            },
+            "publicDeclarationChanged": { "type": "boolean" },
+            "publicRuntimeChanged": { "type": "boolean" },
+            "versionModuleChanged": { "type": "boolean" },
+            "serverMethodsChanged": { "type": "boolean" }
+          }
+        },
+        "coreMethods": { "$ref": "#/$defs/inventoryDelta" },
+        "schemaExports": { "$ref": "#/$defs/inventoryDelta" },
+        "validators": { "$ref": "#/$defs/inventoryDelta" },
+        "eventSchemas": { "$ref": "#/$defs/inventoryDelta" }
+      }
+    },
+    "gatewayProtocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current", "minClient", "minProbe", "minNode"],
+      "properties": {
+        "current": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "minClient": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "minProbe": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "minNode": { "$ref": "#/$defs/nullableNonnegativeInteger" }
+      }
+    },
+    "nullableNonnegativeInteger": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "null" }
+      ]
+    },
+    "inventoryDelta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["added", "removed"],
+      "properties": {
+        "added": { "$ref": "#/$defs/stringList" },
+        "removed": { "$ref": "#/$defs/stringList" }
+      }
+    },
     "dependencyRisk": {
       "type": "object",
       "additionalProperties": false,

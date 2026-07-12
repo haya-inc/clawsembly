@@ -83,6 +83,12 @@ shrinkwrap-resolved tarball with scripts disabled, verifies its SHA-512, and
 performs a bounded static risk scan. It records lifecycle scripts, native and
 Wasm artifacts, runtime Node built-ins, network signals, and derived browser
 capabilities together with scan completeness.
+The inspector also reads the fixed public Gateway declaration/runtime entries,
+their referenced protocol-version module, and the unique generated
+server-methods module directly from each tarball. It does not import or execute
+OpenClaw. The release index recomputes stable-relative protocol, distribution,
+method, schema, validator, and event deltas and fails validation if a checked-in
+summary drifts from its source reports.
 Checked-in Gateway evidence is attached to whichever channel has the exact same
 OpenClaw version; the report builder rejects mismatched runtime evidence. The
 scheduled workflow exits without rewriting timestamps when channel versions are
@@ -112,8 +118,10 @@ flowchart LR
 - Compare the published manifest with the shrinkwrap root; report missing or
   mismatched declarations that make deterministic `npm ci` impossible.
 - Identify native addons, install scripts, and Node built-in imports.
-- Generate and diff Gateway JSON Schema and protocol constants.
-- Diff advertised methods and events.
+- Extract and diff Gateway protocol constants, public schema exports,
+  validators, event schemas, and generated core methods.
+- Classify removed contract inventory or legacy declaration distribution as a
+  breaking review signal; report incomplete extraction without guessing.
 - Validate the compatibility-manifest schema.
 
 ### Runtime checks
