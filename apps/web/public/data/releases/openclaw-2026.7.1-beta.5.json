@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-11T22:31:57.008Z",
+  "generatedAt": "2026-07-12T02:39:01.311Z",
   "status": "probing",
   "target": {
-    "runtime": "webcontainer",
-    "browserBaseline": "Desktop Chromium; Firefox and Safari are experimental until runtime evidence exists."
+    "runtime": "browserpod",
+    "runtimeVersion": "2.12.1",
+    "browserBaseline": "Desktop Chromium; Firefox and WebKit pending BrowserPod evidence."
   },
   "artifact": {
     "package": "openclaw",
@@ -18,37 +19,37 @@
       {
         "name": "@lydell/node-pty",
         "version": "1.2.0-beta.12",
-        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+        "reason": "Ships platform-specific PTY binaries that cannot execute in the selected browser Wasm runtime."
       },
       {
         "name": "@lydell/node-pty-darwin-arm64",
         "version": "1.2.0-beta.12",
-        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+        "reason": "Ships platform-specific PTY binaries that cannot execute in the selected browser Wasm runtime."
       },
       {
         "name": "@lydell/node-pty-darwin-x64",
         "version": "1.2.0-beta.12",
-        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+        "reason": "Ships platform-specific PTY binaries that cannot execute in the selected browser Wasm runtime."
       },
       {
         "name": "@lydell/node-pty-linux-arm64",
         "version": "1.2.0-beta.12",
-        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+        "reason": "Ships platform-specific PTY binaries that cannot execute in the selected browser Wasm runtime."
       },
       {
         "name": "@lydell/node-pty-linux-x64",
         "version": "1.2.0-beta.12",
-        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+        "reason": "Ships platform-specific PTY binaries that cannot execute in the selected browser Wasm runtime."
       },
       {
         "name": "@lydell/node-pty-win32-arm64",
         "version": "1.2.0-beta.12",
-        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+        "reason": "Ships platform-specific PTY binaries that cannot execute in the selected browser Wasm runtime."
       },
       {
         "name": "@lydell/node-pty-win32-x64",
         "version": "1.2.0-beta.12",
-        "reason": "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+        "reason": "Ships platform-specific PTY binaries that cannot execute in the selected browser Wasm runtime."
       },
       {
         "name": "sqlite-vec",
@@ -89,16 +90,7 @@
       "missingDevDependencyCount": 31
     }
   },
-  "evidence": [
-    {
-      "id": "host-preflight",
-      "kind": "browser-runtime",
-      "capturedAt": "2026-07-11T16:06:30.000Z",
-      "path": "evidence/webcontainer-host.json",
-      "sha256": "9ccc5d3c41b486eaf4d1df1080fbfe8d201e809d22e5272650f3c7779c0ae51c",
-      "summary": "WebContainer 1.6.4 booted Node v22.22.3 with cross-origin isolation."
-    }
-  ],
+  "evidence": [],
   "checks": [
     {
       "id": "artifact-pinned",
@@ -127,12 +119,12 @@
     {
       "id": "host-preflight",
       "label": "Browser host preflight",
-      "status": "warn",
-      "detail": "WebContainer 1.6.4 booted Node v22.22.3; built-in node:sqlite requires an adapter."
+      "status": "pending",
+      "detail": "A dated browser-host evidence record has not been attached."
     },
     {
-      "id": "openclaw-webcontainer-boot",
-      "label": "OpenClaw WebContainer boot",
+      "id": "openclaw-browserpod-boot",
+      "label": "OpenClaw BrowserPod boot",
       "status": "pending",
       "detail": "The host runtime works, but this exact OpenClaw artifact has not booted in it yet."
     },
@@ -170,7 +162,7 @@
       "id": "credential-vault",
       "label": "Encrypted credential boundary",
       "status": "pending",
-      "detail": "Provider credentials must remain encrypted in the browser host and outside the WebContainer filesystem."
+      "detail": "Provider credentials must remain encrypted in the browser host and outside the selected guest runtime."
     },
     {
       "id": "provider-broker",
@@ -182,7 +174,7 @@
       "id": "host-broker-turn",
       "label": "OpenClaw host-broker turn",
       "status": "pending",
-      "detail": "A real OpenClaw agent turn must cross the browser-host provider broker without mounting or logging provider credentials."
+      "detail": "A real OpenClaw agent turn must cross the browser-host provider broker without mounting or logging provider credentials in the guest."
     },
     {
       "id": "provider-budget",
@@ -204,9 +196,9 @@
     },
     {
       "id": "opfs-recovery",
-      "label": "OPFS runtime recovery",
+      "label": "Runtime state recovery",
       "status": "pending",
-      "detail": "The mock session must survive OPFS save, WebContainer restart, binary mount, and document reload."
+      "detail": "The mock session must survive persisted save, fresh runtime boot, restore, and document reload."
     },
     {
       "id": "runtime-performance",

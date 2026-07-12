@@ -113,7 +113,9 @@ Footprint and cold-path reduction remain Phase 3 work.
 Replace the WebContainer-specific production boundary without moving execution
 to a server:
 
-- keep the current WebContainer lane as regression evidence;
+- remove WebContainer from the application, production dependency graph,
+  public compatibility target, and normal CI; retain old artifacts only as an
+  audit archive;
 - use BrowserPod as the selected embedded production target while keeping its
   support status blocked on runtime evidence;
 - verify BrowserPod Node 22.19+, crypto, SQLite, long-lived Gateway process I/O,
@@ -157,10 +159,11 @@ per-session typed filesystem mailbox bound to the same exact broker subject.
 It automatically stages and reads back a generated SHA-256-pinned guest client;
 the release gate rejects drift from its canonical sources. Real-filesystem
 tests execute that staged Node client and cover allow, deny, replay,
-cancellation, strict parsing, and response limits. The current WebContainer
-`partial` report is correctly rejected before BrowserPod boot or token
-consumption. The boot slice is not promoted as supported while owner-authorized
-BrowserPod evidence remains missing.
+cancellation, strict parsing, and response limits. The public reports now
+target `browserpod@2.12.1` and remain `probing` with no attached runtime
+evidence, so boot is correctly rejected before token consumption. The boot
+slice is not promoted as supported while owner-authorized BrowserPod evidence
+remains missing.
 
 Exit criterion: an external web application can embed one supported upstream
 OpenClaw version without granting ambient credentials, filesystem, or network

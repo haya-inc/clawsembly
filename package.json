@@ -19,38 +19,37 @@
   },
   "scripts": {
     "dev": "vite --config apps/web/vite.config.js",
-    "build": "vite build --config apps/web/vite.config.js",
+    "build": "vite build --config apps/web/vite.config.js && node scripts/validate-active-runtime.mjs --dist",
     "preview": "vite preview --config apps/web/vite.config.js",
     "mailbox:generate": "node scripts/generate-guest-mailbox-artifact.mjs",
     "mailbox:check": "node scripts/generate-guest-mailbox-artifact.mjs --check",
     "typecheck": "tsc -p apps/web/tsconfig.json --noEmit && npm run typecheck:api",
     "typecheck:api": "tsc --noEmit --strict --skipLibCheck false --target ES2023 --module Node16 --moduleResolution Node16 --lib ES2023,DOM packages/browser-runtime/browser-runtime.d.mts packages/browser-runtime/browserpod-runtime.d.mts packages/browser-runtime/browserpod-preflight.d.mts packages/browser-runtime/cooperative-process.d.mts packages/browser-runtime/browserpod-openclaw-probe.d.mts packages/capability-broker/capability-broker.d.mts packages/capability-broker/mailbox-protocol.d.mts packages/capability-broker/filesystem-mailbox-host.d.mts packages/capability-broker/guest-mailbox-client.d.mts packages/capability-broker/guest-mailbox-artifact.d.mts packages/embed-sdk/embed-manifest.d.mts packages/embed-sdk/boot.d.mts",
-    "test": "node --test packages/browser-runtime/*.test.mjs packages/capability-broker/*.test.mjs packages/compatibility/src/*.test.mjs packages/embed-sdk/*.test.mjs packages/webcontainer-adapter/*.test.mjs",
+    "test": "node --test packages/browser-runtime/*.test.mjs packages/capability-broker/*.test.mjs packages/compatibility/src/*.test.mjs packages/embed-sdk/*.test.mjs",
+    "test:archive:webcontainer": "node --test packages/webcontainer-adapter/*.test.mjs",
     "pretest:browser": "npm run build",
     "test:browser": "playwright test --config playwright.config.ts",
     "compat:inspect": "node packages/compatibility/src/inspect.mjs",
     "compat:track": "node packages/compatibility/src/track-releases.mjs",
     "compat:validate": "node packages/compatibility/src/validate-artifacts.mjs",
+    "runtime:validate": "node scripts/validate-active-runtime.mjs",
     "workflows:validate": "node scripts/validate-workflows.mjs",
     "pretest:page": "npm run build",
     "test:page": "playwright test tests/browser/project-page.spec.ts --config playwright.config.ts",
     "test:security": "playwright test tests/browser/security-probes.spec.ts --config playwright.config.ts",
     "social:render": "node scripts/render-social-preview.mjs",
-    "build:pages": "CLAWSEMBLY_BASE_PATH=/clawsembly/ vite build --config apps/web/vite.config.js",
-    "check": "npm run mailbox:check && npm run test && npm run compat:validate && npm run workflows:validate && npm run typecheck && npm run build",
+    "build:pages": "CLAWSEMBLY_BASE_PATH=/clawsembly/ vite build --config apps/web/vite.config.js && node scripts/validate-active-runtime.mjs --dist",
+    "check": "npm run mailbox:check && npm run runtime:validate && npm run test && npm run compat:validate && npm run workflows:validate && npm run typecheck && npm run build",
     "release:check": "npm run social:render && npm run check && npm run test:security && npm run test:page && npm run build:pages && node packages/compatibility/src/release-readiness.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",
+    "@noble/curves": "2.2.0",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
-    "typescript": "7.0.2",
-    "vite": "8.1.4"
-  },
-  "dependencies": {
-    "@noble/curves": "2.2.0",
-    "@webcontainer/api": "1.6.4",
     "sql.js": "1.14.1",
+    "typescript": "7.0.2",
+    "vite": "8.1.4",
     "ws": "8.21.0"
   }
 }

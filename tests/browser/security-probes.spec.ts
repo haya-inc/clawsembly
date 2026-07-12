@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 
 // Exercises the browser-host security core (credential vault, provider broker
-// policy, device identity) through the page's own self-probes. Unlike
-// runtime-probe.spec.ts this suite boots no WebContainer and never contacts a
-// model provider. The page may still load its CSP-approved static font assets.
-test("browser host security probes pass without WebContainer or provider traffic", async ({ page }) => {
+// policy, device identity) through the page's own self-probes. This suite boots
+// no guest runtime and never contacts a model provider. The page may still load
+// its CSP-approved static font assets.
+test("browser host security probes pass without guest-runtime or provider traffic", async ({ page }) => {
   const consoleErrors: string[] = [];
   page.on("console", (message) => {
     if (message.type() === "error") consoleErrors.push(message.text());

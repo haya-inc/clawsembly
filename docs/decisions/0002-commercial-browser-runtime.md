@@ -48,9 +48,11 @@ first production target while retaining the evidence gates below:
    the same final execution gate. Browser conversion is deferred until that
    host feasibility failure is resolved.
 
-WebContainer stays only as the current compatibility-evidence baseline until a
-replacement earns the same end-to-end Gateway evidence. New application code
-must not deepen the WebContainer coupling.
+ADR 0003 selected BrowserPod, and the application subsequently removed its
+WebContainer import, interactive probe, production dependency, StackBlitz CSP
+allowance, and normal CI lane. Old evidence JSON and adapter fixtures remain an
+explicit audit archive only; they cannot attach to BrowserPod reports or affect
+support status.
 
 ## Runtime acceptance gates
 
@@ -79,8 +81,9 @@ becomes `supported` until these gates pass.
 - container2wasm preserves a self-hosted path but may miss acceptable download
   and startup budgets; the first Node 22 probe is already boot-blocked at
   316.7 MB before browser packaging.
-- The existing WebContainer results remain reproducible evidence instead of
-  being discarded or relabeled as production support.
+- Existing WebContainer results remain archived reproduction material instead
+  of being discarded or relabeled as production support; no active product
+  path loads them.
 - Remote execution cannot be used to make a failed embedded acceptance gate
   appear green.
 

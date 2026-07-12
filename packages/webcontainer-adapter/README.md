@@ -1,8 +1,13 @@
-# WebContainer adapter experiments
+# Archived WebContainer evidence fixtures
+
+This directory is historical evidence from the pre-BrowserPod prototype. It is
+not imported by the application, included in the production dependency graph,
+or run by the normal CI/release gate. Maintainers may run
+`npm run test:archive:webcontainer` when auditing the old evidence.
 
 These files are mounted into the browser probe without modifying the upstream
-OpenClaw package. The bootstrap installs compatibility behavior before loading
-the official `openclaw.mjs` entrypoint.
+OpenClaw package in the archived reproduction only. The bootstrap installs
+compatibility behavior before loading the official `openclaw.mjs` entrypoint.
 
 `node-sqlite-polyfill.mjs` is an initial, deliberately narrow experiment backed
 by `sql.js`. It implements the synchronous API surface currently exercised by

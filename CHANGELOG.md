@@ -34,6 +34,15 @@ The project does not yet promise semantic-version compatibility.
 - report-driven project page, release ledger, compatibility badge, contribution
   templates, security policy, and downstream consumption guide.
 
+### Changed
+
+- removed the active WebContainer page probe, application import, production
+  dependency, StackBlitz CSP allowance, and normal browser CI lane; historical
+  evidence files and adapter fixtures remain archive-only;
+- switched compatibility inspection and release tracking defaults to
+  `browserpod@2.12.1`, with all public runtime claims pending until matching
+  owner-authorized evidence exists;
+
 ### Known limitations
 
 - status remains `partial` for `openclaw@2026.6.11`;

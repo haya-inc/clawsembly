@@ -40,9 +40,10 @@ const manifest = createEmbedManifest({
 assertVerifiedLaunch(manifest);
 ```
 
-The assertion currently rejects the checked-in report because that runtime
-evidence belongs to WebContainer and remains `partial`. This is intentional.
-BrowserPod adoption cannot silently turn another provider's evidence green.
+The assertion currently rejects the checked-in `browserpod@2.12.1` report
+because it remains `probing` with no owner-authorized runtime evidence. This is
+intentional. Archived evidence from another provider cannot turn BrowserPod
+green.
 
 ## Capability request contract
 
@@ -154,8 +155,8 @@ matches runtime version, browser string, package, OpenClaw version, and
 integrity before it promotes only the preflight and boot checks. Handshake,
 broker, tool, reconnect, cancellation, persistence, and full performance gates
 stay pending. No owner-authorized record is checked in yet; the current public
-report therefore remains WebContainer-targeted and BrowserPod launch remains
-blocked. See [BrowserPod evidence workflow](browserpod-evidence.md).
+BrowserPod report therefore remains `probing` and launch remains blocked. See
+[BrowserPod evidence workflow](browserpod-evidence.md).
 
 ## Typed guest-to-host transport
 

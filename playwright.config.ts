@@ -15,6 +15,9 @@ export default defineConfig({
     screenshot: "only-on-failure",
     video: "retain-on-failure"
   },
+  // Desktop Chromium is the first declared browser baseline. Firefox/WebKit
+  // belong in the BrowserPod provider matrix after owner-authorized evidence,
+  // not in this provider-free page and browser-host test suite.
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     command: "node node_modules/vite/bin/vite.js preview --config apps/web/vite.config.js --host 127.0.0.1 --port 5173",

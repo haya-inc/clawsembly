@@ -2,7 +2,8 @@
 
 This architecture preserves browser-local execution while making the product a
 verified embedding layer rather than a runtime wrapper. BrowserPod is the
-adopted provider; the current WebContainer probe remains a measured baseline.
+only active embedded provider. Legacy WebContainer evidence is archive-only and
+cannot affect current support claims.
 See [ADR 0002](decisions/0002-commercial-browser-runtime.md) and
 [ADR 0003](decisions/0003-verified-openclaw-embedding.md).
 
@@ -15,8 +16,6 @@ flowchart LR
     Client["Generated Gateway client"]
     Contract["BrowserRuntime contract"]
     Commercial["BrowserPod selected\ncommercial browser runtime"]
-    Open["container2wasm archived probe\nself-distributable browser runtime"]
-    Baseline["WebContainer\nevidence baseline"]
     Remote["Optional native Gateway"]
     Adapter["Browser compatibility adapter"]
     Broker["Default-deny capability broker"]
@@ -26,14 +25,10 @@ flowchart LR
     UI --> Manifest --> Client --> Contract
     Manifest --> Broker
     Contract --> Commercial
-    Contract --> Open
-    Contract -. regression only .-> Baseline
     Contract -. optional interop .-> Remote
     Commercial --> Adapter
-    Open --> Adapter
-    Baseline --> Adapter --> Broker --> Host
+    Adapter --> Broker --> Host
     Commercial --> Broker
-    Open --> Broker
     Host --> Store
 ```
 
@@ -116,6 +111,12 @@ every filesystem handle. BrowserPod 2.12.1 documents no terminal input,
 process termination, or Pod disposal, so the contract exposes those features
 as false and refuses to claim complete teardown.
 
+The provider-free page and browser-host suite currently declares desktop
+Chromium as its first browser baseline. Firefox and WebKit belong to a separate
+BrowserPod provider matrix after owner-authorized runtime evidence is
+available. TypeScript remains at ES2023 as the conservative web/public-API
+output floor even though the guest runtime itself requires Node 22.19 or newer.
+
 The BrowserPod evidence runner composes that contract without adding a second
 provider-specific control path. It verifies Node/crypto/SQLite, performs the
 exact npm install, matches the installed lock integrity, starts the real
@@ -187,16 +188,15 @@ audit metadata. Payloads and results never enter the audit trail. See
 
 The embed manifest combines artifact identity, compatibility evidence,
 BrowserPod selection, and capability grants. Verified launch remains blocked
-while the checked-in report targets WebContainer or has a status below
-`supported`. This prevents a commercial-provider decision from becoming an
-unsupported compatibility claim.
+while the checked-in BrowserPod report has a status below `supported`. Evidence
+from any other provider is rejected. This prevents a provider decision from
+becoming an unsupported compatibility claim.
 
-The current evidence implementation follows the same boundary in code:
-`runtime-probe.ts` owns page state and the legacy WebContainer preflight UI,
-`runtime-gateway-probe.ts` owns the Gateway, provider bridge, lifecycle, and
-recovery orchestration, and `runtime-probe-support.ts` owns reusable process,
-device-signing, and transcript-verification helpers. Provider policy,
-credential storage, and state persistence remain separate modules.
+The active implementation follows the same boundary in code:
+`browserpod-runtime.mjs` owns the documented provider API,
+`browserpod-openclaw-probe.mjs` owns exact-artifact readiness evidence,
+`boot.mjs` owns verified launch, and the capability-mailbox modules own guest
+transport. The project page imports none of the archived WebContainer adapter.
 
 ## Persistence
 
@@ -207,43 +207,19 @@ The first implementation should separate:
 - secrets as non-extractable Web Crypto keys and encrypted IndexedDB records;
 - exportable user backups in an explicit, versioned format.
 
-The current compatibility probe exports mock OpenClaw state as a WebContainer
-binary snapshot and wraps it in a v1 manifest with the OpenClaw version, scope,
-length, and SHA-256 digest. It writes that envelope to OPFS, boots a fresh
-runtime, validates and mounts the payload, and verifies transcript contents.
-The user-facing format still needs workspace migration fixtures, encryption,
-and workspace-scale recovery before it is a production backup contract.
+The historical WebContainer probe's OPFS snapshot and restore artifacts remain
+available for audit, but they are not an active persistence implementation.
+BrowserPod workspace migration fixtures, encryption, and workspace-scale
+recovery remain required before a production backup contract exists.
 
 The browser host now has a separate credential-vault slice. It stores a
 non-extractable AES-GCM key and provider-scoped ciphertext in IndexedDB and
-never mounts those records into WebContainer. This proves the at-rest boundary;
-provider requests traverse a fixed-destination host broker. Its mock transport
-probe enforces the official Responses endpoint, stateless storage, rejected
-redirects, bounded JSON, and secret-safe errors. A bounded loopback provider
-translates OpenClaw's local Chat Completions request into a browser-host message;
-the host ignores the WebContainer model alias, selects `gpt-5.6-luna`, calls the
-Responses policy, parses typed SSE text and function-call events, and forwards
-only validated deltas or calls. The loopback side converts a function call into
-Chat Completions `tool_calls`; OpenClaw executes the allowlisted `agents_list`
-tool, returns its result, and the host converts the matched call/result history
-into Responses `function_call` and `function_call_output` input items before a
-second broker request. Historical results are not mistaken for a continuation
-after a newer user message. For cancellation,
-the Gateway probe sends `chat.abort` and an explicit adapter control message;
-the browser aborts the matching provider controller and the Responses body is
-cancelled. The explicit control message is required because WebContainer's HTTP
-compatibility layer does not surface client fetch abort as a server-side close
-event. The probe uses mock fetch at the exact external boundary, so the
-continuation payload is verified but live requests remain disabled.
-
-The loopback provider accepts only `broker-v1`, validates an ephemeral bridge
-capability, caps body and input size, and has a four-request budget. These are
-defense-in-depth controls rather than a tenant boundary because workspace code
-can read the local OpenClaw configuration. Provider credentials remain solely
-in the browser-host vault. A second browser-host budget is user-configurable
-before startup and counts requests, serialized Responses input characters, and
-streamed text/function-argument characters across the session. Exceeding any
-dimension rejects the request and cancels an active provider body.
+never exposes those records to a guest runtime. The active provider policy
+enforces the official Responses endpoint, stateless storage, rejected
+redirects, bounded JSON, user-configurable request/input/output budgets, and
+secret-safe errors. BrowserPod must invoke that policy through the typed
+capability mailbox; the old loopback bridge is archived evidence, not an active
+transport.
 
 The project page also exposes a protected live smoke-test surface. It is locked
 unless an `openai` credential exists in the browser vault and the user checks a
@@ -258,22 +234,11 @@ that no live endpoint request occurs.
 
 Device identity is owned by a second IndexedDB database. The browser creates a
 non-extractable Ed25519 private key, derives the OpenClaw-compatible device ID
-from the raw public key, and signs the exact v3 challenge payload. A loopback
-probe process passes only the challenge and signed public device record across
-the boundary; it never receives the private key. WebContainer's `node:crypto`
-cannot construct the current verifier key, so the pinned 2026.6.11 artifact uses
-an exact-marker, fail-closed source patch that falls back to Noble Ed25519
-verification. Upstream marker drift aborts installation instead of weakening
-verification.
-
-The local Control UI probe then follows OpenClaw's ordinary
-`openclaw-control-ui` / `webchat` policy. OpenClaw silently approves this
-loopback-local device, issues a device token, and accepts a second signed
-connection authenticated only with that token. The browser host encrypts the
-token with the credential-vault AES key and retains it across document reload.
-Because WebContainer cannot expose its loopback socket directly to the page,
-the token exists briefly in a dedicated bridge process; it is never mounted,
-persisted in the workspace, or copied into diagnostics.
+from the raw public key, and signs the exact v3 challenge payload. The page
+proves persistence, non-extractability, signing, and nonce rejection without a
+guest runtime. BrowserPod pairing and token reconnect remain pending provider
+evidence; the archived provider-specific bridge and verifier patch are not
+loaded by the application.
 
 Clearing site data can remove all browser-owned state, so users need a visible
 backup and restore path before Clawsembly is considered production-ready.

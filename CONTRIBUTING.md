@@ -35,8 +35,9 @@ npm run test:browser
 ```
 
 The same lane runs on matching pull requests, by manual dispatch, and weekly.
-It builds and serves the production bundle, avoiding development-server HMR
-reloads while the resource-intensive WebContainer lifecycle is running.
+It builds and serves the production bundle, verifies the BrowserPod-only active
+runtime gate, and exercises the provider-free project page and browser-host
+security controls. It does not spend BrowserPod tokens.
 
 Static compatibility inspection downloads but does not install or execute the
 target package:

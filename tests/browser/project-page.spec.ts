@@ -22,7 +22,7 @@ test("project page distinguishes stable, previous, and preview evidence", async 
 
   const pageResponse = await request.get("/");
   expect(pageResponse.headers()["content-security-policy"]).toContain("default-src 'self'");
-  expect(pageResponse.headers()["content-security-policy"]).toContain("frame-src https://stackblitz.com");
+  expect(pageResponse.headers()["content-security-policy"]).not.toContain("stackblitz.com");
   expect(pageResponse.headers()["content-security-policy"]).toContain("connect-src 'self' https://api.openai.com");
   expect(pageResponse.headers()["referrer-policy"]).toBe("strict-origin-when-cross-origin");
   expect(pageResponse.headers()["x-content-type-options"]).toBe("nosniff");
@@ -65,7 +65,8 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   await expect(runtimes.getByText("container2wasm", { exact: true })).toBeVisible();
   await expect(runtimes.getByText("Archived ↗", { exact: true })).toBeVisible();
   await expect(runtimes.getByText(/316\.7 MB/)).toBeVisible();
-  await expect(runtimes.getByText("Evidence only ↗", { exact: true })).toBeVisible();
+  await expect(runtimes.getByText("WebContainer", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("none in app bundle", { exact: true })).toBeVisible();
   await expect(runtimes.getByText("Rejected", { exact: true })).toBeVisible();
   const preview = index.releases.find((release) => release.channel === "preview");
   const dependencyDelta = preview?.deltaFromStable.directDependencyCount ?? 0;

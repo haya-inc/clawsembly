@@ -10,9 +10,9 @@ function parseArgs(argv) {
     packageName: "openclaw",
     version: "latest",
     output: "apps/web/public/data/compatibility.json",
-    runtime: "webcontainer",
-    runtimeVersion: undefined,
-    browserBaseline: "Desktop Chromium; Firefox and Safari are experimental until runtime evidence exists.",
+    runtime: "browserpod",
+    runtimeVersion: "2.12.1",
+    browserBaseline: "Desktop Chromium; Firefox and WebKit pending BrowserPod evidence.",
     hostEvidence: undefined,
     gatewayEvidence: undefined,
     browserRuntimeEvidence: undefined

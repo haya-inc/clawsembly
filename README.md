@@ -34,8 +34,8 @@ The implemented broker supports exact scopes, call limits, expiry, revocation,
 cancellation, bounded metadata-only audit, and redacted handler errors. The
 protected provider smoke-test path now crosses that broker. The embed-manifest
 core and `bootVerifiedEmbed` select BrowserPod but correctly block verified
-launch before token consumption while only the WebContainer baseline has
-runtime evidence. The BrowserPod adapter implements documented Node 22 boot,
+launch before token consumption while no owner-authorized BrowserPod runtime
+evidence exists. The BrowserPod adapter implements documented Node 22 boot,
 `storageKey` persistence, long-running output readiness, HTTPS portal discovery,
 and bounded file I/O. A typed filesystem mailbox now connects the untrusted
 guest to the exact-scope broker with replay defense, byte limits, generic
@@ -56,10 +56,9 @@ The transport boundary is documented in
 ## Browser runtime direction
 
 Browser-local execution is a product invariant; a remote sandbox is not the
-replacement path. The verified WebContainer slice below remains a regression
-baseline, but it is not the selected commercial production runtime.
-[BrowserPod](https://browserpod.io/docs/overview) is the adopted embedded
-provider. It is not called supported until it reproduces the full Gateway,
+replacement path. [BrowserPod](https://browserpod.io/docs/overview) is the only
+active embedded provider in the application, public compatibility target, and
+normal CI path. It is not called supported until it reproduces the full Gateway,
 broker, tool, recovery, cancellation, persistence, performance, and licensing
 evidence in
 [ADR 0002](docs/decisions/0002-commercial-browser-runtime.md).
@@ -72,64 +71,32 @@ The first implementation is a static compatibility inspector and a public,
 report-driven project page. For the pinned `openclaw@2026.6.11` artifact it
 records package integrity, Node requirements, artifact size, lifecycle scripts,
 and platform-specific dependency risks without executing install scripts.
-The same page now tracks the npm `latest`, previous stable, and `beta` channels
-as separate reports. At the 2026-07-12 snapshot those resolve to `2026.6.11`,
-`2026.6.10`, and `2026.7.1-beta.5`; only the exact `2026.6.11` report inherits
-its matching browser-runtime evidence. A scheduled workflow skips unchanged
-channels and opens or updates a generated-report pull request when a channel
-moves.
+The same page tracks the npm `latest`, previous stable, and `beta` channels as
+separate reports. At the 2026-07-12 snapshot those resolve to `2026.6.11`,
+`2026.6.10`, and `2026.7.1-beta.5`. All three public reports now target
+`browserpod@2.12.1`, contain zero runtime evidence, and remain `probing`. A
+scheduled workflow skips unchanged channels and opens or updates a generated
+report pull request when a channel moves.
 
-The real artifact now boots in a Chromium WebContainer, returns HTTP 200 from
-`/healthz`, completes an authenticated protocol 4 `hello-ok` handshake, and
-finishes a streamed turn through a deterministic local mock provider. The
-model is restricted to one read-only tool (`agents_list`); OpenClaw executes
-the call, returns its result to the provider, and completes the turn. The SQLite
-adapter also recovers history after a new authenticated WebSocket and cancels
-an active streamed run through `chat.abort`. Mock session state is exported as a
-binary snapshot, wrapped in a versioned SHA-256-verified backup, saved in OPFS,
-mounted into a fresh WebContainer, and retained after document reload. Real
-OpenAI credentials can now be encrypted by a non-extractable browser-host
-AES-GCM key and retained in IndexedDB without entering the WebContainer. A host
-broker also constrains mock-verified provider traffic to the official Responses
-endpoint with `store:false`, rejected redirects, bounded responses, and
-secret-safe errors. A real OpenClaw `broker` agent now completes a final turn
-through that browser-host boundary using the host-selected `gpt-5.6-luna`
-model. Typed Responses SSE deltas reach OpenClaw incrementally, and
-the bridge forwards the real `agents_list` schema, translates a streamed
-Responses function call into `tool_calls`, observes OpenClaw return the tool
-result, converts the matched history back into Responses `function_call` and
-`function_call_output` input items, and completes the second provider turn.
-`chat.abort` cancels the browser
-`AbortController` and provider stream. User-editable session limits cap request
-count, input characters, and streamed output characters in the browser host.
-The same Chromium lane now publishes runtime cost instead of hiding it: cold
-install is 57.1 seconds (49.7 seconds in the nested dependency repair), warm
-reinstall is 2.9 seconds, `node_modules` contains 618.5 MB, npm cache contains
-261.6 MB, and Gateway protocol readiness takes 16.4 seconds. These values are a
-compatibility PASS but an adoption WARN until the repair and cache footprint are
-reduced. Skipping redundant repair lifecycle scripts improved cold time by 4.1%;
-`npm ci` cannot yet replace the repair because the published shrinkwrap is
-missing 31 root development declarations required by its clean-install
-validation. The static inspector now checks manifest/shrinkwrap root consistency
-for every inspected release and exposes the failure in the public report.
-The API credential never enters
-WebContainer and the test transport does not contact OpenAI. A separate
-non-extractable Ed25519 device key persists in
-IndexedDB and signs the exact Gateway v3 challenge in the browser host; the
-private key never enters WebContainer, and the signed connection receives
-`hello-ok`. OpenClaw 2026.6.11 needs one exact-marker, fail-closed verifier
-patch because WebContainer cannot construct the upstream Ed25519 public key
-through `node:crypto`. The local standard Control UI path now pairs, encrypts
-its issued device token in the browser vault, and reconnects with that token;
-the value is never written to the page log or workspace. The page now provides
-a credential-and-explicit-consent gate for one fixed-prompt `gpt-5.6-luna`
-live smoke test. It enforces `store:false`, 128 maximum output tokens, a
-displayed $0.001 upper bound based on the
+The page contains no WebContainer import, fallback, probe control, or
+StackBlitz CSP permission. Browser-host vault, identity, budget, and consent
+checks remain provider-free and do not boot a guest runtime or contact OpenAI.
+
+Earlier WebContainer Gateway, tool, reconnect, cancellation, identity,
+persistence, and performance artifacts remain under the evidence and adapter
+directories only as historical reproduction material. They are not attached
+to current reports, included in the production dependency graph, or run by the
+normal release gate. This preserves audit history without allowing legacy
+provider evidence to influence BrowserPod support.
+
+The page provides a credential-and-explicit-consent gate for one fixed-prompt
+`gpt-5.6-luna` live smoke test. It enforces `store:false`, 128 maximum output
+tokens, a displayed $0.001 upper bound based on the
 [official API pricing](https://developers.openai.com/api/docs/pricing#text-tokens),
 cancel control, and completed plain-text output only. Live network execution
-has not been performed. Remote approval, token rotation and revocation, general workspace
-recovery, and the broader browser matrix remain experimental, so the release
-is reported as `partial` rather than production-compatible.
+has not been performed. Remote approval, token rotation and revocation, general
+workspace recovery, and the broader BrowserPod matrix remain experimental, so
+the release is reported as `probing` rather than production-compatible.
 
 - [Project page](https://haya-inc.github.io/clawsembly/)
 - [Checked-in compatibility report](apps/web/public/data/compatibility.json)

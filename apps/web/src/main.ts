@@ -2,7 +2,6 @@ import "./styles.css";
 import { setupCredentialVault } from "./credential-vault-ui";
 import { setupDeviceIdentity } from "./device-identity-ui";
 import { setupLiveProvider } from "./live-provider-ui";
-import { setupRuntimeProbe } from "./runtime-probe";
 
 type CheckStatus = "pass" | "warn" | "fail" | "pending";
 
@@ -230,7 +229,6 @@ loadReport().catch((error: unknown) => {
   const list = document.querySelector<HTMLElement>("[data-checks]");
   if (list) list.textContent = error instanceof Error ? error.message : "Unable to load compatibility evidence.";
 }).finally(() => {
-  setupRuntimeProbe();
   setupCredentialVault();
   setupLiveProvider();
   setupDeviceIdentity();

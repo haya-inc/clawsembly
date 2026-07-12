@@ -155,13 +155,9 @@ nav a:hover, nav a:focus-visible { color: var(--accent); }
 .environment-probe { display: grid; grid-template-columns: .8fr 1.2fr; gap: 8vw; padding-top: 120px; align-items: center; }
 .probe-intro h3 { max-width: 600px; margin: 0; font-size: clamp(34px, 4vw, 62px); line-height: .98; letter-spacing: -.055em; }
 .probe-intro > p:not(.eyebrow) { max-width: 540px; margin: 24px 0 0; color: var(--muted); line-height: 1.7; }
-.probe-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
-.probe-intro .button:disabled { cursor: progress; opacity: .72; }
-.state-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 18px; color: var(--muted); font: 400 9px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .05em; }
 .state-action { padding: 0 0 4px; color: var(--muted); background: none; border: 0; border-bottom: 1px solid currentColor; cursor: pointer; font: inherit; text-transform: inherit; letter-spacing: inherit; }
 .state-action:hover, .state-action:focus-visible { color: var(--accent); }
 .state-action:disabled { cursor: not-allowed; opacity: .35; }
-.state-actions span { flex-basis: 100%; color: #73786e; text-transform: none; letter-spacing: 0; }
 .credential-vault { max-width: 540px; margin-top: 28px; padding: 20px 0 0; border-top: 1px solid var(--line); font-family: var(--mono); }
 .vault-head { display: flex; justify-content: space-between; gap: 18px; color: var(--ink); font-size: 10px; letter-spacing: .07em; text-transform: uppercase; }
 .vault-head strong { color: #f6c85f; font-size: 9px; font-weight: 500; }
@@ -207,7 +203,6 @@ nav a:hover, nav a:focus-visible { color: var(--accent); }
 .probe-terminal li[data-state="running"] em { color: #f6c85f; }
 .probe-terminal li[data-state="pass"] em { color: var(--accent); }
 .probe-terminal li[data-state="fail"] em { color: #ff685f; }
-.install-output { max-height: 300px; margin: 0; padding: 22px; overflow: auto; border-top: 1px solid var(--line); color: #c4c8bd; background: #030403; font: 400 10px/1.6 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
 
 .broker-boundary { border-top: 1px solid var(--line); scroll-margin-top: 20px; }
 .broker-boundary-head { display: grid; grid-template-columns: 1.15fr .85fr; gap: 8vw; align-items: end; margin-bottom: 64px; }
@@ -358,7 +353,6 @@ footer .wordmark { color: var(--ink); text-transform: none; letter-spacing: -.02
   .release-history-foot { flex-direction: column; }
   .probe-terminal li { grid-template-columns: 26px 1fr; }
   .probe-terminal li em { grid-column: 2; text-align: left; }
-  .probe-actions { flex-direction: column; align-items: stretch; }
   .credential-field { grid-template-columns: 1fr; gap: 8px; }
   .broker-budget { grid-template-columns: 1fr; }
   .device-identity { grid-template-columns: 1fr auto; }

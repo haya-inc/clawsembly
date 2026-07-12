@@ -57,7 +57,7 @@ The canonical promise is:
   subjects, default deny, exact scopes, call limits, expiry, revocation,
   cancellation, bounded metadata-only audit, and redacted failures.
 - `packages/embed-sdk/embed-manifest.mjs` binds a BrowserPod launch plan to an
-  exact report and refuses to reuse the current WebContainer evidence.
+  exact report and refuses to reuse archived evidence from another provider.
 - `packages/browser-runtime/browserpod-runtime.mjs` implements documented Node
   22 boot, persistent storage, long-running output readiness, HTTPS portal
   discovery, bounded filesystem access, and honest lifecycle feature flags.

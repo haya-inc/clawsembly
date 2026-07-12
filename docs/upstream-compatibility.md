@@ -88,7 +88,7 @@ flowchart LR
     Release["New OpenClaw release"]
     Inspect["Inspect artifact and schemas"]
     Diff["Classify dependency and protocol diff"]
-    Boot["Boot in WebContainer"]
+    Boot["Boot in BrowserPod"]
     Smoke["Run browser smoke tests"]
     Report["Compatibility report"]
     PR["Automated upgrade PR"]
@@ -108,7 +108,7 @@ flowchart LR
 
 ### Runtime checks
 
-- Install the exact npm artifact in a fresh WebContainer.
+- Install the exact npm artifact in a fresh BrowserPod channel.
 - Start a minimal Gateway configuration.
 - Verify `/healthz`, `/readyz`, and the Gateway handshake.
 - Complete a provider-independent mocked chat turn.
@@ -127,7 +127,7 @@ flowchart LR
 | New optional native dependency | Disable only the owning capability |
 | New eager native dependency | Add a host/Wasm adapter or block upgrade |
 | Config schema change | Regenerate minimal config and migration fixture |
-| Upstream WebContainer bug | Pin last compatible; report upstream |
+| BrowserPod provider regression | Keep the last evidenced artifact/provider pair; report to the vendor |
 | Source patch required | Link it to an upstream issue or PR |
 
 ## Support policy

@@ -19,10 +19,7 @@ jobs:
       - run: npm ci
       - name: Track stable, previous, and preview
         run: >-
-          npm run compat:track --
-          --host-evidence apps/web/public/data/evidence/webcontainer-host.json
-          --gateway-evidence apps/web/public/data/evidence/openclaw-2026.6.11-gateway.json
-          --skip-unchanged
+          npm run compat:track -- --skip-unchanged
       - run: npm run compat:validate
       - name: Write summary
         run: |
