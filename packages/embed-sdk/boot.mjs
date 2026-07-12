@@ -1,8 +1,10 @@
 import { createBrowserPodRuntime } from "../browser-runtime/browserpod-runtime.mjs";
 import { CapabilityBroker } from "../capability-broker/capability-broker.mjs";
+import { FilesystemCapabilityMailboxHost } from "../capability-broker/filesystem-mailbox-host.mjs";
 import { assertVerifiedLaunch } from "./embed-manifest.mjs";
 
-const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/u;
+const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/u;
+const MAILBOX_CHANNEL_PATTERN = /^[A-Za-z0-9_-]{1,64}$/u;
 const WORKSPACE_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u;
 
 export function createArtifactStorageKey(manifest, workspaceId) {
@@ -26,12 +28,30 @@ export async function bootVerifiedEmbed({
   workspaceId,
   capabilityHandlers = {},
   sessionId = crypto.randomUUID(),
+  mailboxChannelId = `mailbox_${crypto.randomUUID().replaceAll("-", "")}`,
   onRuntimeAudit,
-  onCapabilityAudit
+  onCapabilityAudit,
+  mailboxOptions = {}
 }) {
   const verifiedManifest = assertVerifiedLaunch(manifest);
   if (typeof sessionId !== "string" || !SESSION_ID_PATTERN.test(sessionId)) {
     throw new TypeError("embed session identifier is invalid");
+  }
+  if (typeof mailboxChannelId !== "string" || !MAILBOX_CHANNEL_PATTERN.test(mailboxChannelId)) {
+    throw new TypeError("embed mailbox channel identifier is invalid");
+  }
+  if (!mailboxOptions || typeof mailboxOptions !== "object" || Array.isArray(mailboxOptions)) {
+    throw new TypeError("embed mailbox options are invalid");
+  }
+  const allowedMailboxOptions = new Set([
+    "pollIntervalMs",
+    "maxRequestBytes",
+    "maxResponseBytes",
+    "maxRequests",
+    "clock"
+  ]);
+  if (Object.keys(mailboxOptions).some((key) => !allowedMailboxOptions.has(key))) {
+    throw new TypeError("embed mailbox options contain an unknown field");
   }
   const storageKey = workspaceId === undefined
     ? undefined
@@ -52,12 +72,25 @@ export async function bootVerifiedEmbed({
     handlers: capabilityHandlers,
     auditSink: onCapabilityAudit
   });
+  const mailbox = new FilesystemCapabilityMailboxHost({
+    runtime,
+    broker: capabilities,
+    root: `/workspace/.clawsembly/mailbox/${mailboxChannelId}`,
+    channelId: mailboxChannelId,
+    ...(mailboxOptions.pollIntervalMs === undefined ? {} : { pollIntervalMs: mailboxOptions.pollIntervalMs }),
+    ...(mailboxOptions.maxRequestBytes === undefined ? {} : { maxRequestBytes: mailboxOptions.maxRequestBytes }),
+    ...(mailboxOptions.maxResponseBytes === undefined ? {} : { maxResponseBytes: mailboxOptions.maxResponseBytes }),
+    ...(mailboxOptions.maxRequests === undefined ? {} : { maxRequests: mailboxOptions.maxRequests }),
+    ...(mailboxOptions.clock === undefined ? {} : { clock: mailboxOptions.clock })
+  });
+  await mailbox.initialize();
   let closed = false;
   return Object.freeze({
     schemaVersion: 1,
     manifest: verifiedManifest,
     runtime,
     capabilities,
+    mailbox,
     get closed() { return closed; },
     dispose() {
       if (closed) return Object.freeze({ complete: false, reason: "embed session already closed", activeTaskIds: Object.freeze([]) });

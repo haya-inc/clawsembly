@@ -68,7 +68,7 @@
     "gateway": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["result", "port", "bind", "auth", "taskId", "durationMs", "readiness", "portal", "healthz", "readyz", "outputTruncated"],
+      "required": ["result", "port", "bind", "auth", "taskId", "durationMs", "readiness", "portal", "healthz", "readyz", "termination", "outputTruncated"],
       "properties": {
         "result": { "const": "pass" },
         "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
@@ -99,6 +99,18 @@
         },
         "healthz": { "$ref": "#/$defs/httpProbe" },
         "readyz": { "$ref": "#/$defs/httpProbe" },
+        "termination": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["mode", "result", "durationMs", "providerProcessTermination", "hardDispose"],
+          "properties": {
+            "mode": { "const": "guest-supervisor" },
+            "result": { "const": "pass" },
+            "durationMs": { "type": "integer", "minimum": 0 },
+            "providerProcessTermination": { "const": false },
+            "hardDispose": { "const": false }
+          }
+        },
         "outputTruncated": { "type": "boolean" }
       }
     },

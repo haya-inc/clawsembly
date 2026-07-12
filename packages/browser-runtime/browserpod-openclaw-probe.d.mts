@@ -38,6 +38,13 @@ export interface BrowserPodOpenClawEvidence {
     portal: Awaited<ReturnType<BrowserPodRuntime["waitForPortal"]>>;
     healthz: Readonly<{ status: 200; body: string }>;
     readyz: Readonly<{ status: 200; body: string }>;
+    termination: Readonly<{
+      mode: "guest-supervisor";
+      result: "pass";
+      durationMs: number;
+      providerProcessTermination: false;
+      hardDispose: false;
+    }>;
     outputTruncated: boolean;
   }>;
   limitations: readonly string[];
@@ -59,6 +66,7 @@ export function runBrowserPodOpenClawProbe(options: {
   storageKey?: string;
   port?: number;
   gatewayToken?: string;
+  supervisorNonceFactory?: () => string;
   onOutput?: (event: Readonly<{ phase: "preflight" | "install" | "gateway" | "health"; chunk: string }>) => void;
   now?: () => number;
 }): Promise<BrowserPodOpenClawProbeSession>;

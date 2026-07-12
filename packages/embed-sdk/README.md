@@ -24,7 +24,7 @@ assertVerifiedLaunch(manifest);
 ```
 
 `bootVerifiedEmbed` then boots the BrowserPod adapter and creates a capability
-broker whose subject is the same exact artifact:
+broker plus a fresh filesystem mailbox whose subject is the same exact artifact:
 
 ```js
 const session = await bootVerifiedEmbed({
@@ -34,6 +34,8 @@ const session = await bootVerifiedEmbed({
   workspaceId: "primary",
   capabilityHandlers
 });
+
+session.mailbox.serve({ signal: shutdown.signal, maxRequests: 100 });
 ```
 
 There is intentionally no `allowUnverified` option. Provider probes use the
@@ -42,6 +44,10 @@ Persistent storage keys are derived as
 `clawsembly:<exact-openclaw-version>:<workspaceId>` so an upgrade cannot
 silently mount the previous artifact's disk.
 
-Gateway installation/lifecycle and user-facing permission prompts remain the
-next SDK slices. BrowserPod 2.12.1 also lacks documented process termination
-and hard-disposal APIs; those gaps remain explicit support blockers.
+The mailbox provides typed exact-scope guest requests, replay rejection,
+bounded responses, cancellation, and payload-free transport audit without
+terminal input. Package the guest client and protocol modules with the OpenClaw
+adapter. Gateway installation and user-facing permission prompts remain next
+SDK slices. BrowserPod 2.12.1 still lacks documented provider process
+termination and hard-disposal APIs; a guest supervisor now handles cooperative
+shutdown only for Clawsembly-launched processes.

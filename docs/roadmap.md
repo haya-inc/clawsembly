@@ -132,10 +132,12 @@ storage, bounded terminal output/readiness, long-running command tracking,
 HTTPS portal discovery, and bounded file I/O. The exact-artifact readiness
 harness now composes preflight, npm SHA-512 verification, real Gateway log and
 portal readiness, and guest-local `/healthz` plus `/readyz` into a versioned
-evidence schema. Its fake-provider end-to-end path and report attachment pass;
-an owner-authorized commercial run is still required. The public 2.12.1 API exposes no
-terminal input, process termination, or hard disposal, leaving cancellation
-and teardown blocked pending a documented provider mechanism.
+evidence schema, then requires a nonce-bound cooperative Gateway stop. Its
+fake-provider end-to-end path and report attachment pass; an owner-authorized
+commercial run is still required. The public 2.12.1 API exposes no terminal
+input, provider process termination, or hard disposal. The supervisor closes
+only Clawsembly-launched cooperative children and does not overstate those
+provider capabilities.
 
 ### Phase 3c: verified embedding SDK
 
@@ -150,10 +152,13 @@ surface:
   after `assertVerifiedLaunch` passes against BrowserPod evidence.
 
 Status: manifest generation, fail-closed verified-launch assertion, and
-`bootVerifiedEmbed` are implemented. The current WebContainer `partial` report
-is correctly rejected before BrowserPod boot or token consumption. The boot
-slice is not promoted as supported while provider lifecycle evidence and
-termination remain missing.
+`bootVerifiedEmbed` are implemented. Verified boot now initializes a fresh
+per-session typed filesystem mailbox bound to the same exact broker subject.
+Real-filesystem tests cover allow, deny, replay, cancellation, strict parsing,
+and response limits. The current WebContainer `partial` report is correctly
+rejected before BrowserPod boot or token consumption. The boot slice is not
+promoted as supported while owner-authorized BrowserPod evidence remains
+missing.
 
 Exit criterion: an external web application can embed one supported upstream
 OpenClaw version without granting ambient credentials, filesystem, or network

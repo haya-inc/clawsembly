@@ -44,6 +44,13 @@ The browser sandbox is one boundary, not the only control.
   arguments, environment variables, filesystem, runtime objects, or audits.
 - Treat BrowserPod portal URLs as publicly reachable and retain Gateway
   authentication and explicit origin policy at that boundary.
+- Bind every BrowserPod mailbox to a fresh per-boot channel and the broker's
+  exact artifact/runtime/session subject; treat the on-disk manifest only as
+  discovery metadata.
+- Strictly bound and parse mailbox envelopes, reject replay and traversal, and
+  expose only generic transport errors plus payload-free audit metadata.
+- Treat cooperative Gateway shutdown separately from provider process
+  termination and Pod disposal; never infer the latter from a supervisor exit.
 
 ## Release requirements
 

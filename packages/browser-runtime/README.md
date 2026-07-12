@@ -30,6 +30,11 @@ The probe is covered end-to-end with a fake BrowserPod. A real evidence record
 is not checked in until an owner runs the same path with a commercial API key.
 See [BrowserPod evidence](../../docs/browserpod-evidence.md).
 
+`cooperative-process.mjs` stages a nonce-bound Node supervisor for processes
+launched by Clawsembly. The exact-artifact probe now requires that supervisor
+to stop the Gateway after readiness. This is a cooperative guest protocol, not
+a claim that BrowserPod exposes process termination or Pod disposal.
+
 ## Explicit gaps
 
 The published BrowserPod `Terminal` and `Process` types are empty and the 2.12.1
@@ -42,8 +47,10 @@ method. The adapter therefore reports:
 
 `terminate()` throws `unsupported_feature`, and `dispose()` performs only a
 logical close while reporting any active task IDs. This must remain a support
-blocker for OpenClaw cancellation and teardown; the adapter never fabricates a
-green lifecycle result from an undocumented vendor method.
+blocker for arbitrary process and Pod teardown. Clawsembly-launched Gateway
+processes can additionally opt into the documented guest supervisor; the
+adapter never fabricates a green provider lifecycle result from that higher
+level protocol.
 
 Portal URLs are treated as public URLs, not loopback endpoints or secrets. The
 OpenClaw Gateway still requires its own authentication and origin policy.

@@ -72,7 +72,11 @@ export function assertBrowserRuntimeEvidence(evidence) {
   if (evidence?.gateway?.result !== "pass" || readiness?.output !== true
     || readiness?.portal !== true || readiness?.healthz !== true || readiness?.readyz !== true
     || evidence?.gateway?.portal?.visibility !== "public-url" || portalProtocol !== "https:"
-    || evidence?.gateway?.healthz?.status !== 200 || evidence?.gateway?.readyz?.status !== 200) {
+    || evidence?.gateway?.healthz?.status !== 200 || evidence?.gateway?.readyz?.status !== 200
+    || evidence?.gateway?.termination?.mode !== "guest-supervisor"
+    || evidence?.gateway?.termination?.result !== "pass"
+    || evidence?.gateway?.termination?.providerProcessTermination !== false
+    || evidence?.gateway?.termination?.hardDispose !== false) {
     failures.push("Gateway readiness");
   }
   if (!Array.isArray(evidence?.limitations)
@@ -254,7 +258,7 @@ export function buildReport({
         capturedAt: browserRuntimeEvidence.capturedAt,
         path: `evidence/browserpod-openclaw-${browserRuntimeEvidence.artifact.version}.json`,
         sha256: evidenceDigest(browserRuntimeEvidence),
-        summary: `BrowserPod ${browserRuntimeEvidence.target.runtimeVersion} installed exact OpenClaw ${browserRuntimeEvidence.artifact.version}, matched its SHA-512 lock integrity, and returned HTTP 200 from /healthz and /readyz in ${browserRuntimeEvidence.target.browser}; the portal is public and provider termination remains unavailable.`
+        summary: `BrowserPod ${browserRuntimeEvidence.target.runtimeVersion} installed exact OpenClaw ${browserRuntimeEvidence.artifact.version}, matched its SHA-512 lock integrity, returned HTTP 200 from /healthz and /readyz, and completed guest-supervisor shutdown in ${browserRuntimeEvidence.target.browser}; the portal is public and provider termination remains unavailable.`
       }] : [],
       ...hostEvidence ? [{
         id: "host-preflight",
@@ -371,7 +375,7 @@ export function buildReport({
         label: `OpenClaw ${runtimeLabel} boot`,
         status: runtimeStatuses[bootCheckId],
         detail: browserRuntimeEvidence?.gateway?.healthz?.status === 200
-          ? `The exact SHA-512 artifact reached [gateway] ready, opened an HTTPS public portal, and returned HTTP 200 from /healthz and /readyz in BrowserPod.`
+          ? `The exact SHA-512 artifact reached [gateway] ready, opened an HTTPS public portal, returned HTTP 200 from /healthz and /readyz, and completed guest-supervisor shutdown in BrowserPod.`
           : gatewayEvidence?.gateway?.healthz?.status === 200
           ? `The official artifact reached server-ready and /healthz returned HTTP ${gatewayEvidence.gateway.healthz.status} through explicit dependency and SQLite adapters.`
           : "The host runtime works, but this exact OpenClaw artifact has not booted in it yet."

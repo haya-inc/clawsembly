@@ -57,10 +57,11 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   const runtimes = page.locator("#runtimes");
   await expect(runtimes.getByRole("heading", { name: "BrowserPod executes. Clawsembly decides." })).toBeVisible();
   await expect(runtimes.getByText("BrowserPod 2.x", { exact: true })).toBeVisible();
-  await expect(runtimes.getByText("Probe path ✓", { exact: true })).toBeVisible();
-  await expect(runtimes.getByText(/exact npm SHA-512/)).toBeVisible();
-  await expect(runtimes.getByText(/Real provider evidence is still unrun/)).toBeVisible();
-  await expect(runtimes.getByText(/no terminate or hard dispose/)).toBeVisible();
+  await expect(runtimes.getByText("Transport core ✓", { exact: true })).toBeVisible();
+  await expect(runtimes.getByText(/Typed file mailbox carries broker calls/)).toBeVisible();
+  await expect(runtimes.getByText(/guest supervisor stops the Gateway/)).toBeVisible();
+  await expect(runtimes.getByText(/Real provider evidence is unrun/)).toBeVisible();
+  await expect(runtimes.getByText(/hard dispose remains unavailable/)).toBeVisible();
   await expect(runtimes.getByText("container2wasm", { exact: true })).toBeVisible();
   await expect(runtimes.getByText("Archived ↗", { exact: true })).toBeVisible();
   await expect(runtimes.getByText(/316\.7 MB/)).toBeVisible();

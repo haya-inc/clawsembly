@@ -66,7 +66,14 @@ The canonical promise is:
   same artifact identity.
 - `packages/browser-runtime/browserpod-openclaw-probe.mjs` installs the exact
   artifact, matches its package-lock SHA-512, and requires Gateway log, HTTPS
-  portal, `/healthz`, and `/readyz` readiness before emitting raw evidence.
+  portal, `/healthz`, `/readyz`, and cooperative Gateway shutdown before
+  emitting raw evidence.
+- `packages/capability-broker/filesystem-mailbox-host.mjs` and the guest client
+  carry bounded, typed, cancellable requests across BrowserPod's documented
+  filesystem API while preserving the broker as the only source of authority.
+- `packages/browser-runtime/cooperative-process.mjs` stops Clawsembly-launched
+  children through a nonce-bound guest supervisor without claiming provider
+  process termination or Pod disposal.
 - `packages/compatibility/browserpod-evidence.schema.json` and the report
   generator bind that evidence to runtime version, browser, and artifact while
   leaving later protocol gates pending.
@@ -77,10 +84,10 @@ The canonical promise is:
 
 ## Required next slices
 
-- BrowserPod process termination, interactive input, and hard teardown through
-  a documented vendor API; version 2.12.1 exposes none of these operations;
+- BrowserPod interactive input, arbitrary process termination, and hard Pod
+  teardown through a documented vendor API; version 2.12.1 exposes none of
+  these operations;
 - an owner-authorized run of the implemented exact-artifact readiness harness;
-- a guest-to-host typed transport that cannot invoke undeclared capabilities;
 - user-facing grant, expiry, and revocation prompts;
 - exportable audit and capability manifests with a stable schema;
 - a small public `boot()` SDK after BrowserPod reaches the Gateway evidence

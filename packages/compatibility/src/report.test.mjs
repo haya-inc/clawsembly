@@ -60,6 +60,13 @@ function browserPodEvidence() {
       portal: { port: 18_789, url: "https://browserpod.example/session", visibility: "public-url" },
       healthz: { status: 200, body: "{\"ok\":true}" },
       readyz: { status: 200, body: "{\"ready\":true}" },
+      termination: {
+        mode: "guest-supervisor",
+        result: "pass",
+        durationMs: 250,
+        providerProcessTermination: false,
+        hardDispose: false
+      },
       outputTruncated: false
     },
     limitations: [

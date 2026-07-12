@@ -15,8 +15,10 @@ function report({ status = "supported", runtime = "browserpod", runtimeVersion =
 
 function fakeBrowserPod() {
   const calls = [];
+  const files = new Map();
   return {
     calls,
+    files,
     BrowserPod: {
       async boot(options) {
         calls.push(options);
@@ -25,8 +27,21 @@ function fakeBrowserPod() {
           async createCustomTerminal() { return {}; },
           async run() { return {}; },
           async createDirectory() {},
-          async createFile() { return { async write() {}, async close() {} }; },
-          async openFile() { return { async getSize() { return 0; }, async read() { return ""; }, async close() {} }; }
+          async createFile(path) {
+            let text = "";
+            return {
+              async write(value) { text += value; files.set(path, text); },
+              async close() {}
+            };
+          },
+          async openFile(path) {
+            const text = files.get(path) ?? "";
+            return {
+              async getSize() { return text.length; },
+              async read() { return text; },
+              async close() {}
+            };
+          }
         };
       }
     }
@@ -43,6 +58,34 @@ test("refuses cross-runtime or partial evidence before spending BrowserPod token
   assert.equal(fake.calls.length, 0);
 });
 
+test("rejects an unsafe mailbox channel before BrowserPod boot", async () => {
+  const fake = fakeBrowserPod();
+  await assert.rejects(
+    bootVerifiedEmbed({
+      manifest: createEmbedManifest({ report: report() }),
+      BrowserPod: fake.BrowserPod,
+      browserPodApiKey: "secret",
+      mailboxChannelId: "../shared"
+    }),
+    /mailbox channel identifier is invalid/u
+  );
+  assert.equal(fake.calls.length, 0);
+});
+
+test("rejects unknown mailbox options before BrowserPod boot", async () => {
+  const fake = fakeBrowserPod();
+  await assert.rejects(
+    bootVerifiedEmbed({
+      manifest: createEmbedManifest({ report: report() }),
+      BrowserPod: fake.BrowserPod,
+      browserPodApiKey: "secret",
+      mailboxOptions: { root: "/workspace/shared" }
+    }),
+    /mailbox options contain an unknown field/u
+  );
+  assert.equal(fake.calls.length, 0);
+});
+
 test("boots a verified BrowserPod session and binds capability authority to its artifact", async () => {
   const fake = fakeBrowserPod();
   const manifest = createEmbedManifest({
@@ -55,6 +98,7 @@ test("boots a verified BrowserPod session and binds capability authority to its 
     browserPodApiKey: "secret",
     workspaceId: "primary",
     sessionId: "verified-session",
+    mailboxChannelId: "verified_mailbox",
     capabilityHandlers: {
       "storage.snapshot": async (input) => ({ stored: input.name })
     }
@@ -66,6 +110,11 @@ test("boots a verified BrowserPod session and binds capability authority to its 
     runtime: "browserpod",
     sessionId: "verified-session"
   });
+  const mailboxManifest = JSON.parse(fake.files.get(
+    "/workspace/.clawsembly/mailbox/verified_mailbox/manifest.json"
+  ));
+  assert.deepEqual(mailboxManifest.subject, session.capabilities.subject);
+  assert.equal(session.mailbox.nextSequence, 1);
   assert.deepEqual(await session.capabilities.request({
     id: "snapshot-1",
     capability: "storage.snapshot",

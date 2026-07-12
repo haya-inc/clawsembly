@@ -144,8 +144,9 @@ interface.
 provider-evidence boundary. In one metered Pod it runs the Node/crypto/SQLite
 preflight, installs the exact OpenClaw version, compares the installed
 `package-lock.json` SHA-512 with the inspected npm artifact, starts the real
-Gateway, observes `[gateway] ready` plus an HTTPS portal, and requires HTTP 200
-from guest-local `/healthz` and `/readyz`.
+Gateway, observes `[gateway] ready` plus an HTTPS portal, requires HTTP 200 from
+guest-local `/healthz` and `/readyz`, and then requires cooperative Gateway
+shutdown through a nonce-bound guest supervisor.
 
 The resulting raw record is governed by
 `packages/compatibility/browserpod-evidence.schema.json`. Report generation
@@ -155,3 +156,22 @@ broker, tool, reconnect, cancellation, persistence, and full performance gates
 stay pending. No owner-authorized record is checked in yet; the current public
 report therefore remains WebContainer-targeted and BrowserPod launch remains
 blocked. See [BrowserPod evidence workflow](browserpod-evidence.md).
+
+## Typed guest-to-host transport
+
+Every verified boot now creates a fresh BrowserPod filesystem mailbox at a
+random per-boot channel path. Its manifest repeats the broker's exact artifact,
+runtime, and session subject, but grants remain solely in the in-memory host
+broker. The guest cannot edit a file to create authority.
+
+The protocol uses bounded JSON envelopes, monotonic slots, ready markers, exact
+capability and scope identifiers, replay rejection, and cancellation markers.
+Handler failures are reduced to generic public errors, while transport and
+broker audits contain metadata rather than inputs or results. The guest client
+uses Node filesystem calls; the host uses only BrowserPod's documented bounded
+filesystem adapter. See [BrowserPod capability mailbox](capability-mailbox.md).
+
+The SDK initializes the host side automatically and exposes
+`session.mailbox.serve(...)`. Integrators currently package the two small guest
+modules with their OpenClaw adapter and pass the generated channel path to that
+adapter. Automatic guest staging and permission UX are later SDK slices.

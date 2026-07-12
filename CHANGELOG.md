@@ -22,7 +22,11 @@ The project does not yet promise semantic-version compatibility.
   reports before BrowserPod token consumption;
 - exact-artifact BrowserPod readiness harness and raw-evidence schema covering
   Node/crypto/SQLite preflight, npm SHA-512 matching, Gateway log/portal
-  readiness, and guest-local health/readiness probes;
+  readiness, guest-local health/readiness probes, and cooperative Gateway stop;
+- typed BrowserPod filesystem mailbox with exact-subject binding, strict
+  bounded envelopes, replay defense, cancellation, and metadata-only audit;
+- nonce-bound guest process supervisor for cooperative child shutdown without
+  overstating BrowserPod process-termination or Pod-disposal capabilities;
 - stable / previous / preview release tracking with generated update pull
   requests and cross-version evidence rejection;
 - report-driven project page, release ledger, compatibility badge, contribution
@@ -33,8 +37,9 @@ The project does not yet promise semantic-version compatibility.
 - status remains `partial` for `openclaw@2026.6.11`;
 - BrowserPod lifecycle and Gateway evidence are not yet captured, so verified
   BrowserPod launch remains intentionally blocked;
-- BrowserPod 2.12.1 exposes no documented terminal-input, process-termination,
-  or hard-disposal API, so complete Gateway cancellation and teardown remain blocked;
+- BrowserPod 2.12.1 exposes no documented terminal-input, arbitrary
+  process-termination, or hard-disposal API; Clawsembly can cooperatively stop
+  its own supervised Gateway, but cannot claim provider-level teardown;
 - the measured install/cache footprint is approximately 880 MB;
 - an exact-marker Ed25519 verifier patch is still required;
 - Firefox, Safari, remote Gateway parity, general workspace migration, and

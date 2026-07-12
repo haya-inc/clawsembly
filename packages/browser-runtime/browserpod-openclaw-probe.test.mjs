@@ -35,11 +35,13 @@ function fakeBrowserPod({
   const files = new Map();
   const portals = [];
   const gateway = deferred();
+  let gatewayTerminal;
   const emit = (terminal, text) => {
     terminal.emit(new TextEncoder().encode(text).buffer);
   };
   return {
     calls,
+    files,
     gateway,
     BrowserPod: {
       async boot(options) {
@@ -68,10 +70,11 @@ function fakeBrowserPod({
               emit(options.terminal, "added openclaw\n");
               return {};
             }
-            if (executable === "node" && args.includes("node_modules/openclaw/openclaw.mjs")) {
+            if (executable === "node" && args[0]?.endsWith("/supervisor-gateway.mjs")) {
               if (gatewayExitEarly) return {};
+              gatewayTerminal = options.terminal;
               queueMicrotask(() => {
-                emit(options.terminal, "[gateway] ready\n");
+                emit(options.terminal, "[clawsembly-supervisor]{\"event\":\"ready\"}\n[gateway] ready\n");
                 for (const handler of portals) {
                   handler({ port: 18_789, url: "https://browserpod.example/session" });
                 }
@@ -92,7 +95,12 @@ function fakeBrowserPod({
             let text = "";
             return {
               async write(value) { text += value; files.set(path, text); },
-              async close() {}
+              async close() {
+                if (path.endsWith("/stop-gateway.json")) {
+                  emit(gatewayTerminal, "[clawsembly-supervisor]{\"event\":\"exit\",\"requestedStop\":true,\"code\":0,\"signal\":null,\"error\":false}\n");
+                  gateway.resolve({});
+                }
+              }
             };
           },
           async openFile(path) {
@@ -121,6 +129,7 @@ test("captures exact-artifact BrowserPod Gateway readiness without serializing c
     browser: "Chromium 140.0.0",
     storageKey: "clawsembly-openclaw-2026.6.11",
     gatewayToken: "gateway-ephemeral-secret",
+    supervisorNonceFactory: () => "supervisor_nonce_123456",
     onOutput: (event) => output.push(event),
     now: () => { clock += 100; return clock; }
   });
@@ -136,6 +145,13 @@ test("captures exact-artifact BrowserPod Gateway readiness without serializing c
     healthz: true,
     readyz: true
   });
+  assert.deepEqual(session.evidence.gateway.termination, {
+    mode: "guest-supervisor",
+    result: "pass",
+    durationMs: 100,
+    providerProcessTermination: false,
+    hardDispose: false
+  });
   assert.deepEqual(session.evidence.limitations, [
     "interactive-input-unavailable",
     "provider-process-termination-unavailable",
@@ -147,15 +163,17 @@ test("captures exact-artifact BrowserPod Gateway readiness without serializing c
   assert.deepEqual(new Set(output.map((event) => event.phase)), new Set(["preflight", "install", "gateway", "health"]));
   assert.equal(fake.calls.some(([name, call]) => name === "run"
     && call.executable === "npm" && call.args.includes("openclaw@2026.6.11")), true);
-  assert.equal(fake.calls.some(([name, call]) => name === "run"
-    && call.executable === "node" && call.args.includes("--auth") && call.args.includes("token")), true);
+  const supervisorConfig = JSON.parse(fake.files.get(
+    "/workspace/clawsembly-probe/supervision/supervisor-gateway.json"
+  ));
+  assert.equal(supervisorConfig.args.includes("--auth") && supervisorConfig.args.includes("token"), true);
+  assert.equal(JSON.stringify(supervisorConfig).includes("gateway-ephemeral-secret"), false);
   assert.deepEqual(session.dispose(), {
     complete: false,
     reason: "BrowserPod 2.12.1 exposes no documented pod or process termination",
-    activeTaskIds: [session.gatewayTask.id]
+    activeTaskIds: []
   });
-  fake.gateway.resolve({});
-  await session.gatewayTask.wait();
+  assert.equal(session.gatewayTask.status, "completed");
 });
 
 test("rejects a package-lock integrity mismatch before starting the Gateway", async () => {
@@ -189,7 +207,7 @@ test("rejects a failed crypto preflight before installing OpenClaw", async () =>
   assert.equal(fake.calls.some(([name, call]) => name === "run" && call.executable === "npm"), false);
 });
 
-test("fails immediately when OpenClaw exits before portal and log readiness", async () => {
+test("fails immediately when the Gateway supervisor exits before readiness", async () => {
   const fake = fakeBrowserPod({ gatewayExitEarly: true });
   await assert.rejects(
     runBrowserPodOpenClawProbe({
@@ -199,6 +217,6 @@ test("fails immediately when OpenClaw exits before portal and log readiness", as
       browser: "Chromium 140.0.0",
       gatewayToken: "gateway-ephemeral-secret"
     }),
-    (error) => error.code === "gateway_exited"
+    (error) => error.code === "supervisor_exited"
   );
 });

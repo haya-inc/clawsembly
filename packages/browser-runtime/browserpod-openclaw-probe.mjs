@@ -1,4 +1,5 @@
 import { BrowserRuntimeError } from "./browser-runtime.mjs";
+import { startCooperativeProcess } from "./cooperative-process.mjs";
 import { runBrowserRuntimePreflight } from "./browserpod-preflight.mjs";
 import { createBrowserPodRuntime } from "./browserpod-runtime.mjs";
 
@@ -102,8 +103,9 @@ function relayOutput(onOutput, phase, chunk) {
 
 /**
  * Boots one metered BrowserPod, installs the exact npm artifact, and proves the
- * first Gateway readiness boundary. The returned session remains live because
- * BrowserPod 2.12.1 exposes no documented process or Pod termination API.
+ * first Gateway readiness boundary, then stops the Gateway through a guest
+ * supervisor. Provider process termination and hard Pod disposal remain
+ * unavailable and are reported separately.
  */
 export async function runBrowserPodOpenClawProbe({
   BrowserPod,
@@ -114,6 +116,7 @@ export async function runBrowserPodOpenClawProbe({
   storageKey,
   port = 18_789,
   gatewayToken = `clawsembly-${globalThis.crypto.randomUUID()}`,
+  supervisorNonceFactory,
   onOutput = () => {},
   now = Date.now
 }) {
@@ -178,30 +181,37 @@ export async function runBrowserPodOpenClawProbe({
   }
 
   const gatewayStartedAt = now();
-  const gatewayTask = await runtime.start({
-    executable: "node",
-    args: [
-      "node_modules/openclaw/openclaw.mjs",
-      "--dev",
-      "gateway",
-      "--allow-unconfigured",
-      "--bind",
-      "loopback",
-      "--port",
-      String(port),
-      "--auth",
-      "token"
-    ],
-    cwd: PROBE_ROOT,
-    env: [
-      "CI=1",
-      "NO_COLOR=1",
-      "OPENCLAW_SKIP_CHANNELS=1",
-      `OPENCLAW_STATE_DIR=${STATE_ROOT}`,
-      `OPENCLAW_GATEWAY_TOKEN=${gatewayToken}`
-    ],
-    outputLimitBytes: 2 * 1024 * 1024
+  const supervisedGateway = await startCooperativeProcess({
+    runtime,
+    root: `${PROBE_ROOT}/supervision`,
+    id: "gateway",
+    command: {
+      executable: "node",
+      args: [
+        "node_modules/openclaw/openclaw.mjs",
+        "--dev",
+        "gateway",
+        "--allow-unconfigured",
+        "--bind",
+        "loopback",
+        "--port",
+        String(port),
+        "--auth",
+        "token"
+      ],
+      cwd: PROBE_ROOT,
+      env: [
+        "CI=1",
+        "NO_COLOR=1",
+        "OPENCLAW_SKIP_CHANNELS=1",
+        `OPENCLAW_STATE_DIR=${STATE_ROOT}`,
+        `OPENCLAW_GATEWAY_TOKEN=${gatewayToken}`
+      ],
+      outputLimitBytes: 2 * 1024 * 1024
+    },
+    ...(supervisorNonceFactory ? { nonceFactory: supervisorNonceFactory } : {})
   });
+  const gatewayTask = supervisedGateway.task;
   gatewayTask.onOutput((chunk) => relayOutput(onOutput, "gateway", chunk));
   const readinessController = new AbortController();
   const readiness = Promise.all([
@@ -241,6 +251,12 @@ export async function runBrowserPodOpenClawProbe({
   }
   const health = parseBrowserPodHealthEvidence(healthTask.transcript);
   const gatewayDurationMs = Math.max(0, now() - gatewayStartedAt);
+  const terminationStartedAt = now();
+  const termination = await supervisedGateway.stop({ timeoutMs: 15_000 });
+  const terminationDurationMs = Math.max(0, now() - terminationStartedAt);
+  if (!termination.complete) {
+    throw new BrowserRuntimeError("cooperative_stop_failed", "BrowserPod Gateway cooperative stop did not complete");
+  }
 
   const evidence = Object.freeze({
     schemaVersion: 1,
@@ -280,6 +296,13 @@ export async function runBrowserPodOpenClawProbe({
       portal,
       healthz: Object.freeze(health.healthz),
       readyz: Object.freeze(health.readyz),
+      termination: Object.freeze({
+        mode: "guest-supervisor",
+        result: "pass",
+        durationMs: terminationDurationMs,
+        providerProcessTermination: false,
+        hardDispose: false
+      }),
       outputTruncated: gatewayTask.outputTruncated
     }),
     limitations: runtimeLimitations(runtime.features)

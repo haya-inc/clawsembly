@@ -15,11 +15,14 @@ same exact OpenClaw artifact inside the selected runtime and browser.
    inspected npm SHA-512;
 5. start the real Gateway on an authenticated loopback port;
 6. require the `[gateway] ready` log, an HTTPS BrowserPod portal, and HTTP 200
-   from guest-local `/healthz` and `/readyz` probes.
+   from guest-local `/healthz` and `/readyz` probes;
+7. stop that Gateway through a nonce-bound guest supervisor and require its
+   foreground task to finish.
 
 The returned evidence contains no BrowserPod API key or Gateway token. It does
-record that the portal is a public URL and that BrowserPod 2.12.1 has no
-documented terminal-input, provider-process-termination, or hard-disposal API.
+record that the portal is a public URL. It also distinguishes the successful
+cooperative Gateway stop from BrowserPod 2.12.1's still-unavailable documented
+terminal-input, provider-process-termination, and hard-disposal APIs.
 
 This is a readiness boundary, not full support. A successful record promotes
 the BrowserPod preflight and OpenClaw boot checks only. Gateway `hello-ok`, the
@@ -53,11 +56,11 @@ const evidenceJson = JSON.stringify(session.evidence, null, 2);
 ```
 
 Run this only with explicit owner consent. BrowserPod boot and execution are
-metered. Because the documented provider API cannot terminate the foreground
-Gateway or dispose the Pod, `session.dispose()` is deliberately logical-only
-and returns the still-active task IDs. Close the owner-controlled probe context
-according to the provider's documented lifecycle and do not claim cleanup from
-the returned value.
+metered. The probe stops its own Gateway through the guest supervisor before it
+returns, so the foreground task is complete. `session.dispose()` remains a
+logical-only Pod close because BrowserPod exposes no documented hard-disposal
+operation. Close the owner-controlled probe context according to the provider's
+documented lifecycle and do not claim Pod cleanup from the returned value.
 
 ## Attach reviewed evidence
 

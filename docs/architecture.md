@@ -123,6 +123,12 @@ Gateway, and gathers log, portal, `/healthz`, and `/readyz` evidence. Raw
 records are schema-validated and only promote matching runtime-version,
 browser, and artifact checks; they do not imply protocol or broker support.
 
+Clawsembly-launched long-running commands may use a guest-local cooperative
+supervisor. A nonce-bound stop file requests `SIGTERM`, followed by `SIGKILL`
+after a grace period, without persisting process environment values. This
+closes the Gateway task used by the evidence probe, but does not imply provider
+process termination or Pod hard disposal.
+
 ### Compatibility adapter
 
 Contains browser-specific behavior that upstream OpenClaw does not provide.
@@ -150,6 +156,13 @@ interfaces include:
 - future WIT-based Wasm capability invocation.
 
 Every interface should be narrow, typed, cancellable, and auditable.
+
+BrowserPod guest calls cross this boundary through a filesystem mailbox. The
+host writes the exact broker subject and byte limits into a per-boot channel;
+the guest writes monotonic request slots and cancellation markers. The host
+strictly parses bounded envelopes, rejects replay, invokes only its in-memory
+broker, and returns generic bounded responses. Mailbox metadata is discovery,
+never authority. See [BrowserPod capability mailbox](capability-mailbox.md).
 
 ### Capability broker
 
