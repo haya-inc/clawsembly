@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "package": {
+    "name": "@haya-inc/clawsembly",
+    "version": "0.1.0-alpha.0"
+  },
+  "distribution": {
+    "channel": "github-pages",
+    "npmPublished": false,
+    "tarball": {
+      "file": "haya-inc-clawsembly-0.1.0-alpha.0.tgz",
+      "url": "https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz",
+      "bytes": 63603,
+      "sha256": "e8d593dd1633cf7950bb283b50292fea9a64f9dc7432863dc72aaff8a11efc87"
+    },
+    "checksum": {
+      "file": "haya-inc-clawsembly-0.1.0-alpha.0.tgz.sha256",
+      "url": "https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz.sha256",
+      "bytes": 104,
+      "value": "e8d593dd1633cf7950bb283b50292fea9a64f9dc7432863dc72aaff8a11efc87"
+    }
+  },
+  "compatibility": {
+    "status": "probing",
+    "reportUrl": "https://haya-inc.github.io/clawsembly/data/compatibility.json",
+    "reportSha256": "81cce552628d761fd0accc26ba0354df214474b8c659bf20962858da1c42eb74",
+    "openclaw": {
+      "version": "2026.6.11",
+      "integrity": "sha512-T+P/g19IheeT1ckXMoPN61dYuE8vBF4MderI+kWkvpuFYxPkJxn8AXLpu9IXCnN9g36Acpm9+mMD/V+lsvOkyA=="
+    },
+    "runtime": {
+      "provider": "browserpod",
+      "version": "2.12.1"
+    }
+  },
+  "install": {
+    "command": "npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz"
+  }
+}
