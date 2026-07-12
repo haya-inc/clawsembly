@@ -84,6 +84,8 @@ The project does not yet promise semantic-version compatibility.
 - manual Environment-protected BrowserPod evidence capture with exact isolated
   provider lock, cross-origin-isolated Chromium host, payload-free failure
   diagnostics, schema validation, and review-before-promotion runbook;
+- Pages-distributed byte-reproducible SDK alpha, checksum, public release
+  schema, and exact compatibility-report binding without an npm/support claim;
 - report-driven project page, release ledger, compatibility badge, contribution
   templates, security policy, and downstream consumption guide.
 

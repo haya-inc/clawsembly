@@ -98,6 +98,10 @@ suppression, generated-report pull requests, public schemas, and a fail-closed
 promotion policy with dependency-free Node and GitHub Action consumers are implemented. External
 consumption and multi-release runtime evidence are not yet proven.
 
+The byte-reproducible SDK alpha is distributed from Pages with an exact
+checksum and compatibility-report binding. npm remains a later discovery
+channel, not a prerequisite for the first external integration.
+
 ### Gate 3 — contributor flywheel
 
 - Label bounded fixture, classification, docs, and adapter issues as good first

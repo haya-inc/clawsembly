@@ -156,6 +156,7 @@ the release is reported as `probing` rather than production-compatible.
 - [Checked-in compatibility report](apps/web/public/data/compatibility.json)
 - [Release-channel history](apps/web/public/data/release-history.json)
 - [Promotion policy](https://haya-inc.github.io/clawsembly/data/promotion-policy.json)
+- [SDK alpha release manifest](https://haya-inc.github.io/clawsembly/downloads/sdk-release.json)
 - [Report schema](packages/compatibility/report.schema.json)
 - [Release-history schema](packages/compatibility/release-history.schema.json)
 - [Downstream consumption guide](docs/consuming-reports.md)
@@ -202,8 +203,16 @@ npm run report-pin:check
 digests, installs it into an isolated temporary consumer, imports every public
 ESM subpath, and compiles a strict TypeScript consumer. `sdk:pack` writes
 `@haya-inc/clawsembly@0.1.0-alpha.0` plus its checksum under ignored
-`.artifacts/sdk/`. The package is prepared but not published to npm while the
-BrowserPod report remains `probing`.
+`.artifacts/sdk/`. npm publication remains pending while the BrowserPod report
+is `probing`, but the exact verified bytes are available from Pages:
+
+```bash
+npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz
+```
+
+The adjacent release manifest binds the tarball SHA-256 to the exact public
+compatibility report and explicitly records `npmPublished:false` and
+`status:probing`.
 
 `sdk:example` installs that tarball into an independent Vite/TypeScript package
 without workspace aliases and serves a launch inspector on

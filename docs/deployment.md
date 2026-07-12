@@ -29,6 +29,9 @@ it uses.
 - `npm run build:pages` also builds the packed-SDK host under
   `dist/sdk-host/`; that application consumes the generated tarball and must
   remain provider-free while the public report is `probing`.
+- The same build publishes the byte-reproducible SDK tarball, checksum, and
+  report-bound release manifest under `dist/downloads/`. This is a source-alpha
+  distribution channel, not an npm publication or runtime-support claim.
 - Cloudflare Pages reads `apps/web/public/_headers`.
 - Netlify uses `netlify.toml`.
 - Vercel uses `vercel.json`.

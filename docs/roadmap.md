@@ -208,7 +208,9 @@ artifact, and BrowserPod version; raw or hand-edited `supported` objects cannot
 authorize launch. The six-hour tracker deterministically rotates that pin in
 its read-only job and publishes it with the report through the isolated
 write-capable PR job. npm publication remains blocked on the same runtime
-evidence and maintainer release gates.
+evidence and maintainer release gates. The identical checked tarball is now
+available from Pages with a schema-valid release manifest and checksum, so
+external source-alpha consumers do not depend on registry publication.
 
 Exit criterion: an external web application can embed one supported upstream
 OpenClaw version without granting ambient credentials, filesystem, or network

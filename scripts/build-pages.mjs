@@ -20,6 +20,7 @@ run(process.execPath, ["node_modules/vite/bin/vite.js", "build", "--config", "ap
   env: { ...process.env, CLAWSEMBLY_BASE_PATH: "/clawsembly/" }
 });
 run(process.execPath, ["scripts/build-sdk-package.mjs"]);
+run(process.execPath, ["scripts/publish-sdk-download.mjs"]);
 
 const tarball = resolve(root, ".artifacts", "sdk", "haya-inc-clawsembly-0.1.0-alpha.0.tgz");
 const hostRoot = resolve(root, "examples", "sdk-host");

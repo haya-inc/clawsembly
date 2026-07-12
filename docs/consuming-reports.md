@@ -26,6 +26,8 @@ passed every production gate. It must not be interpreted as fully supported.
 | History schema | `https://haya-inc.github.io/clawsembly/schemas/release-history.schema.json` | Validation contract for the channel index |
 | Promotion schema | `https://haya-inc.github.io/clawsembly/schemas/promotion-policy.schema.json` | Validation contract for the derived decision artifact |
 | BrowserPod evidence schema | `https://haya-inc.github.io/clawsembly/schemas/browserpod-evidence.schema.json` | Raw exact-artifact BrowserPod readiness contract |
+| SDK release | `https://haya-inc.github.io/clawsembly/downloads/sdk-release.json` | Pages tarball/checksum identity plus exact compatibility-report binding |
+| SDK release schema | `https://haya-inc.github.io/clawsembly/schemas/sdk-release.schema.json` | Validation contract for the source-alpha distribution manifest |
 
 Consumers should:
 

@@ -9,7 +9,8 @@ const schemas = [
   ["packages/compatibility", "report.schema.json"],
   ["packages/compatibility", "release-history.schema.json"],
   ["packages/compatibility", "browserpod-evidence.schema.json"],
-  ["packages/compatibility", "promotion-policy.schema.json"]
+  ["packages/compatibility", "promotion-policy.schema.json"],
+  ["packages/compatibility", "sdk-release.schema.json"]
 ];
 let stale = false;
 

@@ -47,6 +47,7 @@ const required = [
   ".github/workflows/pages.yml",
   ".github/workflows/runtime-browser.yml",
   "scripts/validate-workflows.mjs",
+  "scripts/publish-sdk-download.mjs",
   "apps/web/public/_headers",
   "netlify.toml",
   "vercel.json",
@@ -59,6 +60,7 @@ const required = [
   "packages/compatibility/release-history.schema.json",
   "packages/compatibility/browserpod-evidence.schema.json",
   "packages/compatibility/promotion-policy.schema.json",
+  "packages/compatibility/sdk-release.schema.json",
   "packages/compatibility/src/dependency-risk.mjs",
   "packages/compatibility/src/dependency-risk.test.mjs",
   "packages/compatibility/src/gateway-contract-inspection.mjs",
@@ -67,6 +69,8 @@ const required = [
   "packages/compatibility/src/promotion-policy.test.mjs",
   "packages/compatibility/src/promotion-action-metadata.test.mjs",
   "packages/compatibility/src/browserpod-capture-harness.test.mjs",
+  "packages/compatibility/src/sdk-release.mjs",
+  "packages/compatibility/src/sdk-release.test.mjs",
   "packages/capability-broker/capability-manifest.schema.json",
   "packages/capability-broker/capability-audit.schema.json",
   "packages/embed-sdk/permission-prompt.mjs",
@@ -124,6 +128,7 @@ const required = [
   "apps/web/public/schemas/release-history.schema.json",
   "apps/web/public/schemas/browserpod-evidence.schema.json",
   "apps/web/public/schemas/promotion-policy.schema.json",
+  "apps/web/public/schemas/sdk-release.schema.json",
   "dist/index.html",
   "dist/data/compatibility.json",
   "dist/data/compatibility-badge.svg",
@@ -135,6 +140,10 @@ const required = [
   "dist/schemas/release-history.schema.json",
   "dist/schemas/browserpod-evidence.schema.json",
   "dist/schemas/promotion-policy.schema.json",
+  "dist/schemas/sdk-release.schema.json",
+  "dist/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz",
+  "dist/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz.sha256",
+  "dist/downloads/sdk-release.json",
   "dist/sdk-host/index.html"
 ];
 
@@ -173,6 +182,39 @@ if (sdkHostJavaScript.length !== 1) throw new Error("The Pages SDK host bundle i
 const sdkHostBundle = readFileSync(resolve(root, "dist/sdk-host/assets", sdkHostJavaScript[0]), "utf8");
 for (const expected of ["Provider boot blocked", "Not attempted", "report status is"]) {
   if (!sdkHostBundle.includes(expected)) throw new Error(`The Pages SDK host is missing ${expected}.`);
+}
+
+const sdkRelease = JSON.parse(readFileSync(resolve(root, "dist/downloads/sdk-release.json"), "utf8"));
+const sdkTarballName = sdkRelease.distribution?.tarball?.file;
+if (sdkRelease.schemaVersion !== 1 || sdkRelease.package?.name !== "@haya-inc/clawsembly"
+  || sdkRelease.distribution?.npmPublished !== false
+  || sdkRelease.install?.command !== `npm install ${sdkRelease.distribution?.tarball?.url}`
+  || !/^haya-inc-clawsembly-0\.1\.0-alpha\.[0-9]+\.tgz$/u.test(sdkTarballName ?? "")) {
+  throw new Error("The Pages SDK release manifest overstates or misidentifies the source alpha.");
+}
+const sdkTarball = readFileSync(resolve(root, "dist/downloads", sdkTarballName));
+const sdkTarballSha256 = createHash("sha256").update(sdkTarball).digest("hex");
+if (sdkTarballSha256 !== sdkRelease.distribution.tarball.sha256
+  || sdkTarball.byteLength !== sdkRelease.distribution.tarball.bytes) {
+  throw new Error("The Pages SDK tarball bytes do not match the release manifest.");
+}
+const sdkChecksumName = sdkRelease.distribution.checksum.file;
+const sdkChecksum = readFileSync(resolve(root, "dist/downloads", sdkChecksumName), "utf8");
+if (sdkRelease.distribution.checksum.value !== sdkTarballSha256
+  || sdkChecksum !== `${sdkTarballSha256}  ${sdkTarballName}\n`) {
+  throw new Error("The Pages SDK checksum does not match the release tarball.");
+}
+const publicReport = readFileSync(resolve(root, "dist/data/compatibility.json"), "utf8");
+if (createHash("sha256").update(publicReport).digest("hex") !== sdkRelease.compatibility.reportSha256) {
+  throw new Error("The Pages SDK release is not bound to the deployed compatibility report.");
+}
+const deployedReport = JSON.parse(publicReport);
+if (sdkRelease.compatibility.status !== deployedReport.status
+  || sdkRelease.compatibility.openclaw.version !== deployedReport.artifact.version
+  || sdkRelease.compatibility.openclaw.integrity !== deployedReport.artifact.integrity
+  || sdkRelease.compatibility.runtime.provider !== deployedReport.target.runtime
+  || sdkRelease.compatibility.runtime.version !== deployedReport.target.runtimeVersion) {
+  throw new Error("The Pages SDK release compatibility identity drifted from its deployed report.");
 }
 
 const socialPreview = readFileSync(resolve(root, "apps/web/public/social-preview.png"));

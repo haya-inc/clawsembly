@@ -7,7 +7,18 @@ The checked-in BrowserPod report remains `probing`, so verified boot correctly
 fails before a provider key is consumed. A source tarball can still be built
 and tested without making a runtime-support claim.
 
-## Install after a prerelease is published
+## Install the Pages-distributed source alpha
+
+```bash
+npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz
+```
+
+Verify the SHA-256 and compatibility binding through the public
+[`sdk-release.json`](https://haya-inc.github.io/clawsembly/downloads/sdk-release.json).
+Distribution does not change the public `probing` status or authorize
+BrowserPod boot.
+
+## Install after an npm prerelease is published
 
 ```bash
 npm install @haya-inc/clawsembly@0.1.0-alpha.0

@@ -29,8 +29,9 @@ npm run dev --prefix examples/sdk-host
 ```
 
 The application imports `@haya-inc/clawsembly`; it does not use a Vite alias or
-a relative path into the repository packages. After an npm prerelease exists,
-the ordinary `npm install` flow will use the declared version instead.
+a relative path into the repository packages. External hosts can now install
+the exact Pages tarball URL from `downloads/sdk-release.json`; after an npm
+prerelease exists, the ordinary registry flow can use the declared version.
 
 ## Owner-controlled boot
 

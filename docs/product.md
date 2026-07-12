@@ -78,3 +78,7 @@ Current adoption surface: the public policy endpoint, schema, dependency-free
 Node consumer, and zero-install GitHub Action are implemented. This makes
 external consumption possible before npm publication; a first independent
 consumer is still the next distribution proof.
+
+The reproducible SDK alpha is also directly installable from Pages with a
+machine-readable checksum/report binding. This removes registry access as an
+adoption prerequisite without relabeling the `probing` runtime as supported.

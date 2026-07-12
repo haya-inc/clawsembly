@@ -114,6 +114,10 @@ test("project page distinguishes stable, previous, and preview evidence", async 
     "href",
     "https://haya-inc.github.io/clawsembly/sdk-host/"
   );
+  await expect(page.getByRole("link", { name: "Download SDK alpha ↓" })).toHaveAttribute(
+    "href",
+    "./downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz"
+  );
   const preview = index.releases.find((release) => release.channel === "preview");
   const dependencyDelta = preview?.deltaFromStable.directDependencyCount ?? 0;
   const expectedDelta = dependencyDelta === 0 ? "±0 deps" : `${dependencyDelta > 0 ? "+" : "−"}${Math.abs(dependencyDelta)} deps`;
