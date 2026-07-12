@@ -172,6 +172,8 @@ uses Node filesystem calls; the host uses only BrowserPod's documented bounded
 filesystem adapter. See [BrowserPod capability mailbox](capability-mailbox.md).
 
 The SDK initializes the host side automatically and exposes
-`session.mailbox.serve(...)`. Integrators currently package the two small guest
-modules with their OpenClaw adapter and pass the generated channel path to that
-adapter. Automatic guest staging and permission UX are later SDK slices.
+`session.mailbox.serve(...)`. It also stages the canonical protocol and Node
+client as a generated SHA-256-pinned artifact, reads both files back through the
+runtime, and exposes their exact paths plus non-secret command environment as
+`session.guestTransport`. Generated-source drift fails the release gate.
+Permission UX remains a later SDK slice.

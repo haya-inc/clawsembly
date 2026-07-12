@@ -57,9 +57,9 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   const runtimes = page.locator("#runtimes");
   await expect(runtimes.getByRole("heading", { name: "BrowserPod executes. Clawsembly decides." })).toBeVisible();
   await expect(runtimes.getByText("BrowserPod 2.x", { exact: true })).toBeVisible();
-  await expect(runtimes.getByText("Transport core ✓", { exact: true })).toBeVisible();
-  await expect(runtimes.getByText(/Typed file mailbox carries broker calls/)).toBeVisible();
-  await expect(runtimes.getByText(/guest supervisor stops the Gateway/)).toBeVisible();
+  await expect(runtimes.getByText("Guest transport ✓", { exact: true })).toBeVisible();
+  await expect(runtimes.getByText(/SDK stages and reads back a digest-pinned Node client/)).toBeVisible();
+  await expect(runtimes.getByText(/typed mailbox carries broker calls/)).toBeVisible();
   await expect(runtimes.getByText(/Real provider evidence is unrun/)).toBeVisible();
   await expect(runtimes.getByText(/hard dispose remains unavailable/)).toBeVisible();
   await expect(runtimes.getByText("container2wasm", { exact: true })).toBeVisible();

@@ -39,12 +39,14 @@ runtime evidence. The BrowserPod adapter implements documented Node 22 boot,
 `storageKey` persistence, long-running output readiness, HTTPS portal discovery,
 and bounded file I/O. A typed filesystem mailbox now connects the untrusted
 guest to the exact-scope broker with replay defense, byte limits, generic
-errors, cancellation, and payload-free audit. The readiness harness installs
-the exact SHA-512 npm artifact and requires Gateway log, portal, `/healthz`,
-`/readyz`, and a nonce-bound guest-supervisor shutdown. No owner-authorized
-BrowserPod record has been captured yet. Its public 2.12.1 API has no documented
-terminal-input, provider-termination, or hard-disposal method, so those
-features remain explicitly unsupported. See
+errors, cancellation, and payload-free audit. Verified boot automatically
+stages and reads back a generated SHA-256-pinned Node client in the fresh
+channel, while a release check rejects generated-source drift. The readiness
+harness installs the exact SHA-512 npm artifact and requires Gateway log,
+portal, `/healthz`, `/readyz`, and a nonce-bound guest-supervisor shutdown. No
+owner-authorized BrowserPod record has been captured yet. Its public 2.12.1 API
+has no documented terminal-input, provider-termination, or hard-disposal
+method, so those features remain explicitly unsupported. See
 [ADR 0003](docs/decisions/0003-verified-openclaw-embedding.md) and the
 [embedding contract](docs/embedding.md). The capture and attachment procedure
 is documented in [BrowserPod evidence](docs/browserpod-evidence.md).

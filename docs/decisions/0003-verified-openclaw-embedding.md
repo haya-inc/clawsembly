@@ -71,6 +71,9 @@ The canonical promise is:
 - `packages/capability-broker/filesystem-mailbox-host.mjs` and the guest client
   carry bounded, typed, cancellable requests across BrowserPod's documented
   filesystem API while preserving the broker as the only source of authority.
+- `packages/capability-broker/guest-mailbox-artifact.mjs` stages a generated,
+  SHA-256-pinned client into every fresh channel, verifies its readback, and
+  removes manual guest-module packaging from the integration contract.
 - `packages/browser-runtime/cooperative-process.mjs` stops Clawsembly-launched
   children through a nonce-bound guest supervisor without claiming provider
   process termination or Pod disposal.

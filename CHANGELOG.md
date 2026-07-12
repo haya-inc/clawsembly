@@ -25,6 +25,8 @@ The project does not yet promise semantic-version compatibility.
   readiness, guest-local health/readiness probes, and cooperative Gateway stop;
 - typed BrowserPod filesystem mailbox with exact-subject binding, strict
   bounded envelopes, replay defense, cancellation, and metadata-only audit;
+- deterministic SHA-256-pinned guest transport artifact, automatic verified
+  BrowserPod staging, explicit connection environment, and CI drift detection;
 - nonce-bound guest process supervisor for cooperative child shutdown without
   overstating BrowserPod process-termination or Pod-disposal capabilities;
 - stable / previous / preview release tracking with generated update pull

@@ -5,6 +5,7 @@ import type {
 } from "../capability-broker/capability-broker.mjs";
 import type { BrowserPodApi, BrowserPodRuntime } from "../browser-runtime/browserpod-runtime.mjs";
 import type { FilesystemCapabilityMailboxHost } from "../capability-broker/filesystem-mailbox-host.mjs";
+import type { StagedGuestMailboxClient } from "../capability-broker/guest-mailbox-artifact.mjs";
 import type { EmbedManifest } from "./embed-manifest.mjs";
 
 export function bootVerifiedEmbed(options: {
@@ -30,6 +31,18 @@ export function bootVerifiedEmbed(options: {
   runtime: Readonly<BrowserPodRuntime>;
   capabilities: CapabilityBroker;
   mailbox: FilesystemCapabilityMailboxHost;
+  guestTransport: Readonly<{
+    schemaVersion: 1;
+    kind: "filesystem-mailbox";
+    channelId: string;
+    mailboxRoot: string;
+    client: Readonly<StagedGuestMailboxClient>;
+    environment: readonly [
+      `CLAWSEMBLY_MAILBOX_ROOT=${string}`,
+      `CLAWSEMBLY_MAILBOX_CHANNEL=${string}`,
+      `CLAWSEMBLY_MAILBOX_CLIENT=${string}`
+    ];
+  }>;
   readonly closed: boolean;
   dispose(): Readonly<{ complete: false; reason: string; activeTaskIds: readonly string[] }>;
 }>>;

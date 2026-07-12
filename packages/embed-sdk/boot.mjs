@@ -1,6 +1,7 @@
 import { createBrowserPodRuntime } from "../browser-runtime/browserpod-runtime.mjs";
 import { CapabilityBroker } from "../capability-broker/capability-broker.mjs";
 import { FilesystemCapabilityMailboxHost } from "../capability-broker/filesystem-mailbox-host.mjs";
+import { stageGuestMailboxClient } from "../capability-broker/guest-mailbox-artifact.mjs";
 import { assertVerifiedLaunch } from "./embed-manifest.mjs";
 
 const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/u;
@@ -72,10 +73,11 @@ export async function bootVerifiedEmbed({
     handlers: capabilityHandlers,
     auditSink: onCapabilityAudit
   });
+  const mailboxRoot = `/workspace/.clawsembly/mailbox/${mailboxChannelId}`;
   const mailbox = new FilesystemCapabilityMailboxHost({
     runtime,
     broker: capabilities,
-    root: `/workspace/.clawsembly/mailbox/${mailboxChannelId}`,
+    root: mailboxRoot,
     channelId: mailboxChannelId,
     ...(mailboxOptions.pollIntervalMs === undefined ? {} : { pollIntervalMs: mailboxOptions.pollIntervalMs }),
     ...(mailboxOptions.maxRequestBytes === undefined ? {} : { maxRequestBytes: mailboxOptions.maxRequestBytes }),
@@ -84,6 +86,22 @@ export async function bootVerifiedEmbed({
     ...(mailboxOptions.clock === undefined ? {} : { clock: mailboxOptions.clock })
   });
   await mailbox.initialize();
+  const guestClient = await stageGuestMailboxClient({
+    runtime,
+    root: `${mailboxRoot}/guest-client-v1`
+  });
+  const guestTransport = Object.freeze({
+    schemaVersion: 1,
+    kind: "filesystem-mailbox",
+    channelId: mailboxChannelId,
+    mailboxRoot,
+    client: guestClient,
+    environment: Object.freeze([
+      `CLAWSEMBLY_MAILBOX_ROOT=${mailboxRoot}`,
+      `CLAWSEMBLY_MAILBOX_CHANNEL=${mailboxChannelId}`,
+      `CLAWSEMBLY_MAILBOX_CLIENT=${guestClient.entrypointPath}`
+    ])
+  });
   let closed = false;
   return Object.freeze({
     schemaVersion: 1,
@@ -91,6 +109,7 @@ export async function bootVerifiedEmbed({
     runtime,
     capabilities,
     mailbox,
+    guestTransport,
     get closed() { return closed; },
     dispose() {
       if (closed) return Object.freeze({ complete: false, reason: "embed session already closed", activeTaskIds: Object.freeze([]) });

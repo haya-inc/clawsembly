@@ -115,6 +115,27 @@ test("boots a verified BrowserPod session and binds capability authority to its 
   ));
   assert.deepEqual(mailboxManifest.subject, session.capabilities.subject);
   assert.equal(session.mailbox.nextSequence, 1);
+  assert.deepEqual({
+    kind: session.guestTransport.kind,
+    channelId: session.guestTransport.channelId,
+    mailboxRoot: session.guestTransport.mailboxRoot,
+    verified: session.guestTransport.client.verified,
+    entrypointPath: session.guestTransport.client.entrypointPath
+  }, {
+    kind: "filesystem-mailbox",
+    channelId: "verified_mailbox",
+    mailboxRoot: "/workspace/.clawsembly/mailbox/verified_mailbox",
+    verified: true,
+    entrypointPath: "/workspace/.clawsembly/mailbox/verified_mailbox/guest-client-v1/guest-mailbox-client.mjs"
+  });
+  assert.equal(session.guestTransport.client.files.length, 2);
+  assert.match(session.guestTransport.client.integrity, /^sha256-[a-f0-9]{64}$/u);
+  assert.equal(fake.files.get(session.guestTransport.client.entrypointPath)?.includes("node:fs/promises"), true);
+  assert.deepEqual(session.guestTransport.environment, [
+    "CLAWSEMBLY_MAILBOX_ROOT=/workspace/.clawsembly/mailbox/verified_mailbox",
+    "CLAWSEMBLY_MAILBOX_CHANNEL=verified_mailbox",
+    "CLAWSEMBLY_MAILBOX_CLIENT=/workspace/.clawsembly/mailbox/verified_mailbox/guest-client-v1/guest-mailbox-client.mjs"
+  ]);
   assert.deepEqual(await session.capabilities.request({
     id: "snapshot-1",
     capability: "storage.snapshot",

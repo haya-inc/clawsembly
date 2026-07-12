@@ -164,6 +164,13 @@ strictly parses bounded envelopes, rejects replay, invokes only its in-memory
 broker, and returns generic bounded responses. Mailbox metadata is discovery,
 never authority. See [BrowserPod capability mailbox](capability-mailbox.md).
 
+The canonical Node guest client and protocol are compiled into a deterministic
+host artifact with per-file and combined SHA-256 identifiers. Verified boot
+checks the source digests, stages both modules inside the fresh channel, reads
+them back byte-for-byte, and returns only explicit paths and non-secret command
+environment. CI rejects any generated artifact that drifts from canonical
+source.
+
 ### Capability broker
 
 The broker is the product security boundary between the untrusted guest and

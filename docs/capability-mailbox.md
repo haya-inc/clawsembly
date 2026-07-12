@@ -50,24 +50,45 @@ const hostLoop = session.mailbox.serve({
   signal: serving.signal,
   maxRequests: 100
 });
+
+await session.runtime.start({
+  executable: "node",
+  args: ["guest-adapter.mjs"],
+  cwd: "/workspace",
+  env: [...session.guestTransport.environment]
+});
 ```
 
 The random channel identifier is also part of the guest path. Reusing a
 persistent workspace therefore cannot silently replay stale slots from an
 earlier embed boot.
 
+## Exact guest artifact
+
+`mailbox:generate` deterministically packages the canonical protocol and Node
+client sources into one checked-in host artifact. It records a SHA-256 for each
+file and the combined artifact. `mailbox:check` runs in the normal release gate
+and fails when either canonical source changes without regeneration.
+
+Verified boot writes both modules into the fresh channel, verifies their
+source digests before writing, reads the exact text back through BrowserPod's
+bounded file API, and only then exposes `session.guestTransport`. The returned
+record contains the client entrypoint, mailbox root, channel, file metadata,
+and explicit environment strings. None are credentials or grants.
+
 ## Guest integration
 
-Package `guest-mailbox-client.mjs` and its sibling `mailbox-protocol.mjs` with
-the OpenClaw guest adapter, then connect to the channel path supplied by the
-host integration:
+The guest adapter imports the staged entrypoint and connects with the supplied
+non-secret environment:
 
 ```js
-import { FilesystemCapabilityMailboxClient } from "./guest-mailbox-client.mjs";
+const { FilesystemCapabilityMailboxClient } = await import(
+  process.env.CLAWSEMBLY_MAILBOX_CLIENT
+);
 
 const client = new FilesystemCapabilityMailboxClient({
-  root: mailboxRoot,
-  channelId: mailboxChannelId
+  root: process.env.CLAWSEMBLY_MAILBOX_ROOT,
+  channelId: process.env.CLAWSEMBLY_MAILBOX_CHANNEL
 });
 await client.connect();
 

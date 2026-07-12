@@ -36,6 +36,12 @@ const session = await bootVerifiedEmbed({
 });
 
 session.mailbox.serve({ signal: shutdown.signal, maxRequests: 100 });
+await session.runtime.start({
+  executable: "node",
+  args: ["guest-adapter.mjs"],
+  cwd: "/workspace",
+  env: [...session.guestTransport.environment]
+});
 ```
 
 There is intentionally no `allowUnverified` option. Provider probes use the
@@ -46,8 +52,10 @@ silently mount the previous artifact's disk.
 
 The mailbox provides typed exact-scope guest requests, replay rejection,
 bounded responses, cancellation, and payload-free transport audit without
-terminal input. Package the guest client and protocol modules with the OpenClaw
-adapter. Gateway installation and user-facing permission prompts remain next
-SDK slices. BrowserPod 2.12.1 still lacks documented provider process
+terminal input. Verified boot stages a generated, SHA-256-pinned guest client,
+reads both modules back, and returns its paths plus explicit non-secret command
+environment in `session.guestTransport`; integrators no longer copy protocol
+files by hand. Gateway installation and user-facing permission prompts remain
+next SDK slices. BrowserPod 2.12.1 still lacks documented provider process
 termination and hard-disposal APIs; a guest supervisor now handles cooperative
 shutdown only for Clawsembly-launched processes.

@@ -49,6 +49,9 @@ The browser sandbox is one boundary, not the only control.
   discovery metadata.
 - Strictly bound and parse mailbox envelopes, reject replay and traversal, and
   expose only generic transport errors plus payload-free audit metadata.
+- Generate the guest client from canonical sources, reject source/artifact
+  drift in CI, verify file digests before staging, and require byte-exact
+  readback before exposing its entrypoint.
 - Treat cooperative Gateway shutdown separately from provider process
   termination and Pod disposal; never infer the latter from a supervisor exit.
 

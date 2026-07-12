@@ -154,11 +154,13 @@ surface:
 Status: manifest generation, fail-closed verified-launch assertion, and
 `bootVerifiedEmbed` are implemented. Verified boot now initializes a fresh
 per-session typed filesystem mailbox bound to the same exact broker subject.
-Real-filesystem tests cover allow, deny, replay, cancellation, strict parsing,
-and response limits. The current WebContainer `partial` report is correctly
-rejected before BrowserPod boot or token consumption. The boot slice is not
-promoted as supported while owner-authorized BrowserPod evidence remains
-missing.
+It automatically stages and reads back a generated SHA-256-pinned guest client;
+the release gate rejects drift from its canonical sources. Real-filesystem
+tests execute that staged Node client and cover allow, deny, replay,
+cancellation, strict parsing, and response limits. The current WebContainer
+`partial` report is correctly rejected before BrowserPod boot or token
+consumption. The boot slice is not promoted as supported while owner-authorized
+BrowserPod evidence remains missing.
 
 Exit criterion: an external web application can embed one supported upstream
 OpenClaw version without granting ambient credentials, filesystem, or network
