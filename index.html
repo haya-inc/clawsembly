@@ -243,10 +243,11 @@
             <div class="terminal-head"><span></span><span></span><span></span><strong>browserpod-contract.log</strong></div>
             <ol data-probe-output>
               <li data-state="pass"><span>01</span><strong>Production runtime</strong><em>BrowserPod 2.x · selected</em></li>
-              <li data-state="pass"><span>02</span><strong>Guest transport</strong><em>SHA-256 source + readback</em></li>
-              <li data-state="pass"><span>03</span><strong>Permission lifecycle</strong><em>pending · approve · expire/revoke</em></li>
-              <li data-state="idle"><span>04</span><strong>Provider evidence</strong><em>owner key required</em></li>
-              <li data-state="pass"><span>05</span><strong>Legacy runtime fallback</strong><em>none in app bundle</em></li>
+              <li data-state="pass"><span>02</span><strong>Exact installer</strong><em>manifest + lock integrity readback</em></li>
+              <li data-state="pass"><span>03</span><strong>Guest transport</strong><em>SHA-256 source + readback</em></li>
+              <li data-state="pass"><span>04</span><strong>Permission lifecycle</strong><em>pending · approve · expire/revoke</em></li>
+              <li data-state="idle"><span>05</span><strong>Provider evidence</strong><em>owner key required</em></li>
+              <li data-state="pass"><span>06</span><strong>Legacy runtime fallback</strong><em>none in app bundle</em></li>
             </ol>
           </div>
         </div>
@@ -328,7 +329,7 @@
           <a class="runtime-row runtime-row-primary" href="https://browserpod.io/docs/more/licensing" target="_blank" rel="noreferrer">
             <span class="runtime-rank">01 / adopted</span>
             <div class="runtime-name"><strong>BrowserPod 2.x</strong><span>Node 22 · browser-local</span></div>
-            <p>SDK stages and reads back a digest-pinned Node client; its typed mailbox carries broker calls and cancellation without terminal input. Real provider evidence is unrun; hard dispose remains unavailable.</p>
+            <p>SDK verifies the manifest-bound npm version and lock integrity before exposing OpenClaw paths, then stages a digest-pinned Node client for typed broker calls and cancellation. Real provider evidence is unrun; hard dispose remains unavailable.</p>
             <span class="runtime-license">Commercial</span>
             <span class="runtime-state">Guest transport ✓</span>
           </a>
