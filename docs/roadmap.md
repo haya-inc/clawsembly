@@ -115,6 +115,9 @@ to a server:
   portal routing, persistence, cancellation, and commercial terms;
 - verify container2wasm amd64 browser execution, transfer size, cold/warm boot,
   OPFS or IndexedDB restore, broker networking, SBOM, notices, and source duties;
+- resolve the measured container2wasm host feasibility failure first: the
+  316.7 MB Node 22.19.0 module exits before its guest command, so `--to-js`
+  browser work remains blocked;
 - introduce one provider-neutral runtime contract;
 - promote no candidate until it reproduces the full Gateway evidence slice.
 

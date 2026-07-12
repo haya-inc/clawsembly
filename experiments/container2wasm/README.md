@@ -14,6 +14,31 @@ It compiles runc, GRUB, a Linux 6.1 kernel, Bochs, wasi-vfs, Wizer, and Binaryen
 before packaging the guest; this is a heavyweight artifact pipeline even when
 the final browser payload later meets its budget.
 
+## 2026-07-12 result
+
+The pinned Node 22.19.0 amd64 image converted successfully with container2wasm
+v0.8.4, but the generated module did not reach a guest command. This is a
+conversion pass and a runtime-boot failure, not browser compatibility evidence.
+
+| Probe | Result |
+| --- | --- |
+| Clean conversion | 1,625.84 s |
+| `node22.wasm` size | 316,700,841 bytes (316.7 MB decimal) |
+| `node22.wasm` SHA-256 | `a340e43fb65a784991cbd5c7f09e6c1dbebe611396a62e8b16d0e5a7004c9425` |
+| Wasmtime | v33.0.2, macOS arm64 host |
+| Guest commands | `node --version`, absolute Node path, shell, and no-argument runs all exited 1 without guest stdout |
+| 512 MB debug rebuild | Linux reached the OCI root mount while Wizer created the snapshot; the final 322,635,807-byte module still exited 1 before running `node --version` |
+| Browser `--to-js` run | Not attempted because the host feasibility gate failed |
+
+The debug module SHA-256 was
+`4a74da452cac52d1b917cd3454b640cfb0bb9bb8ea3971e8498e4e2d56266cf9`.
+Its cache-assisted rebuild took 639.57 s and is not comparable with the clean
+conversion time. Neither generated artifact is committed.
+
+The next experiment must first make a minimal guest command succeed from the
+same pinned converter revision. Only then is a Chromium `--to-js` build worth
+its transfer-size, cold-start, persistence, and license-compliance cost.
+
 ## Reproduce
 
 Build the exact amd64 source image:

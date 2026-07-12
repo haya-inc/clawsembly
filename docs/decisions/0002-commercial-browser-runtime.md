@@ -40,7 +40,12 @@ boundary:
    converter is Apache-2.0. The project labels itself experimental; its output
    includes a Linux guest, Bochs/QEMU, and container packages with separate
    redistribution obligations. Performance, artifact size, persistence, and
-   browser networking are unproven for OpenClaw.
+   browser networking are unproven for OpenClaw. The first pinned Node 22.19.0
+   probe produced a 316,700,841-byte module after 1,625.84 seconds, but
+   Wasmtime v33.0.2 exited 1 before running the guest command. A 512 MB debug
+   rebuild reached the OCI root mount while creating the snapshot but failed
+   the same final execution gate. Browser conversion is deferred until that
+   host feasibility failure is resolved.
 
 WebContainer stays only as the current compatibility-evidence baseline until a
 replacement earns the same end-to-end Gateway evidence. New application code
@@ -69,7 +74,8 @@ Until then, the public status is `candidate`, never `supported`.
 - BrowserPod offers the shortest commercial path but introduces vendor,
   metering, privacy-policy, and availability dependencies.
 - container2wasm preserves a self-hosted path but may miss acceptable download
-  and startup budgets.
+  and startup budgets; the first Node 22 probe is already boot-blocked at
+  316.7 MB before browser packaging.
 - The existing WebContainer results remain reproducible evidence instead of
   being discarded or relabeled as production support.
 - Remote execution cannot be used to make a failed embedded acceptance gate

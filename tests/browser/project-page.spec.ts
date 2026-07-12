@@ -54,6 +54,8 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   await expect(runtimes.getByRole("heading", { name: "Local stays non-negotiable." })).toBeVisible();
   await expect(runtimes.getByText("BrowserPod 2.x", { exact: true })).toBeVisible();
   await expect(runtimes.getByText("container2wasm", { exact: true })).toBeVisible();
+  await expect(runtimes.getByText("Boot blocked ↗", { exact: true })).toBeVisible();
+  await expect(runtimes.getByText(/316\.7 MB/)).toBeVisible();
   await expect(runtimes.getByText("Evidence only ↗", { exact: true })).toBeVisible();
   await expect(runtimes.getByText("Rejected", { exact: true })).toBeVisible();
   const preview = index.releases.find((release) => release.channel === "preview");
