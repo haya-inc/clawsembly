@@ -27,6 +27,11 @@ push and a GitHub release are separate decisions from proving a browser result.
 - Allow Actions to create pull requests if automated release tracking should
   open its fixed-branch update PR.
 - Require the `CI` and `browser-host-page` checks on `main`.
+- Keep both required checks unconditional for pull requests; a path-filtered
+  required workflow leaves unrelated contributor PRs permanently `expected`.
+- Enable auto-merge, automatic head-branch deletion, and contributor branch
+  updates. Keep strict checks, conversation resolution, force-push protection,
+  and admin enforcement enabled.
 - Enable private vulnerability reporting.
 - Create the `compatibility`, `needs-triage`, and `good first issue` labels used
   by contribution workflows.

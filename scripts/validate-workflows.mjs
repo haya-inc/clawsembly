@@ -23,6 +23,7 @@ for (const name of workflowFiles) {
 }
 
 const compatibility = readFileSync(resolve(workflowDirectory, "compatibility.yml"), "utf8");
+const pages = readFileSync(resolve(workflowDirectory, "pages.yml"), "utf8");
 const runtimeBrowser = readFileSync(resolve(workflowDirectory, "runtime-browser.yml"), "utf8");
 const sdkRelease = readFileSync(resolve(workflowDirectory, "sdk-release.yml"), "utf8");
 const publishMarker = "\n  publish-report-pr:\n";
@@ -59,6 +60,10 @@ assert.match(runtimeBrowser, /github\.event_name == 'workflow_dispatch'/u, "mete
 assert.match(runtimeBrowser, /npm ci --prefix examples\/browserpod-evidence-host --ignore-scripts/u, "BrowserPod capture must install its exact isolated lock without scripts");
 assert.equal(runtimeBrowser.match(/secrets\.BROWSERPOD_API_KEY/gu)?.length, 1, "BrowserPod key must enter one capture step only");
 assert.match(runtimeBrowser, /path: test-results\/browserpod-evidence/u, "BrowserPod capture must retain reviewed evidence artifacts");
+assert.match(runtimeBrowser, /\n  pull_request:\n/u, "the required browser-host check must run for every pull request");
+assert.doesNotMatch(runtimeBrowser, /pull_request:\n\s+paths:/u, "required browser-host checks must not be skipped by path filters");
+assert.match(pages, /npm run build:pages/u, "Pages deployment must build all release-readiness artifacts");
+assert.doesNotMatch(pages, /npm run build\n/u, "Pages deployment must not run the incomplete site-only build");
 
 const sdkPublishMarker = "\n  publish:\n";
 const sdkPublishIndex = sdkRelease.indexOf(sdkPublishMarker);

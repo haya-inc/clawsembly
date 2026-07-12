@@ -11,17 +11,6 @@ on:
   schedule:
     - cron: "17 3 * * 6"
   pull_request:
-    paths:
-      - "apps/web/**"
-      - "packages/browser-runtime/**"
-      - "packages/capability-broker/**"
-      - "packages/embed-sdk/**"
-      - "tests/browser/**"
-      - "examples/browserpod-evidence-host/**"
-      - "playwright.config.ts"
-      - "package.json"
-      - "package-lock.json"
-      - ".github/workflows/runtime-browser.yml"
 
 permissions:
   contents: read
