@@ -14,7 +14,7 @@ test("pinned OpenClaw completes the browser session lifecycle", async ({ page, r
 
   const vaultStatus = page.locator("[data-vault-status]");
   await expect(vaultStatus).toContainText("Vault verified");
-  await expect(page.locator("[data-vault-health]")).toHaveText("VAULT + BROKER / PASS");
+  await expect(page.locator("[data-vault-health]")).toHaveText("VAULT + CAPABILITY BROKER / PASS");
   await expect(page.locator("[data-device-health]")).toHaveText("SIGNATURE / PASS");
   const deviceId = await page.locator("[data-device-id]").getAttribute("title");
   expect(deviceId).toMatch(/^[a-f0-9]{64}$/);
