@@ -15,6 +15,8 @@ push and a GitHub release are separate decisions from proving a browser result.
    Playwright output is staged.
 6. Commit through a reviewable branch and open a draft pull request; do not push
    an unreviewed compatibility claim directly to `main`.
+7. Run `npm run sdk:check`; if preparing a release asset, run `npm run sdk:pack`
+   and verify the generated `.tgz` against its adjacent `.sha256` file.
 
 ## GitHub repository setup
 
@@ -39,10 +41,14 @@ The first tag should remain a prerelease until all of these hold:
 - an upstream issue exists for every required source patch;
 - one previous stable result is retained as rollback evidence;
 - BrowserPod licensing, metering, delivery, and exit-path decisions are documented;
-- at least one external integrator has reviewed the report contract.
+- at least one external integrator has reviewed the report contract;
+- the packed SDK passes isolated ESM and strict TypeScript consumer checks.
 
 ## Release evidence
 
 Attach the compatibility JSON, release-history JSON, and successful
-`browser-host-page-diagnostics` Actions artifact to release notes. State warnings
-and pending checks in prose; do not summarize a `partial` result as supported.
+`browser-host-page-diagnostics` Actions artifact to release notes. A source-SDK
+prerelease may also attach the generated tarball and checksum, clearly stating
+that npm publication and verified BrowserPod boot remain unavailable. State
+warnings and pending checks in prose; do not summarize a `partial` result as
+supported.

@@ -62,13 +62,13 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   const runtimes = page.locator("#runtimes");
   await expect(runtimes.getByRole("heading", { name: "BrowserPod executes. Clawsembly decides." })).toBeVisible();
   await expect(runtimes.getByText("BrowserPod 2.x", { exact: true })).toBeVisible();
-  await expect(runtimes.getByText("Pairing + chat ✓", { exact: true })).toBeVisible();
+  await expect(runtimes.getByText("SDK artifact ✓", { exact: true })).toBeVisible();
   await expect(runtimes.getByText(/npm identity and browser origin/)).toBeVisible();
   await expect(runtimes.getByText(/rechecks exact pairing access/)).toBeVisible();
-  await expect(runtimes.getByText(/parity-tests its ESM entrypoint/)).toBeVisible();
+  await expect(runtimes.getByText(/byte-reproducible SDK tarball/)).toBeVisible();
+  await expect(runtimes.getByText(/isolated ESM and TypeScript consumers/)).toBeVisible();
   await expect(runtimes.getByText(/encrypts issued device tokens/)).toBeVisible();
   await expect(runtimes.getByText(/bounded chat\/history\/abort RPC/)).toBeVisible();
-  await expect(runtimes.getByText(/digest-pinned Node client carries broker calls/)).toBeVisible();
   await expect(runtimes.getByText(/Real provider evidence is unrun/)).toBeVisible();
   await expect(runtimes.getByText(/hard dispose remains unavailable/)).toBeVisible();
   await expect(runtimes.getByText("container2wasm", { exact: true })).toBeVisible();

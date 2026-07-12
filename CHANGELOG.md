@@ -50,6 +50,8 @@ The project does not yet promise semantic-version compatibility.
   clearing;
 - parity-tested ESM source entrypoint whose runtime boot exports match the
   public TypeScript declarations;
+- byte-reproducible `@haya-inc/clawsembly@0.1.0-alpha.0` package assembly with
+  a script-disabled isolated ESM/TypeScript consumer check and local checksum;
 - ordered embed-session close that refuses runtime disposal while the Gateway
   is active and retains cleanup access when cooperative stop fails;
 - nonce-bound guest process supervisor for cooperative child shutdown without

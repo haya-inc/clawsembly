@@ -107,6 +107,22 @@ OpenClaw documents its Gateway protocol and TypeBox code-generation pipeline in
 [Gateway protocol](https://docs.openclaw.ai/gateway/protocol) and
 [TypeBox](https://docs.openclaw.ai/concepts/typebox).
 
+### SDK distribution boundary
+
+The repository root remains `private:true` because it is a compatibility lab,
+site, evidence corpus, and release automation workspace rather than one npm
+library. `scripts/build-sdk-package.mjs` creates a clean staging directory from
+the canonical non-test `.mjs`, `.d.mts`, and schema files in `browser-runtime`,
+`capability-broker`, and `embed-sdk`, then applies the checked-in
+`packages/sdk-package/package.json` publish manifest.
+
+The builder packs twice and requires byte-identical tarballs. It rejects tests,
+application files, and `node_modules`, installs the tarball with scripts disabled
+into a fresh consumer, imports every public subpath, and compiles a strict
+TypeScript consumer against the packed declarations. No BrowserPod or provider
+credential is required, and package construction cannot promote compatibility
+evidence. npm publication remains a separate maintainer decision.
+
 ### Browser runtime manager
 
 Boots and tears down a selected browser runtime, mounts workspace files,

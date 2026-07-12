@@ -34,6 +34,8 @@
     "protocol:generate": "node scripts/generate-openclaw-gateway-contract.mjs",
     "protocol:verify": "node scripts/generate-openclaw-gateway-contract.mjs --check",
     "protocol:check": "node scripts/validate-openclaw-gateway-contract.mjs",
+    "sdk:check": "node scripts/build-sdk-package.mjs --check",
+    "sdk:pack": "node scripts/build-sdk-package.mjs",
     "schemas:sync": "node scripts/sync-public-schemas.mjs",
     "schemas:check": "node scripts/sync-public-schemas.mjs --check",
     "typecheck": "tsc -p apps/web/tsconfig.json --noEmit && npm run typecheck:api",
@@ -51,7 +53,7 @@
     "test:security": "playwright test tests/browser/security-probes.spec.ts --config playwright.config.ts",
     "social:render": "node scripts/render-social-preview.mjs",
     "build:pages": "CLAWSEMBLY_BASE_PATH=/clawsembly/ vite build --config apps/web/vite.config.js && node scripts/validate-active-runtime.mjs --dist",
-    "check": "npm run mailbox:check && npm run protocol:check && npm run schemas:check && npm run runtime:validate && npm run test && npm run compat:validate && npm run workflows:validate && npm run typecheck && npm run build",
+    "check": "npm run mailbox:check && npm run protocol:check && npm run schemas:check && npm run runtime:validate && npm run sdk:check && npm run test && npm run compat:validate && npm run workflows:validate && npm run typecheck && npm run build",
     "release:check": "npm run social:render && npm run check && npm run test:browser && npm run build:pages && node packages/compatibility/src/release-readiness.mjs"
   },
   "devDependencies": {

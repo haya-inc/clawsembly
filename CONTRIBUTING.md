@@ -23,6 +23,10 @@ npm run check
 npm run dev
 ```
 
+Changes to public SDK modules must also preserve the isolated packed-consumer
+contract. `npm run check` runs it automatically; use `npm run sdk:pack` only
+when you need the local tarball and checksum under `.artifacts/sdk/`.
+
 `npm run check` also enforces that GitHub Actions are commit-SHA pinned and that
 the compatibility report generator remains read-only while only the separate
 publishing job receives repository write permission.

@@ -143,6 +143,7 @@ the release is reported as `probing` rather than production-compatible.
 - [Report schema](packages/compatibility/report.schema.json)
 - [Release-history schema](packages/compatibility/release-history.schema.json)
 - [Downstream consumption guide](docs/consuming-reports.md)
+- [SDK prerelease recipe](packages/sdk-package/README.md)
 - [Maintainer release checklist](docs/releasing.md)
 - [Deployment requirements](docs/deployment.md)
 
@@ -155,6 +156,22 @@ npm install
 npm run check
 npm run dev
 ```
+
+The compatibility-lab root intentionally remains a private npm package. A
+separate publish recipe assembles only the canonical SDK/runtime/broker sources
+into an installable prerelease artifact:
+
+```bash
+npm run sdk:check
+npm run sdk:pack
+```
+
+`sdk:check` creates the tarball twice and requires byte-identical SHA-256
+digests, installs it into an isolated temporary consumer, imports every public
+ESM subpath, and compiles a strict TypeScript consumer. `sdk:pack` writes
+`@haya-inc/clawsembly@0.1.0-alpha.0` plus its checksum under ignored
+`.artifacts/sdk/`. The package is prepared but not published to npm while the
+BrowserPod report remains `probing`.
 
 To regenerate and byte-check the Gateway contract against the exact published
 npm artifact:

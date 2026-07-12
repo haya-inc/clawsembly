@@ -195,6 +195,12 @@ rotation/revocation/recovery, and attachments remain. Ordered session close now 
 cutting off an active Gateway's cooperative stop path. The boot slice is not promoted as supported while
 owner-authorized BrowserPod evidence remains missing.
 
+The repository now also produces a byte-reproducible
+`@haya-inc/clawsembly@0.1.0-alpha.0` tarball without making the compatibility lab
+itself publishable. CI installs that tarball into an isolated ESM/TypeScript
+consumer and verifies every declared public subpath. npm publication remains
+blocked on the same runtime evidence and maintainer release gates.
+
 Exit criterion: an external web application can embed one supported upstream
 OpenClaw version without granting ambient credentials, filesystem, or network
 authority, and can export its evidence-bound capability audit.
