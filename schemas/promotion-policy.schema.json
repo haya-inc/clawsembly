@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clawsembly.dev/schemas/promotion-policy.v1.json",
+  "title": "Clawsembly release promotion policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "package", "decision", "baseline", "candidate", "rollback"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "package": { "type": "string", "minLength": 1 },
+    "decision": { "enum": ["promote", "hold"] },
+    "baseline": { "$ref": "#/$defs/releaseGate" },
+    "candidate": { "$ref": "#/$defs/releaseGate" },
+    "rollback": { "$ref": "#/$defs/releaseGate" }
+  },
+  "$defs": {
+    "releaseGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "version", "eligible", "reasons", "observations"],
+      "properties": {
+        "channel": { "enum": ["stable", "previous", "preview"] },
+        "version": { "type": "string", "minLength": 1 },
+        "eligible": { "type": "boolean" },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "status-not-supported",
+              "runtime-evidence-missing",
+              "checks-failed",
+              "checks-pending",
+              "shrinkwrap-inconsistent",
+              "gateway-contract-breaking",
+              "gateway-contract-incomplete",
+              "dependency-risk-scan-truncated"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "observations": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "runtimeEvidence", "checks", "shrinkwrapConsistent", "gatewayClassification", "dependencyRiskCount", "truncatedDependencyRiskCount"],
+          "properties": {
+            "status": { "enum": ["probing", "supported", "partial", "unsupported"] },
+            "runtimeEvidence": { "type": "boolean" },
+            "checks": { "$ref": "#/$defs/statusCounts" },
+            "shrinkwrapConsistent": { "type": "boolean" },
+            "gatewayClassification": { "enum": ["unchanged", "changed", "additive", "breaking", "incomplete"] },
+            "dependencyRiskCount": { "type": "integer", "minimum": 0 },
+            "truncatedDependencyRiskCount": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "statusCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pass", "warn", "fail", "pending"],
+      "properties": {
+        "pass": { "type": "integer", "minimum": 0 },
+        "warn": { "type": "integer", "minimum": 0 },
+        "fail": { "type": "integer", "minimum": 0 },
+        "pending": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}
