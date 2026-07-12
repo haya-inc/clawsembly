@@ -17,14 +17,25 @@ async function filesUnder(path) {
 
 const manifest = await readJson("package.json");
 assert.equal(manifest.dependencies?.["@webcontainer/api"], undefined, "WebContainer must not be a production dependency");
-assert.equal(manifest.scripts.test.includes("webcontainer-adapter"), false, "normal tests must not run the archived adapter");
+assert.equal(manifest.devDependencies?.["@webcontainer/api"], undefined, "WebContainer must not be a development dependency");
+assert.equal(manifest.devDependencies?.["@noble/curves"], undefined, "the removed verifier adapter dependency must stay removed");
+assert.equal(manifest.devDependencies?.["sql.js"], undefined, "the removed SQLite adapter dependency must stay removed");
+assert.equal(manifest.devDependencies?.ws, undefined, "the removed loopback adapter dependency must stay removed");
+assert.equal(Object.values(manifest.scripts).some((script) => script.includes("webcontainer-adapter")), false, "scripts must not reference the removed adapter");
 
 for (const removedPath of [
   "apps/web/src/runtime-probe.ts",
   "apps/web/src/runtime-gateway-probe.ts",
   "apps/web/src/runtime-probe-support.ts",
   "apps/web/src/state-persistence.ts",
-  "tests/browser/runtime-probe.spec.ts"
+  "tests/browser/runtime-probe.spec.ts",
+  "packages/webcontainer-adapter",
+  "apps/web/public/data/evidence/webcontainer-host.json",
+  "apps/web/public/data/evidence/openclaw-2026.6.11-gateway.json",
+  "fixtures/openclaw/2026.6.11/webcontainer-fs-bigint-position.json",
+  "fixtures/openclaw/2026.6.11/webcontainer-npm-nested-dependencies.json",
+  "packages/compatibility/host-evidence.schema.json",
+  "packages/compatibility/gateway-evidence.schema.json"
 ]) {
   await assert.rejects(access(resolve(root, removedPath)), undefined, `${removedPath} must remain removed`);
 }
@@ -46,7 +57,13 @@ for (const path of [
 }
 
 const browserWorkflow = await read(".github/workflows/runtime-browser.yml");
-assert.equal(browserWorkflow.includes("packages/webcontainer-adapter"), false, "normal browser CI references the archive");
+assert.equal(browserWorkflow.includes("packages/webcontainer-adapter"), false, "normal browser CI references the removed adapter");
+
+const reportSchema = await readJson("packages/compatibility/report.schema.json");
+assert.equal(reportSchema.properties.target.properties.runtime.const, "browserpod", "report schema must be BrowserPod-only");
+const inspector = await read("packages/compatibility/src/inspect.mjs");
+assert.equal(inspector.includes("--host-evidence"), false, "inspector accepts removed host evidence");
+assert.equal(inspector.includes("--gateway-evidence"), false, "inspector accepts removed Gateway evidence");
 
 const history = await readJson("apps/web/public/data/release-history.json");
 for (const release of history.releases) {

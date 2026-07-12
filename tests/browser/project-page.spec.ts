@@ -53,7 +53,8 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   const broker = page.locator("#broker");
   await expect(broker.getByRole("heading", { name: "Runtime is commodity. Authority is not." })).toBeVisible();
   await expect(broker.locator(".broker-gate strong")).toHaveText(/DEFAULT\s*DENY/);
-  await expect(broker.getByText("exact capability + scope", { exact: true })).toBeVisible();
+  await expect(broker.getByText("pending exact request", { exact: true })).toBeVisible();
+  await expect(page.getByText("pending · approve · expire/revoke", { exact: true })).toBeVisible();
   const runtimes = page.locator("#runtimes");
   await expect(runtimes.getByRole("heading", { name: "BrowserPod executes. Clawsembly decides." })).toBeVisible();
   await expect(runtimes.getByText("BrowserPod 2.x", { exact: true })).toBeVisible();

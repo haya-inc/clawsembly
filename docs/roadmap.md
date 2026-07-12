@@ -11,7 +11,7 @@ Deliverables:
 - a checked-in compatibility-report schema and static artifact inspector;
 - a report-driven public project page;
 - browser-local commercial-runtime decision;
-- actual WebContainer Node-version capture;
+- an earlier browser-runtime Node-version capture, retained in Git history;
 - a minimal current-stable OpenClaw install and boot attempt;
 - structured capture of install, stdout, stderr, and browser errors.
 
@@ -86,7 +86,7 @@ persisting plaintext secrets or accessing files outside the granted scope.
 Status: partial. Versioned mock-state recovery and the encrypted browser-host
 credential vault pass in Chromium. A real OpenClaw agent turn now crosses the
 fixed-destination browser-host broker with mock transport and no API-key exposure
-to WebContainer. Typed text deltas reach OpenClaw, a streamed `agents_list`
+to the guest. Typed text deltas reach OpenClaw, a streamed `agents_list`
 function call is translated and executed, and its matched result is serialized
 as Responses `function_call` / `function_call_output` input for the second
 provider request. `chat.abort` cancels the browser request and provider stream.
@@ -110,12 +110,12 @@ Footprint and cold-path reduction remain Phase 3 work.
 
 ### Phase 3b: BrowserPod runtime integration
 
-Replace the WebContainer-specific production boundary without moving execution
-to a server:
+Status: complete. Replace the superseded production boundary without moving
+execution to a server:
 
-- remove WebContainer from the application, production dependency graph,
-  public compatibility target, and normal CI; retain old artifacts only as an
-  audit archive;
+- remove the superseded runtime from the application, dependency graph,
+  compatibility target, fixtures, evidence, and CI; retain history in Git and
+  the decision log rather than executable main-branch code;
 - use BrowserPod as the selected embedded production target while keeping its
   support status blocked on runtime evidence;
 - verify BrowserPod Node 22.19+, crypto, SQLite, long-lived Gateway process I/O,
@@ -159,7 +159,11 @@ per-session typed filesystem mailbox bound to the same exact broker subject.
 It automatically stages and reads back a generated SHA-256-pinned guest client;
 the release gate rejects drift from its canonical sources. Real-filesystem
 tests execute that staged Node client and cover allow, deny, replay,
-cancellation, strict parsing, and response limits. The public reports now
+cancellation, strict parsing, and response limits. A headless consent
+controller now keeps manifest requests pending until exact user approval,
+bounds call count and duration, supports deny/revoke/expiry, and exports current
+state plus combined broker audit under stable schemas. A reusable rendered
+prompt component remains. The public reports now
 target `browserpod@2.12.1` and remain `probing` with no attached runtime
 evidence, so boot is correctly rejected before token consumption. The boot
 slice is not promoted as supported while owner-authorized BrowserPod evidence

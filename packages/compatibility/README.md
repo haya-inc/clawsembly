@@ -9,15 +9,16 @@ checked-in evidence record.
 npm run compat:inspect -- \
   --package openclaw \
   --version 2026.6.11 \
-  --host-evidence apps/web/public/data/evidence/webcontainer-host.json \
-  --gateway-evidence apps/web/public/data/evidence/openclaw-2026.6.11-gateway.json \
+  --runtime browserpod \
+  --runtime-version 2.12.1 \
+  --browser-baseline "Desktop Chromium" \
   --output apps/web/public/data/compatibility.json
 ```
 
 The command downloads the exact npm tarball into an operating-system temporary
 directory. It does not install the package or execute its lifecycle scripts.
 
-Generate a static BrowserPod-target report without attaching legacy evidence:
+Generate a static BrowserPod-target report without runtime evidence:
 
 ```bash
 npm run compat:inspect -- \
@@ -29,9 +30,9 @@ npm run compat:inspect -- \
   --output /tmp/openclaw-browserpod.json
 ```
 
-BrowserPod targets require an exact `runtimeVersion`. The generator rejects
-WebContainer host or Gateway evidence on that target; provider-specific source
-evidence must be captured before any runtime check can become green.
+BrowserPod is the only accepted target and requires an exact `runtimeVersion`.
+Provider-specific source evidence must be captured before any runtime check can
+become green.
 
 Attach a reviewed BrowserPod readiness record:
 
@@ -51,16 +52,7 @@ preflight, Gateway log readiness, HTTPS portal discovery, and HTTP 200 from
 both `/healthz` and `/readyz`. Attaching it promotes only the preflight and boot
 checks; protocol, broker, tool, recovery, and teardown claims remain separate.
 
-`--host-evidence` attaches a dated, reviewable WebContainer preflight. It may
-mark the browser host as verified, but it never changes the separate OpenClaw
-boot, Gateway handshake, or chat checks.
-
-`--gateway-evidence` independently promotes boot, authenticated WebSocket
-handshake, streamed chat, constrained tool, reconnect history, and cancellation
-checks only when their matching evidence fields pass. A health check by itself
-never implies that later protocol stages passed.
-
 Every evidence reference includes a canonical SHA-256 digest. `compat:validate`
-schema-checks the raw host, Gateway, and BrowserPod records, verifies those
-digests, matches the runtime, browser, OpenClaw version and integrity, and
+schema-checks raw BrowserPod records, verifies their digests, matches the
+runtime, browser, OpenClaw version and integrity, and
 recomputes all evidence-derived statuses.

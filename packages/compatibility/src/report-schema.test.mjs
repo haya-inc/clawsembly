@@ -31,11 +31,3 @@ test("report schema accepts version-bound BrowserPod targets", () => {
   }));
   assert.equal(validate(report), true, JSON.stringify(validate.errors));
 });
-
-test("report schema keeps runtimeVersion optional for existing WebContainer reports", () => {
-  const report = buildReport(staticInput({
-    runtime: "webcontainer",
-    browserBaseline: "Desktop Chromium"
-  }));
-  assert.equal(validate(report), true, JSON.stringify(validate.errors));
-});

@@ -22,8 +22,6 @@ const root = process.cwd();
 const dataDirectory = resolve(root, "apps/web/public/data");
 const reportSchema = readJson(resolve(root, "packages/compatibility/report.schema.json"));
 const historySchema = readJson(resolve(root, "packages/compatibility/release-history.schema.json"));
-const hostEvidenceSchema = readJson(resolve(root, "packages/compatibility/host-evidence.schema.json"));
-const gatewayEvidenceSchema = readJson(resolve(root, "packages/compatibility/gateway-evidence.schema.json"));
 const browserPodEvidenceSchema = readJson(resolve(root, "packages/compatibility/browserpod-evidence.schema.json"));
 const historyPath = resolve(dataDirectory, "release-history.json");
 const latestPath = resolve(dataDirectory, "compatibility.json");
@@ -32,13 +30,9 @@ const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
 const validateReport = ajv.compile(reportSchema);
 const validateHistory = ajv.compile(historySchema);
-const validateHostEvidence = ajv.compile(hostEvidenceSchema);
-const validateGatewayEvidence = ajv.compile(gatewayEvidenceSchema);
 const validateBrowserPodEvidence = ajv.compile(browserPodEvidenceSchema);
 
 function assertEvidenceClaims(report, label) {
-  let hostEvidence;
-  let gatewayEvidence;
   let browserRuntimeEvidence;
   const evidenceByPath = new Map();
   for (const entry of report.evidence) {
@@ -50,10 +44,7 @@ function assertEvidenceClaims(report, label) {
     evidenceByPath.set(evidencePath, evidence);
     assert.equal(entry.capturedAt, evidence.capturedAt, `${label} ${entry.id} capturedAt drift`);
     assert.equal(entry.sha256, evidenceDigest(evidence), `${label} ${entry.id} evidence digest drift`);
-    if (entry.id === "host-preflight") {
-      assertValid(validateHostEvidence, evidence, entry.path);
-      hostEvidence = evidence;
-    } else if (entry.id === "browserpod-runtime") {
+    if (entry.id === "browserpod-runtime") {
       assertValid(validateBrowserPodEvidence, evidence, entry.path);
       assert.equal(evidence.target.runtimeVersion, report.target.runtimeVersion, `${label} BrowserPod version drift`);
       assert.equal(evidence.target.browser, report.target.browserBaseline, `${label} BrowserPod browser drift`);
@@ -61,24 +52,17 @@ function assertEvidenceClaims(report, label) {
       assert.equal(evidence.artifact.version, report.artifact.version, `${label} BrowserPod OpenClaw version drift`);
       assert.equal(evidence.artifact.integrity, report.artifact.integrity, `${label} BrowserPod integrity drift`);
       browserRuntimeEvidence = evidence;
-    } else {
-      assertValid(validateGatewayEvidence, evidence, entry.path);
-      assert.equal(evidence.openclaw.version, report.artifact.version, `${label} ${entry.id} OpenClaw version drift`);
-      gatewayEvidence = evidence;
-    }
+    } else throw new Error(`${label} contains unsupported evidence ${entry.id}`);
   }
 
   const expectedStatuses = deriveRuntimeClaimStatuses({
-    hostEvidence,
-    gatewayEvidence,
-    browserRuntimeEvidence,
-    targetRuntime: report.target.runtime
+    browserRuntimeEvidence
   });
   const checks = new Map(report.checks.map((check) => [check.id, check.status]));
   for (const [id, expected] of Object.entries(expectedStatuses)) {
     assert.equal(checks.get(id), expected, `${label} ${id} status does not match its evidence`);
   }
-  const bootCheckId = `openclaw-${report.target.runtime}-boot`;
+  const bootCheckId = "openclaw-browserpod-boot";
   assert.equal(report.status, expectedStatuses[bootCheckId] === "pass" ? "partial" : "probing", `${label} overall status drift`);
 }
 

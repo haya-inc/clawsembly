@@ -50,9 +50,9 @@ first production target while retaining the evidence gates below:
 
 ADR 0003 selected BrowserPod, and the application subsequently removed its
 WebContainer import, interactive probe, production dependency, StackBlitz CSP
-allowance, and normal CI lane. Old evidence JSON and adapter fixtures remain an
-explicit audit archive only; they cannot attach to BrowserPod reports or affect
-support status.
+allowance, normal CI lane, evidence JSON, adapter fixtures, dependencies, and
+legacy compatibility schemas. The superseded implementation remains available
+through Git history, but no executable branch survives in the current tree.
 
 ## Runtime acceptance gates
 
@@ -81,9 +81,8 @@ becomes `supported` until these gates pass.
 - container2wasm preserves a self-hosted path but may miss acceptable download
   and startup budgets; the first Node 22 probe is already boot-blocked at
   316.7 MB before browser packaging.
-- Existing WebContainer results remain archived reproduction material instead
-  of being discarded or relabeled as production support; no active product
-  path loads them.
+- Superseded runtime results remain discoverable through Git history and are
+  never relabeled as BrowserPod support.
 - Remote execution cannot be used to make a failed embedded acceptance gate
   appear green.
 

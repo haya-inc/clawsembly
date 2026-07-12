@@ -2,8 +2,8 @@
 
 This architecture preserves browser-local execution while making the product a
 verified embedding layer rather than a runtime wrapper. BrowserPod is the
-only active embedded provider. Legacy WebContainer evidence is archive-only and
-cannot affect current support claims.
+only embedded provider in the main branch. Superseded provider code and evidence
+are available through Git history, not through a current runtime branch.
 See [ADR 0002](decisions/0002-commercial-browser-runtime.md) and
 [ADR 0003](decisions/0003-verified-openclaw-embedding.md).
 
@@ -184,6 +184,13 @@ propagates cancellation, redacts handler failures, and stores only bounded
 audit metadata. Payloads and results never enter the audit trail. See
 [Verified embedding contract](embedding.md).
 
+Embed-manifest capability rows enter a consent controller as pending requests,
+not grants. Only an exact user approval can create a broker grant, its call
+limit cannot exceed the request, and it expires within 24 hours. Deny, revoke,
+and expiry decisions use fixed reason codes. Current permission state and the
+combined permission/broker audit have stable JSON schemas. See
+[Capability permission lifecycle](capability-permissions.md).
+
 ### Embed manifest
 
 The embed manifest combines artifact identity, compatibility evidence,
@@ -196,7 +203,8 @@ The active implementation follows the same boundary in code:
 `browserpod-runtime.mjs` owns the documented provider API,
 `browserpod-openclaw-probe.mjs` owns exact-artifact readiness evidence,
 `boot.mjs` owns verified launch, and the capability-mailbox modules own guest
-transport. The project page imports none of the archived WebContainer adapter.
+transport. The project page and compatibility packages contain only BrowserPod
+runtime contracts.
 
 ## Persistence
 
@@ -207,8 +215,6 @@ The first implementation should separate:
 - secrets as non-extractable Web Crypto keys and encrypted IndexedDB records;
 - exportable user backups in an explicit, versioned format.
 
-The historical WebContainer probe's OPFS snapshot and restore artifacts remain
-available for audit, but they are not an active persistence implementation.
 BrowserPod workspace migration fixtures, encryption, and workspace-scale
 recovery remain required before a production backup contract exists.
 
@@ -218,8 +224,7 @@ never exposes those records to a guest runtime. The active provider policy
 enforces the official Responses endpoint, stateless storage, rejected
 redirects, bounded JSON, user-configurable request/input/output budgets, and
 secret-safe errors. BrowserPod must invoke that policy through the typed
-capability mailbox; the old loopback bridge is archived evidence, not an active
-transport.
+capability mailbox.
 
 The project page also exposes a protected live smoke-test surface. It is locked
 unless an `openai` credential exists in the browser vault and the user checks a
@@ -237,8 +242,7 @@ non-extractable Ed25519 private key, derives the OpenClaw-compatible device ID
 from the raw public key, and signs the exact v3 challenge payload. The page
 proves persistence, non-extractability, signing, and nonce rejection without a
 guest runtime. BrowserPod pairing and token reconnect remain pending provider
-evidence; the archived provider-specific bridge and verifier patch are not
-loaded by the application.
+evidence.
 
 Clearing site data can remove all browser-owned state, so users need a visible
 backup and restore path before Clawsembly is considered production-ready.
@@ -259,12 +263,10 @@ backup and restore path before Clawsembly is considered production-ready.
 
 ## Open design questions
 
-- Can the Noble verifier fallback be replaced by an upstream WebContainer-safe
-  verification path?
 - Which current native dependencies are imported eagerly during minimal boot?
 - How should remote approval, device-token rotation, revocation, and recovery
   be surfaced without expanding the bridge process authority?
 - Should workspace persistence use file-level synchronization or runtime
   snapshots?
 - Which host interfaces should become WIT components first?
-- What browser and mobile support baseline is practical for WebContainers?
+- What browser and mobile support baseline is practical for BrowserPod?

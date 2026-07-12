@@ -27,7 +27,7 @@ test("resolveReleaseChannels rejects a stale latest tag", () => {
   );
 });
 
-function report(version, { status = "probing", gateway = false, deps = 10, native = 2, missing = 3 } = {}) {
+function report(version, { status = "probing", runtimeEvidence = false, deps = 10, native = 2, missing = 3 } = {}) {
   return {
     generatedAt: "2026-07-12T00:00:00.000Z",
     status,
@@ -43,7 +43,7 @@ function report(version, { status = "probing", gateway = false, deps = 10, nativ
         mismatchedCount: 0
       }
     },
-    evidence: gateway ? [{ id: "gateway-health" }] : [],
+    evidence: runtimeEvidence ? [{ id: "browserpod-runtime" }] : [],
     checks: [
       { status: "pass" },
       { status: missing ? "warn" : "pass" },
@@ -62,7 +62,7 @@ test("buildReleaseHistory preserves evidence levels and stable deltas", () => {
     packageName: "openclaw",
     channels,
     reports: {
-      stable: report(channels.stable, { status: "partial", gateway: true, deps: 12, native: 3, missing: 2 }),
+      stable: report(channels.stable, { status: "partial", runtimeEvidence: true, deps: 12, native: 3, missing: 2 }),
       previous: report(channels.previous, { deps: 10, native: 2, missing: 0 }),
       preview: report(channels.preview, { deps: 14, native: 4, missing: 5 })
     },

@@ -50,7 +50,7 @@ function fakeBrowserPod() {
 
 test("refuses cross-runtime or partial evidence before spending BrowserPod tokens", async () => {
   const fake = fakeBrowserPod();
-  const manifest = createEmbedManifest({ report: report({ status: "partial", runtime: "webcontainer", runtimeVersion: undefined }) });
+  const manifest = createEmbedManifest({ report: report({ status: "partial", runtime: "remote", runtimeVersion: undefined }) });
   await assert.rejects(
     bootVerifiedEmbed({ manifest, BrowserPod: fake.BrowserPod, browserPodApiKey: "secret" }),
     /verified BrowserPod launch blocked/u
@@ -136,12 +136,24 @@ test("boots a verified BrowserPod session and binds capability authority to its 
     "CLAWSEMBLY_MAILBOX_CHANNEL=verified_mailbox",
     "CLAWSEMBLY_MAILBOX_CLIENT=/workspace/.clawsembly/mailbox/verified_mailbox/guest-client-v1/guest-mailbox-client.mjs"
   ]);
-  assert.deepEqual(await session.capabilities.request({
+  const request = {
     id: "snapshot-1",
     capability: "storage.snapshot",
     scope: "workspace:primary",
-    input: { name: "primary" }
-  }), { stored: "primary" });
+    input: { name: "private-payload" }
+  };
+  await assert.rejects(
+    session.capabilities.request(request),
+    (error) => error.code === "not_granted"
+  );
+  assert.equal(session.permissions.manifest().permissions[0].status, "pending");
+  session.permissions.approve("storage.snapshot", "workspace:primary", {
+    durationMs: 60_000,
+    maxCalls: 1
+  });
+  assert.deepEqual(await session.capabilities.request({ ...request, id: "snapshot-2" }), { stored: "private-payload" });
+  assert.equal(session.permissions.manifest().permissions[0].status, "granted");
+  assert.equal(JSON.stringify(session.permissions.exportAudit()).includes("private-payload"), false);
   assert.equal(JSON.stringify(fake.calls).includes("secret"), true);
   assert.equal(JSON.stringify(session).includes("secret"), false);
 });

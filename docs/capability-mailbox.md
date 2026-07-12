@@ -32,6 +32,11 @@ The channel manifest is discovery data, not authority. The host always uses
 the in-memory `CapabilityBroker` created from the verified embed manifest. A
 guest editing its manifest or request cannot create a grant.
 
+Embed-manifest capabilities start as pending permission requests. The mailbox
+returns `not_granted` until the trusted host records an exact, expiring user
+approval through `session.permissions`. See
+[Capability permission lifecycle](capability-permissions.md).
+
 ## Host integration
 
 `bootVerifiedEmbed` initializes a fresh random mailbox channel whose subject is

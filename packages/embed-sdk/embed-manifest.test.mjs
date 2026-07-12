@@ -6,7 +6,7 @@ import { assertVerifiedLaunch, createEmbedManifest } from "./embed-manifest.mjs"
 const report = {
   generatedAt: "2026-07-12T00:00:00.000Z",
   status: "partial",
-  target: { runtime: "webcontainer" },
+  target: { runtime: "remote" },
   artifact: { package: "openclaw", version: "2026.6.11", integrity: "sha512-exact" }
 };
 
@@ -18,7 +18,7 @@ test("records BrowserPod adoption while blocking evidence from another runtime",
   assert.equal(manifest.runtime, "browserpod");
   assert.equal(manifest.launchable, false);
   assert.deepEqual(manifest.blockers, [
-    "report targets webcontainer, not browserpod",
+    "report targets remote, not browserpod",
     "report runtime version is unreported, not 2.12.1",
     "report status is partial, not supported"
   ]);

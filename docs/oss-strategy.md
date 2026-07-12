@@ -123,9 +123,7 @@ maintainer can process a new release without handwritten runtime changes.
 
 ## Immediate priority order
 
-1. Upstream the existing Ed25519/WebContainer finding and the published
-   shrinkwrap inconsistency with minimal reproductions, while keeping that patch
-   out of future runtime providers unless they reproduce the same failure.
+1. Upstream the published shrinkwrap inconsistency with a minimal reproduction.
 2. Cache or replace the nested dependency repair path.
 3. Automate stable/previous/preview reports and preserve the last verified
    stable result.

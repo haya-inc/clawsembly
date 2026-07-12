@@ -41,7 +41,10 @@ and bounded file I/O. A typed filesystem mailbox now connects the untrusted
 guest to the exact-scope broker with replay defense, byte limits, generic
 errors, cancellation, and payload-free audit. Verified boot automatically
 stages and reads back a generated SHA-256-pinned Node client in the fresh
-channel, while a release check rejects generated-source drift. The readiness
+channel, while a release check rejects generated-source drift. Manifest
+capabilities remain pending until an explicit, expiring user approval; deny,
+revoke, expiry, current state, and combined broker audit are implemented with
+stable JSON schemas. The readiness
 harness installs the exact SHA-512 npm artifact and requires Gateway log,
 portal, `/healthz`, `/readyz`, and a nonce-bound guest-supervisor shutdown. No
 owner-authorized BrowserPod record has been captured yet. Its public 2.12.1 API
@@ -51,7 +54,8 @@ method, so those features remain explicitly unsupported. See
 [embedding contract](docs/embedding.md). The capture and attachment procedure
 is documented in [BrowserPod evidence](docs/browserpod-evidence.md).
 The transport boundary is documented in
-[Capability mailbox](docs/capability-mailbox.md).
+[Capability mailbox](docs/capability-mailbox.md), and the authority lifecycle
+in [Capability permissions](docs/capability-permissions.md).
 
 ## Browser runtime direction
 
@@ -78,16 +82,12 @@ separate reports. At the 2026-07-12 snapshot those resolve to `2026.6.11`,
 scheduled workflow skips unchanged channels and opens or updates a generated
 report pull request when a channel moves.
 
-The page contains no WebContainer import, fallback, probe control, or
-StackBlitz CSP permission. Browser-host vault, identity, budget, and consent
-checks remain provider-free and do not boot a guest runtime or contact OpenAI.
-
-Earlier WebContainer Gateway, tool, reconnect, cancellation, identity,
-persistence, and performance artifacts remain under the evidence and adapter
-directories only as historical reproduction material. They are not attached
-to current reports, included in the production dependency graph, or run by the
-normal release gate. This preserves audit history without allowing legacy
-provider evidence to influence BrowserPod support.
+The main branch is BrowserPod-only: it contains no legacy runtime adapter,
+dependency, fixture, evidence record, report target, fallback, or vendor CSP
+permission. Browser-host vault, identity, budget, and consent checks remain
+provider-free and do not boot a guest runtime or contact OpenAI. The superseded
+implementation remains available through Git history and its decision record,
+not as executable code in the current tree.
 
 The page provides a credential-and-explicit-consent gate for one fixed-prompt
 `gpt-5.6-luna` live smoke test. It enforces `store:false`, 128 maximum output
@@ -117,10 +117,9 @@ npm run check
 npm run dev
 ```
 
-The long browser lane requires Playwright Chromium and performs the complete
-install, Gateway, device signature, local Control UI pairing, encrypted
-device-token reconnect, chat, tool, history, cancellation, and versioned OPFS
-recovery:
+The browser lane requires Playwright Chromium and verifies the public page,
+BrowserPod-only runtime presentation, deployment policy, and provider-free
+security surfaces:
 
 ```bash
 npx playwright install chromium
@@ -133,8 +132,9 @@ Generate a fresh static report for an exact upstream release:
 npm run compat:inspect -- \
   --package openclaw \
   --version 2026.6.11 \
-  --host-evidence apps/web/public/data/evidence/webcontainer-host.json \
-  --gateway-evidence apps/web/public/data/evidence/openclaw-2026.6.11-gateway.json \
+  --runtime browserpod \
+  --runtime-version 2.12.1 \
+  --browser-baseline "Desktop Chromium" \
   --output apps/web/public/data/compatibility.json
 ```
 
@@ -145,8 +145,8 @@ Resolve and inspect the current stable, previous stable, and preview channels:
 
 ```bash
 npm run compat:track -- \
-  --host-evidence apps/web/public/data/evidence/webcontainer-host.json \
-  --gateway-evidence apps/web/public/data/evidence/openclaw-2026.6.11-gateway.json
+  --runtime browserpod \
+  --runtime-version 2.12.1
 ```
 
 Runtime evidence is attached only when its embedded OpenClaw version exactly

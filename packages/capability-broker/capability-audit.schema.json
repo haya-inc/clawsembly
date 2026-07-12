@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://haya-inc.github.io/clawsembly/schemas/capability-audit.schema.json",
+  "title": "Clawsembly capability audit export",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "subject", "permissionAudit", "brokerAudit"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "subject": { "$ref": "capability-manifest.schema.json#/$defs/subject" },
+    "permissionAudit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["truncated", "events"],
+      "properties": {
+        "truncated": { "type": "boolean" },
+        "events": {
+          "type": "array",
+          "maxItems": 100000,
+          "items": { "$ref": "#/$defs/permissionEvent" }
+        }
+      }
+    },
+    "brokerAudit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "subject", "truncated", "events"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "subject": { "$ref": "capability-manifest.schema.json#/$defs/subject" },
+        "truncated": { "type": "boolean" },
+        "events": {
+          "type": "array",
+          "maxItems": 100000,
+          "items": { "$ref": "#/$defs/brokerEvent" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "baseEvent": {
+      "type": "object",
+      "required": ["schemaVersion", "sequence", "timestamp", "action", "capability", "scope", "outcome", "reason"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "sequence": { "type": "integer", "minimum": 1 },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "action": { "type": "string" },
+        "capability": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$", "maxLength": 128 },
+        "scope": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "outcome": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "permissionEvent": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        { "$ref": "#/$defs/baseEvent" },
+        {
+          "type": "object",
+          "properties": { "action": { "enum": ["approve", "deny", "revoke", "expire"] } }
+        }
+      ]
+    },
+    "brokerEvent": {
+      "type": "object",
+      "unevaluatedProperties": false,
+      "allOf": [
+        { "$ref": "#/$defs/baseEvent" },
+        {
+          "type": "object",
+          "required": ["durationMs"],
+          "properties": {
+            "action": { "enum": ["grant", "revoke", "request"] },
+            "durationMs": { "type": "number", "minimum": 0 },
+            "requestId": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,128}$" }
+          }
+        }
+      ]
+    }
+  }
+}

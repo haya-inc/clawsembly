@@ -74,6 +74,9 @@ The canonical promise is:
 - `packages/capability-broker/guest-mailbox-artifact.mjs` stages a generated,
   SHA-256-pinned client into every fresh channel, verifies its readback, and
   removes manual guest-module packaging from the integration contract.
+- `packages/capability-broker/capability-consent.mjs` keeps manifest authority
+  pending until exact, expiring user approval and exports schema-governed,
+  payload-free permission and broker audit records.
 - `packages/browser-runtime/cooperative-process.mjs` stops Clawsembly-launched
   children through a nonce-bound guest supervisor without claiming provider
   process termination or Pod disposal.
@@ -91,8 +94,8 @@ The canonical promise is:
   teardown through a documented vendor API; version 2.12.1 exposes none of
   these operations;
 - an owner-authorized run of the implemented exact-artifact readiness harness;
-- user-facing grant, expiry, and revocation prompts;
-- exportable audit and capability manifests with a stable schema;
+- a reusable rendered prompt component over the implemented headless consent
+  controller;
 - a small public `boot()` SDK after BrowserPod reaches the Gateway evidence
   gate.
 

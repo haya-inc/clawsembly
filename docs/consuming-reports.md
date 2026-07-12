@@ -63,9 +63,8 @@ model may also reject `partial` or any nonzero pending count.
 The JSON is a published observation, not a substitute for pinning npm integrity
 or for a downstream project's own acceptance tests. Runtime evidence is attached
 only to the exact OpenClaw version and runtime identity named inside that
-evidence. Clawsembly's generator rejects attempts to reuse legacy WebContainer
-evidence for BrowserPod, and the embedding manifest also requires the exact
-BrowserPod adapter version.
+evidence. Clawsembly's report schema accepts only BrowserPod, and the embedding
+manifest also requires the exact BrowserPod adapter version.
 BrowserPod source evidence additionally binds the exact browser string and npm
 SHA-512, and requires log, portal, `/healthz`, and `/readyz` readiness before
 the boot check passes. The checked-in validator also schema-checks the source evidence, verifies its

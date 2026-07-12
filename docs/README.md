@@ -17,6 +17,7 @@ design does not become stale when OpenClaw changes.
 | [Verified embedding](embedding.md) | Artifact, evidence, capability, and BrowserPod launch contract |
 | [BrowserPod evidence](browserpod-evidence.md) | Exact-artifact readiness capture, schema, and report attachment workflow |
 | [Capability mailbox](capability-mailbox.md) | Typed file transport, cancellation, replay defense, and cooperative Gateway stop |
+| [Capability permissions](capability-permissions.md) | Pending requests, bounded approval, deny, revoke, expiry, and audit export |
 | [OSS strategy](oss-strategy.md) | Competitive position, distribution loop, and 90-day success gates |
 | [Consuming reports](consuming-reports.md) | Badge, JSON endpoints, validation policy, and trust boundary |
 | [Releasing](releasing.md) | Maintainer gates for publishing, Pages setup, and prerelease evidence |

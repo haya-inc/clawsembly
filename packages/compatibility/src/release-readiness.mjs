@@ -53,12 +53,17 @@ const required = [
   "apps/web/public/social-preview.png",
   "packages/compatibility/report.schema.json",
   "packages/compatibility/release-history.schema.json",
-  "packages/compatibility/host-evidence.schema.json",
-  "packages/compatibility/gateway-evidence.schema.json",
+  "packages/compatibility/browserpod-evidence.schema.json",
+  "packages/capability-broker/capability-manifest.schema.json",
+  "packages/capability-broker/capability-audit.schema.json",
+  "apps/web/public/schemas/capability-manifest.schema.json",
+  "apps/web/public/schemas/capability-audit.schema.json",
   "dist/index.html",
   "dist/data/compatibility.json",
   "dist/data/compatibility-badge.svg",
-  "dist/data/release-history.json"
+  "dist/data/release-history.json",
+  "dist/schemas/capability-manifest.schema.json",
+  "dist/schemas/capability-audit.schema.json"
 ];
 
 const missing = required.filter((path) => !existsSync(resolve(root, path)));

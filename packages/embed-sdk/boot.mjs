@@ -1,5 +1,6 @@
 import { createBrowserPodRuntime } from "../browser-runtime/browserpod-runtime.mjs";
 import { CapabilityBroker } from "../capability-broker/capability-broker.mjs";
+import { CapabilityConsentController } from "../capability-broker/capability-consent.mjs";
 import { FilesystemCapabilityMailboxHost } from "../capability-broker/filesystem-mailbox-host.mjs";
 import { stageGuestMailboxClient } from "../capability-broker/guest-mailbox-artifact.mjs";
 import { assertVerifiedLaunch } from "./embed-manifest.mjs";
@@ -32,6 +33,7 @@ export async function bootVerifiedEmbed({
   mailboxChannelId = `mailbox_${crypto.randomUUID().replaceAll("-", "")}`,
   onRuntimeAudit,
   onCapabilityAudit,
+  onPermissionAudit,
   mailboxOptions = {}
 }) {
   const verifiedManifest = assertVerifiedLaunch(manifest);
@@ -69,9 +71,13 @@ export async function bootVerifiedEmbed({
       runtime: "browserpod",
       sessionId
     },
-    grants: verifiedManifest.capabilities,
     handlers: capabilityHandlers,
     auditSink: onCapabilityAudit
+  });
+  const permissions = new CapabilityConsentController({
+    broker: capabilities,
+    requests: verifiedManifest.capabilities,
+    auditSink: onPermissionAudit
   });
   const mailboxRoot = `/workspace/.clawsembly/mailbox/${mailboxChannelId}`;
   const mailbox = new FilesystemCapabilityMailboxHost({
@@ -108,6 +114,7 @@ export async function bootVerifiedEmbed({
     manifest: verifiedManifest,
     runtime,
     capabilities,
+    permissions,
     mailbox,
     guestTransport,
     get closed() { return closed; },

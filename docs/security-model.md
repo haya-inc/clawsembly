@@ -18,8 +18,8 @@ the current prototype is production-ready.
    persistence, and permission operations.
 3. **Browser guest runtime** — untrusted runtime containing upstream OpenClaw,
    downloaded packages, model-generated code, plugins, and workspace content.
-   BrowserPod is the only active provider. WebContainer evidence and the
-   container2wasm feasibility result are archive-only.
+   BrowserPod is the only provider represented in executable code and evidence
+   contracts on the main branch.
 4. **External services** — npm, runtime delivery or metering services, model
    providers, and an optional native OpenClaw Gateway.
 
@@ -39,6 +39,10 @@ The browser sandbox is one boundary, not the only control.
 - Bind every broker session to an exact OpenClaw version and package integrity.
 - Require an exact capability and scope grant; do not support wildcard or
   ambient guest authority.
+- Treat manifest capabilities as pending requests; require an explicit user
+  decision before issuing a time- and call-bounded broker grant.
+- Keep deny, revoke, and expiry reasons fixed and export permission/broker audit
+  under strict schemas without accepting payloads or free-form notes.
 - Keep capability audit records payload-free and bounded.
 - Pass the BrowserPod API key only to provider boot; never copy it into guest
   arguments, environment variables, filesystem, runtime objects, or audits.
@@ -72,9 +76,8 @@ pull request from a fork.
 
 ## Current persistence boundary
 
-The project page no longer exposes the legacy runtime snapshot UI. The old
-versioned, SHA-256-checked WebContainer mock backup remains only as historical
-evidence. BrowserPod persistence needs its own migration, encryption, recovery,
+The project page does not expose a runtime snapshot UI. BrowserPod persistence
+needs its own migration, encryption, recovery,
 and workspace-scale evidence before any user backup contract is enabled.
 
 Provider credentials use a separate browser-host vault. A non-extractable
@@ -100,9 +103,7 @@ delivery origin. Any host that enables the adapter must pin and review that
 delivery path, add only the required CSP destination, and retain an outage path
 before it can claim BrowserPod support.
 
-The archived WebContainer evidence integrated the provider broker with an
-actual OpenClaw turn; that path no longer runs in the page or normal CI. The
-active browser-host policy fixes the OpenAI destination to `POST /v1/responses`, sets
+The active browser-host policy fixes the OpenAI destination to `POST /v1/responses`, sets
 `store:false`, rejects redirects, omits ambient browser credentials and the
 referrer, bounds JSON responses to 2 MB, suppresses provider error bodies, and
 never returns the API key. BrowserPod integration must connect this policy
@@ -132,19 +133,9 @@ IndexedDB. The browser exports only the raw public key, derives the device ID as
 SHA-256 of those 32 bytes, and signs OpenClaw's v3 challenge payload including
 the server nonce, token, role, scopes, client metadata, and platform fields. The
 project page verifies persistence, rejected private-key export, a valid
-signature, and nonce-mismatch rejection without a guest runtime. The archived
-WebContainer evidence also contains an old protocol 4 `hello-ok`, Control UI
-pairing, encrypted token, and reconnect result; none of those provider-specific
-claims transfer to BrowserPod.
+signature, and nonce-mismatch rejection without a guest runtime. Control UI
+pairing, encrypted token reconnect, and recovery still require BrowserPod
+evidence.
 
-The old bridge briefly held a device token because its Gateway socket was
-loopback-only. BrowserPod integration must avoid carrying that design forward
-unless exact provider evidence requires it; remote approval, rotation,
-revocation, and recovery remain release gates.
-
-The pinned OpenClaw verifier is patched only when exact release markers match.
-Native verification is attempted first; public-key construction or verification
-failure falls back to Noble Ed25519, and any upstream source drift fails closed.
-This is a compatibility patch, not a bypass: invalid signatures still fail.
 Remote user approval, token rotation, revocation, and recovery are not yet
 implemented.

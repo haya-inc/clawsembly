@@ -6,6 +6,10 @@ import type {
 import type { BrowserPodApi, BrowserPodRuntime } from "../browser-runtime/browserpod-runtime.mjs";
 import type { FilesystemCapabilityMailboxHost } from "../capability-broker/filesystem-mailbox-host.mjs";
 import type { StagedGuestMailboxClient } from "../capability-broker/guest-mailbox-artifact.mjs";
+import type {
+  CapabilityConsentController,
+  PermissionAuditEvent
+} from "../capability-broker/capability-consent.mjs";
 import type { EmbedManifest } from "./embed-manifest.mjs";
 
 export function bootVerifiedEmbed(options: {
@@ -18,6 +22,7 @@ export function bootVerifiedEmbed(options: {
   mailboxChannelId?: string;
   onRuntimeAudit?: (event: Readonly<Record<string, unknown>>) => void;
   onCapabilityAudit?: (event: CapabilityAuditEvent) => void;
+  onPermissionAudit?: (event: PermissionAuditEvent) => void;
   mailboxOptions?: {
     pollIntervalMs?: number;
     maxRequestBytes?: number;
@@ -30,6 +35,7 @@ export function bootVerifiedEmbed(options: {
   manifest: Readonly<EmbedManifest>;
   runtime: Readonly<BrowserPodRuntime>;
   capabilities: CapabilityBroker;
+  permissions: CapabilityConsentController;
   mailbox: FilesystemCapabilityMailboxHost;
   guestTransport: Readonly<{
     schemaVersion: 1;

@@ -10,8 +10,6 @@ The project does not yet promise semantic-version compatibility.
 ### Added
 
 - exact-artifact OpenClaw compatibility inspection and versioned JSON schemas;
-- Chromium WebContainer boot, Gateway handshake, constrained tool turn,
-  reconnect, cancellation, and OPFS recovery probes;
 - browser-host credential vault, device identity, provider broker, session
   budgets, and protected live-provider gate;
 - BrowserPod adoption, a default-deny exact-scope capability broker, and an
@@ -27,6 +25,8 @@ The project does not yet promise semantic-version compatibility.
   bounded envelopes, replay defense, cancellation, and metadata-only audit;
 - deterministic SHA-256-pinned guest transport artifact, automatic verified
   BrowserPod staging, explicit connection environment, and CI drift detection;
+- headless capability-consent lifecycle with pending requests, bounded
+  approval, deny, revoke, expiry, and schema-governed payload-free audit export;
 - nonce-bound guest process supervisor for cooperative child shutdown without
   overstating BrowserPod process-termination or Pod-disposal capabilities;
 - stable / previous / preview release tracking with generated update pull
@@ -36,22 +36,21 @@ The project does not yet promise semantic-version compatibility.
 
 ### Changed
 
-- removed the active WebContainer page probe, application import, production
-  dependency, StackBlitz CSP allowance, and normal browser CI lane; historical
-  evidence files and adapter fixtures remain archive-only;
+- completed the BrowserPod-only cutover by removing the superseded runtime
+  adapter, tests, dependencies, fixtures, public evidence, compatibility
+  schemas, CLI flags, report branches, and vendor CSP allowance from main;
 - switched compatibility inspection and release tracking defaults to
   `browserpod@2.12.1`, with all public runtime claims pending until matching
   owner-authorized evidence exists;
 
 ### Known limitations
 
-- status remains `partial` for `openclaw@2026.6.11`;
+- status remains `probing` for `openclaw@2026.6.11`;
 - BrowserPod lifecycle and Gateway evidence are not yet captured, so verified
   BrowserPod launch remains intentionally blocked;
 - BrowserPod 2.12.1 exposes no documented terminal-input, arbitrary
   process-termination, or hard-disposal API; Clawsembly can cooperatively stop
   its own supervised Gateway, but cannot claim provider-level teardown;
 - the measured install/cache footprint is approximately 880 MB;
-- an exact-marker Ed25519 verifier patch is still required;
 - Firefox, Safari, remote Gateway parity, general workspace migration, and
   owner-authorized live-provider evidence remain unverified.

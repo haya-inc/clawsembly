@@ -93,6 +93,14 @@ handler work so concurrent requests cannot overspend one grant.
 Vocabulary is not permission. A capability is unavailable until the host
 registers a handler and an explicit, unexpired grant exists for its exact scope.
 
+Manifest capability rows are permission requests rather than initial grants.
+`bootVerifiedEmbed` exposes them as `session.permissions`; the broker remains
+default-deny until the trusted host calls `approve` after a user action.
+Approvals cannot exceed the requested call budget, expire within 24 hours, and
+can be denied or revoked. Current state and combined permission/broker audit are
+exported under stable schemas. See
+[Capability permission lifecycle](capability-permissions.md).
+
 ## Evidence-bound boot
 
 `bootVerifiedEmbed` is implemented, but remains unusable with the current

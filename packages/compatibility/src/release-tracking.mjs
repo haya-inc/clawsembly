@@ -44,7 +44,7 @@ function summarizeReport(channel, report, reportPath, stableReport) {
     status: report.status,
     reportPath,
     generatedAt: report.generatedAt,
-    runtimeEvidence: report.evidence.some((item) => item.id === "gateway-health"),
+    runtimeEvidence: report.evidence.some((item) => item.id === "browserpod-runtime"),
     artifact: {
       integrity: report.artifact.integrity,
       unpackedBytes: report.artifact.unpackedBytes,

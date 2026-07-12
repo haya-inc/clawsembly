@@ -7,9 +7,8 @@ embedding SDK. `createEmbedManifest` binds a BrowserPod launch to:
 - a compatibility report captured for the same runtime;
 - an explicit set of exact-scope capability grants.
 
-Selecting BrowserPod does not make a report portable from another runtime.
-`assertVerifiedLaunch` rejects the current WebContainer evidence and will stay
-red until BrowserPod reproduces the full supported evidence set.
+`assertVerifiedLaunch` accepts only an exact BrowserPod version and stays red
+until BrowserPod produces the full supported evidence set.
 
 ```js
 const manifest = createEmbedManifest({
@@ -35,6 +34,12 @@ const session = await bootVerifiedEmbed({
   capabilityHandlers
 });
 
+// Manifest capabilities start pending, not granted.
+session.permissions.approve("storage.snapshot", "workspace:primary", {
+  durationMs: 5 * 60_000,
+  maxCalls: 1
+});
+
 session.mailbox.serve({ signal: shutdown.signal, maxRequests: 100 });
 await session.runtime.start({
   executable: "node",
@@ -49,6 +54,13 @@ lower-level BrowserPod adapter until BrowserPod earns a `supported` report.
 Persistent storage keys are derived as
 `clawsembly:<exact-openclaw-version>:<workspaceId>` so an upgrade cannot
 silently mount the previous artifact's disk.
+
+`manifest.capabilities` are exact permission requests. Verified boot creates no
+initial broker grants. The host renders `session.permissions.manifest()`, then
+calls `approve`, `deny`, or `revoke` from explicit user actions. Approval cannot
+exceed the requested call limit and always expires within 24 hours. Stable,
+payload-free state and audit exports are available from `manifest()` and
+`exportAudit()`.
 
 The mailbox provides typed exact-scope guest requests, replay rejection,
 bounded responses, cancellation, and payload-free transport audit without
