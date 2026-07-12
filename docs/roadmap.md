@@ -197,7 +197,7 @@ cutting off an active Gateway's cooperative stop path. The boot slice is not pro
 owner-authorized BrowserPod evidence remains missing.
 
 The repository now also produces a byte-reproducible
-`@haya-inc/clawsembly@0.1.0-alpha.0` tarball without making the compatibility lab
+`@haya-inc/clawsembly@0.1.0-alpha.1` tarball without making the compatibility lab
 itself publishable. CI installs that tarball into an isolated ESM/TypeScript
 consumer, verifies every declared public subpath, and builds an independent
 host application from the packed dependency with no workspace alias. Its
@@ -207,10 +207,13 @@ branded loader now pins the report's exact HTTPS source, raw JSON SHA-256, npm
 artifact, and BrowserPod version; raw or hand-edited `supported` objects cannot
 authorize launch. The six-hour tracker deterministically rotates that pin in
 its read-only job and publishes it with the report through the isolated
-write-capable PR job. npm publication remains blocked on the same runtime
-evidence and maintainer release gates. The identical checked tarball is now
-available from Pages with a schema-valid release manifest and checksum, so
-external source-alpha consumers do not depend on registry publication. A
+write-capable PR job. Package distribution is gated independently from runtime
+support: the identical checked alpha.1 tarball is available from Pages and its
+GitHub prerelease while npm bootstrap is pending, but none of those channels
+can turn missing BrowserPod evidence into a supported launch. The Pages release
+manifest records that distinction with exact checksums and reviewed npm
+publication state, so external source-alpha consumers do not depend on registry
+publication. A
 fail-closed prerelease workflow repeats the complete gate on a matching Git tag,
 then publishes the same bytes with provider-free browser diagnostics and a
 source-commit/Pages/report provenance record from an npm-free write job.
