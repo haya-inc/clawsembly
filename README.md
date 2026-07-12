@@ -161,6 +161,7 @@ the release is reported as `probing` rather than production-compatible.
 - [Downstream consumption guide](docs/consuming-reports.md)
 - [SDK prerelease recipe](packages/sdk-package/README.md)
 - [Packed-SDK host example](examples/sdk-host/README.md)
+- [Owner-authorized BrowserPod evidence workflow](docs/browserpod-evidence.md)
 - [Maintainer release checklist](docs/releasing.md)
 - [Deployment requirements](docs/deployment.md)
 
@@ -233,6 +234,11 @@ security surfaces:
 npx playwright install chromium
 npm run test:browser
 ```
+
+Maintainers can capture the first real BrowserPod readiness record through the
+manual, Environment-protected `Browser host, page, and evidence` workflow. It
+is opt-in, metered, installs the exact provider SDK from an isolated lock, and
+uploads evidence for review without committing or promoting it automatically.
 
 Generate a fresh static report for an exact upstream release:
 

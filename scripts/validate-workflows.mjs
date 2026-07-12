@@ -23,6 +23,7 @@ for (const name of workflowFiles) {
 }
 
 const compatibility = readFileSync(resolve(workflowDirectory, "compatibility.yml"), "utf8");
+const runtimeBrowser = readFileSync(resolve(workflowDirectory, "runtime-browser.yml"), "utf8");
 const publishMarker = "\n  publish-report-pr:\n";
 const publishIndex = compatibility.indexOf(publishMarker);
 assert.ok(publishIndex > 0, "compatibility workflow must separate report generation from publishing");
@@ -50,5 +51,12 @@ assert.match(publishJob, /Report artifact must not contain symlinks/, "report pu
 assert.match(publishJob, /cp .*report-pin\.ts.*examples\/sdk-host\/src\/report-pin\.ts/, "report publishing must install the validated SDK host pin");
 assert.match(publishJob, /git add .*examples\/sdk-host\/src\/report-pin\.ts/, "report publishing must commit the SDK host pin with reports");
 assert.match(publishJob, /git add .*promotion-policy\.json/, "report publishing must commit the promotion policy with reports");
+
+assert.match(runtimeBrowser, /capture_browserpod:[\s\S]*?type: boolean[\s\S]*?default: false/u, "BrowserPod capture must require explicit dispatch input");
+assert.match(runtimeBrowser, /environment: browserpod-evidence/u, "BrowserPod capture must use the protected evidence environment");
+assert.match(runtimeBrowser, /github\.event_name == 'workflow_dispatch'/u, "metered BrowserPod capture must be dispatch-only");
+assert.match(runtimeBrowser, /npm ci --prefix examples\/browserpod-evidence-host --ignore-scripts/u, "BrowserPod capture must install its exact isolated lock without scripts");
+assert.equal(runtimeBrowser.match(/secrets\.BROWSERPOD_API_KEY/gu)?.length, 1, "BrowserPod key must enter one capture step only");
+assert.match(runtimeBrowser, /path: test-results\/browserpod-evidence/u, "BrowserPod capture must retain reviewed evidence artifacts");
 
 process.stdout.write(`Validated ${workflowFiles.length} pinned workflows and compatibility-job permissions.\n`);

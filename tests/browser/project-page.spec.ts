@@ -106,6 +106,10 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   await expect(runtimes.getByText("WebContainer", { exact: true })).toHaveCount(0);
   await expect(page.getByText("none in app bundle", { exact: true })).toBeVisible();
   await expect(runtimes.getByText("Rejected", { exact: true })).toBeVisible();
+  await expect(runtimes.getByRole("link", { name: "Run evidence capture ↗" })).toHaveAttribute(
+    "href",
+    "https://github.com/haya-inc/clawsembly/issues/6"
+  );
   await expect(page.getByRole("link", { name: "Inspect SDK launch ↗" })).toHaveAttribute(
     "href",
     "https://haya-inc.github.io/clawsembly/sdk-host/"

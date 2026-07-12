@@ -72,6 +72,52 @@ logical-only Pod close because BrowserPod exposes no documented hard-disposal
 operation. Close the owner-controlled probe context according to the provider's
 documented lifecycle and do not claim Pod cleanup from the returned value.
 
+## Capture through GitHub Actions
+
+The repository includes a dedicated manual capture job in
+`Browser host, page, and evidence`. It never runs on pull requests or the
+schedule. Before the first run, a maintainer must:
+
+1. create the repository Environment `browserpod-evidence`;
+2. add required reviewers so a dispatch cannot spend tokens without an owner
+   approval;
+3. store the BrowserPod credential as the Environment secret
+   `BROWSERPOD_API_KEY`;
+4. confirm the selected branch contains the exact report and capture harness to
+   review;
+5. dispatch the workflow with `capture_browserpod` enabled.
+
+The job installs `@leaningtech/browserpod@2.12.1` from its isolated lock with
+scripts disabled, launches a cross-origin-isolated Chromium host, and passes the
+secret directly into one page evaluation. The key is never written to source,
+DOM, console capture, evidence, status, or uploaded paths. Diagnostic callbacks
+retain only per-phase chunk and byte counts.
+
+BrowserPod documents that `boot` requires an API key and consumes tokens. One
+dispatch is therefore an owner-authorized metered operation. The workflow
+uploads either a schema-valid raw evidence record plus payload-free status, or
+only a payload-free failure status. It does not commit or promote the result.
+
+After downloading `browserpod-evidence-<run-id>`, review the JSON and copy the
+approved record to the versioned evidence path. Then regenerate all channel
+artifacts together so the stable report, SDK pin, release policy, and page stay
+coherent:
+
+```bash
+evidence=apps/web/public/data/evidence/browserpod-openclaw-2026.6.11.json
+browser=$(node -p "JSON.parse(require('fs').readFileSync('$evidence')).target.browser")
+
+npm run compat:track -- \
+  --browserpod-evidence "$evidence" \
+  --browser-baseline "$browser"
+npm run report-pin:generate
+npm run compat:validate
+npm run release:check
+```
+
+Promotion remains a reviewed commit. A successful readiness record promotes
+only the preflight and Gateway-boot checks represented by its schema.
+
 ## Attach reviewed evidence
 
 Validate the raw record against

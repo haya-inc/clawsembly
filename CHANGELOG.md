@@ -81,6 +81,9 @@ The project does not yet promise semantic-version compatibility.
   template for install-free external adoption;
 - zero-install Node 24 GitHub Action with observe/gate modes and validated
   decision, candidate-version, and blocker outputs;
+- manual Environment-protected BrowserPod evidence capture with exact isolated
+  provider lock, cross-origin-isolated Chromium host, payload-free failure
+  diagnostics, schema validation, and review-before-promotion runbook;
 - report-driven project page, release ledger, compatibility badge, contribution
   templates, security policy, and downstream consumption guide.
 

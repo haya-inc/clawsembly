@@ -47,6 +47,16 @@ The first tag should remain a prerelease until all of these hold:
 - at least one external integrator has reviewed the report contract;
 - the packed SDK passes isolated ESM and strict TypeScript consumer checks.
 
+## Owner-authorized BrowserPod evidence
+
+Provider evidence is never part of the normal release check. Configure the
+`browserpod-evidence` GitHub Environment with required reviewers and an
+Environment-scoped `BROWSERPOD_API_KEY`, then manually dispatch
+`Browser host, page, and evidence` with `capture_browserpod` enabled. Review the
+downloaded artifact before placing it under `apps/web/public/data/evidence/`.
+Follow [the BrowserPod evidence runbook](browserpod-evidence.md) to regenerate
+reports and the SDK pin; never hand-edit a green status.
+
 ## Release evidence
 
 Attach the compatibility JSON, release-history JSON, and successful
