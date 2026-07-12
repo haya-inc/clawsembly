@@ -101,18 +101,28 @@ jobs:
           if [ -n "$NPM_TOKEN" ]; then
             export NODE_AUTH_TOKEN="$NPM_TOKEN"
           fi
-          npm publish "$tarball" --access public --tag alpha --provenance --ignore-scripts
+          publish_status=0
+          npm publish "$tarball" --access public --tag alpha --provenance --ignore-scripts || publish_status=$?
           remote_integrity=""
-          for attempt in $(seq 1 12); do
+          for attempt in $(seq 1 30); do
             if remote_integrity="$(registry_integrity)"; then break; fi
-            sleep 5
+            echo "Registry does not expose $package@$version yet (attempt $attempt/30)."
+            sleep 10
           done
           if [ -z "$remote_integrity" ]; then
-            echo "npm registry did not expose the exact version after publishing." >&2
+            if [ "$publish_status" -ne 0 ]; then
+              echo "npm publish exited with code $publish_status and the exact version never became visible." >&2
+            else
+              echo "npm publish succeeded but the registry did not expose the exact version within the propagation window; re-running this workflow verifies the published bytes without publishing again." >&2
+            fi
             exit 1
           fi
           if [ "$remote_integrity" != "$local_integrity" ]; then
             echo "npm registry integrity does not match the verified release." >&2
             exit 1
           fi
-          echo "Published $package@$version with matching provenance-bound bytes." >> "$GITHUB_STEP_SUMMARY"
+          if [ "$publish_status" -ne 0 ]; then
+            echo "$package@$version already carries the verified bytes; npm publish exit code $publish_status was a registry propagation artifact." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Published $package@$version with matching provenance-bound bytes." >> "$GITHUB_STEP_SUMMARY"
+          fi
