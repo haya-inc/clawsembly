@@ -40,7 +40,7 @@
         "programmingLanguage": ["TypeScript", "JavaScript"]
       }
     </script>
-    <script type="module" crossorigin src="/clawsembly/assets/index-BsATVH0c.js"></script>
+    <script type="module" crossorigin src="/clawsembly/assets/index-C_g8MjFc.js"></script>
     <link rel="stylesheet" crossorigin href="/clawsembly/assets/index-Cke9_m_D.css">
   </head>
   <body>
@@ -244,11 +244,12 @@
             <ol data-probe-output>
               <li data-state="pass"><span>01</span><strong>Production runtime</strong><em>BrowserPod 2.x · selected</em></li>
               <li data-state="pass"><span>02</span><strong>Exact installer</strong><em>manifest + lock integrity readback</em></li>
-              <li data-state="pass"><span>03</span><strong>Gateway controller</strong><em>token-private · health/ready · stop</em></li>
-              <li data-state="pass"><span>04</span><strong>Guest transport</strong><em>SHA-256 source + readback</em></li>
-              <li data-state="pass"><span>05</span><strong>Permission lifecycle</strong><em>pending · approve · expire/revoke</em></li>
-              <li data-state="idle"><span>06</span><strong>Provider evidence</strong><em>owner key required</em></li>
-              <li data-state="pass"><span>07</span><strong>Legacy runtime fallback</strong><em>none in app bundle</em></li>
+              <li data-state="pass"><span>03</span><strong>Gateway controller</strong><em>token-private · origin-pinned · stop</em></li>
+              <li data-state="pass"><span>04</span><strong>Protocol client</strong><em>challenge · Ed25519 · hello-ok</em></li>
+              <li data-state="pass"><span>05</span><strong>Guest transport</strong><em>SHA-256 source + readback</em></li>
+              <li data-state="pass"><span>06</span><strong>Permission lifecycle</strong><em>pending · approve · expire/revoke</em></li>
+              <li data-state="idle"><span>07</span><strong>Provider evidence</strong><em>owner key required</em></li>
+              <li data-state="pass"><span>08</span><strong>Legacy runtime fallback</strong><em>none in app bundle</em></li>
             </ol>
           </div>
         </div>
@@ -309,7 +310,7 @@
 
         <div class="broker-proof reveal">
           <span>Implemented slice</span>
-          <p>Exact artifact → verified manifest → pending permission → user approval → expiring exact grant → typed mailbox → payload-free audit. Drift, replay, and cross-runtime evidence fail closed.</p>
+          <p>Exact artifact → origin-pinned Gateway → signed protocol 4 handshake → pending permission → user approval → expiring exact grant → typed mailbox → payload-free audit. Drift, replay, and cross-runtime evidence fail closed.</p>
           <a href="https://github.com/haya-inc/clawsembly/blob/main/docs/embedding.md">Read the embedding contract ↗</a>
         </div>
       </section>
@@ -330,9 +331,9 @@
           <a class="runtime-row runtime-row-primary" href="https://browserpod.io/docs/more/licensing" target="_blank" rel="noreferrer">
             <span class="runtime-rank">01 / adopted</span>
             <div class="runtime-name"><strong>BrowserPod 2.x</strong><span>Node 22 · browser-local</span></div>
-            <p>SDK verifies npm version and lock integrity, then uses the same token-private, health-checked, cooperatively stopped Gateway controller as the evidence probe. A digest-pinned Node client carries typed broker calls. Real provider evidence is unrun; hard dispose remains unavailable.</p>
+            <p>SDK verifies npm identity, pins the browser origin, and signs the artifact-matched protocol 4 challenge before accepting a token-free hello. A digest-pinned Node client carries typed broker calls. Real provider evidence is unrun; hard dispose remains unavailable.</p>
             <span class="runtime-license">Commercial</span>
-            <span class="runtime-state">Guest transport ✓</span>
+            <span class="runtime-state">Handshake contract ✓</span>
           </a>
           <a class="runtime-row" href="https://github.com/container2wasm/container2wasm" target="_blank" rel="noreferrer">
             <span class="runtime-rank">02 / archived probe</span>
