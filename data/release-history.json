@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-12T03:08:07.317Z",
+  "generatedAt": "2026-07-12T06:34:38.736Z",
   "package": "openclaw",
   "channels": {
     "stable": "2026.6.11",
@@ -13,7 +13,7 @@
       "version": "2026.6.11",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.6.11.json",
-      "generatedAt": "2026-07-12T03:08:05.562Z",
+      "generatedAt": "2026-07-12T06:34:37.323Z",
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-T+P/g19IheeT1ckXMoPN61dYuE8vBF4MderI+kWkvpuFYxPkJxn8AXLpu9IXCnN9g36Acpm9+mMD/V+lsvOkyA==",
@@ -30,6 +30,11 @@
         "fail": 0,
         "pending": 15
       },
+      "dependencyChangesFromStable": {
+        "added": [],
+        "removed": [],
+        "changed": []
+      },
       "deltaFromStable": {
         "unpackedBytes": 0,
         "directDependencyCount": 0,
@@ -42,7 +47,7 @@
       "version": "2026.6.10",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.6.10.json",
-      "generatedAt": "2026-07-12T03:08:06.432Z",
+      "generatedAt": "2026-07-12T06:34:38.014Z",
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-LcooND2tBQw8A+kc1Ujltu3lg30bJ0w7XaeRy7eYzobb8BBdcW6DOGbwJL4vpj1vl9+gjRceOtlh5nh9OARcug==",
@@ -59,6 +64,11 @@
         "fail": 0,
         "pending": 15
       },
+      "dependencyChangesFromStable": {
+        "added": [],
+        "removed": [],
+        "changed": []
+      },
       "deltaFromStable": {
         "unpackedBytes": 314904,
         "directDependencyCount": 0,
@@ -71,7 +81,7 @@
       "version": "2026.7.1-beta.5",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.7.1-beta.5.json",
-      "generatedAt": "2026-07-12T03:08:07.299Z",
+      "generatedAt": "2026-07-12T06:34:38.723Z",
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-ejdttiBZwk5RJmZdGD3gQPW1+4819pb0gyw4ZbGg/NcEAdozk6UQWq4n3P2XfDBgOn2k7D8fSKLcN+YDdJ77TA==",
@@ -87,6 +97,101 @@
         "warn": 3,
         "fail": 0,
         "pending": 15
+      },
+      "dependencyChangesFromStable": {
+        "added": [
+          {
+            "name": "@openclaw/ai",
+            "spec": "2026.7.1-beta.5"
+          },
+          {
+            "name": "@silvia-odwyer/photon-node",
+            "spec": "0.3.4"
+          }
+        ],
+        "removed": [],
+        "changed": [
+          {
+            "name": "@agentclientprotocol/sdk",
+            "stableSpec": "0.22.1",
+            "releaseSpec": "1.1.0"
+          },
+          {
+            "name": "@anthropic-ai/sdk",
+            "stableSpec": "0.100.1",
+            "releaseSpec": "0.109.1"
+          },
+          {
+            "name": "@clack/core",
+            "stableSpec": "1.3.1",
+            "releaseSpec": "1.4.2"
+          },
+          {
+            "name": "@clack/prompts",
+            "stableSpec": "1.4.0",
+            "releaseSpec": "1.6.0"
+          },
+          {
+            "name": "@earendil-works/pi-tui",
+            "stableSpec": "0.78.0",
+            "releaseSpec": "0.80.3"
+          },
+          {
+            "name": "@google/genai",
+            "stableSpec": "2.7.0",
+            "releaseSpec": "2.10.0"
+          },
+          {
+            "name": "@mistralai/mistralai",
+            "stableSpec": "2.2.5",
+            "releaseSpec": "2.4.0"
+          },
+          {
+            "name": "@openclaw/fs-safe",
+            "stableSpec": "0.3.0",
+            "releaseSpec": "0.4.1"
+          },
+          {
+            "name": "commander",
+            "stableSpec": "14.0.3",
+            "releaseSpec": "15.0.0"
+          },
+          {
+            "name": "grammy",
+            "stableSpec": "1.43.0",
+            "releaseSpec": "1.44.0"
+          },
+          {
+            "name": "openai",
+            "stableSpec": "6.39.1",
+            "releaseSpec": "6.45.0"
+          },
+          {
+            "name": "playwright-core",
+            "stableSpec": "1.60.0",
+            "releaseSpec": "1.61.1"
+          },
+          {
+            "name": "quickjs-wasi",
+            "stableSpec": "3.0.0",
+            "releaseSpec": "3.0.2"
+          },
+          {
+            "name": "tar",
+            "stableSpec": "7.5.16",
+            "releaseSpec": "7.5.19"
+          },
+          {
+            "name": "typebox",
+            "stableSpec": "1.1.39",
+            "releaseSpec": "1.3.3"
+          },
+          {
+            "name": "web-tree-sitter",
+            "stableSpec": "0.26.9",
+            "releaseSpec": "0.26.10"
+          }
+        ]
       },
       "deltaFromStable": {
         "unpackedBytes": 1255885,
