@@ -2,8 +2,10 @@ import { getCredentialMetadata } from "./credential-vault";
 import {
   extractOpenAIResponseText,
   OPENAI_BROKER_MODEL,
-  requestOpenAIResponse
+  requestOpenAIResponse,
+  type OpenAITextRequest
 } from "./provider-broker";
+import { CapabilityBroker } from "../../../packages/capability-broker/capability-broker.mjs";
 
 export const LIVE_SMOKE_PROMPT = "Reply with exactly CLAWSEMBLY_LIVE_OK and nothing else.";
 export const LIVE_SMOKE_EXPECTED = "CLAWSEMBLY_LIVE_OK";
@@ -38,11 +40,31 @@ export function getLiveSmokeCostPreview(): LiveSmokeCostPreview {
 }
 
 export async function runLiveProviderSmokeTest(signal?: AbortSignal): Promise<string> {
-  const response = await requestOpenAIResponse({
-    model: OPENAI_BROKER_MODEL,
-    input: LIVE_SMOKE_PROMPT,
-    maxOutputTokens: LIVE_SMOKE_MAX_OUTPUT_TOKENS
-  }, signal);
+  const version = document.documentElement.dataset.openclawVersion;
+  const integrity = document.documentElement.dataset.openclawIntegrity;
+  if (!version || !integrity) throw new Error("exact OpenClaw artifact identity is unavailable");
+  const scope = `model:${OPENAI_BROKER_MODEL}`;
+  const broker = new CapabilityBroker({
+    subject: {
+      artifact: { package: "openclaw", version, integrity },
+      runtime: "browser-host",
+      sessionId: crypto.randomUUID()
+    },
+    grants: [{ capability: "provider.openai.responses", scope, maxCalls: 1 }],
+    handlers: {
+      "provider.openai.responses": (input, context) => requestOpenAIResponse(input as OpenAITextRequest, context.signal)
+    }
+  });
+  const response = await broker.request<OpenAITextRequest, unknown>({
+    id: crypto.randomUUID(),
+    capability: "provider.openai.responses",
+    scope,
+    input: {
+      model: OPENAI_BROKER_MODEL,
+      input: LIVE_SMOKE_PROMPT,
+      maxOutputTokens: LIVE_SMOKE_MAX_OUTPUT_TOKENS
+    }
+  }, { signal });
   const text = extractOpenAIResponseText(response).trim();
   if (text !== LIVE_SMOKE_EXPECTED) throw new Error("live provider returned an unexpected smoke-test response");
   return text;

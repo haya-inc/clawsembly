@@ -1,6 +1,6 @@
 # ADR 0002: Keep execution browser-local and replace the production runtime boundary
 
-- Status: accepted for migration; runtime candidates remain experimental
+- Status: accepted; BrowserPod selected by ADR 0003, support evidence pending
 - Date: 2026-07-12
 
 ## Context
@@ -26,16 +26,17 @@ optional interoperability mode, but it is not the replacement for embedded
 execution.
 
 The application will depend on a small `BrowserRuntime` boundary instead of a
-WebContainer-specific API. We will evaluate two implementations behind that
-boundary:
+WebContainer-specific API. ADR 0003 subsequently selected BrowserPod as the
+first production target while retaining the evidence gates below:
 
-1. **BrowserPod 2.x is the primary commercial integration candidate.** It runs
+1. **BrowserPod 2.x is the adopted commercial integration provider.** It runs
    Node 22 in the browser, documents IndexedDB persistence, and explicitly
    permits commercial use on paid plans. It is proprietary, requires a metered
    API key, loads runtime code from vendor infrastructure unless an Enterprise
    agreement provides self-hosting, and does not yet have Clawsembly runtime
-   evidence. Those constraints must remain visible to users.
-2. **container2wasm v0.8.4 is the open, self-distributable feasibility lane.**
+   evidence. Provider selection does not make it `supported`; those constraints
+   remain visible to users.
+2. **container2wasm v0.8.4 is an archived open feasibility lane.**
    It can package an amd64 Linux container for browser execution and the
    converter is Apache-2.0. The project labels itself experimental; its output
    includes a Linux guest, Bochs/QEMU, and container packages with separate

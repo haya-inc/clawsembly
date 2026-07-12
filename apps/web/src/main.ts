@@ -13,6 +13,7 @@ interface CompatibilityReport {
   artifact: {
     package: string;
     version: string;
+    integrity: string;
     nodeEngine: string;
     tarballBytes: number;
     unpackedBytes: number;
@@ -143,6 +144,7 @@ async function loadReport(): Promise<void> {
   if (!response.ok) throw new Error(`Compatibility report request failed: ${response.status}`);
   const report = await response.json() as CompatibilityReport;
   document.documentElement.dataset.openclawVersion = report.artifact.version;
+  document.documentElement.dataset.openclawIntegrity = report.artifact.integrity;
 
   setText("[data-package]", report.artifact.package);
   setText("[data-version]", report.artifact.version);

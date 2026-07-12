@@ -23,7 +23,7 @@ test("browser host security probes pass without WebContainer or provider traffic
   await page.goto("/");
 
   const vaultHealth = page.locator("[data-vault-health]");
-  await expect(vaultHealth).toHaveText("VAULT + BROKER / PASS");
+  await expect(vaultHealth).toHaveText("VAULT + CAPABILITY BROKER / PASS");
   await expect(vaultHealth).toHaveAttribute("data-state", "pass");
 
   const deviceHealth = page.locator("[data-device-health]");

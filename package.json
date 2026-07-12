@@ -1,7 +1,7 @@
 {
   "name": "clawsembly",
   "version": "0.0.0",
-  "description": "Upstream-first browser compatibility runtime and evidence lab for OpenClaw.",
+  "description": "Verified, capability-safe browser embedding infrastructure for upstream OpenClaw.",
   "private": true,
   "license": "MIT",
   "homepage": "https://haya-inc.github.io/clawsembly/",
@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/haya-inc/clawsembly/issues"
   },
-  "keywords": ["openclaw", "browserpod", "container2wasm", "webcontainer", "webassembly", "browser", "compatibility"],
+  "keywords": ["openclaw", "browserpod", "capability-broker", "embedding", "webassembly", "browser", "compatibility"],
   "type": "module",
   "engines": {
     "node": ">=22.19.0"
@@ -22,7 +22,7 @@
     "build": "vite build --config apps/web/vite.config.js",
     "preview": "vite preview --config apps/web/vite.config.js",
     "typecheck": "tsc -p apps/web/tsconfig.json --noEmit",
-    "test": "node --test packages/browser-runtime/*.test.mjs packages/compatibility/src/*.test.mjs packages/webcontainer-adapter/*.test.mjs",
+    "test": "node --test packages/browser-runtime/*.test.mjs packages/capability-broker/*.test.mjs packages/compatibility/src/*.test.mjs packages/embed-sdk/*.test.mjs packages/webcontainer-adapter/*.test.mjs",
     "pretest:browser": "npm run build",
     "test:browser": "playwright test --config playwright.config.ts",
     "compat:inspect": "node packages/compatibility/src/inspect.mjs",

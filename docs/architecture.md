@@ -1,15 +1,17 @@
 # Proposed architecture
 
-This architecture preserves browser-local execution while moving the product
-off a WebContainer-specific boundary. The current WebContainer probe is a
-measured compatibility baseline, not the selected commercial runtime. See
-[ADR 0002](decisions/0002-commercial-browser-runtime.md).
+This architecture preserves browser-local execution while making the product a
+verified embedding layer rather than a runtime wrapper. BrowserPod is the
+adopted provider; the current WebContainer probe remains a measured baseline.
+See [ADR 0002](decisions/0002-commercial-browser-runtime.md) and
+[ADR 0003](decisions/0003-verified-openclaw-embedding.md).
 
 ## System overview
 
 ```mermaid
 flowchart LR
     UI["Browser UI"]
+    Manifest["Verified embed manifest"]
     Client["Generated Gateway client"]
     Contract["BrowserRuntime contract"]
     Commercial["BrowserPod candidate\ncommercial browser runtime"]
@@ -17,17 +19,21 @@ flowchart LR
     Baseline["WebContainer\nevidence baseline"]
     Remote["Optional native Gateway"]
     Adapter["Browser compatibility adapter"]
-    Host["Browser host capabilities"]
+    Broker["Default-deny capability broker"]
+    Host["Browser host handlers"]
     Store["OPFS / IndexedDB"]
 
-    UI --> Client --> Contract
+    UI --> Manifest --> Client --> Contract
+    Manifest --> Broker
     Contract --> Commercial
     Contract --> Open
     Contract -. regression only .-> Baseline
     Contract -. optional interop .-> Remote
     Commercial --> Adapter
     Open --> Adapter
-    Baseline --> Adapter --> Host
+    Baseline --> Adapter --> Broker --> Host
+    Commercial --> Broker
+    Open --> Broker
     Host --> Store
 ```
 
@@ -38,9 +44,9 @@ flowchart LR
 The browser boots a runtime provider, installs or mounts a pinned upstream
 OpenClaw package, applies a versioned compatibility manifest, and starts a
 constrained Gateway. Execution and workspace state remain in the browser tab.
-BrowserPod is the first commercial integration candidate; container2wasm is the
-open feasibility lane. Neither is supported until it earns the acceptance
-evidence defined by ADR 0002.
+BrowserPod is the selected embedded provider. It is not supported until it
+earns the acceptance evidence defined by ADR 0002. container2wasm is retained
+only as an archived feasibility record after its measured boot failure.
 
 Expected initial capabilities:
 
@@ -131,6 +137,26 @@ interfaces include:
 - future WIT-based Wasm capability invocation.
 
 Every interface should be narrow, typed, cancellable, and auditable.
+
+### Capability broker
+
+The broker is the product security boundary between the untrusted guest and
+browser-host authority. A session is bound to an exact OpenClaw version and
+integrity. Requests require an exact capability and scope grant; unknown,
+expired, revoked, or exhausted grants fail closed.
+
+The implemented broker consumes call limits before asynchronous dispatch,
+propagates cancellation, redacts handler failures, and stores only bounded
+audit metadata. Payloads and results never enter the audit trail. See
+[Verified embedding contract](embedding.md).
+
+### Embed manifest
+
+The embed manifest combines artifact identity, compatibility evidence,
+BrowserPod selection, and capability grants. Verified launch remains blocked
+while the checked-in report targets WebContainer or has a status below
+`supported`. This prevents a commercial-provider decision from becoming an
+unsupported compatibility claim.
 
 The current evidence implementation follows the same boundary in code:
 `runtime-probe.ts` owns page state and the legacy WebContainer preflight UI,

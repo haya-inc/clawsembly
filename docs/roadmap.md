@@ -94,7 +94,10 @@ User-configurable request/input/output budgets are enforced and reported by the
 browser host. A fixed-prompt live smoke-test UI is credential- and consent-gated,
 cost-bounded, cancellable, and complete-output-only; automation proves the gate
 without making a live request. User-workspace migration fixtures, the first
-owner-authorized live execution, broader moderation UX, and capability approvals remain.
+owner-authorized live execution and broader moderation UX remain. The first
+default-deny capability broker now enforces exact artifact subjects, scopes,
+call limits, expiry, revocation, cancellation, and payload-free audit; user
+permission prompts and guest transport integration remain.
 
 The Chromium performance lane now measures a 57.1-second cold install, including
 49.7 seconds for the 293-package nested repair, a 2.9-second warm reinstall,
@@ -105,25 +108,44 @@ shrinkwrap root omits 31 manifest dev-dependency declarations. The static
 inspector now detects root declaration drift on every inspected release.
 Footprint and cold-path reduction remain Phase 3 work.
 
-### Phase 3b: commercial browser-runtime migration
+### Phase 3b: BrowserPod runtime integration
 
 Replace the WebContainer-specific production boundary without moving execution
 to a server:
 
 - keep the current WebContainer lane as regression evidence;
+- use BrowserPod as the selected embedded production target while keeping its
+  support status blocked on runtime evidence;
 - verify BrowserPod Node 22.19+, crypto, SQLite, long-lived Gateway process I/O,
   portal routing, persistence, cancellation, and commercial terms;
-- verify container2wasm amd64 browser execution, transfer size, cold/warm boot,
-  OPFS or IndexedDB restore, broker networking, SBOM, notices, and source duties;
-- resolve the measured container2wasm host feasibility failure first: the
-  316.7 MB Node 22.19.0 module exits before its guest command, so `--to-js`
-  browser work remains blocked;
+- retain the 316.7 MB container2wasm boot failure as an archived feasibility
+  result rather than splitting current implementation effort;
 - introduce one provider-neutral runtime contract;
 - promote no candidate until it reproduces the full Gateway evidence slice.
 
 Exit criterion: one commercially deployable browser-local provider passes the
 same health, handshake, turn, tool, history, abort, reconnect, and restore
 evidence as the baseline. Remote execution does not satisfy this criterion.
+
+### Phase 3c: verified embedding SDK
+
+Turn the compatibility and host-security work into a reusable integration
+surface:
+
+- bind every launch to exact OpenClaw version, integrity, report, and runtime;
+- expose only explicit capability grants through the browser-host broker;
+- add a typed BrowserPod guest transport and lifecycle adapter;
+- add permission, expiry, revocation, and audit UX;
+- publish a minimal `Clawsembly.boot({ manifest, browserPodApiKey })` API only
+  after `assertVerifiedLaunch` passes against BrowserPod evidence.
+
+Status: manifest generation and fail-closed verified-launch assertion are
+implemented. The current WebContainer `partial` report is correctly rejected
+for BrowserPod launch. The public boot API remains intentionally unavailable.
+
+Exit criterion: an external web application can embed one supported upstream
+OpenClaw version without granting ambient credentials, filesystem, or network
+authority, and can export its evidence-bound capability audit.
 
 ## Phase 4: harden automated upstream tracking
 

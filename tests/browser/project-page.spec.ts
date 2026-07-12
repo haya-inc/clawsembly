@@ -50,11 +50,16 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   const evidencedCount = index.releases.filter((release) => release.runtimeEvidence).length;
   await expect(history.getByText("runtime evidenced", { exact: true })).toHaveCount(evidencedCount);
   await expect(history.getByText("static inspection only", { exact: true })).toHaveCount(3 - evidencedCount);
+  const broker = page.locator("#broker");
+  await expect(broker.getByRole("heading", { name: "Runtime is commodity. Authority is not." })).toBeVisible();
+  await expect(broker.locator(".broker-gate strong")).toHaveText(/DEFAULT\s*DENY/);
+  await expect(broker.getByText("exact capability + scope", { exact: true })).toBeVisible();
   const runtimes = page.locator("#runtimes");
-  await expect(runtimes.getByRole("heading", { name: "Local stays non-negotiable." })).toBeVisible();
+  await expect(runtimes.getByRole("heading", { name: "BrowserPod executes. Clawsembly decides." })).toBeVisible();
   await expect(runtimes.getByText("BrowserPod 2.x", { exact: true })).toBeVisible();
+  await expect(runtimes.getByText("Selected ↗", { exact: true })).toBeVisible();
   await expect(runtimes.getByText("container2wasm", { exact: true })).toBeVisible();
-  await expect(runtimes.getByText("Boot blocked ↗", { exact: true })).toBeVisible();
+  await expect(runtimes.getByText("Archived ↗", { exact: true })).toBeVisible();
   await expect(runtimes.getByText(/316\.7 MB/)).toBeVisible();
   await expect(runtimes.getByText("Evidence only ↗", { exact: true })).toBeVisible();
   await expect(runtimes.getByText("Rejected", { exact: true })).toBeVisible();
@@ -76,4 +81,8 @@ test("release ledger remains readable at a mobile viewport", async ({ page }) =>
   expect(bounds).not.toBeNull();
   expect(bounds!.x).toBeGreaterThanOrEqual(0);
   expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(390);
+  const brokerBounds = await page.locator("#broker").boundingBox();
+  expect(brokerBounds).not.toBeNull();
+  expect(brokerBounds!.x).toBeGreaterThanOrEqual(0);
+  expect(brokerBounds!.x + brokerBounds!.width).toBeLessThanOrEqual(390);
 });

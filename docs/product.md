@@ -2,18 +2,19 @@
 
 ## Initial user
 
-The first user is an OpenClaw integrator or maintainer who needs to know whether
-an exact upstream release can run safely in a browser-hosted Node environment.
+The first user is an OpenClaw integrator or maintainer who needs to embed an
+exact upstream release safely in a web application and prove what it can do.
 The first user is not a non-technical consumer looking for full OpenClaw parity.
 
 ## Five-minute value
 
-A visitor should be able to answer three questions without installing the
+A visitor should be able to answer four questions without installing the
 project:
 
 1. Which OpenClaw release was inspected?
 2. Which claims are proven, constrained, failed, or still pending?
 3. How can the result be reproduced or improved?
+4. Which host capabilities would an embedded session receive?
 
 When a release is verified, the same page should offer a one-click constrained
 browser-chat demo.
@@ -26,6 +27,7 @@ browser-chat demo.
 - failure fixtures containing inputs, logs, and the expected classification;
 - a generated Gateway client that external applications can reuse;
 - narrow compatibility adapters with explicit capability ownership.
+- a verified BrowserPod embed manifest and default-deny capability broker.
 
 ## Adoption loop
 

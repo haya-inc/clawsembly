@@ -14,12 +14,14 @@ without giving the agent unrestricted access to the user's machine.
 
 ## Vision
 
-Clawsembly makes the official OpenClaw runtime available in a browser tab and
-keeps it aligned with upstream releases through generated contracts,
-capability-aware adapters, and automated compatibility tests.
+Clawsembly makes the official OpenClaw runtime safe to embed in a web
+application. It binds an exact upstream artifact to public compatibility
+evidence, a BrowserPod runtime, and explicit browser-host capabilities.
 
 It should feel like OpenClaw running in a different host environment, rather
-than a separate agent that happens to resemble OpenClaw.
+than a separate agent that happens to resemble OpenClaw. BrowserPod supplies
+execution; Clawsembly supplies the verified artifact, authority boundary,
+Gateway integration, and evidence required to trust that execution.
 
 ## Principles
 
@@ -53,6 +55,12 @@ An OpenClaw release should trigger a machine-generated compatibility report and
 upgrade pull request. Routine compatible releases should not require manual
 code edits.
 
+### Evidence-bound embedding
+
+Selecting a runtime does not prove compatibility. Every launch manifest binds
+the exact OpenClaw integrity, runtime provider, evidence status, and explicit
+capability grants. Evidence from one provider cannot authorize another.
+
 ### Useful degradation
 
 The same application should support two runtime modes:
@@ -67,6 +75,8 @@ The same application should support two runtime modes:
 - Support browser chat, LLM provider calls, session state, and a constrained
   file workspace.
 - Provide an OpenClaw Gateway client generated from upstream schemas.
+- Provide a default-deny browser capability broker and verified embedding
+  manifest for BrowserPod hosts.
 - Record an explicit capability matrix for each supported OpenClaw version.
 - Persist browser-owned state without exposing the user's general filesystem.
 

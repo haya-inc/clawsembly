@@ -9,8 +9,8 @@ and evidence discipline. The main strategic risk is not technical ambiguity;
 it is being mistaken for one more browser-native agent product. Clawsembly
 should therefore lead with a narrower promise:
 
-> Know whether the current upstream OpenClaw release is safe and usable in a
-> browser before you depend on it.
+> Embed the current upstream OpenClaw in a browser with explicit authority and
+> evidence for every compatibility claim.
 
 The project should not compete on the number of providers, tools, channels, or
 agent features. Those are upstream OpenClaw's job. Clawsembly's defensible work
@@ -61,9 +61,10 @@ flowchart LR
     Credit --> Report
 ```
 
-The report is the product surface. The demo proves that the report is real.
-The fixture is the contribution unit. This is a more sustainable community
-loop than accepting broad feature requests.
+The report is the trust surface. The capability broker is the reusable product
+surface. The demo proves both are real, and the fixture is the contribution
+unit. This is a more sustainable community loop than accepting broad feature
+requests.
 
 ## 90-day gates
 

@@ -1,6 +1,6 @@
 # Clawsembly
 
-> OpenClaw, assembled for the browser.
+> Verified OpenClaw embedding for the browser.
 
 [![CI](https://github.com/haya-inc/clawsembly/actions/workflows/ci.yml/badge.svg)](https://github.com/haya-inc/clawsembly/actions/workflows/ci.yml)
 [![Compatibility probe](https://github.com/haya-inc/clawsembly/actions/workflows/compatibility.yml/badge.svg)](https://github.com/haya-inc/clawsembly/actions/workflows/compatibility.yml)
@@ -10,27 +10,46 @@
 
 [![Clawsembly — OpenClaw, verified in the browser](apps/web/public/social-preview.png)](https://haya-inc.github.io/clawsembly/)
 
-Clawsembly is an unofficial browser runtime for upstream
-[OpenClaw](https://github.com/openclaw/openclaw). It aims to run the official
-OpenClaw package inside a WebAssembly-powered browser sandbox while keeping the
-compatibility layer small, explicit, and continuously tested against new
-OpenClaw releases.
+Clawsembly is an unofficial, capability-safe embedding layer for upstream
+[OpenClaw](https://github.com/openclaw/openclaw). It binds the exact published
+package to public compatibility evidence, a browser-local runtime, and explicit
+host capabilities. It does not reimplement the agent loop and it is not a
+generic wrapper around a browser sandbox.
 
 The project is in an experimental compatibility-lab phase. It is not affiliated
 with or endorsed by the OpenClaw project.
+
+## Product boundary
+
+BrowserPod supplies browser-local Node execution. Clawsembly supplies the parts
+an embedding application still needs in order to trust upstream OpenClaw:
+
+- exact-version compatibility reports and reproducible failure fixtures;
+- a default-deny capability broker for secrets, identity, storage, provider
+  traffic, notifications, and future host APIs;
+- an evidence-bound embed manifest that rejects runtime-provider mismatch;
+- the generated Gateway client and narrow compatibility adapters.
+
+The implemented broker supports exact scopes, call limits, expiry, revocation,
+cancellation, bounded metadata-only audit, and redacted handler errors. The
+protected provider smoke-test path now crosses that broker. The embed-manifest
+core selects BrowserPod but correctly blocks verified launch while only the
+WebContainer baseline has runtime evidence. See
+[ADR 0003](docs/decisions/0003-verified-openclaw-embedding.md) and the
+[embedding contract](docs/embedding.md).
 
 ## Browser runtime direction
 
 Browser-local execution is a product invariant; a remote sandbox is not the
 replacement path. The verified WebContainer slice below remains a regression
-baseline, but it is not the selected commercial production runtime. The current
-migration evaluates [BrowserPod](https://browserpod.io/docs/overview) as the
-commercial Node 22 candidate and
-[container2wasm](https://github.com/container2wasm/container2wasm) as the open,
-self-distributable feasibility lane. Neither is called supported until it
-reproduces the full Gateway, broker, tool, recovery, cancellation, persistence,
-performance, and licensing evidence in
+baseline, but it is not the selected commercial production runtime.
+[BrowserPod](https://browserpod.io/docs/overview) is the adopted embedded
+provider. It is not called supported until it reproduces the full Gateway,
+broker, tool, recovery, cancellation, persistence, performance, and licensing
+evidence in
 [ADR 0002](docs/decisions/0002-commercial-browser-runtime.md).
+[container2wasm](https://github.com/container2wasm/container2wasm) is retained
+as an archived feasibility result after its measured boot failure.
 
 ## Current evidence
 
@@ -155,6 +174,8 @@ untouched when all three resolved channels are unchanged.
 ## Goals
 
 - Run upstream OpenClaw rather than maintaining an independent agent rewrite.
+- Make OpenClaw safe to embed through exact artifact identity, evidence-bound
+  launch, and explicit browser-host authority.
 - Keep the useful default browser-local, with an optional native Gateway
   interoperability mode rather than a remote-sandbox dependency.
 - Expose browser limitations as explicit capabilities instead of silently
@@ -176,6 +197,8 @@ untouched when all three resolved channels are unchanged.
 - [Risk register](docs/risk-register.md)
 - [Security model](docs/security-model.md)
 - [Commercial browser runtime decision](docs/decisions/0002-commercial-browser-runtime.md)
+- [Verified OpenClaw embedding decision](docs/decisions/0003-verified-openclaw-embedding.md)
+- [Verified embedding contract](docs/embedding.md)
 
 ## Contributing
 

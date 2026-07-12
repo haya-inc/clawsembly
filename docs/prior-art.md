@@ -9,11 +9,13 @@ They suggest that a simple product promise, a usable artifact, and a distinct
 security or architecture story matter more for discovery than implementation
 depth alone. See the resulting [OSS success strategy](oss-strategy.md).
 
-No surveyed project currently combines all three target properties:
+No surveyed project currently combines all four target properties:
 
 1. running in a browser or Wasm-based environment;
 2. using the upstream OpenClaw runtime rather than a rewrite;
 3. continuously tracking current OpenClaw releases with automated tests.
+4. binding exact runtime evidence to a default-deny, host-owned capability
+   contract that another web application can embed.
 
 ## ClawLess
 
@@ -88,13 +90,15 @@ manual feature reimplementation.
   [WebContainers troubleshooting guide](https://webcontainers.io/guides/troubleshooting).
 - [BrowserPod](https://browserpod.io/docs/overview) runs Node 22 inside the
   browser with a virtual filesystem and controlled service portals. Its paid
-  plans explicitly allow commercial use, making it the shortest migration
-  candidate, but the runtime is proprietary, metered, and vendor-hosted unless
-  separately licensed for self-hosting.
+  plans explicitly allow commercial use. Clawsembly adopts it as the first
+  embedded provider, but the runtime is proprietary, metered, and vendor-hosted
+  unless separately licensed for self-hosting.
 - [container2wasm](https://github.com/container2wasm/container2wasm) converts
   amd64 containers into browser-runnable Wasm using emulation. It offers an open
   self-distribution path but remains experimental and generated artifacts carry
-  emulator, Linux, and guest-package licensing obligations.
+  emulator, Linux, and guest-package licensing obligations. Clawsembly's pinned
+  Node 22 probe generated a 316.7 MB module and failed before the guest command,
+  so the path is archived rather than treated as an active runtime alternative.
 - [v86](https://github.com/copy/v86) is BSD-licensed and browser-local, but it
   does not support 64-bit kernels. Current
   [CheerpX](https://cheerpx.io/docs/overview) likewise documents 32-bit x86.
@@ -108,5 +112,6 @@ manual feature reimplementation.
 
 Clawsembly should combine the upstream-package strategy proven by ClawLess,
 the browser storage patterns explored by ShadowClaw, and the explicit Wasm
-capability boundaries demonstrated by IronClaw. It should not inherit their
-manual version pins or independent agent implementations.
+capability boundaries demonstrated by IronClaw. Its distinct contribution is
+to make those boundaries evidence-bound and reusable by embedding applications.
+It should not inherit manual version pins or independent agent implementations.

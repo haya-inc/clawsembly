@@ -5,6 +5,7 @@ import {
   storeProviderCredential
 } from "./credential-vault";
 import { runProviderBrokerPolicyProbe } from "./provider-broker";
+import { runCapabilityBrokerPolicyProbe } from "../../../packages/capability-broker/capability-broker.mjs";
 
 export function setupCredentialVault(): void {
   const form = document.querySelector<HTMLFormElement>("[data-credential-vault]");
@@ -18,7 +19,7 @@ export function setupCredentialVault(): void {
   const showReadyState = async (prefix = "Vault verified") => {
     const metadata = await getCredentialMetadata("openai");
     health.dataset.state = "pass";
-    health.textContent = "VAULT + BROKER / PASS";
+    health.textContent = "VAULT + CAPABILITY BROKER / PASS";
     clearButton.disabled = !metadata;
     status.textContent = metadata
       ? `${prefix} · OpenAI credential stored · browser host only`
@@ -28,7 +29,7 @@ export function setupCredentialVault(): void {
     }));
   };
 
-  Promise.all([runCredentialVaultProbe(), runProviderBrokerPolicyProbe()])
+  Promise.all([runCredentialVaultProbe(), runProviderBrokerPolicyProbe(), runCapabilityBrokerPolicyProbe()])
     .then(() => showReadyState())
     .catch((error: unknown) => {
       health.dataset.state = "fail";

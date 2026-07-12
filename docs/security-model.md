@@ -18,8 +18,8 @@ the current prototype is production-ready.
    persistence, and permission operations.
 3. **Browser guest runtime** — untrusted runtime containing upstream OpenClaw,
    downloaded packages, model-generated code, plugins, and workspace content.
-   WebContainer is the current evidence implementation; BrowserPod and
-   container2wasm are migration candidates.
+   BrowserPod is the selected provider; WebContainer is the current evidence
+   implementation and container2wasm is an archived feasibility experiment.
 4. **External services** — npm, runtime delivery or metering services, model
    providers, and an optional native OpenClaw Gateway.
 
@@ -36,6 +36,10 @@ The browser sandbox is one boundary, not the only control.
 - Redact secrets from bounded diagnostic and audit output.
 - Pin upstream artifacts by version and integrity.
 - Treat report status as a security-sensitive claim backed by stored artifacts.
+- Bind every broker session to an exact OpenClaw version and package integrity.
+- Require an exact capability and scope grant; do not support wildcard or
+  ambient guest authority.
+- Keep capability audit records payload-free and bounded.
 
 ## Release requirements
 
