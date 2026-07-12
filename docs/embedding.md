@@ -191,5 +191,9 @@ The SDK initializes the host side automatically and exposes
 client as a generated SHA-256-pinned artifact, reads both files back through the
 runtime, and exposes their exact paths plus non-secret command environment as
 `session.guestTransport`. Generated-source drift fails the release gate.
-The reusable permission prompt covers the host decision UX; Gateway installation
-and owner-authorized BrowserPod evidence remain later SDK slices.
+The reusable permission prompt covers the host decision UX. The verified
+session also exposes `session.installer.install()`, which uses the same
+exact-artifact installer as the BrowserPod evidence probe and returns paths only
+after installed manifest and package-lock integrity match. Gateway launch,
+protocol authentication, and owner-authorized BrowserPod evidence remain later
+SDK slices.

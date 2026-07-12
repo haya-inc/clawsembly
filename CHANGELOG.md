@@ -29,6 +29,9 @@ The project does not yet promise semantic-version compatibility.
   approval, deny, revoke, expiry, and schema-governed payload-free audit export;
 - framework-neutral permission prompt with bounded grant controls, automatic
   expiry refresh, explicit audit download, and a provider-free public demo;
+- shared exact-artifact OpenClaw installer for evidence probes and verified
+  embed sessions, with concurrent-call aggregation, idempotence, bounded output,
+  and installed manifest/package-lock integrity verification;
 - nonce-bound guest process supervisor for cooperative child shutdown without
   overstating BrowserPod process-termination or Pod-disposal capabilities;
 - stable / previous / preview release tracking with generated update pull

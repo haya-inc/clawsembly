@@ -58,6 +58,8 @@ const required = [
   "packages/capability-broker/capability-audit.schema.json",
   "packages/embed-sdk/permission-prompt.mjs",
   "packages/embed-sdk/permission-prompt.d.mts",
+  "packages/browser-runtime/openclaw-installer.mjs",
+  "packages/browser-runtime/openclaw-installer.d.mts",
   "apps/web/public/schemas/capability-manifest.schema.json",
   "apps/web/public/schemas/capability-audit.schema.json",
   "dist/index.html",

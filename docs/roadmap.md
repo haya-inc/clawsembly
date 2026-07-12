@@ -170,8 +170,11 @@ explicit payload-free audit download. Its public demo uses an inert local broker
 and invokes no capability. The public reports now
 target `browserpod@2.12.1` and remain `probing` with no attached runtime
 evidence, so boot is correctly rejected before token consumption. The boot
-slice is not promoted as supported while owner-authorized BrowserPod evidence
-remains missing.
+session now also exposes the same exact-artifact installer used by the evidence
+probe; it aggregates concurrent calls and verifies installed manifest plus
+package-lock integrity before returning executable paths. Gateway launch and
+authentication remain. The boot slice is not promoted as supported while
+owner-authorized BrowserPod evidence remains missing.
 
 Exit criterion: an external web application can embed one supported upstream
 OpenClaw version without granting ambient credentials, filesystem, or network

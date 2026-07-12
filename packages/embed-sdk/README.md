@@ -34,6 +34,10 @@ const session = await bootVerifiedEmbed({
   capabilityHandlers
 });
 
+// Explicitly install the manifest-bound artifact. The SDK exposes no executable
+// path until both package.json and package-lock integrity match.
+const installed = await session.installer.install();
+
 // Manifest capabilities start pending, not granted.
 session.permissions.approve("storage.snapshot", "workspace:primary", {
   durationMs: 5 * 60_000,
@@ -43,8 +47,8 @@ session.permissions.approve("storage.snapshot", "workspace:primary", {
 session.mailbox.serve({ signal: shutdown.signal, maxRequests: 100 });
 await session.runtime.start({
   executable: "node",
-  args: ["guest-adapter.mjs"],
-  cwd: "/workspace",
+  args: [installed.executablePath, "--help"],
+  cwd: installed.root,
   env: [...session.guestTransport.environment]
 });
 ```
@@ -72,7 +76,10 @@ bounded responses, cancellation, and payload-free transport audit without
 terminal input. Verified boot stages a generated, SHA-256-pinned guest client,
 reads both modules back, and returns its paths plus explicit non-secret command
 environment in `session.guestTransport`; integrators no longer copy protocol
-files by hand. Gateway installation remains the next SDK slice. BrowserPod
-2.12.1 still lacks documented provider process
+files by hand. `session.installer` writes an exact dependency manifest, runs one
+bounded npm install, and exposes its executable only after installed version and
+package-lock integrity match the verified embed manifest. Gateway launch and
+protocol authentication remain the next SDK slice. BrowserPod 2.12.1 still
+lacks documented provider process
 termination and hard-disposal APIs; a guest supervisor now handles cooperative
 shutdown only for Clawsembly-launched processes.

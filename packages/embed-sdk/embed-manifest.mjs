@@ -1,6 +1,8 @@
 import { BROWSERPOD_ADAPTER_VERSION } from "../browser-runtime/browserpod-runtime.mjs";
 
 const CAPABILITY_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/u;
+const VERSION_PATTERN = /^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/u;
+const INTEGRITY_PATTERN = /^sha512-[A-Za-z0-9+/]+={0,2}$/u;
 
 function plainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -28,7 +30,8 @@ function normalizeCapabilities(capabilities) {
 function assertReport(report) {
   if (!plainObject(report) || !plainObject(report.artifact) || !plainObject(report.target)
     || report.artifact.package !== "openclaw" || typeof report.artifact.version !== "string"
-    || typeof report.artifact.integrity !== "string" || !report.artifact.integrity.startsWith("sha512-")
+    || !VERSION_PATTERN.test(report.artifact.version)
+    || typeof report.artifact.integrity !== "string" || !INTEGRITY_PATTERN.test(report.artifact.integrity)
     || typeof report.generatedAt !== "string" || !Number.isFinite(Date.parse(report.generatedAt))
     || !["probing", "partial", "supported", "unsupported"].includes(report.status)
     || typeof report.target.runtime !== "string"
@@ -78,12 +81,22 @@ export function createEmbedManifest({ report, runtime = "browserpod", capabiliti
 
 export function assertVerifiedLaunch(manifest) {
   if (!plainObject(manifest) || manifest.schemaVersion !== 1 || manifest.runtime !== "browserpod"
-    || manifest.runtimeVersion !== BROWSERPOD_ADAPTER_VERSION) {
+    || manifest.runtimeVersion !== BROWSERPOD_ADAPTER_VERSION || !plainObject(manifest.artifact)
+    || manifest.artifact.package !== "openclaw" || typeof manifest.artifact.version !== "string"
+    || !VERSION_PATTERN.test(manifest.artifact.version) || typeof manifest.artifact.integrity !== "string"
+    || !INTEGRITY_PATTERN.test(manifest.artifact.integrity) || !Array.isArray(manifest.capabilities)) {
     throw new TypeError("embed manifest is invalid");
   }
+  normalizeCapabilities(manifest.capabilities);
   if (manifest.launchable !== true || manifest.evidence?.verifiedForRuntime !== true) {
     const detail = Array.isArray(manifest.blockers) ? manifest.blockers.join("; ") : "runtime evidence is missing";
     throw new Error(`verified BrowserPod launch blocked: ${detail}`);
+  }
+  if (manifest.evidence?.reportStatus !== "supported"
+    || manifest.evidence?.reportRuntime !== "browserpod"
+    || manifest.evidence?.reportRuntimeVersion !== BROWSERPOD_ADAPTER_VERSION
+    || !Array.isArray(manifest.blockers) || manifest.blockers.length !== 0) {
+    throw new TypeError("embed manifest evidence is inconsistent");
   }
   return manifest;
 }

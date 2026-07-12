@@ -4,6 +4,7 @@ import type {
   CapabilityHandlerContext
 } from "../capability-broker/capability-broker.mjs";
 import type { BrowserPodApi, BrowserPodRuntime } from "../browser-runtime/browserpod-runtime.mjs";
+import type { VerifiedOpenClawInstaller } from "../browser-runtime/openclaw-installer.mjs";
 import type { FilesystemCapabilityMailboxHost } from "../capability-broker/filesystem-mailbox-host.mjs";
 import type { StagedGuestMailboxClient } from "../capability-broker/guest-mailbox-artifact.mjs";
 import type {
@@ -21,6 +22,8 @@ export function bootVerifiedEmbed(options: {
   sessionId?: string;
   mailboxChannelId?: string;
   onRuntimeAudit?: (event: Readonly<Record<string, unknown>>) => void;
+  onInstallOutput?: (event: Readonly<{ phase: "install"; chunk: string }>) => void;
+  onInstallAudit?: (event: Readonly<Record<string, unknown>>) => void;
   onCapabilityAudit?: (event: CapabilityAuditEvent) => void;
   onPermissionAudit?: (event: PermissionAuditEvent) => void;
   mailboxOptions?: {
@@ -34,6 +37,7 @@ export function bootVerifiedEmbed(options: {
   schemaVersion: 1;
   manifest: Readonly<EmbedManifest>;
   runtime: Readonly<BrowserPodRuntime>;
+  installer: Readonly<VerifiedOpenClawInstaller>;
   capabilities: CapabilityBroker;
   permissions: CapabilityConsentController;
   mailbox: FilesystemCapabilityMailboxHost;

@@ -4,12 +4,14 @@ import test from "node:test";
 import { bootVerifiedEmbed, createArtifactStorageKey } from "./boot.mjs";
 import { createEmbedManifest } from "./embed-manifest.mjs";
 
+const INTEGRITY = `sha512-${"A".repeat(86)}==`;
+
 function report({ status = "supported", runtime = "browserpod", runtimeVersion = "2.12.1" } = {}) {
   return {
     generatedAt: "2026-07-12T00:00:00.000Z",
     status,
     target: { runtime, runtimeVersion },
-    artifact: { package: "openclaw", version: "2026.6.11", integrity: "sha512-exact" }
+    artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY }
   };
 }
 
@@ -86,6 +88,20 @@ test("rejects unknown mailbox options before BrowserPod boot", async () => {
   assert.equal(fake.calls.length, 0);
 });
 
+test("rejects invalid installer diagnostics before BrowserPod boot", async () => {
+  const fake = fakeBrowserPod();
+  await assert.rejects(
+    bootVerifiedEmbed({
+      manifest: createEmbedManifest({ report: report() }),
+      BrowserPod: fake.BrowserPod,
+      browserPodApiKey: "secret",
+      onInstallOutput: "console"
+    }),
+    /install output sink is invalid/u
+  );
+  assert.equal(fake.calls.length, 0);
+});
+
 test("boots a verified BrowserPod session and binds capability authority to its artifact", async () => {
   const fake = fakeBrowserPod();
   const manifest = createEmbedManifest({
@@ -104,9 +120,12 @@ test("boots a verified BrowserPod session and binds capability authority to its 
     }
   });
   assert.equal(session.runtime.provider, "browserpod");
+  assert.equal(session.installer.state, "idle");
+  assert.deepEqual(session.installer.artifact, manifest.artifact);
+  assert.equal(session.installer.executablePath, "/workspace/.clawsembly/openclaw/node_modules/openclaw/openclaw.mjs");
   assert.equal(fake.calls[0].storageKey, "clawsembly:2026.6.11:primary");
   assert.deepEqual(session.capabilities.subject, {
-    artifact: { package: "openclaw", version: "2026.6.11", integrity: "sha512-exact" },
+    artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY },
     runtime: "browserpod",
     sessionId: "verified-session"
   });

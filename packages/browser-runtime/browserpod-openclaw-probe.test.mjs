@@ -189,7 +189,8 @@ test("rejects a package-lock integrity mismatch before starting the Gateway", as
     (error) => error.code === "artifact_mismatch"
   );
   assert.equal(fake.calls.some(([name, call]) => name === "run"
-    && call.executable === "node" && call.args.includes("node_modules/openclaw/openclaw.mjs")), false);
+    && call.executable === "node"
+    && call.args.includes("/workspace/clawsembly-probe/node_modules/openclaw/openclaw.mjs")), false);
 });
 
 test("rejects a failed crypto preflight before installing OpenClaw", async () => {

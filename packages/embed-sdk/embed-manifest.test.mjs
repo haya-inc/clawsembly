@@ -3,11 +3,13 @@ import test from "node:test";
 
 import { assertVerifiedLaunch, createEmbedManifest } from "./embed-manifest.mjs";
 
+const INTEGRITY = `sha512-${"A".repeat(86)}==`;
+
 const report = {
   generatedAt: "2026-07-12T00:00:00.000Z",
   status: "partial",
   target: { runtime: "remote" },
-  artifact: { package: "openclaw", version: "2026.6.11", integrity: "sha512-exact" }
+  artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY }
 };
 
 test("records BrowserPod adoption while blocking evidence from another runtime", () => {
@@ -63,5 +65,19 @@ test("rejects reports without exact artifact integrity", () => {
   assert.throws(
     () => createEmbedManifest({ report: { ...report, artifact: { ...report.artifact, integrity: "latest" } } }),
     /exact OpenClaw artifact/u
+  );
+  assert.throws(
+    () => createEmbedManifest({ report: { ...report, artifact: { ...report.artifact, integrity: "sha512-not-base64-" } } }),
+    /exact OpenClaw artifact/u
+  );
+});
+
+test("rejects a forged launchable manifest with inconsistent evidence", () => {
+  const manifest = createEmbedManifest({
+    report: { ...report, status: "supported", target: { runtime: "browserpod", runtimeVersion: "2.12.1" } }
+  });
+  assert.throws(
+    () => assertVerifiedLaunch({ ...manifest, evidence: { ...manifest.evidence, reportStatus: "partial" } }),
+    /evidence is inconsistent/u
   );
 });

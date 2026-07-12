@@ -2,12 +2,13 @@ import { BrowserRuntimeError } from "./browser-runtime.mjs";
 import { startCooperativeProcess } from "./cooperative-process.mjs";
 import { runBrowserRuntimePreflight } from "./browserpod-preflight.mjs";
 import { createBrowserPodRuntime } from "./browserpod-runtime.mjs";
+import {
+  assertExactOpenClawArtifact,
+  createVerifiedOpenClawInstaller
+} from "./openclaw-installer.mjs";
 
 export const BROWSERPOD_HEALTH_PREFIX = "[clawsembly-browserpod-health]";
 const PROBE_ROOT = "/workspace/clawsembly-probe";
-const STATE_ROOT = `${PROBE_ROOT}/state`;
-const INTEGRITY_PATTERN = /^sha512-[A-Za-z0-9+/]+={0,2}$/u;
-const VERSION_PATTERN = /^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/u;
 
 export const BROWSERPOD_HEALTH_SOURCE = String.raw`
 const port = Number(process.argv[1]);
@@ -35,19 +36,6 @@ for (const endpoint of ["healthz", "readyz"]) {
 }
 console.log("${BROWSERPOD_HEALTH_PREFIX}" + JSON.stringify(result));
 `;
-
-function validateArtifact(artifact) {
-  if (!artifact || artifact.package !== "openclaw" || typeof artifact.version !== "string"
-    || !VERSION_PATTERN.test(artifact.version) || typeof artifact.integrity !== "string"
-    || !INTEGRITY_PATTERN.test(artifact.integrity)) {
-    throw new TypeError("an exact openclaw version and sha512 integrity are required");
-  }
-  return Object.freeze({
-    package: "openclaw",
-    version: artifact.version,
-    integrity: artifact.integrity
-  });
-}
 
 function validateProbeOptions({ browser, source, port, gatewayToken, now }) {
   if (typeof browser !== "string" || browser.trim().length === 0 || browser.length > 512) {
@@ -120,7 +108,7 @@ export async function runBrowserPodOpenClawProbe({
   onOutput = () => {},
   now = Date.now
 }) {
-  const artifact = validateArtifact(untrustedArtifact);
+  const artifact = assertExactOpenClawArtifact(untrustedArtifact);
   validateProbeOptions({ browser, source, port, gatewayToken, now });
   const runtime = await createBrowserPodRuntime({ BrowserPod, apiKey, storageKey });
   const preflight = await runBrowserRuntimePreflight({
@@ -131,64 +119,24 @@ export async function runBrowserPodOpenClawProbe({
     throw new BrowserRuntimeError("preflight_failed", "BrowserPod crypto and SQLite checks must pass");
   }
 
-  await runtime.createDirectory(PROBE_ROOT, { recursive: true });
-  await runtime.createDirectory(STATE_ROOT, { recursive: true });
-  await runtime.writeTextFile(`${PROBE_ROOT}/package.json`, `${JSON.stringify({
-    name: "clawsembly-browserpod-probe",
-    private: true,
-    dependencies: { openclaw: artifact.version }
-  }, null, 2)}\n`);
-
-  const installStartedAt = now();
-  const installTask = await runtime.start({
-    executable: "npm",
-    args: [
-      "install",
-      "--save-exact",
-      `openclaw@${artifact.version}`,
-      "--no-audit",
-      "--no-fund",
-      "--no-progress",
-      "--loglevel",
-      "warn"
-    ],
-    cwd: PROBE_ROOT,
-    env: ["CI=1", "NO_COLOR=1"],
-    outputLimitBytes: 4 * 1024 * 1024
+  const installer = createVerifiedOpenClawInstaller({
+    runtime,
+    artifact,
+    root: PROBE_ROOT,
+    onOutput: ({ chunk }) => relayOutput(onOutput, "install", chunk),
+    now
   });
-  installTask.onOutput((chunk) => relayOutput(onOutput, "install", chunk));
-  const installCompletion = await installTask.wait();
-  if (installCompletion.status !== "completed") {
-    throw new BrowserRuntimeError("install_failed", "the exact OpenClaw artifact did not install in BrowserPod");
-  }
-  const installDurationMs = Math.max(0, now() - installStartedAt);
-
-  const installedManifest = parseJson(
-    await runtime.readTextFile(`${PROBE_ROOT}/node_modules/openclaw/package.json`),
-    "installed OpenClaw manifest"
-  );
-  const packageLock = parseJson(
-    await runtime.readTextFile(`${PROBE_ROOT}/package-lock.json`, { maxBytes: 8 * 1024 * 1024 }),
-    "BrowserPod package lock"
-  );
-  const installedLock = packageLock?.packages?.["node_modules/openclaw"];
-  if (installedManifest.version !== artifact.version || installedLock?.version !== artifact.version
-    || installedLock?.integrity !== artifact.integrity) {
-    throw new BrowserRuntimeError(
-      "artifact_mismatch",
-      "the installed BrowserPod artifact does not match the requested OpenClaw version and integrity"
-    );
-  }
+  const installed = await installer.install();
 
   const gatewayStartedAt = now();
   const supervisedGateway = await startCooperativeProcess({
     runtime,
-    root: `${PROBE_ROOT}/supervision`,
+    root: `${installed.root}/supervision`,
     id: "gateway",
     command: {
       executable: "node",
       args: [
-        "node_modules/openclaw/openclaw.mjs",
+        installed.executablePath,
         "--dev",
         "gateway",
         "--allow-unconfigured",
@@ -199,12 +147,12 @@ export async function runBrowserPodOpenClawProbe({
         "--auth",
         "token"
       ],
-      cwd: PROBE_ROOT,
+      cwd: installed.root,
       env: [
         "CI=1",
         "NO_COLOR=1",
         "OPENCLAW_SKIP_CHANNELS=1",
-        `OPENCLAW_STATE_DIR=${STATE_ROOT}`,
+        `OPENCLAW_STATE_DIR=${installed.stateRoot}`,
         `OPENCLAW_GATEWAY_TOKEN=${gatewayToken}`
       ],
       outputLimitBytes: 2 * 1024 * 1024
@@ -240,7 +188,7 @@ export async function runBrowserPodOpenClawProbe({
   const healthTask = await runtime.start({
     executable: "node",
     args: ["--input-type=module", "-e", BROWSERPOD_HEALTH_SOURCE, String(port)],
-    cwd: PROBE_ROOT,
+    cwd: installed.root,
     env: ["NO_COLOR=1"],
     outputLimitBytes: 64 * 1024
   });
@@ -279,11 +227,11 @@ export async function runBrowserPodOpenClawProbe({
     install: Object.freeze({
       result: "pass",
       command: "npm install --save-exact openclaw@<version>",
-      durationMs: installDurationMs,
-      installedVersion: installedManifest.version,
-      lockIntegrity: installedLock.integrity,
+      durationMs: installed.durationMs,
+      installedVersion: installed.artifact.version,
+      lockIntegrity: installed.artifact.integrity,
       integrityMatched: true,
-      outputTruncated: installTask.outputTruncated
+      outputTruncated: installed.outputTruncated
     }),
     gateway: Object.freeze({
       result: "pass",

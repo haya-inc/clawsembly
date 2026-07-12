@@ -1,4 +1,5 @@
 import { createBrowserPodRuntime } from "../browser-runtime/browserpod-runtime.mjs";
+import { createVerifiedOpenClawInstaller } from "../browser-runtime/openclaw-installer.mjs";
 import { CapabilityBroker } from "../capability-broker/capability-broker.mjs";
 import { CapabilityConsentController } from "../capability-broker/capability-consent.mjs";
 import { FilesystemCapabilityMailboxHost } from "../capability-broker/filesystem-mailbox-host.mjs";
@@ -32,6 +33,8 @@ export async function bootVerifiedEmbed({
   sessionId = crypto.randomUUID(),
   mailboxChannelId = `mailbox_${crypto.randomUUID().replaceAll("-", "")}`,
   onRuntimeAudit,
+  onInstallOutput,
+  onInstallAudit,
   onCapabilityAudit,
   onPermissionAudit,
   mailboxOptions = {}
@@ -56,6 +59,12 @@ export async function bootVerifiedEmbed({
   if (Object.keys(mailboxOptions).some((key) => !allowedMailboxOptions.has(key))) {
     throw new TypeError("embed mailbox options contain an unknown field");
   }
+  if (onInstallOutput !== undefined && typeof onInstallOutput !== "function") {
+    throw new TypeError("embed install output sink is invalid");
+  }
+  if (onInstallAudit !== undefined && typeof onInstallAudit !== "function") {
+    throw new TypeError("embed install audit sink is invalid");
+  }
   const storageKey = workspaceId === undefined
     ? undefined
     : createArtifactStorageKey(verifiedManifest, workspaceId);
@@ -78,6 +87,12 @@ export async function bootVerifiedEmbed({
     broker: capabilities,
     requests: verifiedManifest.capabilities,
     auditSink: onPermissionAudit
+  });
+  const installer = createVerifiedOpenClawInstaller({
+    runtime,
+    artifact: verifiedManifest.artifact,
+    onOutput: onInstallOutput,
+    onAudit: onInstallAudit
   });
   const mailboxRoot = `/workspace/.clawsembly/mailbox/${mailboxChannelId}`;
   const mailbox = new FilesystemCapabilityMailboxHost({
@@ -113,6 +128,7 @@ export async function bootVerifiedEmbed({
     schemaVersion: 1,
     manifest: verifiedManifest,
     runtime,
+    installer,
     capabilities,
     permissions,
     mailbox,

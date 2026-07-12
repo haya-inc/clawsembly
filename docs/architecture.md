@@ -212,6 +212,13 @@ controller rather than data attributes, allows only bounded duration/call
 inputs, refreshes on grant expiry, and exports the same schema-governed audit
 used by headless integrations.
 
+`openclaw-installer.mjs` is shared by evidence probes and verified embed
+sessions. It accepts only an exact semver plus SHA-512 identity, writes a
+minimal dependency manifest, runs npm with an explicit secret-free environment,
+and verifies the installed manifest and lock entry before exposing the OpenClaw
+executable. Concurrent calls share one install and successful calls are
+idempotent.
+
 ## Persistence
 
 The first implementation should separate:

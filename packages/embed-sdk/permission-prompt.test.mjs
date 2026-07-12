@@ -9,13 +9,15 @@ import {
   serializeCapabilityAudit
 } from "./permission-prompt.mjs";
 
+const INTEGRITY = `sha512-${"A".repeat(86)}==`;
+
 const manifest = {
   schemaVersion: 1,
   generatedAt: "2026-07-12T00:00:00.000Z",
   subject: {
     runtime: "browserpod",
     sessionId: "permission-test",
-    artifact: { package: "openclaw", version: "2026.6.11", integrity: "sha512-exact" }
+    artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY }
   },
   permissions: [
     {
