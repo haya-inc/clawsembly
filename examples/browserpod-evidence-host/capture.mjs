@@ -12,6 +12,12 @@ const apiKey = process.env.BROWSERPOD_API_KEY;
 const statusPath = resolve(outputDirectory, "capture-status.json");
 await mkdir(outputDirectory, { recursive: true });
 
+function fail(code, message) {
+  const error = new Error(message);
+  error.code = code;
+  return error;
+}
+
 let server;
 let browser;
 let page;
@@ -19,14 +25,17 @@ let artifact;
 let evidencePath;
 let stage = "initialize";
 try {
-  if (typeof apiKey !== "string" || !apiKey || apiKey.length > 4_096) {
-    throw new Error("BROWSERPOD_API_KEY is required for an owner-authorized capture.");
+  if (typeof apiKey !== "string" || !apiKey) {
+    throw fail("missing_api_key", "BROWSERPOD_API_KEY is required for an owner-authorized capture.");
+  }
+  if (apiKey.length > 4_096) {
+    throw fail("api_key_too_long", "BROWSERPOD_API_KEY exceeds the expected credential length.");
   }
   const report = JSON.parse(await readFile(reportPath, "utf8"));
   const version = report?.artifact?.version;
   if (!/^[0-9A-Za-z][0-9A-Za-z._+-]{0,127}$/u.test(version ?? "")
     || report?.artifact?.package !== "openclaw" || typeof report?.artifact?.integrity !== "string") {
-    throw new Error("The checked-in stable compatibility report identity is invalid.");
+    throw fail("invalid_report_identity", "The checked-in stable compatibility report identity is invalid.");
   }
   artifact = {
     package: "openclaw",
@@ -45,7 +54,7 @@ try {
   });
   await server.listen();
   const address = server.httpServer?.address();
-  if (!address || typeof address === "string") throw new Error("Evidence host address is unavailable.");
+  if (!address || typeof address === "string") throw fail("host_address_unavailable", "Evidence host address is unavailable.");
   stage = "browser-launch";
   browser = await chromium.launch({ headless: true });
   page = await browser.newPage();
