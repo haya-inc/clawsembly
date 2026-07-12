@@ -4,6 +4,7 @@ Thank you for helping make OpenClaw browser compatibility reproducible.
 
 ## Good first contributions
 
+- consume the published report or packed SDK from a minimal external application;
 - classify an unclassified dependency or Node built-in;
 - turn a browser failure into a minimal fixture;
 - improve the compatibility-report schema or project page accessibility;
@@ -12,6 +13,12 @@ Thank you for helping make OpenClaw browser compatibility reproducible.
 
 Please avoid broad parity implementations or dummy packages that make startup
 look successful while hiding later failures.
+
+Before claiming a compatibility issue, confirm that it targets the current
+BrowserPod runtime boundary. Findings for removed providers remain useful in
+Git history and decision records, but they are not active implementation tasks.
+Every submitted record must identify whether it came from static inspection, a
+provider-free contract test, or an owner-authorized BrowserPod run.
 
 ## Development
 

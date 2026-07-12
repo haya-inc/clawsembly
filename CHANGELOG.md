@@ -52,6 +52,8 @@ The project does not yet promise semantic-version compatibility.
   public TypeScript declarations;
 - byte-reproducible `@haya-inc/clawsembly@0.1.0-alpha.0` package assembly with
   a script-disabled isolated ESM/TypeScript consumer check and local checksum;
+- BrowserPod-specific compatibility intake with an explicit evidence source,
+  current probe stages, and mandatory secret-redaction confirmation;
 - ordered embed-session close that refuses runtime disposal while the Gateway
   is active and retains cleanup access when cooperative stop fails;
 - nonce-bound guest process supervisor for cooperative child shutdown without
@@ -78,6 +80,8 @@ The project does not yet promise semantic-version compatibility.
 - BrowserPod 2.12.1 exposes no documented terminal-input, arbitrary
   process-termination, or hard-disposal API; Clawsembly can cooperatively stop
   its own supervised Gateway, but cannot claim provider-level teardown;
-- the measured install/cache footprint is approximately 880 MB;
+- BrowserPod install/cache/boot performance is not yet measured; the historical
+  approximately 880 MB figure belongs to the removed runtime and is not a
+  BrowserPod baseline;
 - Firefox, Safari, remote Gateway parity, general workspace migration, and
   owner-authorized live-provider evidence remain unverified.

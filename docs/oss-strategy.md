@@ -71,11 +71,12 @@ requests.
 ### Gate 1 — credible launch artifact
 
 - Publish the project page, report schema, raw evidence, and reproducible commands.
-- Keep the current stable release verified and clearly label the result `partial`
-  until all release gates pass.
-- Reduce or cache the measured 57.1-second cold install and 880 MB combined
-  dependency/cache footprint; publish the number even before it improves.
-- Report the exact-marker Ed25519 patch upstream and link its disposition.
+- Keep the current stable release inspected and clearly label the result
+  `probing` until owner-authorized BrowserPod runtime gates pass.
+- Capture BrowserPod cold/warm install, persistent reuse, Gateway-ready latency,
+  and storage footprint; publish the numbers before optimizing them.
+- Report upstream only failures reproduced against the current BrowserPod
+  boundary; do not carry removed-runtime patches into the active backlog.
 
 Exit signal: an OpenClaw integrator can reproduce a report without maintainer
 help and can identify why a check is not green.
@@ -123,11 +124,14 @@ maintainer can process a new release without handwritten runtime changes.
 
 ## Immediate priority order
 
-1. Upstream the published shrinkwrap inconsistency with a minimal reproduction.
-2. Cache or replace the nested dependency repair path.
-3. Automate stable/previous/preview reports and preserve the last verified
-   stable result.
-4. Publish the current project page and invite review from OpenClaw, the
-   selected browser-runtime provider, and the open fallback community.
-5. Add broader workspace persistence, remote mode, and more capabilities only
+1. Capture the owner-authorized BrowserPod readiness/Gateway record in
+   [issue #6](https://github.com/haya-inc/clawsembly/issues/6).
+2. Establish BrowserPod cold/warm/persistent performance baselines in
+   [issue #8](https://github.com/haya-inc/clawsembly/issues/8).
+3. Prove packed-SDK consumption from a minimal external host in
+   [issue #7](https://github.com/haya-inc/clawsembly/issues/7).
+4. Keep stable/previous/preview reports automated and preserve the last
+   provider-evidenced stable result once one exists.
+5. Invite review from OpenClaw integrators and BrowserPod maintainers; add
+   broader workspace persistence, remote mode, and capabilities only
    when they improve a measured compatibility gate.

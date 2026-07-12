@@ -40,9 +40,10 @@ Deliverables:
 Exit criterion: the Gateway either boots without an upstream source patch, or
 the smallest unavoidable patch and its upstream issue are documented.
 
-Status: the pinned release boots with one fail-closed exact-marker patch for
-Ed25519 verification. The patch preserves rejection of invalid signatures and
-is listed in the checked-in compatibility evidence; upstream reporting remains.
+Historical status: the pinned release booted on the removed runtime with one
+fail-closed exact-marker patch for Ed25519 verification. That adapter and patch
+were deleted during the BrowserPod-only cutover. The result remains useful as
+history but does not provide BrowserPod support evidence.
 
 This phase also introduces stable-release detection and the minimal automated
 report workflow. Release tracking is part of the product from the first probe,
@@ -102,19 +103,19 @@ call limits, expiry, revocation, cancellation, and payload-free audit. The typed
 guest transport and reusable permission prompt are integrated; workspace
 migration and owner-authorized provider evidence remain.
 
-The Chromium performance lane now measures a 57.1-second cold install, including
-49.7 seconds for the 293-package nested repair, a 2.9-second warm reinstall,
+The removed Chromium runtime measured a 57.1-second cold install, including
+49.7 seconds for a 293-package nested repair, a 2.9-second warm reinstall,
 618.5 MB of `node_modules`, 261.6 MB of npm cache, and 16.4 seconds to Gateway
-protocol readiness. Suppressing redundant repair scripts improved cold time by
-4.1%. A deterministic `npm ci` experiment was rejected because the published
-shrinkwrap root omits 31 manifest dev-dependency declarations. The static
-inspector now detects root declaration drift on every inspected release.
-Footprint and cold-path reduction remain Phase 3 work.
+protocol readiness. These remain historical comparison data only. BrowserPod
+cold, warm, persistent-reuse, and Gateway-ready measurements are absent and
+must be captured before setting performance budgets. The static inspector still
+detects published shrinkwrap root declaration drift without implying that the
+removed repair path remains active.
 
 ### Phase 3b: BrowserPod runtime integration
 
-Status: complete. Replace the superseded production boundary without moving
-execution to a server:
+Status: implementation complete; provider evidence pending. Replace the
+superseded production boundary without moving execution to a server:
 
 - remove the superseded runtime from the application, dependency graph,
   compatibility target, fixtures, evidence, and CI; retain history in Git and
@@ -247,7 +248,8 @@ agent runtime inside Clawsembly.
 
 1. Extend the versioned mock-state envelope to cover user workspaces and migration fixtures.
 2. Execute the protected live smoke test with an owner-provided key, archive redacted evidence, and expand moderation UX.
-3. Replace or cache the 293-package repair path and reduce the measured 880 MB combined install/cache footprint.
+3. Measure BrowserPod cold, warm, and persistent install paths and establish
+   provider-specific latency/storage budgets.
 4. Reproduce the full runtime slice on the selected commercial browser runtime.
 5. Add remote-mode pairing approval, device-token rotation, revocation,
    recovery, and bridge-process hardening.

@@ -57,7 +57,10 @@ The first baseline must be measured before targets are made stricter.
 - coverage: latest verified stable, previous verified stable, and latest preview;
 - evidence: no green status without boot, handshake, and mocked chat artifacts;
 - maintenance: additive protocol updates require no handwritten runtime change;
-- reliability: supported-browser success rate and p75 cold/warm boot time are published; the optimized Chromium baseline is 57.1 s cold install, 2.9 s warm reinstall, and 16.4 s to Gateway protocol-ready;
+- reliability: supported-browser success rate and p75 cold/warm boot time are
+  published after owner-authorized BrowserPod evidence exists; the historical
+  57.1 s cold install, 2.9 s warm reinstall, and 16.4 s Gateway-ready figures
+  belong to the removed runtime and are comparison data, not a BrowserPod SLO;
 - community: at least three non-maintainer contributors complete a fixture,
   classification, documentation, or adapter contribution before 1.0.
 

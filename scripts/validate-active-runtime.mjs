@@ -59,6 +59,19 @@ for (const path of [
 const browserWorkflow = await read(".github/workflows/runtime-browser.yml");
 assert.equal(browserWorkflow.includes("packages/webcontainer-adapter"), false, "normal browser CI references the removed adapter");
 
+const compatibilityIssueTemplate = await read(".github/ISSUE_TEMPLATE/compatibility.yml");
+assert.equal(compatibilityIssueTemplate.includes("WebContainer"), false, "compatibility issue template references the removed runtime");
+assert.equal(compatibilityIssueTemplate.includes("BrowserPod version"), true, "compatibility findings must identify the BrowserPod version");
+assert.equal(compatibilityIssueTemplate.includes("Owner-authorized BrowserPod run"), true, "compatibility findings must identify owner-authorized runtime evidence");
+assert.equal(compatibilityIssueTemplate.includes("I removed BrowserPod keys"), true, "compatibility findings must confirm secret redaction");
+
+const roadmap = await read("docs/roadmap.md");
+assert.equal(roadmap.includes("Status: implementation complete; provider evidence pending."), true, "roadmap overstates BrowserPod evidence completion");
+assert.equal(roadmap.includes("Replace or cache the 293-package repair path"), false, "roadmap promotes the removed runtime repair path");
+const ossStrategy = await read("docs/oss-strategy.md");
+assert.equal(ossStrategy.includes("Cache or replace the nested dependency repair path"), false, "OSS strategy promotes the removed runtime repair path");
+assert.equal(ossStrategy.includes("issue #7"), true, "OSS strategy must expose the external SDK starter contribution");
+
 const reportSchema = await readJson("packages/compatibility/report.schema.json");
 assert.equal(reportSchema.properties.target.properties.runtime.const, "browserpod", "report schema must be BrowserPod-only");
 const inspector = await read("packages/compatibility/src/inspect.mjs");
