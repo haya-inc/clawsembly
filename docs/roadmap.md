@@ -250,6 +250,13 @@ of that CI artifact into the durable checked-in report, optional/transitive
 ownership classification, automatic rollback promotion, and owner-authorized
 end-to-end Gateway evidence remain.
 
+The first automatic-promotion boundary is now implemented as a derived public
+policy: preview, stable, and previous are evaluated independently against
+runtime evidence, support state, pending/failing checks, shrinkwrap consistency,
+Gateway classification, and dependency-scan completeness. It recommends but
+does not itself mutate npm tags or deployment state; automatic rollback
+execution remains intentionally separate.
+
 ## Phase 5: extensibility and broader capabilities
 
 Possible follow-up work:

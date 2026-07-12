@@ -34,6 +34,13 @@ protocol, and distribution changes in `gatewayContractFromStable`; missing or
 ambiguous source artifacts produce `incomplete` rather than an empty-compatible
 result.
 
+Release tracking also writes `promotion-policy.json`. It derives a `promote` or
+`hold` candidate decision and independent stable/rollback eligibility from the
+validated history. `compat:validate` recomputes the policy, so editing the
+decision or its blockers without changing source reports fails CI. The public
+schema and dependency-free consumer live under `apps/web/public/schemas/` and
+`examples/release-policy/` respectively.
+
 Generate a static BrowserPod-target report without runtime evidence:
 
 ```bash

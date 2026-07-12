@@ -155,6 +155,7 @@ the release is reported as `probing` rather than production-compatible.
 - [Project page](https://haya-inc.github.io/clawsembly/)
 - [Checked-in compatibility report](apps/web/public/data/compatibility.json)
 - [Release-channel history](apps/web/public/data/release-history.json)
+- [Promotion policy](https://haya-inc.github.io/clawsembly/data/promotion-policy.json)
 - [Report schema](packages/compatibility/report.schema.json)
 - [Release-history schema](packages/compatibility/release-history.schema.json)
 - [Downstream consumption guide](docs/consuming-reports.md)
@@ -164,6 +165,18 @@ the release is reported as `probing` rather than production-compatible.
 - [Deployment requirements](docs/deployment.md)
 
 ## Quick start
+
+No install is required to observe the current promotion decision:
+
+```bash
+node examples/release-policy/check.mjs --observe
+```
+
+The dependency-free consumer fetches the public policy over strict HTTPS and
+prints the exact preview decision. Remove `--observe` to make `HOLD` fail CI.
+See the [release-policy example](examples/release-policy/README.md) and its
+copyable GitHub Actions template. The current preview is intentionally held;
+this command is useful before BrowserPod or the SDK package is available.
 
 Requirements: Node.js 22.19 or newer.
 

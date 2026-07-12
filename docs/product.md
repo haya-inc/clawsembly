@@ -23,6 +23,8 @@ browser-chat demo.
 
 - a versioned JSON compatibility report;
 - a stable / previous / preview release index with exact evidence levels;
+- a derived promotion/rollback policy that downstream CI can consume without
+  installing the SDK;
 - a human-readable compatibility page and badge;
 - failure fixtures containing inputs, logs, and the expected classification;
 - a generated Gateway client that external applications can reuse;
@@ -71,3 +73,8 @@ the report or badge, three non-maintainer contributors landing bounded changes,
 and one additive upstream release processed without handwritten runtime changes.
 See the [OSS success strategy](oss-strategy.md) for the competitive position and
 90-day gates.
+
+Current adoption surface: the public policy endpoint, schema, dependency-free
+Node consumer, and copyable GitHub Actions template are implemented. This makes
+external consumption possible before npm publication; a first independent
+consumer is still the next distribution proof.

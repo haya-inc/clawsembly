@@ -36,6 +36,7 @@ assert.match(generationJob, /npm run report-pin:generate/, "report generation mu
 assert.match(generationJob, /npm run report-pin:check/, "report generation must verify the SDK host pin");
 assert.match(generationJob, /npm run compat:validate/, "report generation must validate evidence before upload");
 assert.match(generationJob, /examples\/sdk-host\/src\/report-pin\.ts/, "validated report artifacts must contain the SDK host pin");
+assert.match(generationJob, /apps\/web\/public\/data\/promotion-policy\.json/, "validated report artifacts must contain the promotion policy");
 assert.ok(
   generationJob.indexOf("Package validated reports") < generationJob.indexOf("actions/upload-artifact@"),
   "validated reports must be packaged before artifact upload"
@@ -48,5 +49,6 @@ assert.match(publishJob, /Report artifact contains an unsafe path/, "report publ
 assert.match(publishJob, /Report artifact must not contain symlinks/, "report publishing must reject artifact symlinks");
 assert.match(publishJob, /cp .*report-pin\.ts.*examples\/sdk-host\/src\/report-pin\.ts/, "report publishing must install the validated SDK host pin");
 assert.match(publishJob, /git add .*examples\/sdk-host\/src\/report-pin\.ts/, "report publishing must commit the SDK host pin with reports");
+assert.match(publishJob, /git add .*promotion-policy\.json/, "report publishing must commit the promotion policy with reports");
 
 process.stdout.write(`Validated ${workflowFiles.length} pinned workflows and compatibility-job permissions.\n`);

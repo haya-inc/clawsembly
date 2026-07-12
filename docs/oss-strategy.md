@@ -94,7 +94,8 @@ Exit signal: at least one external project links to or consumes the report.
 
 Current implementation: stable / previous / preview resolution, exact-artifact
 reports, release-history JSON, project-page comparison, unchanged-channel
-suppression, and generated-report pull requests are implemented. External
+suppression, generated-report pull requests, public schemas, and a fail-closed
+promotion policy with a dependency-free CI consumer are implemented. External
 consumption and multi-release runtime evidence are not yet proven.
 
 ### Gate 3 — contributor flywheel
@@ -128,8 +129,9 @@ maintainer can process a new release without handwritten runtime changes.
    [issue #6](https://github.com/haya-inc/clawsembly/issues/6).
 2. Establish BrowserPod cold/warm/persistent performance baselines in
    [issue #8](https://github.com/haya-inc/clawsembly/issues/8).
-3. Keep the packed-SDK host example reproducible and seek a genuinely external
-   consumer; the first-party example proves packaging, not adoption.
+3. Offer the install-free promotion-policy consumer as the first adoption path,
+   keep the packed-SDK host example reproducible, and seek a genuinely external
+   consumer; first-party examples prove usability, not adoption.
 4. Keep stable/previous/preview reports automated and preserve the last
    provider-evidenced stable result once one exists.
 5. Invite review from OpenClaw integrators and BrowserPod maintainers; add

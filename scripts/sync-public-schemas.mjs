@@ -4,13 +4,17 @@ import { dirname, resolve } from "node:path";
 
 const root = process.cwd();
 const schemas = [
-  "capability-manifest.schema.json",
-  "capability-audit.schema.json"
+  ["packages/capability-broker", "capability-manifest.schema.json"],
+  ["packages/capability-broker", "capability-audit.schema.json"],
+  ["packages/compatibility", "report.schema.json"],
+  ["packages/compatibility", "release-history.schema.json"],
+  ["packages/compatibility", "browserpod-evidence.schema.json"],
+  ["packages/compatibility", "promotion-policy.schema.json"]
 ];
 let stale = false;
 
-for (const name of schemas) {
-  const source = resolve(root, "packages/capability-broker", name);
+for (const [directory, name] of schemas) {
+  const source = resolve(root, directory, name);
   const target = resolve(root, "apps/web/public/schemas", name);
   const expected = await readFile(source, "utf8");
   if (process.argv.includes("--check")) {
@@ -32,5 +36,5 @@ if (stale) {
   process.stderr.write("Run npm run schemas:sync.\n");
   process.exitCode = 1;
 } else if (process.argv.includes("--check")) {
-  process.stdout.write("Public capability schemas are current.\n");
+  process.stdout.write("Public schemas are current.\n");
 }

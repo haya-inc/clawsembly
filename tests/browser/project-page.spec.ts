@@ -39,6 +39,15 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   };
   expect(index.releases.map((release) => release.channel)).toEqual(["stable", "previous", "preview"]);
   expect(new Set(Object.values(index.channels)).size).toBe(3);
+  const policyResponse = await request.get("/data/promotion-policy.json");
+  expect(policyResponse.ok()).toBe(true);
+  const policy = await policyResponse.json() as {
+    schemaVersion: number;
+    decision: "promote" | "hold";
+    candidate: { channel: string; version: string; eligible: boolean; reasons: string[] };
+  };
+  expect(policy.schemaVersion).toBe(1);
+  expect(policy.candidate.eligible).toBe(policy.decision === "promote");
 
   const pageResponse = await request.get("/");
   expect(pageResponse.headers()["content-security-policy"]).toContain("default-src 'self'");
@@ -142,6 +151,14 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   )).toBeVisible();
   const firstMethod = contract?.coreMethods.added[0];
   if (firstMethod) await expect(gatewayDiff.getByText(firstMethod, { exact: true })).toBeVisible();
+  const promotionPolicy = page.locator("[data-promotion-policy]");
+  await expect(promotionPolicy).toBeVisible();
+  await expect(promotionPolicy.locator("[data-promotion-decision]")).toHaveText(policy.decision);
+  await expect(promotionPolicy.locator("[data-promotion-version]")).toHaveText(policy.candidate.version);
+  await expect(promotionPolicy).toHaveAttribute("href", "/data/promotion-policy.json");
+  if (policy.candidate.reasons.includes("gateway-contract-breaking")) {
+    await expect(promotionPolicy).toContainText("Gateway contract breaking");
+  }
   expect(consoleErrors).toEqual([]);
 });
 
@@ -162,6 +179,10 @@ test("release ledger remains readable at a mobile viewport", async ({ page }) =>
   expect(gatewayBounds!.x).toBeGreaterThanOrEqual(0);
   expect(gatewayBounds!.x + gatewayBounds!.width).toBeLessThanOrEqual(390);
   await expect(gatewayDiff.locator(".gateway-diff-group")).toHaveCount(4);
+  const policyBounds = await section.locator("[data-promotion-policy]").boundingBox();
+  expect(policyBounds).not.toBeNull();
+  expect(policyBounds!.x).toBeGreaterThanOrEqual(0);
+  expect(policyBounds!.x + policyBounds!.width).toBeLessThanOrEqual(390);
   const brokerBounds = await page.locator("#broker").boundingBox();
   expect(brokerBounds).not.toBeNull();
   expect(brokerBounds!.x).toBeGreaterThanOrEqual(0);

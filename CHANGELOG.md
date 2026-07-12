@@ -75,6 +75,10 @@ The project does not yet promise semantic-version compatibility.
   fail-closed breaking/incomplete classification;
 - project-page Gateway upgrade inspector exposing the preview classification,
   protocol movement, legacy declaration removal, and bounded exact-name lists;
+- fail-closed promotion-policy artifact with independent stable, preview, and
+  rollback gates, public schema URLs, and checked-in derivation validation;
+- dependency-free strict-HTTPS Node/CI consumer and copyable GitHub Actions
+  template for install-free external adoption;
 - report-driven project page, release ledger, compatibility badge, contribution
   templates, security policy, and downstream consumption guide.
 

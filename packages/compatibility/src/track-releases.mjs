@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { dirname, relative, resolve } from "node:path";
 import { renderCompatibilityBadge } from "./compatibility-badge.mjs";
 import { inspectDependencyRisk } from "./dependency-risk.mjs";
+import { buildPromotionPolicy } from "./promotion-policy.mjs";
 import { buildReleaseHistory, compareDirectDependencies, resolveReleaseChannels } from "./release-tracking.mjs";
 
 function parseArgs(argv) {
@@ -14,6 +15,7 @@ function parseArgs(argv) {
     index: "apps/web/public/data/release-history.json",
     latest: "apps/web/public/data/compatibility.json",
     badge: "apps/web/public/data/compatibility-badge.svg",
+    policy: "apps/web/public/data/promotion-policy.json",
     runtime: "browserpod",
     runtimeVersion: "2.12.1",
     browserBaseline: "Desktop Chromium; Firefox and WebKit pending BrowserPod evidence.",
@@ -27,6 +29,7 @@ function parseArgs(argv) {
     if (argv[index] === "--index" && value) options.index = value;
     if (argv[index] === "--latest" && value) options.latest = value;
     if (argv[index] === "--badge" && value) options.badge = value;
+    if (argv[index] === "--policy" && value) options.policy = value;
     if (argv[index] === "--runtime" && value) options.runtime = value;
     if (argv[index] === "--runtime-version" && value) options.runtimeVersion = value;
     if (argv[index] === "--browser-baseline" && value) options.browserBaseline = value;
@@ -56,6 +59,7 @@ const outputDirectory = resolve(process.cwd(), options.outputDirectory);
 const indexPath = resolve(process.cwd(), options.index);
 const latestPath = resolve(process.cwd(), options.latest);
 const badgePath = resolve(process.cwd(), options.badge);
+const policyPath = resolve(process.cwd(), options.policy);
 const inspectScript = resolve(import.meta.dirname, "inspect.mjs");
 const reports = {};
 const reportPaths = {};
@@ -70,7 +74,8 @@ const browserRuntimeEvidenceVersion = options.browserRuntimeEvidence
 if (options.skipUnchanged) {
   try {
     const current = JSON.parse(readFileSync(indexPath, "utf8"));
-    const complete = [indexPath, latestPath, badgePath, ...Object.values(finalOutputs)].every((path) => existsSync(path));
+    const complete = [indexPath, latestPath, badgePath, policyPath, ...Object.values(finalOutputs)]
+      .every((path) => existsSync(path));
     if (complete && ["stable", "previous", "preview"].every((channel) => current?.channels?.[channel] === channels[channel])) {
       process.stdout.write(`Release channels are unchanged: ${JSON.stringify(channels)}\n`);
       process.exit(0);
@@ -149,6 +154,7 @@ try {
     version: reports.stable.artifact.version,
     status: reports.stable.status
   });
+  const policy = buildPromotionPolicy(history);
 
   mkdirSync(outputDirectory, { recursive: true });
   for (const channel of Object.keys(channels)) {
@@ -164,6 +170,9 @@ try {
   mkdirSync(dirname(badgePath), { recursive: true });
   writeFileSync(badgePath, badge);
   process.stdout.write(`Wrote ${badgePath}\n`);
+  mkdirSync(dirname(policyPath), { recursive: true });
+  writeFileSync(policyPath, `${JSON.stringify(policy, null, 2)}\n`);
+  process.stdout.write(`Wrote ${policyPath}\n`);
 } finally {
   rmSync(stagingDirectory, { recursive: true, force: true });
 }

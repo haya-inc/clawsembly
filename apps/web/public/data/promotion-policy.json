@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-12T07:32:53.867Z",
+  "package": "openclaw",
+  "decision": "hold",
+  "baseline": {
+    "channel": "stable",
+    "version": "2026.6.11",
+    "eligible": false,
+    "reasons": [
+      "status-not-supported",
+      "runtime-evidence-missing",
+      "checks-pending",
+      "shrinkwrap-inconsistent"
+    ],
+    "observations": {
+      "status": "probing",
+      "runtimeEvidence": false,
+      "checks": {
+        "pass": 1,
+        "warn": 3,
+        "fail": 0,
+        "pending": 15
+      },
+      "shrinkwrapConsistent": false,
+      "gatewayClassification": "unchanged",
+      "dependencyRiskCount": 0,
+      "truncatedDependencyRiskCount": 0
+    }
+  },
+  "candidate": {
+    "channel": "preview",
+    "version": "2026.7.1-beta.5",
+    "eligible": false,
+    "reasons": [
+      "status-not-supported",
+      "runtime-evidence-missing",
+      "checks-pending",
+      "shrinkwrap-inconsistent",
+      "gateway-contract-breaking"
+    ],
+    "observations": {
+      "status": "probing",
+      "runtimeEvidence": false,
+      "checks": {
+        "pass": 1,
+        "warn": 3,
+        "fail": 0,
+        "pending": 15
+      },
+      "shrinkwrapConsistent": false,
+      "gatewayClassification": "breaking",
+      "dependencyRiskCount": 18,
+      "truncatedDependencyRiskCount": 0
+    }
+  },
+  "rollback": {
+    "channel": "previous",
+    "version": "2026.6.10",
+    "eligible": false,
+    "reasons": [
+      "status-not-supported",
+      "runtime-evidence-missing",
+      "checks-pending",
+      "shrinkwrap-inconsistent"
+    ],
+    "observations": {
+      "status": "probing",
+      "runtimeEvidence": false,
+      "checks": {
+        "pass": 1,
+        "warn": 3,
+        "fail": 0,
+        "pending": 15
+      },
+      "shrinkwrapConsistent": false,
+      "gatewayClassification": "changed",
+      "dependencyRiskCount": 0,
+      "truncatedDependencyRiskCount": 0
+    }
+  }
+}

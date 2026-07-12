@@ -5,6 +5,7 @@ import { dirname, resolve, sep } from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { deriveBrowserCapabilities } from "./dependency-risk.mjs";
+import { buildPromotionPolicy } from "./promotion-policy.mjs";
 import { deriveRuntimeClaimStatuses, evidenceDigest } from "./report.mjs";
 import { compareDirectDependencies, compareGatewayContracts } from "./release-tracking.mjs";
 
@@ -25,14 +26,18 @@ const dataDirectory = resolve(root, "apps/web/public/data");
 const reportSchema = readJson(resolve(root, "packages/compatibility/report.schema.json"));
 const historySchema = readJson(resolve(root, "packages/compatibility/release-history.schema.json"));
 const browserPodEvidenceSchema = readJson(resolve(root, "packages/compatibility/browserpod-evidence.schema.json"));
+const promotionPolicySchema = readJson(resolve(root, "packages/compatibility/promotion-policy.schema.json"));
 const historyPath = resolve(dataDirectory, "release-history.json");
 const latestPath = resolve(dataDirectory, "compatibility.json");
 const history = readJson(historyPath);
+const promotionPolicyPath = resolve(dataDirectory, "promotion-policy.json");
+const promotionPolicy = readJson(promotionPolicyPath);
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
 const validateReport = ajv.compile(reportSchema);
 const validateHistory = ajv.compile(historySchema);
 const validateBrowserPodEvidence = ajv.compile(browserPodEvidenceSchema);
+const validatePromotionPolicy = ajv.compile(promotionPolicySchema);
 
 function assertEvidenceClaims(report, label) {
   let browserRuntimeEvidence;
@@ -71,6 +76,8 @@ function assertEvidenceClaims(report, label) {
 assertValid(validateHistory, history, "release-history.json");
 assert.deepEqual(history.releases.map((release) => release.channel), ["stable", "previous", "preview"]);
 assert.equal(new Set(history.releases.map((release) => release.version)).size, 3, "tracked release versions must be unique");
+assertValid(validatePromotionPolicy, promotionPolicy, "promotion-policy.json");
+assert.deepEqual(promotionPolicy, buildPromotionPolicy(history), "promotion-policy.json must be derived from release-history.json");
 
 const reports = [];
 for (const release of history.releases) {
@@ -135,4 +142,4 @@ const latest = readJson(latestPath);
 assertValid(validateReport, latest, "compatibility.json");
 assertEvidenceClaims(latest, "compatibility.json");
 assert.deepEqual(latest, reports[0], "compatibility.json must be an exact copy of the stable channel report");
-process.stdout.write(`Validated ${reports.length + 1} compatibility reports and release-history.json.\n`);
+process.stdout.write(`Validated ${reports.length + 1} compatibility reports, release-history.json, and promotion-policy.json.\n`);

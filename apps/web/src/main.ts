@@ -88,6 +88,30 @@ interface GatewayInventoryDelta {
   removed: string[];
 }
 
+interface PromotionPolicy {
+  schemaVersion: 1;
+  generatedAt: string;
+  decision: "promote" | "hold";
+  candidate: {
+    channel: "preview";
+    version: string;
+    eligible: boolean;
+    reasons: string[];
+  };
+}
+
+const POLICY_REASON_LABELS: Record<string, string> = {
+  "gateway-contract-breaking": "Gateway contract breaking",
+  "gateway-contract-incomplete": "Gateway inspection incomplete",
+  "runtime-evidence-missing": "runtime evidence missing",
+  "checks-failed": "checks failed",
+  "checks-pending": "checks pending",
+  "shrinkwrap-inconsistent": "shrinkwrap inconsistent",
+  "dependency-risk-scan-truncated": "dependency scan truncated",
+  "status-not-supported": "status not supported"
+};
+const POLICY_REASON_PRIORITY = Object.keys(POLICY_REASON_LABELS);
+
 const selectAll = <T extends Element>(selector: string) => Array.from(document.querySelectorAll<T>(selector));
 const setText = (selector: string, value: string) => selectAll<HTMLElement>(selector).forEach((element) => { element.textContent = value; });
 
@@ -333,6 +357,31 @@ async function loadReleaseHistory(): Promise<void> {
   renderReleaseHistory(await response.json() as ReleaseHistory);
 }
 
+function renderPromotionPolicy(policy: PromotionPolicy): void {
+  const row = document.querySelector<HTMLAnchorElement>("[data-promotion-policy]");
+  if (!row || policy.schemaVersion !== 1 || policy.candidate.channel !== "preview"
+    || policy.candidate.eligible !== (policy.decision === "promote")) {
+    throw new Error("Promotion policy response is invalid.");
+  }
+  const unknownReasons = policy.candidate.reasons.filter((reason) => !(reason in POLICY_REASON_LABELS));
+  if (unknownReasons.length) throw new Error("Promotion policy contains an unknown blocker.");
+  const ordered = POLICY_REASON_PRIORITY.filter((reason) => policy.candidate.reasons.includes(reason));
+  const visible = ordered.slice(0, 3).map((reason) => POLICY_REASON_LABELS[reason]);
+  if (ordered.length > visible.length) visible.push(`+${ordered.length - visible.length} more blockers`);
+  row.dataset.decision = policy.decision;
+  row.href = `${import.meta.env.BASE_URL}data/promotion-policy.json`;
+  setText("[data-promotion-decision]", policy.decision);
+  setText("[data-promotion-version]", policy.candidate.version);
+  setText("[data-promotion-reasons]", visible.length ? visible.join(" · ") : "All promotion gates passed");
+  row.hidden = false;
+}
+
+async function loadPromotionPolicy(): Promise<void> {
+  const response = await fetch(`${import.meta.env.BASE_URL}data/promotion-policy.json`, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Promotion policy request failed: ${response.status}`);
+  renderPromotionPolicy(await response.json() as PromotionPolicy);
+}
+
 async function loadReport(): Promise<void> {
   const response = await fetch(`${import.meta.env.BASE_URL}data/compatibility.json`, { cache: "no-store" });
   if (!response.ok) throw new Error(`Compatibility report request failed: ${response.status}`);
@@ -433,6 +482,15 @@ loadReport().then(() => {
 loadReleaseHistory().catch((error: unknown) => {
   const ledger = document.querySelector<HTMLElement>("[data-release-history]");
   if (ledger) ledger.textContent = error instanceof Error ? error.message : "Unable to load release history.";
+});
+loadPromotionPolicy().catch((error: unknown) => {
+  const row = document.querySelector<HTMLAnchorElement>("[data-promotion-policy]");
+  if (!row) return;
+  row.dataset.decision = "unavailable";
+  setText("[data-promotion-decision]", "unavailable");
+  setText("[data-promotion-version]", "fail closed");
+  setText("[data-promotion-reasons]", error instanceof Error ? error.message : "Unable to load promotion policy.");
+  row.hidden = false;
 });
 setupReveal();
 setupScrollProgress();

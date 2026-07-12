@@ -21,9 +21,11 @@ passed every production gate. It must not be interpreted as fully supported.
 | --- | --- | --- |
 | Current stable report | `https://haya-inc.github.io/clawsembly/data/compatibility.json` | Complete checks and evidence for npm `latest` |
 | Release index | `https://haya-inc.github.io/clawsembly/data/release-history.json` | Stable, previous, and preview summaries, exact dependency and Gateway contract changes, and report paths |
-| Report schema | repository `packages/compatibility/report.schema.json` | Validation contract for a complete report |
-| History schema | repository `packages/compatibility/release-history.schema.json` | Validation contract for the channel index |
-| BrowserPod evidence schema | repository `packages/compatibility/browserpod-evidence.schema.json` | Raw exact-artifact BrowserPod readiness contract |
+| Promotion policy | `https://haya-inc.github.io/clawsembly/data/promotion-policy.json` | Fail-closed promote/hold decision for preview plus independent stable and rollback gates |
+| Report schema | `https://haya-inc.github.io/clawsembly/schemas/report.schema.json` | Validation contract for a complete report |
+| History schema | `https://haya-inc.github.io/clawsembly/schemas/release-history.schema.json` | Validation contract for the channel index |
+| Promotion schema | `https://haya-inc.github.io/clawsembly/schemas/promotion-policy.schema.json` | Validation contract for the derived decision artifact |
+| BrowserPod evidence schema | `https://haya-inc.github.io/clawsembly/schemas/browserpod-evidence.schema.json` | Raw exact-artifact BrowserPod readiness contract |
 
 Consumers should:
 
@@ -97,6 +99,27 @@ if (["breaking", "incomplete"].includes(preview?.gatewayContractFromStable?.clas
 This policy deliberately allows warnings while rejecting missing runtime
 evidence and explicit failures. A downstream project with a stricter threat
 model may also reject `partial` or any nonzero pending count.
+
+## Ready-to-run promotion gate
+
+`promotion-policy.json` is deterministically derived from the validated release
+history. Preview promotion is held when support status or runtime evidence is
+missing, checks fail or remain pending, shrinkwrap is inconsistent, Gateway
+inspection is breaking/incomplete, or a dependency scan is truncated. Stable
+and previous are evaluated independently so `rollback.eligible` is never
+inherited from the candidate.
+
+```bash
+# Observe without changing CI status.
+node examples/release-policy/check.mjs --observe
+
+# Fail unless the current preview is eligible.
+node examples/release-policy/check.mjs
+```
+
+The copyable consumer rejects redirects, URL aliases, non-JSON content,
+responses over 1 MiB, unknown reason identifiers, and contradictory decisions.
+See [`examples/release-policy`](../examples/release-policy/README.md).
 
 ## Evidence-bound SDK loading
 
