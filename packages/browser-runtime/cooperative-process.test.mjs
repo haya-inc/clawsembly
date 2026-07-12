@@ -60,7 +60,9 @@ test("guest supervisor stops a real child through a nonce-bound control file", a
   assert.equal(exitCode, 0);
   assert.equal(output.value.includes(`${COOPERATIVE_SUPERVISOR_PREFIX}{"event":"ready"}`), true);
   assert.match(output.value, /child-started/u);
-  assert.match(output.value, /child-stopped/u);
+  // Windows terminates the child without running its SIGTERM handler, so the
+  // graceful acknowledgement is only observable on POSIX hosts.
+  if (process.platform !== "win32") assert.match(output.value, /child-stopped/u);
   assert.equal(output.value.includes(`${COOPERATIVE_SUPERVISOR_PREFIX}{"event":"stopping"`), true);
   assert.match(output.value, /"event":"exit","requestedStop":true/u);
 });

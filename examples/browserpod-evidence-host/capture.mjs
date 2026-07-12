@@ -17,6 +17,7 @@ let browser;
 let page;
 let artifact;
 let evidencePath;
+let stage = "initialize";
 try {
   if (typeof apiKey !== "string" || !apiKey || apiKey.length > 4_096) {
     throw new Error("BROWSERPOD_API_KEY is required for an owner-authorized capture.");
@@ -37,6 +38,7 @@ try {
     ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
     : "local owner-authorized BrowserPod evidence capture";
   const source = `Clawsembly owner-authorized BrowserPod capture: ${runUrl}`.slice(0, 512);
+  stage = "host-server-start";
   server = await createServer({
     configFile: resolve(import.meta.dirname, "vite.config.mjs"),
     logLevel: "silent"
@@ -44,9 +46,21 @@ try {
   await server.listen();
   const address = server.httpServer?.address();
   if (!address || typeof address === "string") throw new Error("Evidence host address is unavailable.");
+  stage = "browser-launch";
   browser = await chromium.launch({ headless: true });
   page = await browser.newPage();
+  stage = "host-page-load";
   await page.goto(`http://127.0.0.1:${address.port}/`, { waitUntil: "load" });
+  stage = "capture-hook-wait";
+  // The dev server finishes transforming and evaluating the host module graph
+  // shortly after the load event on a cold dependency cache, so the capture
+  // hook must be awaited rather than asserted at load time.
+  await page.waitForFunction(
+    () => typeof globalThis.__RUN_CLAWSEMBLY_BROWSERPOD_EVIDENCE__ === "function",
+    undefined,
+    { timeout: 60_000 }
+  );
+  stage = "capture-run";
   const evidence = await page.evaluate(async ({ credential, exactArtifact, evidenceSource }) => {
     if (typeof globalThis.__RUN_CLAWSEMBLY_BROWSERPOD_EVIDENCE__ !== "function") {
       throw new Error("BrowserPod evidence host is not ready.");
@@ -61,7 +75,9 @@ try {
     });
     return Promise.race([capture, timeout]);
   }, { credential: apiKey, exactArtifact: artifact, evidenceSource: source });
+  stage = "evidence-validate";
   assertBrowserRuntimeEvidence(evidence);
+  stage = "persist";
   const phaseCounts = await page.evaluate(() => globalThis.__CLAWSEMBLY_PHASE_COUNTS__);
   await writeFile(evidencePath, `${JSON.stringify(evidence, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
   await writeFile(statusPath, `${JSON.stringify({
@@ -85,6 +101,7 @@ try {
     result: "fail",
     artifact: artifact ?? null,
     errorCode,
+    failedStage: stage,
     phaseCounts
   }, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
   throw new Error("BrowserPod evidence capture failed; inspect the payload-free status artifact.");

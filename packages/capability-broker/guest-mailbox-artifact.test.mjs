@@ -1,13 +1,21 @@
 import assert from "node:assert/strict";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import test from "node:test";
 
 import { CapabilityBroker } from "./capability-broker.mjs";
 import { FilesystemCapabilityMailboxHost } from "./filesystem-mailbox-host.mjs";
 import { stageGuestMailboxClient } from "./guest-mailbox-artifact.mjs";
+
+// Mailbox roots are guest POSIX paths; keep the directory repo-local and strip
+// the Windows drive prefix so the same string resolves through node:fs everywhere.
+async function guestTemporaryDirectory(t, prefix) {
+  await mkdir(join(".artifacts", "test-tmp"), { recursive: true });
+  const directory = await mkdtemp(join(".artifacts", "test-tmp", prefix));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  return resolve(directory).replaceAll("\\", "/").replace(/^[A-Za-z]:/u, "");
+}
 
 function nodeFilesystemRuntime() {
   return {
@@ -26,11 +34,10 @@ function nodeFilesystemRuntime() {
 }
 
 test("stages an exact guest client that executes a real mailbox request", async (t) => {
-  const directory = await mkdtemp(join(tmpdir(), "clawsembly-staged-guest-"));
-  t.after(() => rm(directory, { recursive: true, force: true }));
+  const directory = await guestTemporaryDirectory(t, "clawsembly-staged-guest-");
   const runtime = nodeFilesystemRuntime();
-  const mailboxRoot = join(directory, "mailbox");
-  const clientRoot = join(mailboxRoot, "guest-client-v1");
+  const mailboxRoot = `${directory}/mailbox`;
+  const clientRoot = `${mailboxRoot}/guest-client-v1`;
   const subject = {
     artifact: { package: "openclaw", version: "2026.6.11", integrity: "sha512-staging-test" },
     runtime: "browserpod",
