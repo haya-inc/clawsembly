@@ -3,6 +3,10 @@ import { startCooperativeProcess } from "./cooperative-process.mjs";
 
 export const OPENCLAW_GATEWAY_PORT = 18_789;
 export const BROWSERPOD_HEALTH_PREFIX = "[clawsembly-browserpod-health]";
+const PAIRING_REQUEST_ID = /^[A-Za-z0-9._:-]{1,128}$/u;
+const DEVICE_ID = /^[a-f0-9]{64}$/u;
+const PAIRING_REASONS = new Set(["not-paired", "role-upgrade", "scope-upgrade", "metadata-upgrade"]);
+const REVIEW_TTL_MS = 5 * 60_000;
 
 export const BROWSERPOD_HEALTH_SOURCE = String.raw`
 const port = Number(process.argv[1]);
@@ -96,6 +100,94 @@ function safeSink(sink, value) {
   catch { /* Diagnostics cannot break the Gateway lifecycle. */ }
 }
 
+function normalizePairingStrings(value, label, { min = 0, max = 64 } = {}) {
+  if (!Array.isArray(value) || value.length < min || value.length > max
+    || value.some((entry) => typeof entry !== "string" || entry.length < 1 || entry.length > 512
+      || /[\0\r\n]/u.test(entry))) {
+    throw new BrowserRuntimeError("invalid_pairing_state", `${label} is invalid`);
+  }
+  return Object.freeze([...new Set(value)].sort());
+}
+
+function requestedRoles(record) {
+  const values = [
+    ...(Array.isArray(record?.roles) ? record.roles : []),
+    ...(typeof record?.role === "string" ? [record.role] : [])
+  ];
+  return normalizePairingStrings(values, "pending pairing roles", { min: 1 });
+}
+
+function approvedAccess(record) {
+  if (!record) return null;
+  return Object.freeze({
+    roles: requestedRoles(record),
+    scopes: normalizePairingStrings(record.scopes ?? record.approvedScopes ?? [], "approved pairing scopes")
+  });
+}
+
+function sameStrings(left, right) {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function assertPairingProfile(profile) {
+  if (!profile || typeof profile.role !== "string" || profile.role.length < 1 || profile.role.length > 64
+    || /[\0\r\n]/u.test(profile.role)) {
+    throw new TypeError("Gateway pairing profile role is invalid");
+  }
+  const scopes = normalizePairingStrings(profile.scopes, "Gateway pairing profile scopes", { min: 1 });
+  return Object.freeze({ role: profile.role, scopes });
+}
+
+function assertPairingRequirement(requirement, profile) {
+  if (!requirement || requirement.required !== true || !PAIRING_REQUEST_ID.test(requirement.requestId ?? "")
+    || !DEVICE_ID.test(requirement.deviceId ?? "") || !PAIRING_REASONS.has(requirement.reason)
+    || requirement.role !== profile.role) {
+    throw new BrowserRuntimeError("invalid_pairing_requirement", "Gateway pairing requirement is incomplete or invalid");
+  }
+  const scopes = normalizePairingStrings(requirement.scopes, "Gateway pairing requirement scopes", { min: 1 });
+  if (!sameStrings(scopes, profile.scopes)) {
+    throw new BrowserRuntimeError("pairing_scope_mismatch", "Gateway pairing requirement exceeds the generated client profile");
+  }
+  return Object.freeze({
+    requestId: requirement.requestId,
+    deviceId: requirement.deviceId,
+    reason: requirement.reason,
+    role: requirement.role,
+    scopes
+  });
+}
+
+function pairingSnapshot(list, requirement, profile) {
+  if (!list || typeof list !== "object" || !Array.isArray(list.pending) || list.pending.length > 1_000
+    || !Array.isArray(list.paired) || list.paired.length > 1_000) {
+    throw new BrowserRuntimeError("invalid_pairing_state", "OpenClaw returned an invalid device pairing list");
+  }
+  const pending = list.pending.find((entry) => entry?.requestId === requirement.requestId);
+  if (!pending) throw new BrowserRuntimeError("pairing_request_stale", "Gateway pairing request is no longer pending");
+  if (pending.deviceId !== requirement.deviceId || !DEVICE_ID.test(pending.deviceId ?? "")) {
+    throw new BrowserRuntimeError("pairing_device_mismatch", "Gateway pairing request device does not match the signed browser identity");
+  }
+  const roles = requestedRoles(pending);
+  const scopes = normalizePairingStrings(pending.scopes ?? [], "pending pairing scopes", { min: 1 });
+  if (!sameStrings(roles, [profile.role]) || !sameStrings(scopes, profile.scopes)) {
+    throw new BrowserRuntimeError("pairing_scope_mismatch", "pending Gateway pairing access exceeds the generated client profile");
+  }
+  const paired = list.paired.find((entry) => entry?.deviceId === requirement.deviceId);
+  return Object.freeze({
+    requestId: requirement.requestId,
+    deviceId: requirement.deviceId,
+    reason: requirement.reason,
+    requested: Object.freeze({ roles, scopes }),
+    approved: approvedAccess(paired)
+  });
+}
+
+function sameSnapshot(left, right) {
+  return left.requestId === right.requestId && left.deviceId === right.deviceId
+    && sameStrings(left.requested.roles, right.requested.roles)
+    && sameStrings(left.requested.scopes, right.requested.scopes);
+}
+
 export function createVerifiedOpenClawGateway({
   runtime,
   installer,
@@ -103,6 +195,8 @@ export function createVerifiedOpenClawGateway({
   allowedOrigins = [],
   tokenFactory = () => `clawsembly-${globalThis.crypto.randomUUID()}`,
   supervisorNonceFactory,
+  pairingProfile,
+  approvalIdFactory = () => globalThis.crypto.randomUUID(),
   onOutput,
   onAudit,
   now = Date.now
@@ -122,6 +216,8 @@ export function createVerifiedOpenClawGateway({
   if (supervisorNonceFactory !== undefined && typeof supervisorNonceFactory !== "function") {
     throw new TypeError("Gateway supervisor nonce factory is invalid");
   }
+  const verifiedPairingProfile = pairingProfile === undefined ? undefined : assertPairingProfile(pairingProfile);
+  if (typeof approvalIdFactory !== "function") throw new TypeError("Gateway pairing approval id factory is invalid");
   if (onOutput !== undefined && typeof onOutput !== "function") throw new TypeError("Gateway output sink is invalid");
   if (onAudit !== undefined && typeof onAudit !== "function") throw new TypeError("Gateway audit sink is invalid");
   if (typeof now !== "function") throw new TypeError("Gateway clock is invalid");
@@ -132,6 +228,70 @@ export function createVerifiedOpenClawGateway({
   let readyResult;
   let authToken;
   let lastTask;
+  const pairingReviews = new Map();
+
+  async function runDevicesCommand(args) {
+    if (state !== "ready" || !readyResult) {
+      throw new BrowserRuntimeError("gateway_not_ready", "OpenClaw Gateway pairing is unavailable");
+    }
+    const task = await runtime.start({
+      executable: "node",
+      args: [installer.executablePath, "--dev", "devices", ...args, "--json"],
+      cwd: installer.root,
+      env: [
+        "CI=1",
+        "NO_COLOR=1",
+        `OPENCLAW_STATE_DIR=${installer.stateRoot}`,
+        `OPENCLAW_GATEWAY_TOKEN=${authToken}`
+      ],
+      outputLimitBytes: 128 * 1024,
+      echo: false
+    });
+    const completion = await task.wait();
+    if (completion.status !== "completed" || task.outputTruncated) {
+      throw new BrowserRuntimeError("pairing_command_failed", "OpenClaw device pairing command failed");
+    }
+    return parseJson(task.transcript.trim(), "OpenClaw device pairing command output");
+  }
+
+  async function currentPairingSnapshot(requirement) {
+    return pairingSnapshot(await runDevicesCommand(["list"]), requirement, verifiedPairingProfile);
+  }
+
+  async function decidePairing(reviewId, decision) {
+    if (!verifiedPairingProfile || !PAIRING_REQUEST_ID.test(reviewId ?? "")) {
+      throw new BrowserRuntimeError("invalid_pairing_review", "Gateway pairing review id is invalid");
+    }
+    const retained = pairingReviews.get(reviewId);
+    if (!retained) throw new BrowserRuntimeError("pairing_review_stale", "Gateway pairing review is missing or already used");
+    pairingReviews.delete(reviewId);
+    if (now() >= retained.expiresAtMs) {
+      throw new BrowserRuntimeError("pairing_review_expired", "Gateway pairing review has expired");
+    }
+    const current = await currentPairingSnapshot(retained.requirement);
+    if (!sameSnapshot(current, retained.snapshot)) {
+      throw new BrowserRuntimeError("pairing_request_changed", "Gateway pairing request changed after owner review");
+    }
+    const result = await runDevicesCommand([decision === "approved" ? "approve" : "reject", current.requestId]);
+    const requestId = result?.requestId ?? current.requestId;
+    const deviceId = result?.device?.deviceId ?? result?.deviceId;
+    if (requestId !== current.requestId || deviceId !== current.deviceId) {
+      throw new BrowserRuntimeError("invalid_pairing_result", "OpenClaw returned an invalid pairing decision result");
+    }
+    safeSink(onAudit, {
+      action: "gateway-pairing",
+      outcome: decision,
+      reason: current.reason,
+      roleCount: current.requested.roles.length,
+      scopeCount: current.requested.scopes.length
+    });
+    return Object.freeze({
+      schemaVersion: 1,
+      decision,
+      requestId: current.requestId,
+      deviceId: current.deviceId
+    });
+  }
 
   async function performStart(token) {
     const installed = await installer.install();
@@ -342,6 +502,47 @@ export function createVerifiedOpenClawGateway({
         auth: Object.freeze({ mode: "token", token: authToken })
       });
     },
+    pairing: Object.freeze({
+      async review(untrustedRequirement) {
+        if (!verifiedPairingProfile) {
+          throw new BrowserRuntimeError("pairing_unavailable", "Gateway pairing profile is not configured");
+        }
+        const requirement = assertPairingRequirement(untrustedRequirement, verifiedPairingProfile);
+        const snapshot = await currentPairingSnapshot(requirement);
+        let reviewId;
+        for (let attempt = 0; attempt < 4; attempt += 1) {
+          const candidate = approvalIdFactory();
+          if (typeof candidate === "string" && PAIRING_REQUEST_ID.test(candidate) && !pairingReviews.has(candidate)) {
+            reviewId = candidate;
+            break;
+          }
+        }
+        if (!reviewId) throw new BrowserRuntimeError("pairing_review_id_failed", "Gateway pairing review id is invalid or duplicated");
+        const createdAtMs = now();
+        if (!Number.isFinite(createdAtMs)) throw new BrowserRuntimeError("invalid_clock", "Gateway pairing review clock is invalid");
+        const expiresAtMs = createdAtMs + REVIEW_TTL_MS;
+        pairingReviews.set(reviewId, Object.freeze({ requirement, snapshot, expiresAtMs }));
+        safeSink(onAudit, {
+          action: "gateway-pairing",
+          outcome: "reviewed",
+          reason: snapshot.reason,
+          roleCount: snapshot.requested.roles.length,
+          scopeCount: snapshot.requested.scopes.length
+        });
+        return Object.freeze({
+          schemaVersion: 1,
+          reviewId,
+          requestId: snapshot.requestId,
+          deviceId: snapshot.deviceId,
+          reason: snapshot.reason,
+          requested: snapshot.requested,
+          approved: snapshot.approved,
+          expiresAt: new Date(expiresAtMs).toISOString()
+        });
+      },
+      approve(reviewId) { return decidePairing(reviewId, "approved"); },
+      reject(reviewId) { return decidePairing(reviewId, "rejected"); }
+    }),
     async stop({ timeoutMs = 15_000 } = {}) {
       if (state === "starting") await inFlight;
       if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 5_000 || timeoutMs > 60_000) {
@@ -377,6 +578,7 @@ export function createVerifiedOpenClawGateway({
       authToken = undefined;
       active = undefined;
       readyResult = undefined;
+      pairingReviews.clear();
       state = result.complete ? "stopped" : "failed";
       safeSink(onAudit, {
         action: "gateway",

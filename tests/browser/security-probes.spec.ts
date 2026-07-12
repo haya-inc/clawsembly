@@ -28,6 +28,7 @@ test("browser host security probes pass without guest-runtime or provider traffi
 
   const deviceHealth = page.locator("[data-device-health]");
   await expect(deviceHealth).toHaveAttribute("data-state", "pass");
+  await expect(deviceHealth).toHaveText("SIGNATURE + PAIRING UI + TOKEN VAULT / PASS");
   await expect(page.locator("[data-device-id]")).toContainText("…");
 
   expect(consoleErrors).toEqual([]);

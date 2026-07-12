@@ -21,7 +21,7 @@ function deferred() {
   return { promise, resolve };
 }
 
-function runtimeFixture({ healthStatus = "completed", configStatus = "completed" } = {}) {
+function runtimeFixture({ healthStatus = "completed", configStatus = "completed", pairingLists = [] } = {}) {
   const files = new Map();
   const commands = [];
   const supervisorCompletion = deferred();
@@ -65,6 +65,15 @@ function runtimeFixture({ healthStatus = "completed", configStatus = "completed"
     onOutput(listener) { listener(this.transcript); return () => true; },
     async wait() { return { status: configStatus, outputBytes: this.transcript.length, outputTruncated: false }; }
   };
+  const deviceTask = (transcript) => ({
+    id: `device-task-${commands.length + 1}`,
+    status: "completed",
+    transcript: `${JSON.stringify(transcript)}\n`,
+    outputTruncated: false,
+    onOutput() { return () => true; },
+    async wait() { return { status: "completed", outputBytes: this.transcript.length, outputTruncated: false }; }
+  });
+  let pairingListIndex = 0;
   const runtime = {
     provider: "browserpod",
     files,
@@ -83,6 +92,21 @@ function runtimeFixture({ healthStatus = "completed", configStatus = "completed"
       if (command.args.includes("gateway.controlUi.allowedOrigins")) return configTask;
       if (command.args[0]?.endsWith("/supervisor-gateway.mjs")) return supervisorTask;
       if (command.args.includes(BROWSERPOD_HEALTH_SOURCE)) return healthTask;
+      const devicesIndex = command.args.indexOf("devices");
+      if (devicesIndex >= 0) {
+        const action = command.args[devicesIndex + 1];
+        if (action === "list") {
+          const selected = pairingLists[Math.min(pairingListIndex, pairingLists.length - 1)] ?? { pending: [], paired: [] };
+          pairingListIndex += 1;
+          return deviceTask(selected);
+        }
+        const requestId = command.args[devicesIndex + 2];
+        const selected = pairingLists[Math.max(0, Math.min(pairingListIndex - 1, pairingLists.length - 1))];
+        const pending = selected?.pending?.find((entry) => entry.requestId === requestId);
+        return deviceTask(action === "approve"
+          ? { requestId, device: { deviceId: pending?.deviceId } }
+          : { requestId, deviceId: pending?.deviceId });
+      }
       throw new Error(`unexpected command ${command.executable}`);
     },
     async waitForPortal(port) {
@@ -227,4 +251,120 @@ test("health parser rejects missing and oversized evidence", () => {
     healthz: { status: 200, body: "x".repeat(4_097) },
     readyz: { status: 200, body: "ok" }
   })}`), (error) => error.code === "health_probe_failed");
+});
+
+test("reviews the exact pending operator request before one-shot approval", async () => {
+  const deviceId = "a".repeat(64);
+  const pending = {
+    requestId: "pairing-request-1",
+    deviceId,
+    publicKey: "private-to-review-boundary",
+    remoteIp: "private-ip",
+    role: "operator",
+    scopes: ["operator.write", "operator.read"],
+    ts: 1
+  };
+  const { runtime, commands } = runtimeFixture({
+    pairingLists: [{ pending: [pending], paired: [] }]
+  });
+  const audit = [];
+  const gateway = createVerifiedOpenClawGateway({
+    runtime,
+    installer: installerFixture(),
+    tokenFactory: () => "gateway-private-token",
+    supervisorNonceFactory: () => "supervisor_nonce_123456",
+    pairingProfile: { role: "operator", scopes: ["operator.read", "operator.write"] },
+    approvalIdFactory: () => "review-1",
+    onAudit: (event) => audit.push(event)
+  });
+  await gateway.start();
+  const review = await gateway.pairing.review({
+    required: true,
+    requestId: pending.requestId,
+    deviceId,
+    reason: "not-paired",
+    role: "operator",
+    scopes: ["operator.read", "operator.write"]
+  });
+  assert.deepEqual(review, {
+    schemaVersion: 1,
+    reviewId: "review-1",
+    requestId: pending.requestId,
+    deviceId,
+    reason: "not-paired",
+    requested: { roles: ["operator"], scopes: ["operator.read", "operator.write"] },
+    approved: null,
+    expiresAt: review.expiresAt
+  });
+  assert.equal(JSON.stringify(review).includes("private-to-review-boundary"), false);
+  assert.equal(JSON.stringify(audit).includes("private-ip"), false);
+  assert.deepEqual(await gateway.pairing.approve(review.reviewId), {
+    schemaVersion: 1,
+    decision: "approved",
+    requestId: pending.requestId,
+    deviceId
+  });
+  const deviceCommands = commands.filter((command) => command.args.includes("devices"));
+  assert.deepEqual(deviceCommands.map((command) => command.args.slice(command.args.indexOf("devices"), -1)), [
+    ["devices", "list"],
+    ["devices", "list"],
+    ["devices", "approve", "pairing-request-1"]
+  ]);
+  await assert.rejects(gateway.pairing.approve(review.reviewId), (error) => error.code === "pairing_review_stale");
+});
+
+test("refuses broader or changed pairing requests before approval", async () => {
+  const deviceId = "b".repeat(64);
+  const broad = {
+    requestId: "pairing-request-broad",
+    deviceId,
+    role: "operator",
+    scopes: ["operator.read", "operator.write", "operator.admin"]
+  };
+  const broadFixture = runtimeFixture({ pairingLists: [{ pending: [broad], paired: [] }] });
+  const broadGateway = createVerifiedOpenClawGateway({
+    runtime: broadFixture.runtime,
+    installer: installerFixture(),
+    tokenFactory: () => "gateway-private-token",
+    supervisorNonceFactory: () => "supervisor_nonce_123456",
+    pairingProfile: { role: "operator", scopes: ["operator.read", "operator.write"] },
+    approvalIdFactory: () => "review-broad"
+  });
+  await broadGateway.start();
+  await assert.rejects(broadGateway.pairing.review({
+    required: true,
+    requestId: broad.requestId,
+    deviceId,
+    reason: "scope-upgrade",
+    role: "operator",
+    scopes: ["operator.read", "operator.write"]
+  }), (error) => error.code === "pairing_scope_mismatch");
+
+  const original = { ...broad, requestId: "pairing-request-change", scopes: ["operator.read", "operator.write"] };
+  const changed = { ...original, scopes: ["operator.read", "operator.write"], deviceId: "c".repeat(64) };
+  const changedFixture = runtimeFixture({
+    pairingLists: [
+      { pending: [original], paired: [] },
+      { pending: [changed], paired: [] }
+    ]
+  });
+  const changedGateway = createVerifiedOpenClawGateway({
+    runtime: changedFixture.runtime,
+    installer: installerFixture(),
+    tokenFactory: () => "gateway-private-token",
+    supervisorNonceFactory: () => "supervisor_nonce_123456",
+    pairingProfile: { role: "operator", scopes: ["operator.read", "operator.write"] },
+    approvalIdFactory: () => "review-change"
+  });
+  await changedGateway.start();
+  const review = await changedGateway.pairing.review({
+    required: true,
+    requestId: original.requestId,
+    deviceId,
+    reason: "not-paired",
+    role: "operator",
+    scopes: ["operator.read", "operator.write"]
+  });
+  await assert.rejects(changedGateway.pairing.approve(review.reviewId), (error) => error.code === "pairing_device_mismatch");
+  assert.equal(changedFixture.commands.some((command) => command.args.includes("approve")), false);
 });

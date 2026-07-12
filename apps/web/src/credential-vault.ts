@@ -6,7 +6,7 @@ const MASTER_KEY_ID = "credential-master-v1";
 const MAX_SECRET_BYTES = 16 * 1024;
 let masterKeyPromise: Promise<CryptoKey> | undefined;
 
-export type CredentialProvider = "openai" | "openclaw-device" | "broker-probe";
+export type CredentialProvider = "openai";
 
 interface StoredCredentialV1 {
   version: 1;

@@ -33,6 +33,11 @@ cancellation, persistence, and performance-distribution checks remain pending.
 Provider-free tests now also cover the bounded chat send/history/abort contract,
 stream event delivery, sequence gaps, disconnect rejection, and a fresh signed
 reconnect. None of those tests substitute for a metered BrowserPod record.
+They also cover exact pending-device review, refusal of changed or broader
+requests, one-shot approve/reject, encrypted issued-token persistence,
+device-token signed reconnect, and stale-token clearing. Runtime evidence must
+still capture those same steps against the real BrowserPod portal before the
+device-identity compatibility check can pass.
 
 ## Capture from an embedding host
 

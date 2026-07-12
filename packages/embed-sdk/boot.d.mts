@@ -14,6 +14,7 @@ import type {
 } from "../capability-broker/capability-consent.mjs";
 import type { EmbedManifest } from "./embed-manifest.mjs";
 import type { BrowserDeviceIdentity } from "./gateway-device-identity.mjs";
+import type { GatewayDeviceTokenVault } from "./gateway-device-token-vault.mjs";
 import type { OpenClawGatewayClient } from "./gateway-client.mjs";
 
 export function bootVerifiedEmbed(options: {
@@ -69,6 +70,7 @@ export function bootVerifiedEmbed(options: {
   }>;
   createGatewayClient(options?: {
     identity?: BrowserDeviceIdentity;
+    deviceTokenVault?: GatewayDeviceTokenVault;
     browserOrigin?: string;
     createWebSocket?: (url: string) => WebSocket;
     requestIdFactory?: () => string;

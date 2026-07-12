@@ -1,4 +1,5 @@
 import { OPENCLAW_GATEWAY_CONTRACT } from "./openclaw-gateway-contract.generated.mjs";
+import { createGatewayDeviceTokenVault } from "./gateway-device-token-vault.mjs";
 
 const NON_EMPTY = /\S/u;
 const SAFE_REQUEST_ID = /^[A-Za-z0-9._:-]{1,128}$/u;
@@ -127,6 +128,24 @@ function assertIdentity(identity) {
   return identity;
 }
 
+function assertDeviceTokenVault(vault) {
+  if (!vault || typeof vault.load !== "function" || typeof vault.store !== "function"
+    || typeof vault.metadata !== "function" || typeof vault.clear !== "function") {
+    throw new TypeError("a Gateway device-token vault is required");
+  }
+  return vault;
+}
+
+function assertStoredDeviceToken(value) {
+  if (value === undefined) return undefined;
+  if (!isRecord(value) || !isNonEmptyString(value.token, 2_048) || /[\0\r\n]/u.test(value.token)
+    || !stringArray(value.scopes, 64)
+    || (value.issuedAtMs !== undefined && (!Number.isSafeInteger(value.issuedAtMs) || value.issuedAtMs < 0))) {
+    throw new Error("stored Gateway device token is invalid");
+  }
+  return value;
+}
+
 export function resolveGatewayWebSocketConnection(connection, browserOrigin) {
   if (!connection || connection.schemaVersion !== 1 || connection.auth?.mode !== "token"
     || !isNonEmptyString(connection.auth.token, 512) || connection.auth.token.length < 16
@@ -168,7 +187,7 @@ function pairingFrom(error, signedDeviceId) {
   });
 }
 
-function sanitizeHello(payload, artifactVersion) {
+function parseHello(payload, artifactVersion) {
   if (!isRecord(payload) || payload.type !== "hello-ok"
     || payload.protocol !== OPENCLAW_GATEWAY_CONTRACT.protocol.max
     || !isRecord(payload.server) || payload.server.version !== artifactVersion
@@ -187,7 +206,15 @@ function sanitizeHello(payload, artifactVersion) {
   if (!requiredScopes.every((scope) => payload.auth.scopes.includes(scope))) {
     throw fail("scope_mismatch", "Gateway did not grant the requested operator scopes");
   }
-  return Object.freeze({
+  const deviceToken = payload.auth.deviceToken;
+  if (deviceToken !== undefined && (!isNonEmptyString(deviceToken, 2_048) || /[\0\r\n]/u.test(deviceToken))) {
+    throw fail("invalid_hello", "Gateway returned an invalid hello-ok device token");
+  }
+  if (payload.auth.issuedAtMs !== undefined
+    && (!Number.isSafeInteger(payload.auth.issuedAtMs) || payload.auth.issuedAtMs < 0)) {
+    throw fail("invalid_hello", "Gateway returned an invalid hello-ok issue time");
+  }
+  const hello = Object.freeze({
     schemaVersion: 1,
     protocol: payload.protocol,
     server: Object.freeze({ version: payload.server.version, connId: payload.server.connId }),
@@ -198,7 +225,7 @@ function sanitizeHello(payload, artifactVersion) {
     auth: Object.freeze({
       role: payload.auth.role,
       scopes: Object.freeze([...payload.auth.scopes]),
-      deviceTokenIssued: isNonEmptyString(payload.auth.deviceToken, 2_048)
+      deviceTokenIssued: deviceToken !== undefined
     }),
     policy: Object.freeze({
       maxPayload: payload.policy.maxPayload,
@@ -206,12 +233,18 @@ function sanitizeHello(payload, artifactVersion) {
       tickIntervalMs: payload.policy.tickIntervalMs
     })
   });
+  return Object.freeze({
+    hello,
+    ...(deviceToken === undefined ? {} : { deviceToken }),
+    ...(payload.auth.issuedAtMs === undefined ? {} : { issuedAtMs: payload.auth.issuedAtMs })
+  });
 }
 
 export function createOpenClawGatewayClient({
   artifact,
   getConnection,
   identity,
+  deviceTokenVault,
   browserOrigin = globalThis.location?.origin,
   createWebSocket = (url) => new WebSocket(url),
   requestIdFactory = () => globalThis.crypto.randomUUID(),
@@ -223,6 +256,9 @@ export function createOpenClawGatewayClient({
   const verifiedArtifact = assertArtifact(artifact);
   if (typeof getConnection !== "function") throw new TypeError("Gateway connection supplier is required");
   const verifiedIdentity = assertIdentity(identity);
+  const verifiedDeviceTokenVault = assertDeviceTokenVault(
+    deviceTokenVault ?? createGatewayDeviceTokenVault({ artifact: verifiedArtifact })
+  );
   const origin = exactOrigin(browserOrigin);
   if (!origin) throw new TypeError("an exact browser origin is required");
   if (typeof createWebSocket !== "function") throw new TypeError("WebSocket factory is invalid");
@@ -429,6 +465,7 @@ export function createOpenClawGatewayClient({
       let settled = false;
       let challengeHandled = false;
       let signedDeviceId;
+      let usedStoredDeviceToken = false;
       const webSocketUrl = authority.url;
       let token = authority.token;
       authority = undefined;
@@ -545,12 +582,27 @@ export function createOpenClawGatewayClient({
           challengeHandled = true;
           const profile = OPENCLAW_GATEWAY_CONTRACT.profile;
           try {
+            const descriptor = await verifiedIdentity.descriptor();
+            if (!descriptor || !DEVICE_ID.test(descriptor.deviceId ?? "")) {
+              throw new Error("identity descriptor returned an invalid device id");
+            }
+            let stored;
+            try {
+              stored = assertStoredDeviceToken(await verifiedDeviceTokenVault.load({
+                deviceId: descriptor.deviceId,
+                role: profile.role
+              }));
+            } catch {
+              throw fail("device_token_load_failed", "encrypted Gateway device token could not be loaded");
+            }
+            const authenticationToken = stored?.token ?? token;
+            usedStoredDeviceToken = Boolean(stored);
             const device = await verifiedIdentity.signConnect({
               clientId: profile.clientId,
               clientMode: profile.clientMode,
               role: profile.role,
               scopes: profile.scopes,
-              token,
+              token: authenticationToken,
               nonce,
               platform: profile.platform,
               deviceFamily: profile.deviceFamily
@@ -579,7 +631,9 @@ export function createOpenClawGatewayClient({
                 role: profile.role,
                 scopes: profile.scopes,
                 caps: profile.caps,
-                auth: { token },
+                auth: usedStoredDeviceToken
+                  ? { deviceToken: authenticationToken }
+                  : { token: authenticationToken },
                 device
               }
             };
@@ -589,6 +643,7 @@ export function createOpenClawGatewayClient({
             }
             activeSocket.send(serialized);
             token = undefined;
+            stored = undefined;
           } catch (error) {
             finishFailure(error instanceof OpenClawGatewayClientError
               ? error
@@ -603,6 +658,22 @@ export function createOpenClawGatewayClient({
             return;
           }
           if (frame.ok !== true) {
+            const detailCode = typeof frame.error?.details?.code === "string"
+              ? frame.error.details.code
+              : undefined;
+            if (usedStoredDeviceToken && detailCode === "AUTH_DEVICE_TOKEN_MISMATCH" && signedDeviceId) {
+              try {
+                await verifiedDeviceTokenVault.clear({ deviceId: signedDeviceId, role: OPENCLAW_GATEWAY_CONTRACT.profile.role });
+                safeSink(onAudit, {
+                  action: "gateway-device-token",
+                  outcome: "cleared",
+                  reason: "token_mismatch"
+                });
+              } catch {
+                finishFailure(fail("device_token_clear_failed", "rejected Gateway device token could not be cleared"));
+                return;
+              }
+            }
             const pairing = pairingFrom(frame.error, signedDeviceId);
             finishFailure(fail(
               pairing ? "pairing_required" : "connect_rejected",
@@ -616,8 +687,38 @@ export function createOpenClawGatewayClient({
             ));
             return;
           }
-          try { hello = sanitizeHello(frame.payload, verifiedArtifact.version); }
+          let parsedHello;
+          try { parsedHello = parseHello(frame.payload, verifiedArtifact.version); }
           catch (error) { finishFailure(error); return; }
+          if (parsedHello.deviceToken !== undefined) {
+            try {
+              await verifiedDeviceTokenVault.store({
+                deviceId: signedDeviceId,
+                role: parsedHello.hello.auth.role,
+                token: parsedHello.deviceToken,
+                scopes: parsedHello.hello.auth.scopes,
+                ...(parsedHello.issuedAtMs === undefined ? {} : { issuedAtMs: parsedHello.issuedAtMs })
+              });
+              safeSink(onAudit, {
+                action: "gateway-device-token",
+                outcome: "stored",
+                role: parsedHello.hello.auth.role,
+                scopeCount: parsedHello.hello.auth.scopes.length
+              });
+            } catch {
+              finishFailure(fail("device_token_store_failed", "issued Gateway device token could not be encrypted"));
+              return;
+            }
+          }
+          hello = Object.freeze({
+            ...parsedHello.hello,
+            auth: Object.freeze({
+              ...parsedHello.hello.auth,
+              deviceTokenStored: parsedHello.deviceToken !== undefined || usedStoredDeviceToken,
+              authenticatedWith: usedStoredDeviceToken ? "device-token" : "shared-token"
+            })
+          });
+          parsedHello = undefined;
           settled = true;
           clearTimeout(timer);
           signal?.removeEventListener("abort", abort);
@@ -753,12 +854,36 @@ export function createOpenClawGatewayClient({
     }
   });
 
+  const deviceAuth = Object.freeze({
+    async metadata() {
+      const descriptor = await verifiedIdentity.descriptor();
+      return verifiedDeviceTokenVault.metadata({
+        deviceId: descriptor.deviceId,
+        role: OPENCLAW_GATEWAY_CONTRACT.profile.role
+      });
+    },
+    async clear() {
+      const descriptor = await verifiedIdentity.descriptor();
+      const cleared = await verifiedDeviceTokenVault.clear({
+        deviceId: descriptor.deviceId,
+        role: OPENCLAW_GATEWAY_CONTRACT.profile.role
+      });
+      safeSink(onAudit, {
+        action: "gateway-device-token",
+        outcome: cleared ? "cleared" : "unchanged",
+        reason: "explicit_local_clear"
+      });
+      return cleared;
+    }
+  });
+
   return Object.freeze({
     schemaVersion: 1,
     contract: OPENCLAW_GATEWAY_CONTRACT,
     get state() { return state; },
     connect,
     chat,
+    deviceAuth,
     close() {
       if (state === "closed") return false;
       const cancel = cancelHandshake;

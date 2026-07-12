@@ -88,6 +88,11 @@ The canonical promise is:
   exact-origin WSS connection, token-private connect, strict `hello-ok`
   validation, explicit pairing-required metadata, and a bounded generated
   chat/history/abort event/RPC surface with explicit reconnect.
+- `packages/embed-sdk/gateway-device-token-vault.mjs` and
+  `gateway-pairing-prompt.mjs` add artifact/device/role/scope-bound encrypted
+  token retention and an explicit exact-request owner decision surface. The
+  Gateway controller rechecks OpenClaw's pending list before its one-shot local
+  CLI approval or rejection.
 - `packages/compatibility/browserpod-evidence.schema.json` and the report
   generator bind that evidence to runtime version, browser, and artifact while
   leaving later protocol gates pending.
@@ -102,9 +107,10 @@ The canonical promise is:
   teardown through a documented vendor API; version 2.12.1 exposes none of
   these operations;
 - an owner-authorized run of the implemented exact-artifact readiness harness;
-- an explicit device-pairing approval UI and issued-token lifecycle;
-- automatic reconnect/backoff, issued-token persistence, attachments, and
-  broader generated RPC coverage;
+- remote-mode pairing approval plus device-token rotation, revocation, and
+  recovery;
+- automatic reconnect/backoff, attachments, and broader generated RPC
+  coverage;
 - a small public `boot()` SDK after BrowserPod reaches the Gateway evidence
   gate.
 

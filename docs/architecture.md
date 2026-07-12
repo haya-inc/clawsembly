@@ -84,7 +84,7 @@ transport layer. The implemented handshake slice:
   of the upstream declaration sources;
 - waits for `connect.challenge` and signs the v3 payload with a persistent,
   non-extractable browser Ed25519 key;
-- sends the shared token only in the authenticated connect frame;
+- sends shared or stored device auth only in the authenticated connect frame;
 - validates the exact-version `hello-ok` and returns method/event discovery
   plus advertised limits without returning issued bearer tokens;
 - caps pre-authentication frames and emits payload-free audit metadata;
@@ -93,11 +93,13 @@ transport layer. The implemented handshake slice:
   pending requests, history, cancellation, and sequence-gap diagnostics;
 - rejects pending RPCs on disconnect and allows an explicit fresh signed
   handshake with the same persistent identity;
+- reviews exact pending pairing state before a one-shot local approve/reject,
+  encrypts issued device tokens, and uses them for explicit signed reconnect;
 - avoids depending on private OpenClaw workspace packages at runtime.
 
-Broader RPC generation, automatic reconnect/backoff, device-token persistence,
-attachments, and forward-compatible unknown post-authentication events remain
-to be generated.
+Broader RPC generation, automatic reconnect/backoff, token
+rotation/revocation/recovery, attachments, and forward-compatible unknown
+post-authentication events remain to be generated.
 
 OpenClaw documents its Gateway protocol and TypeBox code-generation pipeline in
 [Gateway protocol](https://docs.openclaw.ai/gateway/protocol) and
@@ -245,7 +247,20 @@ wildcards, path-bearing values, and public plaintext HTTP origins fail closed.
 IndexedDB and exposes only a descriptor and challenge-signing operation.
 `gateway-client.mjs` consumes `connection()` inside the host closure, performs
 the protocol 4 handshake, and serializes neither the shared token nor an issued
-device token into results or audit.
+device token into results or audit. `gateway-device-token-vault.mjs` stores an
+issued role token as AES-GCM ciphertext under a non-extractable IndexedDB key;
+artifact integrity, device id, role, and scopes are authenticated data. The
+client prefers that device token for a later explicitly requested handshake and
+clears it on an authenticated token-mismatch response.
+
+The Gateway controller owns a narrow local pairing-management bridge. It runs
+only `openclaw devices list|approve|reject --json` from the exact installed
+artifact and state directory. Review compares the current pending device,
+single generated role, and exact generated scopes before issuing an opaque,
+five-minute, one-use review id. Approval or rejection repeats that comparison
+immediately before the decision command. The browser client never receives a
+generic pairing RPC or permission to approve itself. The DOM prompt consumes
+only the redacted review and invokes the two exact controller actions.
 
 The embed session lifecycle prevents logical runtime disposal from racing the
 Gateway. `close()` stops the supervised child first and retains runtime access
@@ -285,9 +300,11 @@ that no live endpoint request occurs.
 Device identity is owned by a second IndexedDB database. The browser creates a
 non-extractable Ed25519 private key, derives the OpenClaw-compatible device ID
 from the raw public key, and signs the exact v3 challenge payload. The page
-proves persistence, non-extractability, signing, and nonce rejection without a
-guest runtime. BrowserPod pairing and token reconnect remain pending provider
-evidence.
+proves persistence, non-extractability, signing, nonce rejection, pairing-prompt
+shape, and encrypted token-vault round trip without a guest runtime. The token
+vault is separate from both device identity and provider credentials, so an
+export or corruption in one store does not silently change another trust
+record. BrowserPod pairing and token reconnect remain pending provider evidence.
 
 Clearing site data can remove all browser-owned state, so users need a visible
 backup and restore path before Clawsembly is considered production-ready.

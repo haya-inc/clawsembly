@@ -61,13 +61,15 @@ Deliverables:
 Exit criterion: one UI can complete the same basic chat workflow against both
 an embedded Gateway and a native Gateway.
 
-Status: partial. Browser-owned Ed25519 identity now signs a real v3 challenge
-and receives `hello-ok`. The local standard Control UI path pairs, issues a
-device token, persists it encrypted in the browser host, and reconnects with
-token authentication after the shared-token session. Streamed chat,
-cancellation, history, and reconnect pass for the embedded probe. Generated UI
-client work, remote-mode parity, remote approval, rotation, revocation, and
-recovery remain.
+Status: partial. Browser-owned Ed25519 identity signs the exact v3 challenge and
+the generated client validates `hello-ok`. The embedded controller now re-reads
+the exact OpenClaw pending list, refuses device/role/scope drift, and exposes a
+five-minute one-shot owner approve/reject prompt. Issued tokens are encrypted
+under a non-extractable AES-GCM key bound to artifact/device/role/scopes and are
+used for signed reconnect; a rejected stale token is cleared. Streamed chat,
+cancellation, history, pairing, and reconnect pass provider-free contract
+tests. Owner-authorized BrowserPod evidence, remote-mode parity, remote
+approval, rotation, revocation, recovery, and automatic retry remain.
 
 ## Phase 3: persistence and constrained tools
 
@@ -183,8 +185,11 @@ explicit-pairing metadata. Provider-free contract tests pass;
 the post-authentication client now limits itself to chat send/history/abort,
 forces local-only delivery, validates streamed chat events, detects gaps,
 rejects pending RPCs on disconnect, and supports an explicit fresh signed
-reconnect. Owner-authorized BrowserPod handshake/turn evidence, approval UI,
-issued-token persistence, automatic retry, and attachments remain. Ordered session close now prevents logical runtime disposal from
+reconnect. Exact local pending-request review, explicit approve/reject UI,
+encrypted issued-token persistence, device-token reconnect, and stale-token
+clearing also pass provider-free tests. Owner-authorized BrowserPod
+handshake/pairing/turn evidence, automatic retry, remote approval, token
+rotation/revocation/recovery, and attachments remain. Ordered session close now prevents logical runtime disposal from
 cutting off an active Gateway's cooperative stop path. The boot slice is not promoted as supported while
 owner-authorized BrowserPod evidence remains missing.
 
@@ -236,4 +241,5 @@ agent runtime inside Clawsembly.
 2. Execute the protected live smoke test with an owner-provided key, archive redacted evidence, and expand moderation UX.
 3. Replace or cache the 293-package repair path and reduce the measured 880 MB combined install/cache footprint.
 4. Reproduce the full runtime slice on the selected commercial browser runtime.
-5. Add remote pairing approval, device-token rotation, revocation, recovery, and bridge-process hardening.
+5. Add remote-mode pairing approval, device-token rotation, revocation,
+   recovery, and bridge-process hardening.

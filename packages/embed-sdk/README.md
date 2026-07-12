@@ -46,15 +46,27 @@ const installed = await session.installer.install();
 // probes, then complete the artifact-matched protocol 4 handshake.
 const gateway = await session.gateway.start();
 const client = session.createGatewayClient();
+let hello;
 try {
-  const hello = await client.connect();
+  hello = await client.connect();
   console.log(hello.protocol, hello.server.version);
 } catch (error) {
   if (error.code === "pairing_required") {
-    // Render error.pairing and require explicit owner approval before retry.
-  }
-  throw error;
+    // Review re-reads OpenClaw's current pending list inside BrowserPod and
+    // rejects any device/role/scope drift before rendering owner controls.
+    const review = await session.gateway.pairing.review(error.pairing);
+    mountGatewayPairingPrompt({
+      container: pairingContainer,
+      review,
+      onApprove: (reviewId) => session.gateway.pairing.approve(reviewId),
+      onReject: (reviewId) => session.gateway.pairing.reject(reviewId),
+      onDecision(decision) {
+        if (decision.decision === "approved") void client.connect();
+      }
+    });
+  } else throw error;
 }
+if (!hello) throw new Error("Pairing decision pending; chat remains locked");
 
 const unsubscribe = client.chat.onEvent((event) => renderChatEvent(event));
 const accepted = await client.chat.send({
@@ -121,18 +133,25 @@ token, exact browser-origin policy, loopback bind, HTTPS portal discovery,
 `session.gateway.connection()` is the internal authority source and becomes
 unavailable after stop. `session.createGatewayClient()` consumes it only during
 the protocol 4 handshake: it waits for `connect.challenge`, signs the exact v3
-device payload with a persistent non-extractable Ed25519 key, sends the token
-only in `connect.params.auth.token`, validates `hello-ok`, and returns a
-token-free summary. First-use or scope-upgrade pairing is surfaced as bounded
-metadata for explicit approval; it is never auto-approved. The generated
+device payload with a persistent non-extractable Ed25519 key, sends shared or
+device auth only inside `connect.params.auth`, validates `hello-ok`, and returns
+a token-free summary. First-use or scope-upgrade pairing is surfaced as bounded
+metadata and `session.gateway.pairing.review()` re-reads the exact pending
+request through the artifact-pinned OpenClaw CLI. The framework-neutral prompt
+requires an explicit owner approve/reject action; approval is one-shot, expires
+after five minutes, and is refused if the device, role, or scopes changed.
+Issued tokens are encrypted with a non-extractable AES-GCM key in a separate
+IndexedDB vault bound to artifact, device, role, and scopes. Reconnect signs and
+authenticates with that device token; a mismatch clears it before a later
+explicit connect can fall back to shared auth. The generated
 contract is pinned to the same npm artifact and can be reproduced with
 `npm run protocol:verify`. The post-authentication surface is deliberately
 limited to generated `chat.send`, `chat.history`, and `chat.abort` contracts.
 It caps payloads and pending requests, delivers validated delta/final/aborted/
 error events, detects sequence gaps, rejects pending work on disconnect, and
 can perform a fresh signed `connect()` with the same device identity. Arbitrary
-Gateway RPC, outbound delivery, attachments, device-token persistence, and
-pairing approval UI remain unavailable.
+Gateway RPC, outbound delivery, attachments, automatic retry/backoff, remote
+pairing approval, token rotation/revocation, and recovery remain unavailable.
 `session.close()` orders cooperative Gateway stop before logical runtime
 disposal; synchronous `dispose()` refuses to close a session while a Gateway is
 active, so the stop control path cannot be cut off accidentally.

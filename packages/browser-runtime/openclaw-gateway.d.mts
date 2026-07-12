@@ -20,6 +20,26 @@ export interface VerifiedOpenClawGatewayReady {
   outputTruncated: boolean;
 }
 
+export interface GatewayPairingReview {
+  schemaVersion: 1;
+  reviewId: string;
+  requestId: string;
+  deviceId: string;
+  reason: "not-paired" | "role-upgrade" | "scope-upgrade" | "metadata-upgrade";
+  requested: Readonly<{ roles: readonly string[]; scopes: readonly string[] }>;
+  approved: Readonly<{ roles: readonly string[]; scopes: readonly string[] }> | null;
+  expiresAt: string;
+}
+
+export interface GatewayPairingRequirement {
+  required: true;
+  requestId: string;
+  deviceId: string;
+  reason: GatewayPairingReview["reason"];
+  role: string;
+  scopes: readonly string[];
+}
+
 export interface VerifiedOpenClawGateway {
   schemaVersion: 1;
   artifact: Readonly<{ package: "openclaw"; version: string; integrity: string }>;
@@ -33,6 +53,21 @@ export interface VerifiedOpenClawGateway {
     portal: Readonly<BrowserPodPortal>;
     allowedOrigins: readonly string[];
     auth: Readonly<{ mode: "token"; token: string }>;
+  }>;
+  readonly pairing: Readonly<{
+    review(requirement: GatewayPairingRequirement): Promise<Readonly<GatewayPairingReview>>;
+    approve(reviewId: string): Promise<Readonly<{
+      schemaVersion: 1;
+      decision: "approved";
+      requestId: string;
+      deviceId: string;
+    }>>;
+    reject(reviewId: string): Promise<Readonly<{
+      schemaVersion: 1;
+      decision: "rejected";
+      requestId: string;
+      deviceId: string;
+    }>>;
   }>;
   stop(options?: { timeoutMs?: number }): Promise<Readonly<{
     complete: boolean;
@@ -50,6 +85,8 @@ export function createVerifiedOpenClawGateway(options: {
   allowedOrigins?: readonly string[];
   tokenFactory?: () => string;
   supervisorNonceFactory?: () => string;
+  pairingProfile?: Readonly<{ role: string; scopes: readonly string[] }>;
+  approvalIdFactory?: () => string;
   onOutput?: (event: Readonly<{ phase: "configure" | "gateway" | "health"; chunk: string }>) => void;
   onAudit?: (event: Readonly<Record<string, unknown>>) => void;
   now?: () => number;

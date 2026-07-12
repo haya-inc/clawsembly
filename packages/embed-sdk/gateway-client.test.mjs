@@ -62,6 +62,50 @@ function identity() {
   };
 }
 
+function tokenVault(initial) {
+  let record = initial;
+  const calls = [];
+  return {
+    calls,
+    async load(subject) {
+      calls.push({ action: "load", subject });
+      return record;
+    },
+    async store(value) {
+      calls.push({ action: "store", value });
+      record = { token: value.token, scopes: [...value.scopes], issuedAtMs: value.issuedAtMs };
+      return {
+        deviceId: value.deviceId,
+        role: value.role,
+        scopes: [...value.scopes],
+        issuedAtMs: value.issuedAtMs,
+        createdAt: "2026-07-12T00:00:00.000Z",
+        updatedAt: "2026-07-12T00:00:00.000Z",
+        keyExtractable: false,
+        algorithm: "AES-GCM-256"
+      };
+    },
+    async metadata(subject) {
+      calls.push({ action: "metadata", subject });
+      return record ? {
+        ...subject,
+        scopes: [...record.scopes],
+        issuedAtMs: record.issuedAtMs,
+        createdAt: "2026-07-12T00:00:00.000Z",
+        updatedAt: "2026-07-12T00:00:00.000Z",
+        keyExtractable: false,
+        algorithm: "AES-GCM-256"
+      } : undefined;
+    },
+    async clear(subject) {
+      calls.push({ action: "clear", subject });
+      const existed = Boolean(record);
+      record = undefined;
+      return existed;
+    }
+  };
+}
+
 function helloFrame(id = "connect-1", methods = ["chat.send", "chat.history", "chat.abort"]) {
   return {
     type: "res",
@@ -96,10 +140,12 @@ function fixture(options = {}) {
   const audit = [];
   const gaps = [];
   let requestSequence = 0;
+  const vault = options.deviceTokenVault ?? tokenVault();
   const client = createOpenClawGatewayClient({
     artifact: OPENCLAW_GATEWAY_CONTRACT.artifact,
     getConnection: () => connection,
     identity: identity(),
+    deviceTokenVault: vault,
     browserOrigin: "https://embed.example",
     createWebSocket(url) { socket = new FakeWebSocket(url); return socket; },
     requestIdFactory: () => requestSequence++ === 0 ? "connect-1" : `request-${requestSequence}`,
@@ -107,7 +153,7 @@ function fixture(options = {}) {
     onGap: (gap) => { gaps.push(gap); options.onGap?.(gap); },
     now: (() => { let value = 1_000; return () => value += 10; })()
   });
-  return { client, audit, gaps, get socket() { return socket; } };
+  return { client, audit, gaps, vault, get socket() { return socket; } };
 }
 
 async function completeHandshake(current, methods) {
@@ -190,6 +236,9 @@ test("waits for challenge, signs protocol 4 connect, and redacts bearer tokens f
   assert.equal(current.client.state, "ready");
   assert.equal(hello.protocol, 4);
   assert.equal(hello.auth.deviceTokenIssued, true);
+  assert.equal(hello.auth.deviceTokenStored, true);
+  assert.equal(hello.auth.authenticatedWith, "shared-token");
+  assert.equal((await current.client.deviceAuth.metadata()).algorithm, "AES-GCM-256");
   assert.equal(JSON.stringify(hello).includes("issued-device-token"), false);
   assert.equal(JSON.stringify(current.audit).includes("gateway-private-token"), false);
   assert.equal(JSON.stringify(current.client).includes("gateway-private-token"), false);
@@ -369,9 +418,53 @@ test("rejects pending RPCs on disconnect and reconnects with a new signed handsh
   });
   await waitFor(() => current.socket.sent.length === 1);
   const reconnectRequest = JSON.parse(current.socket.sent[0]);
+  assert.deepEqual(reconnectRequest.params.auth, { deviceToken: "issued-device-token" });
   current.socket.emit("message", { data: JSON.stringify(helloFrame(reconnectRequest.id)) });
-  assert.equal((await reconnecting).protocol, 4);
+  const reconnected = await reconnecting;
+  assert.equal(reconnected.protocol, 4);
+  assert.equal(reconnected.auth.authenticatedWith, "device-token");
   assert.equal(current.client.state, "ready");
+});
+
+test("clears a rejected stored device token and falls back to shared auth on the next explicit connect", async () => {
+  const current = fixture({
+    deviceTokenVault: tokenVault({
+      token: "stale-device-token",
+      scopes: ["operator.read", "operator.write"],
+      issuedAtMs: 1
+    })
+  });
+  const first = current.client.connect();
+  current.socket.emit("message", {
+    data: JSON.stringify({ type: "event", event: "connect.challenge", payload: { nonce: "first-nonce" } })
+  });
+  await waitFor(() => current.socket.sent.length === 1);
+  assert.deepEqual(JSON.parse(current.socket.sent[0]).params.auth, { deviceToken: "stale-device-token" });
+  current.socket.emit("message", {
+    data: JSON.stringify({
+      type: "res",
+      id: "connect-1",
+      ok: false,
+      error: {
+        code: "UNAUTHORIZED",
+        message: "private stale token detail",
+        details: { code: "AUTH_DEVICE_TOKEN_MISMATCH" }
+      }
+    })
+  });
+  await assert.rejects(first, (error) => error.code === "connect_rejected");
+  assert.equal(current.vault.calls.some((call) => call.action === "clear"), true);
+
+  const second = current.client.connect();
+  current.socket.emit("message", {
+    data: JSON.stringify({ type: "event", event: "connect.challenge", payload: { nonce: "second-nonce" } })
+  });
+  await waitFor(() => current.socket.sent.length === 1);
+  const request = JSON.parse(current.socket.sent[0]);
+  assert.deepEqual(request.params.auth, { token: "gateway-private-token" });
+  current.socket.emit("message", { data: JSON.stringify(helloFrame(request.id)) });
+  assert.equal((await second).auth.authenticatedWith, "shared-token");
+  assert.equal(JSON.stringify(current.audit).includes("stale-device-token"), false);
 });
 
 test("cancels a pending local RPC without exposing or accepting a late response", async () => {

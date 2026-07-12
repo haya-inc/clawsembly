@@ -230,7 +230,22 @@ sign OpenClaw's v3 payload, sends the ephemeral Gateway token only inside the
 returns no bearer token. Pre-authentication frames are capped at 64 KiB and all
 errors/audits are reduced to fixed metadata. A first-use or scope-upgrade
 `PAIRING_REQUIRED` response returns only the bounded request/device/role/scope
-contract; approval remains an explicit owner action.
+contract. `session.gateway.pairing.review()` then invokes the exact installed
+OpenClaw CLI to re-read the current pending list, matches the signed device and
+generated role/scopes, and creates a five-minute one-shot review. The reusable
+`mountGatewayPairingPrompt()` renders only that bounded review. Approve/reject
+reruns the list check immediately before the exact request decision, so a
+superseded request, changed key, or broader role/scope fails closed. Nothing
+auto-approves the browser device.
+
+When an approved reconnect returns `hello-ok.auth.deviceToken`, the client
+encrypts it with a non-extractable AES-GCM key in a separate IndexedDB database.
+Authenticated data binds the ciphertext to the exact npm artifact integrity,
+browser device id, role, and scope list. Public hello and metadata contain only
+issuance/storage booleans and timestamps. A later explicit `connect()` signs
+the challenge with the stored device token and sends it only as
+`auth.deviceToken`; `AUTH_DEVICE_TOKEN_MISMATCH` clears the stale ciphertext
+before a subsequent explicit connect can use fresh shared authority.
 
 After authentication, the client admits only `chat.send`, `chat.history`, and
 `chat.abort`; it does not expose a generic Gateway request escape hatch.
@@ -241,9 +256,9 @@ is count/character bounded, and abort must confirm the requested run id.
 Authenticated frames are capped at 4 MiB and pending requests at 64. A socket
 loss rejects every pending RPC and moves the client to `disconnected`; calling
 `connect()` performs a new signed handshake with the same IndexedDB identity.
-The real BrowserPod handshake/turn evidence, pairing approval UI, issued-token
-persistence, automatic retry policy, attachments, and remote-mode parity remain
-pending.
+The real BrowserPod handshake/pairing/turn evidence, automatic retry policy,
+token rotation/revocation/recovery, attachments, and remote-mode parity remain
+pending. Provider-free contract tests do not promote the public runtime report.
 
 Use `await session.close()` for ordered teardown. It first requires a successful
 cooperative Gateway stop, then closes the logical runtime adapter. The legacy

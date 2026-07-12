@@ -58,13 +58,14 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   await expect(page.locator("[data-probe-output] li")).toHaveCount(8);
   await expect(page.getByText("manifest + lock integrity readback", { exact: true })).toBeVisible();
   await expect(page.getByText("token-private · origin-pinned · stop", { exact: true })).toBeVisible();
-  await expect(page.getByText("challenge · chat RPC · reconnect", { exact: true })).toBeVisible();
+  await expect(page.getByText("exact review · token vault · chat RPC", { exact: true })).toBeVisible();
   const runtimes = page.locator("#runtimes");
   await expect(runtimes.getByRole("heading", { name: "BrowserPod executes. Clawsembly decides." })).toBeVisible();
   await expect(runtimes.getByText("BrowserPod 2.x", { exact: true })).toBeVisible();
-  await expect(runtimes.getByText("Chat contract ✓", { exact: true })).toBeVisible();
+  await expect(runtimes.getByText("Pairing + chat ✓", { exact: true })).toBeVisible();
   await expect(runtimes.getByText(/npm identity and browser origin/)).toBeVisible();
-  await expect(runtimes.getByText(/signs protocol 4/)).toBeVisible();
+  await expect(runtimes.getByText(/rechecks exact pairing access/)).toBeVisible();
+  await expect(runtimes.getByText(/encrypts issued device tokens/)).toBeVisible();
   await expect(runtimes.getByText(/bounded chat\/history\/abort RPC/)).toBeVisible();
   await expect(runtimes.getByText(/digest-pinned Node client carries broker calls/)).toBeVisible();
   await expect(runtimes.getByText(/Real provider evidence is unrun/)).toBeVisible();

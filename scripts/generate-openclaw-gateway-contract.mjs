@@ -16,7 +16,8 @@ const sourcePaths = [
   "gateway-protocol/src/schema/frames.d.ts",
   "gateway-protocol/src/schema/primitives.d.ts",
   "gateway-client/src/device-auth.d.ts",
-  "gateway-protocol/src/schema/logs-chat.d.ts"
+  "gateway-protocol/src/schema/logs-chat.d.ts",
+  "gateway-protocol/src/schema/devices.d.ts"
 ];
 
 const sha256 = (value) => `sha256-${createHash("sha256").update(value).digest("hex")}`;
@@ -103,6 +104,7 @@ try {
   const frames = contents["gateway-protocol/src/schema/frames.d.ts"];
   const deviceAuth = contents["gateway-client/src/device-auth.d.ts"];
   const chat = contents["gateway-protocol/src/schema/logs-chat.d.ts"];
+  const devices = contents["gateway-protocol/src/schema/devices.d.ts"];
   for (const required of ["webchat-ui", "webchat"]) {
     if (!primitives.includes(quoted(required))) throw new Error(`Gateway schema is missing ${required}`);
   }
@@ -114,6 +116,9 @@ try {
   }
   for (const required of ["ChatSendParamsSchema", "ChatHistoryParamsSchema", "ChatAbortParamsSchema", "ChatEventSchema"]) {
     if (!chat.includes(required)) throw new Error(`Gateway chat contract is missing ${required}`);
+  }
+  for (const required of ["DevicePairListParamsSchema", "DevicePairApproveParamsSchema", "DevicePairRejectParamsSchema"]) {
+    if (!devices.includes(required)) throw new Error(`Gateway pairing contract is missing ${required}`);
   }
   const generated = render({
     artifact: { ...artifact, shasum: packed.shasum },

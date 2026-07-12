@@ -68,7 +68,13 @@ The same client now exposes only bounded `chat.send`, `chat.history`, and
 `chat.abort` operations after authentication. It forces `deliver:false`,
 validates stream events, reports sequence gaps without payloads, rejects pending
 work on disconnect, and supports an explicit freshly signed reconnect. It does
-not expose arbitrary Gateway methods.
+not expose arbitrary Gateway methods. The embedded pairing bridge re-reads the
+current OpenClaw pending list, refuses changed or broader access, and executes
+only a one-shot exact-request approve/reject after owner review. Issued device
+tokens are encrypted in an artifact/device/role/scope-bound IndexedDB vault and
+used for signed reconnect; rejected stale tokens are cleared without entering
+results or audit. These paths are provider-free contract evidence, not a claim
+that BrowserPod pairing has been run.
 
 ## Browser runtime direction
 
@@ -237,9 +243,10 @@ explicit-consent gates. No live provider request has been executed in the
 checked-in evidence yet.
 Backup/export controls currently apply only to the deterministic mock-state
 snapshot and deliberately exclude credentials. Browser-owned device signing,
-local Control UI pairing, encrypted token retention, and token reconnect are
-verified against the real Gateway. Remote approval, rotation, revocation, and
-recovery remain future work.
+exact pending-request review, explicit pairing controls, encrypted token
+retention, and token reconnect pass provider-free contract tests. They are not
+yet backed by an owner-authorized BrowserPod/Gateway record. Remote-mode
+approval, rotation, revocation, and recovery remain future work.
 
 ## License
 

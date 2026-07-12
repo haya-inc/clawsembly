@@ -1,4 +1,5 @@
 import type { BrowserDeviceIdentity } from "./gateway-device-identity.mjs";
+import type { GatewayDeviceTokenMetadata, GatewayDeviceTokenVault } from "./gateway-device-token-vault.mjs";
 import type { OpenClawGatewayContract } from "./openclaw-gateway-contract.generated.mjs";
 
 export interface GatewayPairingRequirement {
@@ -27,6 +28,8 @@ export interface OpenClawGatewayHello {
     role: "operator";
     scopes: readonly string[];
     deviceTokenIssued: boolean;
+    deviceTokenStored: boolean;
+    authenticatedWith: "shared-token" | "device-token";
   }>;
   readonly policy: Readonly<{
     maxPayload: number;
@@ -48,6 +51,10 @@ export interface OpenClawGatewayClient {
   readonly state: "idle" | "connecting" | "ready" | "disconnected" | "failed" | "closed";
   connect(options?: { signal?: AbortSignal }): Promise<Readonly<OpenClawGatewayHello>>;
   readonly chat: Readonly<OpenClawGatewayChatClient>;
+  readonly deviceAuth: Readonly<{
+    metadata(): Promise<Readonly<GatewayDeviceTokenMetadata> | undefined>;
+    clear(): Promise<boolean>;
+  }>;
   close(): boolean;
 }
 
@@ -108,6 +115,7 @@ export function createOpenClawGatewayClient(options: {
   artifact: Readonly<{ package: "openclaw"; version: string; integrity: string }>;
   getConnection: () => GatewayConnectionMaterial;
   identity: BrowserDeviceIdentity;
+  deviceTokenVault?: GatewayDeviceTokenVault;
   browserOrigin?: string;
   createWebSocket?: (url: string) => WebSocket;
   requestIdFactory?: () => string;

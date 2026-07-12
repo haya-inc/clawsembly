@@ -70,6 +70,16 @@ The browser sandbox is one boundary, not the only control.
   the server-provided challenge nonce with the exact OpenClaw v3 payload, cap
   pre-authentication frames, and never copy shared/device tokens into hello
   summaries, pairing errors, or protocol audit.
+- Never approve from the unpaired WebSocket client. Re-read the exact pending
+  request through the installed local OpenClaw CLI, require the signed device id
+  and generated role/scopes, issue a short-lived one-shot review, and recheck
+  immediately before an explicit owner approve/reject action. Superseded or
+  broader requests fail closed.
+- Encrypt issued device tokens under a separate non-extractable AES-GCM key and
+  authenticate the exact artifact integrity, device, role, and scopes. Expose
+  only metadata; use plaintext only while signing/sending one connect frame.
+  Clear a token rejected as `AUTH_DEVICE_TOKEN_MISMATCH` before permitting a
+  later explicit shared-token attempt.
 - Expose no generic post-authentication RPC escape hatch. Allow only the
   artifact-generated chat send/history/abort surface, force outbound delivery
   off, reject unsupported fields, cap authenticated frames and pending calls,
@@ -154,9 +164,10 @@ IndexedDB. The browser exports only the raw public key, derives the device ID as
 SHA-256 of those 32 bytes, and signs OpenClaw's v3 challenge payload including
 the server nonce, token, role, scopes, client metadata, and platform fields. The
 project page verifies persistence, rejected private-key export, a valid
-signature, and nonce-mismatch rejection without a guest runtime. Control UI
-pairing, encrypted token reconnect, and recovery still require BrowserPod
-evidence.
+signature, nonce-mismatch rejection, exact-review rendering, explicit denial,
+and encrypted token-vault round trip without a guest runtime. The embedded
+controller and client implement pairing approval and token reconnect, but those
+paths still require owner-authorized BrowserPod evidence.
 
-Remote user approval, token rotation, revocation, and recovery are not yet
+Remote-mode user approval, token rotation, revocation, and recovery are not yet
 implemented.

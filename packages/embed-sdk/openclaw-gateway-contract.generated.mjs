@@ -36,6 +36,7 @@ export const OPENCLAW_GATEWAY_CONTRACT = Object.freeze({
     "gateway-protocol/src/schema/frames.d.ts": "sha256-6eb639ae01170c7b818c623b2e18b4f668515d66de424e61cf8ff4b411b47793",
     "gateway-protocol/src/schema/primitives.d.ts": "sha256-85663b6625ebd41b218e3924e8aab54cbcc7950d03576f1699261ebd5077e877",
     "gateway-client/src/device-auth.d.ts": "sha256-2b2bf3fc1c4c6090cd19b340ecbaa19e1be24beb225292b3258ffd7286c8c788",
-    "gateway-protocol/src/schema/logs-chat.d.ts": "sha256-9eac89a245bc8bc572fc692edefb872c3c16297fa38f64117592bd61448135db"
+    "gateway-protocol/src/schema/logs-chat.d.ts": "sha256-9eac89a245bc8bc572fc692edefb872c3c16297fa38f64117592bd61448135db",
+    "gateway-protocol/src/schema/devices.d.ts": "sha256-b933a940568d99cb4901ae04bf17522523f99fb6b3a2f55f744ccc2ebf39e152"
   })
 });

@@ -42,6 +42,12 @@ The project does not yet promise semantic-version compatibility.
 - generated chat send/history/abort RPC allowlist with local-only delivery,
   bounded history/payloads/pending calls, validated stream events, sequence-gap
   reporting, disconnect rejection, and explicit signed reconnect;
+- exact pending-device review through the pinned OpenClaw CLI, one-shot owner
+  approve/reject controls, scope-drift refusal, and a framework-neutral pairing
+  prompt;
+- artifact/device/role/scope-bound AES-GCM device-token vault,
+  token-authenticated signed reconnect, redacted metadata, and stale-token
+  clearing;
 - ordered embed-session close that refuses runtime disposal while the Gateway
   is active and retains cleanup access when cooperative stop fails;
 - nonce-bound guest process supervisor for cooperative child shutdown without

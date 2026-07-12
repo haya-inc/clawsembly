@@ -12,6 +12,7 @@ import { stageGuestMailboxClient } from "../capability-broker/guest-mailbox-arti
 import { assertVerifiedLaunch } from "./embed-manifest.mjs";
 import { createBrowserDeviceIdentity } from "./gateway-device-identity.mjs";
 import { createOpenClawGatewayClient } from "./gateway-client.mjs";
+import { OPENCLAW_GATEWAY_CONTRACT } from "./openclaw-gateway-contract.generated.mjs";
 
 const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/u;
 const MAILBOX_CHANNEL_PATTERN = /^[A-Za-z0-9_-]{1,64}$/u;
@@ -213,6 +214,10 @@ export async function bootVerifiedEmbed({
   const gateway = createVerifiedOpenClawGateway({
     runtime,
     installer,
+    pairingProfile: {
+      role: OPENCLAW_GATEWAY_CONTRACT.profile.role,
+      scopes: OPENCLAW_GATEWAY_CONTRACT.profile.scopes
+    },
     ...(gatewayOptions.port === undefined ? {} : { port: gatewayOptions.port }),
     ...(gatewayOptions.allowedOrigins === undefined ? {} : { allowedOrigins: gatewayOptions.allowedOrigins }),
     ...(gatewayOptions.tokenFactory === undefined ? {} : { tokenFactory: gatewayOptions.tokenFactory }),
@@ -277,6 +282,7 @@ export async function bootVerifiedEmbed({
       }
       const allowed = new Set([
         "identity",
+        "deviceTokenVault",
         "browserOrigin",
         "createWebSocket",
         "requestIdFactory",
@@ -292,6 +298,7 @@ export async function bootVerifiedEmbed({
         artifact: verifiedManifest.artifact,
         getConnection: () => gateway.connection(),
         identity: options.identity ?? createBrowserDeviceIdentity(),
+        ...(options.deviceTokenVault === undefined ? {} : { deviceTokenVault: options.deviceTokenVault }),
         ...(options.browserOrigin === undefined ? {} : { browserOrigin: options.browserOrigin }),
         ...(options.createWebSocket === undefined ? {} : { createWebSocket: options.createWebSocket }),
         ...(options.requestIdFactory === undefined ? {} : { requestIdFactory: options.requestIdFactory }),
