@@ -77,10 +77,12 @@ assert.doesNotMatch(sdkBuildJob, /contents: write/u, "SDK release build must not
 assert.match(sdkBuildJob, /npm run release:check/u, "SDK release build must pass the full release gate");
 assert.match(sdkBuildJob, /build-sdk-release-assets\.mjs/u, "SDK release build must generate bound assets");
 assert.match(sdkPublishJob, /permissions:\n\s+contents: write/u, "SDK release publishing requires contents write permission");
+assert.match(sdkPublishJob, /actions: write/u, "SDK release publishing requires workflow dispatch permission");
 assert.doesNotMatch(sdkPublishJob, /npm ci|npm install|npm run|npx /u, "write-capable SDK publishing must not execute npm code");
 assert.match(sdkPublishJob, /Release artifact contains an unsafe path/u, "SDK publishing must reject archive path traversal");
 assert.match(sdkPublishJob, /Release artifact must not contain symlinks/u, "SDK publishing must reject artifact symlinks");
 assert.match(sdkPublishJob, /gh release create/u, "SDK publishing must create a GitHub release");
+assert.match(sdkPublishJob, /gh workflow run npm-publish\.yml/u, "SDK publishing must dispatch npm publication explicitly");
 assert.match(sdkPublishJob, /--verify-tag/u, "SDK publishing must bind the release to the pushed tag");
 assert.match(sdkPublishJob, /--prerelease/u, "SDK publishing must never mark the source alpha stable");
 assert.doesNotMatch(sdkPublishJob, /--latest/u, "SDK publishing must not promote the source alpha as latest");
