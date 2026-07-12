@@ -76,9 +76,21 @@ jobs:
           package='@haya-inc/clawsembly'
           tarball=".artifacts/sdk/haya-inc-clawsembly-$version.tgz"
           local_integrity="$(node -e 'const fs=require("node:fs"),c=require("node:crypto"); process.stdout.write(`sha512-${c.createHash("sha512").update(fs.readFileSync(process.argv[1])).digest("base64")}`)' "$tarball")"
-          if remote_integrity="$(npm view "$package@$version" dist.integrity --json 2>/dev/null)"; then
-            remote_integrity="${remote_integrity%\"}"
-            remote_integrity="${remote_integrity#\"}"
+          registry_integrity() {
+            node --input-type=module -e '
+              const [pkg, version] = process.argv.slice(1);
+              const response = await fetch(
+                `https://registry.npmjs.org/${encodeURIComponent(pkg)}/${encodeURIComponent(version)}`,
+                { headers: { Accept: "application/json", "Cache-Control": "no-cache" } }
+              );
+              if (!response.ok) process.exit(1);
+              const manifest = await response.json();
+              if (manifest.name !== pkg || manifest.version !== version
+                || typeof manifest.dist?.integrity !== "string") process.exit(1);
+              process.stdout.write(manifest.dist.integrity);
+            ' "$package" "$version"
+          }
+          if remote_integrity="$(registry_integrity)"; then
             if [ "$remote_integrity" != "$local_integrity" ]; then
               echo "Published npm bytes differ from the verified release." >&2
               exit 1
@@ -90,9 +102,15 @@ jobs:
             export NODE_AUTH_TOKEN="$NPM_TOKEN"
           fi
           npm publish "$tarball" --access public --tag alpha --provenance --ignore-scripts
-          remote_integrity="$(npm view "$package@$version" dist.integrity --json)"
-          remote_integrity="${remote_integrity%\"}"
-          remote_integrity="${remote_integrity#\"}"
+          remote_integrity=""
+          for attempt in $(seq 1 12); do
+            if remote_integrity="$(registry_integrity)"; then break; fi
+            sleep 5
+          done
+          if [ -z "$remote_integrity" ]; then
+            echo "npm registry did not expose the exact version after publishing." >&2
+            exit 1
+          fi
           if [ "$remote_integrity" != "$local_integrity" ]; then
             echo "npm registry integrity does not match the verified release." >&2
             exit 1

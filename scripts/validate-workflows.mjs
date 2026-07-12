@@ -101,6 +101,9 @@ assert.ok(
 );
 assert.match(npmPublish, /gh release download/u, "npm publishing must fetch the reviewed GitHub Release assets");
 assert.match(npmPublish, /cmp "\$tarball" "\$release_dir\/haya-inc-clawsembly-\$version\.tgz"/u, "npm publishing must compare the built and GitHub Release tarballs");
+assert.match(npmPublish, /registry\.npmjs\.org\/\$\{encodeURIComponent\(pkg\)\}\/\$\{encodeURIComponent\(version\)\}/u, "npm publishing must read the exact registry version, not a cached packument");
+assert.match(npmPublish, /for attempt in \$\(seq 1 12\)/u, "npm publishing must tolerate registry propagation before integrity verification");
+assert.doesNotMatch(npmPublish, /npm view/u, "npm publishing must not reuse a cached negative npm view result after publishing");
 assert.match(npmPublish, /npm publish .*--access public --tag alpha --provenance/u, "npm publishing must remain a provenance-backed alpha");
 assert.equal(npmPublish.match(/secrets\.NPM_TOKEN/gu)?.length, 1, "the bootstrap npm token must enter one publish step only");
 
