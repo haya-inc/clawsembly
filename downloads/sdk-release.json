@@ -10,14 +10,14 @@
     "tarball": {
       "file": "haya-inc-clawsembly-0.1.0-alpha.0.tgz",
       "url": "https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz",
-      "bytes": 63603,
-      "sha256": "e8d593dd1633cf7950bb283b50292fea9a64f9dc7432863dc72aaff8a11efc87"
+      "bytes": 63699,
+      "sha256": "8fbeeca68bf39bc86a004d6419ed03545dcb20353494b8c11075d0763ee6dc8c"
     },
     "checksum": {
       "file": "haya-inc-clawsembly-0.1.0-alpha.0.tgz.sha256",
       "url": "https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz.sha256",
       "bytes": 104,
-      "value": "e8d593dd1633cf7950bb283b50292fea9a64f9dc7432863dc72aaff8a11efc87"
+      "value": "8fbeeca68bf39bc86a004d6419ed03545dcb20353494b8c11075d0763ee6dc8c"
     }
   },
   "compatibility": {
