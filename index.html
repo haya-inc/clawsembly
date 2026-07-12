@@ -40,8 +40,8 @@
         "programmingLanguage": ["TypeScript", "JavaScript"]
       }
     </script>
-    <script type="module" crossorigin src="/clawsembly/assets/index-CAHoCwtH.js"></script>
-    <link rel="stylesheet" crossorigin href="/clawsembly/assets/index-Cke9_m_D.css">
+    <script type="module" crossorigin src="/clawsembly/assets/index-vKC64Xdp.js"></script>
+    <link rel="stylesheet" crossorigin href="/clawsembly/assets/index-D5scFd8A.css">
   </head>
   <body>
     <div class="scroll-progress" aria-hidden="true"></div>
@@ -245,7 +245,7 @@
               <li data-state="pass"><span>01</span><strong>Production runtime</strong><em>BrowserPod 2.x · selected</em></li>
               <li data-state="pass"><span>02</span><strong>Exact installer</strong><em>manifest + lock integrity readback</em></li>
               <li data-state="pass"><span>03</span><strong>Gateway controller</strong><em>token-private · origin-pinned · stop</em></li>
-              <li data-state="pass"><span>04</span><strong>Protocol client</strong><em>challenge · chat RPC · reconnect</em></li>
+              <li data-state="pass"><span>04</span><strong>Protocol + pairing</strong><em>exact review · token vault · chat RPC</em></li>
               <li data-state="pass"><span>05</span><strong>Guest transport</strong><em>SHA-256 source + readback</em></li>
               <li data-state="pass"><span>06</span><strong>Permission lifecycle</strong><em>pending · approve · expire/revoke</em></li>
               <li data-state="idle"><span>07</span><strong>Provider evidence</strong><em>owner key required</em></li>
@@ -310,7 +310,7 @@
 
         <div class="broker-proof reveal">
           <span>Implemented slice</span>
-          <p>Exact artifact → origin-pinned Gateway → signed protocol 4 handshake → bounded chat/history/abort → pending permission → expiring exact grant → typed mailbox → payload-free audit. Drift, replay, and cross-runtime evidence fail closed.</p>
+          <p>Exact artifact → origin-pinned Gateway → signed protocol 4 handshake → one-shot pairing review → encrypted device token → bounded chat/history/abort → expiring exact grant → typed mailbox → payload-free audit. Drift, replay, and cross-runtime evidence fail closed.</p>
           <a href="https://github.com/haya-inc/clawsembly/blob/main/docs/embedding.md">Read the embedding contract ↗</a>
         </div>
       </section>
@@ -331,9 +331,9 @@
           <a class="runtime-row runtime-row-primary" href="https://browserpod.io/docs/more/licensing" target="_blank" rel="noreferrer">
             <span class="runtime-rank">01 / adopted</span>
             <div class="runtime-name"><strong>BrowserPod 2.x</strong><span>Node 22 · browser-local</span></div>
-            <p>SDK pins npm identity and browser origin, signs protocol 4, then admits only bounded chat/history/abort RPC with local-only delivery and explicit reconnect. A digest-pinned Node client carries broker calls. Real provider evidence is unrun; hard dispose remains unavailable.</p>
+            <p>SDK pins npm identity and browser origin, rechecks exact pairing access, encrypts issued device tokens, then admits only bounded chat/history/abort RPC with local-only delivery. A digest-pinned Node client carries broker calls. Real provider evidence is unrun; hard dispose remains unavailable.</p>
             <span class="runtime-license">Commercial</span>
-            <span class="runtime-state">Chat contract ✓</span>
+            <span class="runtime-state">Pairing + chat ✓</span>
           </a>
           <a class="runtime-row" href="https://github.com/container2wasm/container2wasm" target="_blank" rel="noreferrer">
             <span class="runtime-rank">02 / archived probe</span>
