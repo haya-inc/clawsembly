@@ -58,6 +58,14 @@ The browser sandbox is one boundary, not the only control.
   readback before exposing its entrypoint.
 - Treat cooperative Gateway shutdown separately from provider process
   termination and Pod disposal; never infer the latter from a supervisor exit.
+- Keep the ephemeral Gateway token inside the lifecycle controller, exclude it
+  from ready records, session serialization, output-independent audit, and
+  public evidence, and return it only from an explicit trusted-host connection
+  request while the Gateway is ready.
+- Refuse logical runtime disposal while the Gateway is active; ordered session
+  close must preserve the filesystem control path until cooperative stop is
+  acknowledged, and a failed stop must leave runtime access available for
+  cleanup or diagnostics.
 
 ## Release requirements
 

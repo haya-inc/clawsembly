@@ -38,6 +38,11 @@ const session = await bootVerifiedEmbed({
 // path until both package.json and package-lock integrity match.
 const installed = await session.installer.install();
 
+// Start the same supervised, health-checked Gateway lifecycle used by evidence
+// probes. The token is available only through this explicit trusted-host call.
+const gateway = await session.gateway.start();
+const connection = session.gateway.connection();
+
 // Manifest capabilities start pending, not granted.
 session.permissions.approve("storage.snapshot", "workspace:primary", {
   durationMs: 5 * 60_000,
@@ -51,6 +56,8 @@ await session.runtime.start({
   cwd: installed.root,
   env: [...session.guestTransport.environment]
 });
+
+await session.close();
 ```
 
 There is intentionally no `allowUnverified` option. Provider probes use the
@@ -79,7 +86,14 @@ environment in `session.guestTransport`; integrators no longer copy protocol
 files by hand. `session.installer` writes an exact dependency manifest, runs one
 bounded npm install, and exposes its executable only after installed version and
 package-lock integrity match the verified embed manifest. Gateway launch and
-protocol authentication remain the next SDK slice. BrowserPod 2.12.1 still
-lacks documented provider process
+readiness now use the same controller as evidence probes: a private ephemeral
+token, loopback bind, HTTPS portal discovery, `/healthz` and `/readyz`, and a
+cooperative supervisor stop. `session.gateway.connection()` is the only API that
+returns the token and it becomes unavailable after stop. Authenticated protocol
+handshake and the generated Gateway client remain the next SDK slice.
+`session.close()` orders cooperative Gateway stop before logical runtime
+disposal; synchronous `dispose()` refuses to close a session while a Gateway is
+active, so the stop control path cannot be cut off accidentally.
+BrowserPod 2.12.1 still lacks documented provider process
 termination and hard-disposal APIs; a guest supervisor now handles cooperative
 shutdown only for Clawsembly-launched processes.

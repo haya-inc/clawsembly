@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { bootVerifiedEmbed, createArtifactStorageKey } from "./boot.mjs";
+import {
+  bootVerifiedEmbed,
+  createArtifactStorageKey,
+  createEmbedSessionLifecycle
+} from "./boot.mjs";
 import { createEmbedManifest } from "./embed-manifest.mjs";
 
 const INTEGRITY = `sha512-${"A".repeat(86)}==`;
@@ -102,6 +106,29 @@ test("rejects invalid installer diagnostics before BrowserPod boot", async () =>
   assert.equal(fake.calls.length, 0);
 });
 
+test("rejects invalid Gateway options before BrowserPod boot", async () => {
+  const fake = fakeBrowserPod();
+  await assert.rejects(
+    bootVerifiedEmbed({
+      manifest: createEmbedManifest({ report: report() }),
+      BrowserPod: fake.BrowserPod,
+      browserPodApiKey: "secret",
+      gatewayOptions: { port: 70_000 }
+    }),
+    /Gateway port is invalid/u
+  );
+  await assert.rejects(
+    bootVerifiedEmbed({
+      manifest: createEmbedManifest({ report: report() }),
+      BrowserPod: fake.BrowserPod,
+      browserPodApiKey: "secret",
+      gatewayOptions: { authToken: "ambient" }
+    }),
+    /Gateway options contain an unknown field/u
+  );
+  assert.equal(fake.calls.length, 0);
+});
+
 test("boots a verified BrowserPod session and binds capability authority to its artifact", async () => {
   const fake = fakeBrowserPod();
   const manifest = createEmbedManifest({
@@ -123,6 +150,9 @@ test("boots a verified BrowserPod session and binds capability authority to its 
   assert.equal(session.installer.state, "idle");
   assert.deepEqual(session.installer.artifact, manifest.artifact);
   assert.equal(session.installer.executablePath, "/workspace/.clawsembly/openclaw/node_modules/openclaw/openclaw.mjs");
+  assert.equal(session.gateway.state, "idle");
+  assert.equal(session.gateway.port, 18_789);
+  assert.deepEqual(session.gateway.artifact, manifest.artifact);
   assert.equal(fake.calls[0].storageKey, "clawsembly:2026.6.11:primary");
   assert.deepEqual(session.capabilities.subject, {
     artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY },
@@ -199,4 +229,73 @@ test("closes the logical session without claiming undocumented hard disposal", a
   assert.equal(session.closed, true);
   assert.equal(result.complete, false);
   assert.match(result.reason, /no documented pod or process termination/u);
+});
+
+test("session lifecycle stops an active Gateway before logical disposal", async () => {
+  let gatewayState = "ready";
+  let disposeCalls = 0;
+  let stopCalls = 0;
+  const lifecycle = createEmbedSessionLifecycle({
+    runtime: {
+      dispose() {
+        disposeCalls += 1;
+        return { complete: false, reason: "provider hard disposal unavailable", activeTaskIds: [] };
+      }
+    },
+    gateway: {
+      get state() { return gatewayState; },
+      task: { id: "gateway-task-1", status: "running" },
+      async stop() {
+        stopCalls += 1;
+        gatewayState = "stopped";
+        return {
+          complete: true,
+          mode: "guest-supervisor",
+          reason: "guest child acknowledged cooperative stop",
+          taskId: "gateway-task-1",
+          durationMs: 10
+        };
+      }
+    }
+  });
+  const refused = lifecycle.dispose();
+  assert.equal(refused.complete, false);
+  assert.match(refused.reason, /must stop/u);
+  assert.equal(disposeCalls, 0);
+  assert.equal(lifecycle.closed, false);
+
+  const closed = await lifecycle.close();
+  assert.equal(closed.logicalSessionClosed, true);
+  assert.equal(closed.gatewayStop.complete, true);
+  assert.equal(closed.runtimeDisposition.complete, false);
+  assert.equal(stopCalls, 1);
+  assert.equal(disposeCalls, 1);
+  assert.equal(lifecycle.closed, true);
+});
+
+test("session lifecycle retains runtime access when Gateway stop fails", async () => {
+  let disposeCalls = 0;
+  const lifecycle = createEmbedSessionLifecycle({
+    runtime: {
+      dispose() { disposeCalls += 1; return { complete: false, reason: "logical", activeTaskIds: [] }; }
+    },
+    gateway: {
+      state: "ready",
+      task: { id: "gateway-task-1", status: "running" },
+      async stop() {
+        return {
+          complete: false,
+          mode: "guest-supervisor",
+          reason: "stop timeout",
+          taskId: "gateway-task-1",
+          durationMs: 15_000
+        };
+      }
+    }
+  });
+  const result = await lifecycle.close();
+  assert.equal(result.logicalSessionClosed, false);
+  assert.equal(result.reason, "stop timeout");
+  assert.equal(disposeCalls, 0);
+  assert.equal(lifecycle.closed, false);
 });

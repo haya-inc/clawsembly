@@ -56,12 +56,13 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   await expect(broker.getByText("pending exact request", { exact: true })).toBeVisible();
   await expect(page.getByText("pending · approve · expire/revoke", { exact: true })).toBeVisible();
   await expect(page.getByText("manifest + lock integrity readback", { exact: true })).toBeVisible();
+  await expect(page.getByText("token-private · health/ready · stop", { exact: true })).toBeVisible();
   const runtimes = page.locator("#runtimes");
   await expect(runtimes.getByRole("heading", { name: "BrowserPod executes. Clawsembly decides." })).toBeVisible();
   await expect(runtimes.getByText("BrowserPod 2.x", { exact: true })).toBeVisible();
   await expect(runtimes.getByText("Guest transport ✓", { exact: true })).toBeVisible();
-  await expect(runtimes.getByText(/SDK verifies the manifest-bound npm version and lock integrity/)).toBeVisible();
-  await expect(runtimes.getByText(/digest-pinned Node client for typed broker calls/)).toBeVisible();
+  await expect(runtimes.getByText(/uses the same token-private, health-checked/)).toBeVisible();
+  await expect(runtimes.getByText(/digest-pinned Node client carries typed broker calls/)).toBeVisible();
   await expect(runtimes.getByText(/Real provider evidence is unrun/)).toBeVisible();
   await expect(runtimes.getByText(/hard dispose remains unavailable/)).toBeVisible();
   await expect(runtimes.getByText("container2wasm", { exact: true })).toBeVisible();

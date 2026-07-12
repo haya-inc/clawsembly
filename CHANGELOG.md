@@ -32,6 +32,11 @@ The project does not yet promise semantic-version compatibility.
 - shared exact-artifact OpenClaw installer for evidence probes and verified
   embed sessions, with concurrent-call aggregation, idempotence, bounded output,
   and installed manifest/package-lock integrity verification;
+- shared verified Gateway controller with token-private supervised launch,
+  portal/log plus guest-local health/readiness gates, explicit trusted-host
+  connection material, failure cleanup, and cooperative stop;
+- ordered embed-session close that refuses runtime disposal while the Gateway
+  is active and retains cleanup access when cooperative stop fails;
 - nonce-bound guest process supervisor for cooperative child shutdown without
   overstating BrowserPod process-termination or Pod-disposal capabilities;
 - stable / previous / preview release tracking with generated update pull

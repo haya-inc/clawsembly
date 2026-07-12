@@ -99,6 +99,11 @@ with the evidence probe. It aggregates concurrent calls and returns executable
 paths only after the installed package version and package-lock SHA-512 match
 the verified report.
 
+The same session now owns a verified Gateway controller shared with the
+evidence probe. It performs supervised launch, HTTPS portal and log readiness,
+guest-local health/readiness checks, explicit trusted-host token issuance, and
+cooperative stop without serializing the ephemeral token.
+
 The page provides a credential-and-explicit-consent gate for one fixed-prompt
 `gpt-5.6-luna` live smoke test. It enforces `store:false`, 128 maximum output
 tokens, a displayed $0.001 upper bound based on the

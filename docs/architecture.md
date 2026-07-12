@@ -219,6 +219,17 @@ and verifies the installed manifest and lock entry before exposing the OpenClaw
 executable. Concurrent calls share one install and successful calls are
 idempotent.
 
+`openclaw-gateway.mjs` is likewise shared by evidence probes and verified embed
+sessions. It calls the verified installer, launches the exact executable behind
+the guest supervisor, requires both log/portal readiness and guest-local
+`/healthz` plus `/readyz`, and clears its ephemeral token on stop. Ready records
+and audit events exclude the token; only an explicit trusted-host
+`connection()` call returns it.
+
+The embed session lifecycle prevents logical runtime disposal from racing the
+Gateway. `close()` stops the supervised child first and retains runtime access
+when stop fails; synchronous `dispose()` refuses while the Gateway is active.
+
 ## Persistence
 
 The first implementation should separate:

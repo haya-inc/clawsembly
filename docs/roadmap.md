@@ -172,8 +172,12 @@ target `browserpod@2.12.1` and remain `probing` with no attached runtime
 evidence, so boot is correctly rejected before token consumption. The boot
 session now also exposes the same exact-artifact installer used by the evidence
 probe; it aggregates concurrent calls and verifies installed manifest plus
-package-lock integrity before returning executable paths. Gateway launch and
-authentication remain. The boot slice is not promoted as supported while
+package-lock integrity before returning executable paths. A shared Gateway
+controller now adds token-private supervised launch, log/portal readiness,
+guest-local health/readiness, explicit trusted-host connection material, and
+cooperative stop. Authenticated protocol handshake and generated client wiring
+remain. Ordered session close now prevents logical runtime disposal from
+cutting off an active Gateway's cooperative stop path. The boot slice is not promoted as supported while
 owner-authorized BrowserPod evidence remains missing.
 
 Exit criterion: an external web application can embed one supported upstream

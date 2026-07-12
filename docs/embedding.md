@@ -195,5 +195,14 @@ The reusable permission prompt covers the host decision UX. The verified
 session also exposes `session.installer.install()`, which uses the same
 exact-artifact installer as the BrowserPod evidence probe and returns paths only
 after installed manifest and package-lock integrity match. Gateway launch,
-protocol authentication, and owner-authorized BrowserPod evidence remain later
-SDK slices.
+portal/log readiness, guest-local health checks, explicit connection-token
+issuance, and cooperative stop now use the same `session.gateway` controller as
+the evidence probe. The token remains in a private closure until trusted host
+code calls `connection()` and is discarded on stop. Authenticated protocol
+handshake, generated client integration, and owner-authorized BrowserPod
+evidence remain later SDK slices.
+
+Use `await session.close()` for ordered teardown. It first requires a successful
+cooperative Gateway stop, then closes the logical runtime adapter. The legacy
+synchronous `dispose()` path refuses to close while a Gateway is active. Neither
+API claims provider-level process termination or hard Pod disposal.

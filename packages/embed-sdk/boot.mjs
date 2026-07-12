@@ -1,5 +1,9 @@
 import { createBrowserPodRuntime } from "../browser-runtime/browserpod-runtime.mjs";
 import { createVerifiedOpenClawInstaller } from "../browser-runtime/openclaw-installer.mjs";
+import {
+  assertOpenClawGatewayPort,
+  createVerifiedOpenClawGateway
+} from "../browser-runtime/openclaw-gateway.mjs";
 import { CapabilityBroker } from "../capability-broker/capability-broker.mjs";
 import { CapabilityConsentController } from "../capability-broker/capability-consent.mjs";
 import { FilesystemCapabilityMailboxHost } from "../capability-broker/filesystem-mailbox-host.mjs";
@@ -19,6 +23,80 @@ export function createArtifactStorageKey(manifest, workspaceId) {
   return key;
 }
 
+export function createEmbedSessionLifecycle({ runtime, gateway }) {
+  if (!runtime || typeof runtime.dispose !== "function" || !gateway
+    || typeof gateway.stop !== "function" || typeof gateway.state !== "string") {
+    throw new TypeError("embed session lifecycle dependencies are invalid");
+  }
+  let closed = false;
+  const gatewayNeedsStop = () => ["starting", "ready", "stopping"].includes(gateway.state)
+    || (gateway.state === "failed" && gateway.task
+      && !["completed", "failed"].includes(gateway.task.status));
+  return Object.freeze({
+    get closed() { return closed; },
+    dispose() {
+      if (closed) {
+        return Object.freeze({ complete: false, reason: "embed session already closed", activeTaskIds: Object.freeze([]) });
+      }
+      if (gatewayNeedsStop()) {
+        return Object.freeze({
+          complete: false,
+          reason: "OpenClaw Gateway must stop before logical runtime disposal",
+          activeTaskIds: Object.freeze(gateway.task?.id ? [gateway.task.id] : [])
+        });
+      }
+      closed = true;
+      return runtime.dispose();
+    },
+    async close() {
+      if (closed) {
+        return Object.freeze({
+          logicalSessionClosed: false,
+          reason: "embed session already closed",
+          gatewayStop: null,
+          runtimeDisposition: null
+        });
+      }
+      if (gateway.state === "stopping") {
+        return Object.freeze({
+          logicalSessionClosed: false,
+          reason: "OpenClaw Gateway stop is already in progress",
+          gatewayStop: null,
+          runtimeDisposition: null
+        });
+      }
+      let gatewayStop = null;
+      if (gatewayNeedsStop()) {
+        try { gatewayStop = await gateway.stop(); }
+        catch {
+          return Object.freeze({
+            logicalSessionClosed: false,
+            reason: "OpenClaw Gateway stop failed",
+            gatewayStop: null,
+            runtimeDisposition: null
+          });
+        }
+        if (!gatewayStop.complete) {
+          return Object.freeze({
+            logicalSessionClosed: false,
+            reason: gatewayStop.reason,
+            gatewayStop,
+            runtimeDisposition: null
+          });
+        }
+      }
+      closed = true;
+      const runtimeDisposition = runtime.dispose();
+      return Object.freeze({
+        logicalSessionClosed: true,
+        reason: "Gateway stopped and logical runtime session closed",
+        gatewayStop,
+        runtimeDisposition
+      });
+    }
+  });
+}
+
 /**
  * Boots the first evidence-bound Clawsembly session. There is intentionally no
  * unverified escape hatch here; BrowserPod probes use the lower runtime adapter
@@ -35,9 +113,12 @@ export async function bootVerifiedEmbed({
   onRuntimeAudit,
   onInstallOutput,
   onInstallAudit,
+  onGatewayOutput,
+  onGatewayAudit,
   onCapabilityAudit,
   onPermissionAudit,
-  mailboxOptions = {}
+  mailboxOptions = {},
+  gatewayOptions = {}
 }) {
   const verifiedManifest = assertVerifiedLaunch(manifest);
   if (typeof sessionId !== "string" || !SESSION_ID_PATTERN.test(sessionId)) {
@@ -64,6 +145,25 @@ export async function bootVerifiedEmbed({
   }
   if (onInstallAudit !== undefined && typeof onInstallAudit !== "function") {
     throw new TypeError("embed install audit sink is invalid");
+  }
+  if (onGatewayOutput !== undefined && typeof onGatewayOutput !== "function") {
+    throw new TypeError("embed Gateway output sink is invalid");
+  }
+  if (onGatewayAudit !== undefined && typeof onGatewayAudit !== "function") {
+    throw new TypeError("embed Gateway audit sink is invalid");
+  }
+  if (!gatewayOptions || typeof gatewayOptions !== "object" || Array.isArray(gatewayOptions)) {
+    throw new TypeError("embed Gateway options are invalid");
+  }
+  const allowedGatewayOptions = new Set(["port", "tokenFactory", "supervisorNonceFactory", "clock"]);
+  if (Object.keys(gatewayOptions).some((key) => !allowedGatewayOptions.has(key))) {
+    throw new TypeError("embed Gateway options contain an unknown field");
+  }
+  if (gatewayOptions.port !== undefined) assertOpenClawGatewayPort(gatewayOptions.port);
+  for (const key of ["tokenFactory", "supervisorNonceFactory", "clock"]) {
+    if (gatewayOptions[key] !== undefined && typeof gatewayOptions[key] !== "function") {
+      throw new TypeError(`embed Gateway ${key} is invalid`);
+    }
   }
   const storageKey = workspaceId === undefined
     ? undefined
@@ -94,6 +194,18 @@ export async function bootVerifiedEmbed({
     onOutput: onInstallOutput,
     onAudit: onInstallAudit
   });
+  const gateway = createVerifiedOpenClawGateway({
+    runtime,
+    installer,
+    ...(gatewayOptions.port === undefined ? {} : { port: gatewayOptions.port }),
+    ...(gatewayOptions.tokenFactory === undefined ? {} : { tokenFactory: gatewayOptions.tokenFactory }),
+    ...(gatewayOptions.supervisorNonceFactory === undefined
+      ? {}
+      : { supervisorNonceFactory: gatewayOptions.supervisorNonceFactory }),
+    ...(gatewayOptions.clock === undefined ? {} : { now: gatewayOptions.clock }),
+    onOutput: onGatewayOutput,
+    onAudit: onGatewayAudit
+  });
   const mailboxRoot = `/workspace/.clawsembly/mailbox/${mailboxChannelId}`;
   const mailbox = new FilesystemCapabilityMailboxHost({
     runtime,
@@ -123,21 +235,19 @@ export async function bootVerifiedEmbed({
       `CLAWSEMBLY_MAILBOX_CLIENT=${guestClient.entrypointPath}`
     ])
   });
-  let closed = false;
+  const lifecycle = createEmbedSessionLifecycle({ runtime, gateway });
   return Object.freeze({
     schemaVersion: 1,
     manifest: verifiedManifest,
     runtime,
     installer,
+    gateway,
     capabilities,
     permissions,
     mailbox,
     guestTransport,
-    get closed() { return closed; },
-    dispose() {
-      if (closed) return Object.freeze({ complete: false, reason: "embed session already closed", activeTaskIds: Object.freeze([]) });
-      closed = true;
-      return runtime.dispose();
-    }
+    get closed() { return lifecycle.closed; },
+    dispose() { return lifecycle.dispose(); },
+    close() { return lifecycle.close(); }
   });
 }

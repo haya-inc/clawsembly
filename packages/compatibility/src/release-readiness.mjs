@@ -60,6 +60,8 @@ const required = [
   "packages/embed-sdk/permission-prompt.d.mts",
   "packages/browser-runtime/openclaw-installer.mjs",
   "packages/browser-runtime/openclaw-installer.d.mts",
+  "packages/browser-runtime/openclaw-gateway.mjs",
+  "packages/browser-runtime/openclaw-gateway.d.mts",
   "apps/web/public/schemas/capability-manifest.schema.json",
   "apps/web/public/schemas/capability-audit.schema.json",
   "dist/index.html",
