@@ -13,6 +13,9 @@ function parseArgs(argv) {
     index: "apps/web/public/data/release-history.json",
     latest: "apps/web/public/data/compatibility.json",
     badge: "apps/web/public/data/compatibility-badge.svg",
+    runtime: "webcontainer",
+    runtimeVersion: undefined,
+    browserBaseline: "Desktop Chromium; Firefox and Safari are experimental until runtime evidence exists.",
     hostEvidence: undefined,
     gatewayEvidence: undefined,
     skipUnchanged: false
@@ -24,6 +27,9 @@ function parseArgs(argv) {
     if (argv[index] === "--index" && value) options.index = value;
     if (argv[index] === "--latest" && value) options.latest = value;
     if (argv[index] === "--badge" && value) options.badge = value;
+    if (argv[index] === "--runtime" && value) options.runtime = value;
+    if (argv[index] === "--runtime-version" && value) options.runtimeVersion = value;
+    if (argv[index] === "--browser-baseline" && value) options.browserBaseline = value;
     if (argv[index] === "--host-evidence" && value) options.hostEvidence = value;
     if (argv[index] === "--gateway-evidence" && value) options.gatewayEvidence = value;
     if (argv[index] === "--skip-unchanged") options.skipUnchanged = true;
@@ -82,7 +88,15 @@ try {
   for (const [channel, version] of Object.entries(channels)) {
     const fileName = `${safeSegment(options.packageName)}-${safeSegment(version)}.json`;
     const stagedOutput = resolve(stagingDirectory, fileName);
-    const args = [inspectScript, "--package", options.packageName, "--version", version, "--output", stagedOutput];
+    const args = [
+      inspectScript,
+      "--package", options.packageName,
+      "--version", version,
+      "--output", stagedOutput,
+      "--runtime", options.runtime,
+      "--browser-baseline", options.browserBaseline
+    ];
+    if (options.runtimeVersion) args.push("--runtime-version", options.runtimeVersion);
     if (options.hostEvidence) args.push("--host-evidence", options.hostEvidence);
     if (version === gatewayEvidenceVersion) args.push("--gateway-evidence", options.gatewayEvidence);
     run(process.execPath, args);

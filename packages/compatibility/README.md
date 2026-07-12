@@ -17,6 +17,22 @@ npm run compat:inspect -- \
 The command downloads the exact npm tarball into an operating-system temporary
 directory. It does not install the package or execute its lifecycle scripts.
 
+Generate a static BrowserPod-target report without attaching legacy evidence:
+
+```bash
+npm run compat:inspect -- \
+  --package openclaw \
+  --version 2026.6.11 \
+  --runtime browserpod \
+  --runtime-version 2.12.1 \
+  --browser-baseline "Desktop Chromium" \
+  --output /tmp/openclaw-browserpod.json
+```
+
+BrowserPod targets require an exact `runtimeVersion`. The generator rejects
+WebContainer host or Gateway evidence on that target; provider-specific source
+evidence must be captured before any runtime check can become green.
+
 `--host-evidence` attaches a dated, reviewable WebContainer preflight. It may
 mark the browser host as verified, but it never changes the separate OpenClaw
 boot, Gateway handshake, or chat checks.

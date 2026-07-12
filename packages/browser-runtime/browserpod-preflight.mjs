@@ -1,3 +1,6 @@
+import { BrowserRuntimeError } from "./browser-runtime.mjs";
+import { createBrowserPodRuntime } from "./browserpod-runtime.mjs";
+
 const EVIDENCE_PREFIX = "[clawsembly-browserpod]";
 
 const PROBE_SOURCE = String.raw`
@@ -53,29 +56,27 @@ export async function runBrowserPodPreflight({
     throw new TypeError("A BrowserPod API key is required for the metered boot");
   }
 
-  let output = "";
-  const decoder = new TextDecoder();
-  const pod = await BrowserPod.boot({
+  const runtime = await createBrowserPodRuntime({
+    BrowserPod,
     apiKey,
-    nodeVersion: "22",
     storageKey
   });
-  const terminal = await pod.createCustomTerminal({
-    cols: 120,
-    rows: 30,
-    onOutput(buffer) {
-      const chunk = decoder.decode(buffer, { stream: true });
-      output += chunk;
-      onOutput(chunk);
-    }
+  const task = await runtime.start({
+    executable: "node",
+    args: ["-e", PROBE_SOURCE],
+    echo: false
   });
-  await pod.run("node", ["-e", PROBE_SOURCE], { terminal, echo: false });
-  output += decoder.decode();
+  task.onOutput(onOutput);
+  const completion = await task.wait();
+  if (completion.status !== "completed") {
+    throw new BrowserRuntimeError("preflight_failed", "BrowserPod preflight command failed");
+  }
 
-  const evidence = parseEvidence(output);
+  const evidence = parseEvidence(task.transcript);
   return {
     schemaVersion: 1,
     runtime: "browserpod",
+    runtimeVersion: runtime.version,
     browserLocal: true,
     node: evidence.node,
     platform: evidence.platform,
@@ -85,6 +86,7 @@ export async function runBrowserPodPreflight({
       cryptoVerify: evidence.cryptoVerify === true,
       sqlite: evidence.sqlite === true
     },
+    lifecycle: runtime.features,
     diagnostics: evidence.sqliteError ? { sqliteError: evidence.sqliteError } : {}
   };
 }

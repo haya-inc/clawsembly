@@ -1,3 +1,5 @@
+import { BROWSERPOD_ADAPTER_VERSION } from "../browser-runtime/browserpod-runtime.mjs";
+
 const CAPABILITY_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/u;
 
 function plainObject(value) {
@@ -29,7 +31,8 @@ function assertReport(report) {
     || typeof report.artifact.integrity !== "string" || !report.artifact.integrity.startsWith("sha512-")
     || typeof report.generatedAt !== "string" || !Number.isFinite(Date.parse(report.generatedAt))
     || !["probing", "partial", "supported", "unsupported"].includes(report.status)
-    || typeof report.target.runtime !== "string") {
+    || typeof report.target.runtime !== "string"
+    || (report.target.runtimeVersion !== undefined && typeof report.target.runtimeVersion !== "string")) {
     throw new TypeError("compatibility report cannot identify an exact OpenClaw artifact");
   }
 }
@@ -43,10 +46,12 @@ export function createEmbedManifest({ report, runtime = "browserpod", capabiliti
   assertReport(report);
   if (runtime !== "browserpod") throw new TypeError("BrowserPod is the adopted embedded runtime");
   const grants = normalizeCapabilities(capabilities);
-  const runtimeMatched = report.target.runtime === runtime;
+  const providerMatched = report.target.runtime === runtime;
+  const versionMatched = report.target.runtimeVersion === BROWSERPOD_ADAPTER_VERSION;
   const supported = report.status === "supported";
   const blockers = Object.freeze([
-    ...(!runtimeMatched ? [`report targets ${report.target.runtime}, not ${runtime}`] : []),
+    ...(!providerMatched ? [`report targets ${report.target.runtime}, not ${runtime}`] : []),
+    ...(!versionMatched ? [`report runtime version is ${report.target.runtimeVersion ?? "unreported"}, not ${BROWSERPOD_ADAPTER_VERSION}`] : []),
     ...(!supported ? [`report status is ${report.status}, not supported`] : [])
   ]);
   return Object.freeze({
@@ -57,11 +62,13 @@ export function createEmbedManifest({ report, runtime = "browserpod", capabiliti
       integrity: report.artifact.integrity
     }),
     runtime,
+    runtimeVersion: BROWSERPOD_ADAPTER_VERSION,
     evidence: Object.freeze({
       generatedAt: report.generatedAt,
       reportStatus: report.status,
       reportRuntime: report.target.runtime,
-      verifiedForRuntime: runtimeMatched && supported
+      reportRuntimeVersion: report.target.runtimeVersion ?? null,
+      verifiedForRuntime: providerMatched && versionMatched && supported
     }),
     capabilities: grants,
     launchable: blockers.length === 0,
@@ -70,7 +77,8 @@ export function createEmbedManifest({ report, runtime = "browserpod", capabiliti
 }
 
 export function assertVerifiedLaunch(manifest) {
-  if (!plainObject(manifest) || manifest.schemaVersion !== 1 || manifest.runtime !== "browserpod") {
+  if (!plainObject(manifest) || manifest.schemaVersion !== 1 || manifest.runtime !== "browserpod"
+    || manifest.runtimeVersion !== BROWSERPOD_ADAPTER_VERSION) {
     throw new TypeError("embed manifest is invalid");
   }
   if (manifest.launchable !== true || manifest.evidence?.verifiedForRuntime !== true) {

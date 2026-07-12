@@ -40,6 +40,10 @@ The browser sandbox is one boundary, not the only control.
 - Require an exact capability and scope grant; do not support wildcard or
   ambient guest authority.
 - Keep capability audit records payload-free and bounded.
+- Pass the BrowserPod API key only to provider boot; never copy it into guest
+  arguments, environment variables, filesystem, runtime objects, or audits.
+- Treat BrowserPod portal URLs as publicly reachable and retain Gateway
+  authentication and explicit origin policy at that boundary.
 
 ## Release requirements
 
@@ -82,6 +86,13 @@ scripts, frames, network destinations, and form targets with a checked-in CSP;
 dependency review and protected broker integration remain release requirements. Browser
 quota eviction, site-data clearing, or an origin change can also remove the key
 and ciphertext together.
+
+The BrowserPod adapter accepts the provider class through dependency injection;
+it does not silently relax that CSP or fetch provider code itself. BrowserPod's
+published npm wrapper currently imports its versioned runtime from the vendor
+delivery origin. Any host that enables the adapter must pin and review that
+delivery path, add only the required CSP destination, and retain an outage path
+before it can claim BrowserPod support.
 
 The provider broker is integrated with an actual OpenClaw agent turn but not
 enabled for live traffic. It fixes the OpenAI destination to `POST /v1/responses`, sets

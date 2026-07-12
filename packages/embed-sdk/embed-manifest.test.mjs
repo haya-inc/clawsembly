@@ -19,6 +19,7 @@ test("records BrowserPod adoption while blocking evidence from another runtime",
   assert.equal(manifest.launchable, false);
   assert.deepEqual(manifest.blockers, [
     "report targets webcontainer, not browserpod",
+    "report runtime version is unreported, not 2.12.1",
     "report status is partial, not supported"
   ]);
   assert.throws(() => assertVerifiedLaunch(manifest), /verified BrowserPod launch blocked/u);
@@ -26,7 +27,7 @@ test("records BrowserPod adoption while blocking evidence from another runtime",
 
 test("authorizes only a supported report captured against BrowserPod", () => {
   const manifest = createEmbedManifest({
-    report: { ...report, status: "supported", target: { runtime: "browserpod" } },
+    report: { ...report, status: "supported", target: { runtime: "browserpod", runtimeVersion: "2.12.1" } },
     capabilities: [
       { capability: "identity.sign", scope: "challenge:gateway" },
       { capability: "storage.snapshot", scope: "workspace:primary", maxCalls: 2 }
@@ -34,8 +35,17 @@ test("authorizes only a supported report captured against BrowserPod", () => {
   });
   assert.equal(assertVerifiedLaunch(manifest), manifest);
   assert.equal(manifest.launchable, true);
+  assert.equal(manifest.runtimeVersion, "2.12.1");
   assert.equal(manifest.evidence.verifiedForRuntime, true);
   assert.equal(Object.isFrozen(manifest.capabilities), true);
+});
+
+test("blocks supported evidence from another BrowserPod version", () => {
+  const manifest = createEmbedManifest({
+    report: { ...report, status: "supported", target: { runtime: "browserpod", runtimeVersion: "2.11.0" } }
+  });
+  assert.equal(manifest.launchable, false);
+  assert.deepEqual(manifest.blockers, ["report runtime version is 2.11.0, not 2.12.1"]);
 });
 
 test("rejects duplicate grants and non-BrowserPod embedded runtimes", () => {

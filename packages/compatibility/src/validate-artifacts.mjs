@@ -57,7 +57,11 @@ function assertEvidenceClaims(report, label) {
     }
   }
 
-  const expectedStatuses = deriveRuntimeClaimStatuses({ hostEvidence, gatewayEvidence });
+  const expectedStatuses = deriveRuntimeClaimStatuses({
+    hostEvidence,
+    gatewayEvidence,
+    targetRuntime: report.target.runtime
+  });
   const checks = new Map(report.checks.map((check) => [check.id, check.status]));
   for (const [id, expected] of Object.entries(expectedStatuses)) {
     assert.equal(checks.get(id), expected, `${label} ${id} status does not match its evidence`);

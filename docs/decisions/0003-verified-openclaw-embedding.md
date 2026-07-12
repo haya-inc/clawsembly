@@ -58,6 +58,12 @@ The canonical promise is:
   cancellation, bounded metadata-only audit, and redacted failures.
 - `packages/embed-sdk/embed-manifest.mjs` binds a BrowserPod launch plan to an
   exact report and refuses to reuse the current WebContainer evidence.
+- `packages/browser-runtime/browserpod-runtime.mjs` implements documented Node
+  22 boot, persistent storage, long-running output readiness, HTTPS portal
+  discovery, bounded filesystem access, and honest lifecycle feature flags.
+- `packages/embed-sdk/boot.mjs` asserts provider-matched supported evidence
+  before spending BrowserPod tokens, then binds the runtime and broker to the
+  same artifact identity.
 - the protected provider smoke-test path now passes through the capability
   broker after the report has supplied the exact OpenClaw version and integrity.
 - BrowserPod boot remains behind the dependency-injected preflight until an
@@ -65,8 +71,8 @@ The canonical promise is:
 
 ## Required next slices
 
-- a BrowserPod lifecycle adapter with long-lived process I/O, cancellation,
-  portal routing, persistence, and teardown;
+- BrowserPod process termination, interactive input, and hard teardown through
+  a documented vendor API; version 2.12.1 exposes none of these operations;
 - a guest-to-host typed transport that cannot invoke undeclared capabilities;
 - user-facing grant, expiry, and revocation prompts;
 - exportable audit and capability manifests with a stable schema;

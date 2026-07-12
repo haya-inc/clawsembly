@@ -16,6 +16,10 @@ The project does not yet promise semantic-version compatibility.
   budgets, and protected live-provider gate;
 - BrowserPod adoption, a default-deny exact-scope capability broker, and an
   evidence-bound embed manifest that rejects cross-runtime support claims;
+- documented-API BrowserPod lifecycle adapter for persistent Node 22 boot,
+  long-running output readiness, portal discovery, and bounded file I/O;
+- evidence-gated `bootVerifiedEmbed` that rejects unsupported or cross-runtime
+  reports before BrowserPod token consumption;
 - stable / previous / preview release tracking with generated update pull
   requests and cross-version evidence rejection;
 - report-driven project page, release ledger, compatibility badge, contribution
@@ -26,6 +30,8 @@ The project does not yet promise semantic-version compatibility.
 - status remains `partial` for `openclaw@2026.6.11`;
 - BrowserPod lifecycle and Gateway evidence are not yet captured, so verified
   BrowserPod launch remains intentionally blocked;
+- BrowserPod 2.12.1 exposes no documented terminal-input, process-termination,
+  or hard-disposal API, so complete Gateway cancellation and teardown remain blocked;
 - the measured install/cache footprint is approximately 880 MB;
 - an exact-marker Ed25519 verifier patch is still required;
 - Firefox, Safari, remote Gateway parity, general workspace migration, and

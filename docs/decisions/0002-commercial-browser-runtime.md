@@ -66,7 +66,9 @@ A candidate becomes the default only after checked-in Chromium evidence proves:
 - commercial-use terms or an auditable redistribution/SBOM procedure;
 - a documented exit path if a vendor service or license changes.
 
-Until then, the public status is `candidate`, never `supported`.
+Provider selection and compatibility support are separate states. BrowserPod is
+publicly `adopted`, while its compatibility status remains `probing` and never
+becomes `supported` until these gates pass.
 
 ## Consequences
 

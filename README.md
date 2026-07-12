@@ -33,8 +33,13 @@ an embedding application still needs in order to trust upstream OpenClaw:
 The implemented broker supports exact scopes, call limits, expiry, revocation,
 cancellation, bounded metadata-only audit, and redacted handler errors. The
 protected provider smoke-test path now crosses that broker. The embed-manifest
-core selects BrowserPod but correctly blocks verified launch while only the
-WebContainer baseline has runtime evidence. See
+core and `bootVerifiedEmbed` select BrowserPod but correctly block verified
+launch before token consumption while only the WebContainer baseline has
+runtime evidence. The BrowserPod adapter implements documented Node 22 boot,
+`storageKey` persistence, long-running output readiness, HTTPS portal discovery,
+and bounded file I/O. Its public 2.12.1 API has no documented input,
+termination, or hard-disposal method, so those features remain explicitly
+unsupported. See
 [ADR 0003](docs/decisions/0003-verified-openclaw-embedding.md) and the
 [embedding contract](docs/embedding.md).
 

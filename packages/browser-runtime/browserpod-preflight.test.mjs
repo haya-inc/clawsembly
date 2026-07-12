@@ -11,6 +11,7 @@ function fakeBrowserPod(evidence) {
       async boot(options) {
         calls.push(["boot", options]);
         return {
+          onPortal() {},
           async createCustomTerminal(options) {
             calls.push(["terminal", { cols: options.cols, rows: options.rows }]);
             return { emit: options.onOutput };
@@ -20,7 +21,10 @@ function fakeBrowserPod(evidence) {
             const bytes = new TextEncoder().encode(`${EVIDENCE_PREFIX}${JSON.stringify(evidence)}\n`);
             options.terminal.emit(bytes.buffer);
             return {};
-          }
+          },
+          async createDirectory() {},
+          async createFile() { return { async write() {}, async close() {} }; },
+          async openFile() { return { async getSize() { return 0; }, async read() { return ""; }, async close() {} }; }
         };
       }
     }
@@ -44,11 +48,23 @@ test("proves the pinned Node baseline without exposing the API key to the guest 
   assert.deepEqual(evidence, {
     schemaVersion: 1,
     runtime: "browserpod",
+    runtimeVersion: "2.12.1",
     browserLocal: true,
     node: "22.19.0",
     platform: "linux",
     arch: "wasm32",
     checks: { nodeBaseline: true, cryptoVerify: true, sqlite: true },
+    lifecycle: {
+      browserLocal: true,
+      nodeMajor: 22,
+      persistentFilesystem: true,
+      portals: true,
+      portalVisibility: "public-url",
+      fileApi: true,
+      interactiveInput: false,
+      processTermination: false,
+      hardDispose: false
+    },
     diagnostics: {}
   });
   assert.deepEqual(fake.calls[0], ["boot", {

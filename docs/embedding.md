@@ -92,16 +92,48 @@ handler work so concurrent requests cannot overspend one grant.
 Vocabulary is not permission. A capability is unavailable until the host
 registers a handler and an explicit, unexpired grant exists for its exact scope.
 
-## Planned public SDK
+## Evidence-bound boot
 
-The public API will be promoted only after BrowserPod earns supported evidence:
+`bootVerifiedEmbed` is implemented, but remains unusable with the current
+checked-in report because BrowserPod has not earned supported evidence:
 
 ```ts
-const claw = await Clawsembly.boot({ manifest, browserPodApiKey });
-await claw.gateway.ready();
-const audit = claw.capabilities.auditSnapshot();
-await claw.dispose();
+const session = await bootVerifiedEmbed({
+  manifest,
+  BrowserPod,
+  browserPodApiKey,
+  workspaceId: "primary",
+  capabilityHandlers
+});
+
+const audit = session.capabilities.auditSnapshot();
+const result = session.dispose();
 ```
 
-`boot()` must not accept `latest`, ambient environment credentials, implicit
-host filesystem access, or a compatibility report from another runtime.
+The boot function first calls `assertVerifiedLaunch`, before BrowserPod spends
+tokens. It has no `allowUnverified` option and does not accept `latest`, ambient
+environment credentials, implicit host filesystem access, or a compatibility
+report from another runtime.
+
+Persistent sessions accept a logical `workspaceId`; the SDK derives
+`clawsembly:<exact-openclaw-version>:<workspaceId>` as the BrowserPod
+`storageKey`. Different OpenClaw versions therefore cannot silently reuse the
+same persisted disk.
+
+## BrowserPod lifecycle contract
+
+The BrowserPod 2.12.1 adapter now supports:
+
+- persistent or ephemeral Node 22 boot;
+- long-lived command start without waiting for process exit;
+- bounded terminal transcript and readiness matching;
+- automatic HTTPS portal discovery by internal port;
+- bounded text-file reads, writes, and directory creation;
+- runtime audit metadata without the BrowserPod API key.
+
+The vendor's published `Process` and `Terminal` types expose no methods, and the
+reference documents no process termination, terminal input, or Pod disposal.
+The adapter therefore reports these features as unavailable. `terminate()`
+fails explicitly and `dispose()` reports a logical-only close with active task
+IDs. These are runtime support blockers, not TODOs hidden behind a successful
+interface.

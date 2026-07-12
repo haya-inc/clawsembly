@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 const RISK_RULES = [
   {
     pattern: /(^|\/)@lydell\/node-pty(?:-|$)|(^|\/)node-pty(?:-|$)/,
-    reason: "Ships platform-specific PTY binaries that cannot execute in a WebContainer."
+    reason: "Ships platform-specific PTY binaries that cannot execute in the selected browser Wasm runtime."
   },
   {
     pattern: /(^|\/)sqlite-vec(?:-|$)/,
@@ -17,16 +17,41 @@ function canonicalize(value) {
   return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]));
 }
 
+export function normalizeReportTarget(target = {}) {
+  const runtime = target.runtime ?? "webcontainer";
+  if (!["webcontainer", "browserpod"].includes(runtime)) {
+    throw new Error(`Unsupported compatibility runtime target: ${runtime}.`);
+  }
+  const runtimeVersion = target.runtimeVersion;
+  if (runtime === "browserpod" && (typeof runtimeVersion !== "string" || runtimeVersion.length === 0)) {
+    throw new Error("BrowserPod compatibility targets require an exact runtimeVersion.");
+  }
+  const browserBaseline = target.browserBaseline
+    ?? "Desktop Chromium; Firefox and Safari are experimental until runtime evidence exists.";
+  if (typeof browserBaseline !== "string" || browserBaseline.length === 0) {
+    throw new Error("Compatibility target browserBaseline is required.");
+  }
+  return Object.freeze({
+    runtime,
+    ...(runtimeVersion ? { runtimeVersion } : {}),
+    browserBaseline
+  });
+}
+
+export function runtimeBootCheckId(runtime) {
+  return `openclaw-${runtime}-boot`;
+}
+
 export function evidenceDigest(value) {
   return createHash("sha256").update(JSON.stringify(canonicalize(value))).digest("hex");
 }
 
-export function deriveRuntimeClaimStatuses({ hostEvidence, gatewayEvidence } = {}) {
+export function deriveRuntimeClaimStatuses({ hostEvidence, gatewayEvidence, targetRuntime = "webcontainer" } = {}) {
   const deviceVerification = gatewayEvidence?.hostBroker?.deviceIdentity?.verification;
   const performance = gatewayEvidence?.gateway?.performance;
   return {
     "host-preflight": hostEvidence ? hostEvidence.nodeSqlite?.close === "function" ? "pass" : "warn" : "pending",
-    "openclaw-webcontainer-boot": gatewayEvidence?.gateway?.healthz?.status === 200 ? "pass" : "pending",
+    [runtimeBootCheckId(targetRuntime)]: gatewayEvidence?.gateway?.healthz?.status === 200 ? "pass" : "pending",
     "gateway-handshake": gatewayEvidence?.gateway?.handshake?.result === "pass" ? "pass" : "pending",
     "mocked-chat-turn": gatewayEvidence?.gateway?.chat?.result === "pass" ? "pass" : "pending",
     "mocked-tool-call": gatewayEvidence?.gateway?.chat?.tool?.result === "pass" ? "pass" : "pending",
@@ -87,27 +112,34 @@ export function findShrinkwrapRootDrift(manifest = {}, shrinkwrap = {}) {
   };
 }
 
-export function buildReport({ packageName, manifest, pack, shrinkwrap, generatedAt, hostEvidence, gatewayEvidence }) {
+export function buildReport({ packageName, manifest, pack, shrinkwrap, generatedAt, hostEvidence, gatewayEvidence, target }) {
   if (!manifest?.version) throw new Error("The npm manifest is missing a version.");
   if (!pack?.integrity) throw new Error("The npm pack result is missing integrity metadata.");
   if (gatewayEvidence && gatewayEvidence?.openclaw?.version !== manifest.version) {
     throw new Error(`Gateway evidence for ${gatewayEvidence?.openclaw?.version ?? "unknown"} cannot prove ${manifest.version}.`);
+  }
+  const reportTarget = normalizeReportTarget(target);
+  if (reportTarget.runtime !== "webcontainer" && (hostEvidence || gatewayEvidence)) {
+    throw new Error(`Evidence captured for the legacy WebContainer schema cannot prove ${reportTarget.runtime}@${reportTarget.runtimeVersion}.`);
   }
 
   const dependencies = manifest.dependencies ?? {};
   const nativeRiskDependencies = findNativeRisks(shrinkwrap?.packages);
   const shrinkwrapRootDrift = findShrinkwrapRootDrift(manifest, shrinkwrap);
   const hasLifecycleScript = Boolean(manifest.scripts?.preinstall || manifest.scripts?.install || manifest.scripts?.postinstall);
-  const runtimeStatuses = deriveRuntimeClaimStatuses({ hostEvidence, gatewayEvidence });
+  const runtimeStatuses = deriveRuntimeClaimStatuses({
+    hostEvidence,
+    gatewayEvidence,
+    targetRuntime: reportTarget.runtime
+  });
+  const bootCheckId = runtimeBootCheckId(reportTarget.runtime);
+  const runtimeLabel = reportTarget.runtime === "browserpod" ? "BrowserPod" : "WebContainer";
 
   return {
     schemaVersion: 1,
     generatedAt,
     status: gatewayEvidence?.gateway?.healthz?.status === 200 ? "partial" : "probing",
-    target: {
-      runtime: "webcontainer",
-      browserBaseline: "Desktop Chromium; Firefox and Safari are experimental until runtime evidence exists."
-    },
+    target: reportTarget,
     artifact: {
       package: packageName,
       version: manifest.version,
@@ -235,9 +267,9 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
           : "A dated browser-host evidence record has not been attached."
       },
       {
-        id: "openclaw-webcontainer-boot",
-        label: "OpenClaw WebContainer boot",
-        status: runtimeStatuses["openclaw-webcontainer-boot"],
+        id: bootCheckId,
+        label: `OpenClaw ${runtimeLabel} boot`,
+        status: runtimeStatuses[bootCheckId],
         detail: gatewayEvidence?.gateway?.healthz?.status === 200
           ? `The official artifact reached server-ready and /healthz returned HTTP ${gatewayEvidence.gateway.healthz.status} through explicit dependency and SQLite adapters.`
           : "The host runtime works, but this exact OpenClaw artifact has not booted in it yet."
@@ -288,7 +320,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
         status: runtimeStatuses["credential-vault"],
         detail: gatewayEvidence?.hostBroker?.credentialVault?.result === "pass"
           ? `${gatewayEvidence.hostBroker.credentialVault.testedProvider} ciphertext persisted across document reload with a non-extractable ${gatewayEvidence.hostBroker.credentialVault.key.algorithm}-${gatewayEvidence.hostBroker.credentialVault.key.bits} key; key export and wrong-scope decryption were rejected.`
-          : "Provider credentials must remain encrypted in the browser host and outside the WebContainer filesystem."
+          : "Provider credentials must remain encrypted in the browser host and outside the selected guest runtime."
       },
       {
         id: "provider-broker",
@@ -304,7 +336,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
         status: runtimeStatuses["host-broker-turn"],
         detail: gatewayEvidence?.gateway?.browserHostBroker?.result === "pass"
           ? `OpenClaw agent ${gatewayEvidence.gateway.browserHostBroker.agent} completed a typed-SSE streamed ${gatewayEvidence.gateway.browserHostBroker.toolRoundTrip?.result === "pass" ? `${gatewayEvidence.gateway.browserHostBroker.toolRoundTrip.tool} tool round-trip with matched Responses function_call/function_call_output input` : "turn"} through the loopback bridge and host-owned Responses policy using ${gatewayEvidence.gateway.browserHostBroker.browserHostModel}; chat.abort reached the provider stream, credential plaintext never entered WebContainer, and no live request was made.`
-          : "A real OpenClaw agent turn must cross the browser-host provider broker without mounting or logging provider credentials."
+          : "A real OpenClaw agent turn must cross the browser-host provider broker without mounting or logging provider credentials in the guest."
       },
       {
         id: "provider-budget",
@@ -334,11 +366,11 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       },
       {
         id: "opfs-recovery",
-        label: "OPFS runtime recovery",
+        label: "Runtime state recovery",
         status: runtimeStatuses["opfs-recovery"],
         detail: gatewayEvidence?.gateway?.persistence?.result === "pass"
           ? `A ${Math.round(gatewayEvidence.gateway.persistence.snapshotBytes / 1024)} KB mock-state backup (${gatewayEvidence.gateway.persistence.format}, ${gatewayEvidence.gateway.persistence.integrity}) restored ${gatewayEvidence.gateway.persistence.recovery.transcriptFiles} transcript files in a fresh WebContainer and remained available after document reload.`
-          : "The mock session must survive OPFS save, WebContainer restart, binary mount, and document reload."
+          : "The mock session must survive persisted save, fresh runtime boot, restore, and document reload."
       },
       {
         id: "runtime-performance",
@@ -358,6 +390,8 @@ export function assertReport(report) {
   if (!Number.isFinite(Date.parse(report?.generatedAt))) failures.push("generatedAt must be an ISO date-time");
   if (!["probing", "supported", "partial", "unsupported"].includes(report?.status)) failures.push("status is invalid");
   if (!report?.artifact?.package || !report?.artifact?.version || !report?.artifact?.integrity) failures.push("artifact identity is incomplete");
+  try { normalizeReportTarget(report?.target); }
+  catch (error) { failures.push(error instanceof Error ? error.message : "target is invalid"); }
   if (!Array.isArray(report?.evidence)) failures.push("evidence must be an array");
   if (!Array.isArray(report?.checks) || report.checks.length === 0) failures.push("checks must not be empty");
   if (report?.checks?.some((check) => !["pass", "warn", "fail", "pending"].includes(check.status))) failures.push("a check status is invalid");

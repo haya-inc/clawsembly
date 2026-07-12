@@ -1,6 +1,6 @@
 # Clawsembly embed SDK core
 
-This package contains the fail-closed launch-manifest slice of the planned
+This package contains the fail-closed launch-manifest and boot slices of the
 embedding SDK. `createEmbedManifest` binds a BrowserPod launch to:
 
 - one exact upstream OpenClaw package version and integrity;
@@ -23,6 +23,25 @@ const manifest = createEmbedManifest({
 assertVerifiedLaunch(manifest);
 ```
 
-Runtime boot, Gateway lifecycle, and user-facing permission prompts remain the
-next SDK slices. They must consume this manifest rather than accepting an
-unversioned package name or ambient host authority.
+`bootVerifiedEmbed` then boots the BrowserPod adapter and creates a capability
+broker whose subject is the same exact artifact:
+
+```js
+const session = await bootVerifiedEmbed({
+  manifest,
+  BrowserPod,
+  browserPodApiKey,
+  workspaceId: "primary",
+  capabilityHandlers
+});
+```
+
+There is intentionally no `allowUnverified` option. Provider probes use the
+lower-level BrowserPod adapter until BrowserPod earns a `supported` report.
+Persistent storage keys are derived as
+`clawsembly:<exact-openclaw-version>:<workspaceId>` so an upgrade cannot
+silently mount the previous artifact's disk.
+
+Gateway installation/lifecycle and user-facing permission prompts remain the
+next SDK slices. BrowserPod 2.12.1 also lacks documented process termination
+and hard-disposal APIs; those gaps remain explicit support blockers.

@@ -127,6 +127,12 @@ Exit criterion: one commercially deployable browser-local provider passes the
 same health, handshake, turn, tool, history, abort, reconnect, and restore
 evidence as the baseline. Remote execution does not satisfy this criterion.
 
+Status: the BrowserPod adapter contract now covers documented boot, persistent
+storage, bounded terminal output/readiness, long-running command tracking,
+HTTPS portal discovery, and bounded file I/O. The public 2.12.1 API exposes no
+terminal input, process termination, or hard disposal, leaving cancellation
+and teardown blocked pending a documented provider mechanism.
+
 ### Phase 3c: verified embedding SDK
 
 Turn the compatibility and host-security work into a reusable integration
@@ -139,9 +145,11 @@ surface:
 - publish a minimal `Clawsembly.boot({ manifest, browserPodApiKey })` API only
   after `assertVerifiedLaunch` passes against BrowserPod evidence.
 
-Status: manifest generation and fail-closed verified-launch assertion are
-implemented. The current WebContainer `partial` report is correctly rejected
-for BrowserPod launch. The public boot API remains intentionally unavailable.
+Status: manifest generation, fail-closed verified-launch assertion, and
+`bootVerifiedEmbed` are implemented. The current WebContainer `partial` report
+is correctly rejected before BrowserPod boot or token consumption. The boot
+slice is not promoted as supported while provider lifecycle evidence and
+termination remain missing.
 
 Exit criterion: an external web application can embed one supported upstream
 OpenClaw version without granting ambient credentials, filesystem, or network

@@ -79,6 +79,51 @@ test("buildReport keeps runtime claims pending", () => {
   assert.doesNotThrow(() => assertReport(report));
 });
 
+test("buildReport emits a version-bound static BrowserPod target", () => {
+  const report = buildReport({
+    packageName: "openclaw",
+    generatedAt: "2026-07-12T00:00:00.000Z",
+    target: {
+      runtime: "browserpod",
+      runtimeVersion: "2.12.1",
+      browserBaseline: "Desktop Chromium"
+    },
+    manifest: { version: "2026.6.11", dependencies: {} },
+    pack: { integrity: "sha512-test", size: 10, unpackedSize: 20 },
+    shrinkwrap: { packages: {} }
+  });
+  assert.deepEqual(report.target, {
+    runtime: "browserpod",
+    runtimeVersion: "2.12.1",
+    browserBaseline: "Desktop Chromium"
+  });
+  assert.equal(report.status, "probing");
+  assert.equal(report.checks.find((check) => check.id === "openclaw-browserpod-boot")?.status, "pending");
+  assert.doesNotThrow(() => assertReport(report));
+});
+
+test("buildReport rejects unversioned BrowserPod targets and legacy cross-runtime evidence", () => {
+  const input = {
+    packageName: "openclaw",
+    generatedAt: "2026-07-12T00:00:00.000Z",
+    manifest: { version: "2026.6.11", dependencies: {} },
+    pack: { integrity: "sha512-test", size: 10, unpackedSize: 20 },
+    shrinkwrap: { packages: {} }
+  };
+  assert.throws(
+    () => buildReport({ ...input, target: { runtime: "browserpod" } }),
+    /exact runtimeVersion/u
+  );
+  assert.throws(
+    () => buildReport({
+      ...input,
+      target: { runtime: "browserpod", runtimeVersion: "2.12.1" },
+      hostEvidence: { capturedAt: "2026-07-12T00:00:00.000Z" }
+    }),
+    /legacy WebContainer schema cannot prove browserpod@2\.12\.1/u
+  );
+});
+
 test("buildReport rejects runtime evidence from another OpenClaw release", () => {
   assert.throws(() => buildReport({
     packageName: "openclaw",

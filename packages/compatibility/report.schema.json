@@ -14,9 +14,19 @@
       "additionalProperties": false,
       "required": ["runtime", "browserBaseline"],
       "properties": {
-        "runtime": { "const": "webcontainer" },
+        "runtime": { "enum": ["webcontainer", "browserpod"] },
+        "runtimeVersion": { "type": "string", "minLength": 1 },
         "browserBaseline": { "type": "string", "minLength": 1 }
-      }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "runtime": { "const": "browserpod" } }, "required": ["runtime"] },
+          "then": {
+            "required": ["runtimeVersion"],
+            "properties": { "runtimeVersion": { "type": "string", "minLength": 1 } }
+          }
+        }
+      ]
     },
     "artifact": {
       "type": "object",

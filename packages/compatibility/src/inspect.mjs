@@ -10,6 +10,9 @@ function parseArgs(argv) {
     packageName: "openclaw",
     version: "latest",
     output: "apps/web/public/data/compatibility.json",
+    runtime: "webcontainer",
+    runtimeVersion: undefined,
+    browserBaseline: "Desktop Chromium; Firefox and Safari are experimental until runtime evidence exists.",
     hostEvidence: undefined,
     gatewayEvidence: undefined
   };
@@ -19,6 +22,9 @@ function parseArgs(argv) {
     if (argv[index] === "--package" && value) result.packageName = value;
     if (argv[index] === "--version" && value) result.version = value;
     if (argv[index] === "--output" && value) result.output = value;
+    if (argv[index] === "--runtime" && value) result.runtime = value;
+    if (argv[index] === "--runtime-version" && value) result.runtimeVersion = value;
+    if (argv[index] === "--browser-baseline" && value) result.browserBaseline = value;
     if (argv[index] === "--host-evidence" && value) result.hostEvidence = value;
     if (argv[index] === "--gateway-evidence" && value) result.gatewayEvidence = value;
   }
@@ -58,6 +64,11 @@ try {
     shrinkwrap,
     hostEvidence,
     gatewayEvidence,
+    target: {
+      runtime: options.runtime,
+      ...(options.runtimeVersion ? { runtimeVersion: options.runtimeVersion } : {}),
+      browserBaseline: options.browserBaseline
+    },
     generatedAt: new Date().toISOString()
   }));
 

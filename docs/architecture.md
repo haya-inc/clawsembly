@@ -14,8 +14,8 @@ flowchart LR
     Manifest["Verified embed manifest"]
     Client["Generated Gateway client"]
     Contract["BrowserRuntime contract"]
-    Commercial["BrowserPod candidate\ncommercial browser runtime"]
-    Open["container2wasm candidate\nself-distributable browser runtime"]
+    Commercial["BrowserPod selected\ncommercial browser runtime"]
+    Open["container2wasm archived probe\nself-distributable browser runtime"]
     Baseline["WebContainer\nevidence baseline"]
     Remote["Optional native Gateway"]
     Adapter["Browser compatibility adapter"]
@@ -106,9 +106,15 @@ operations, local service discovery, persistence, cancellation, and teardown.
 The first BrowserPod preflight is intentionally dependency-injected. It checks
 the exact Node 22.19+ baseline, `node:crypto`, and `node:sqlite` without loading
 proprietary runtime code or transmitting a metered API key until the caller
-explicitly opts in. The container2wasm lane begins with a pinned official Node
-22.19 amd64 image and records browser execution, size, performance, and license
-evidence separately.
+explicitly opts in. The archived container2wasm lane retains its pinned Node
+22.19 amd64 conversion, size, boot failure, and license evidence separately.
+
+The BrowserPod lifecycle adapter now starts long-running processes without
+awaiting their completion, captures bounded terminal output, waits for exact
+readiness text and HTTPS portals, uses `storageKey` persistence, and closes
+every filesystem handle. BrowserPod 2.12.1 documents no terminal input,
+process termination, or Pod disposal, so the contract exposes those features
+as false and refuses to claim complete teardown.
 
 ### Compatibility adapter
 

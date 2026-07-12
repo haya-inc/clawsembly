@@ -28,13 +28,15 @@ Consumers should:
 
 1. require the expected `schemaVersion`;
 2. compare `artifact.version` and integrity with the artifact they will use;
-3. require `runtimeEvidence: true` when making runtime claims;
-4. verify each evidence entry's `sha256` against the recursively key-sorted,
+3. compare `target.runtime` and `target.runtimeVersion` with the runtime they
+   will actually boot;
+4. require `runtimeEvidence: true` when making runtime claims;
+5. verify each evidence entry's `sha256` against the recursively key-sorted,
    compact JSON form of the referenced evidence object;
-5. inspect `fail`, `warn`, and `pending` checks rather than relying only on the
+6. inspect `fail`, `warn`, and `pending` checks rather than relying only on the
    top-level status;
-6. retain the last verified stable report as a rollback reference;
-7. cache responses but revalidate when npm channel versions change.
+7. retain the last verified stable report as a rollback reference;
+8. cache responses but revalidate when npm channel or runtime versions change.
 
 ## Minimal policy example
 
@@ -59,8 +61,10 @@ model may also reject `partial` or any nonzero pending count.
 
 The JSON is a published observation, not a substitute for pinning npm integrity
 or for a downstream project's own acceptance tests. Runtime evidence is attached
-only to the exact OpenClaw version named inside that evidence. Clawsembly's
-generator rejects attempts to reuse it for another version.
+only to the exact OpenClaw version and runtime identity named inside that
+evidence. Clawsembly's generator rejects attempts to reuse legacy WebContainer
+evidence for BrowserPod, and the embedding manifest also requires the exact
+BrowserPod adapter version.
 The checked-in validator also schema-checks the source evidence, verifies its
 canonical SHA-256 digest, and recomputes every evidence-derived check status so
 that edited or stale reports fail CI.
