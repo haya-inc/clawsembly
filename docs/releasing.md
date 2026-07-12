@@ -93,6 +93,13 @@ The job checks out the exact tag, pins npm CLI, repeats the complete release
 gate, downloads the GitHub Release tarball and provenance record, and requires
 those bytes to match the locally rebuilt package before publishing under the
 `alpha` dist-tag. It is idempotent only when the registry integrity matches.
+The step judges success by the final registry state, not by the `npm publish`
+exit code alone: it polls the exact-version registry endpoint for up to five
+minutes of propagation delay and reports green only when the served integrity
+matches the verified release — including when `npm publish` itself failed
+because the version already existed. If a run goes red because the registry
+never became visible in time, re-running the workflow re-verifies the
+published bytes without publishing again.
 
 The first package publication requires an Environment-scoped granular
 `NPM_TOKEN` because npm trusted publishing cannot be configured before the
