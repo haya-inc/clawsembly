@@ -98,12 +98,13 @@ suppression, generated-report pull requests, public schemas, and a fail-closed
 promotion policy with dependency-free Node and GitHub Action consumers are implemented. External
 consumption and multi-release runtime evidence are not yet proven.
 
-The byte-reproducible SDK alpha is distributed from Pages with an exact
-checksum and compatibility-report binding. npm remains a later discovery
-channel, not a prerequisite for the first external integration. The same bytes
-also ship as a GitHub prerelease with an exact tag/source/report provenance
-record and provider-free browser diagnostics, giving reviewers a conventional
-release surface without weakening the `probing` gate.
+The byte-reproducible SDK alpha.1 is distributed from Pages and GitHub Releases
+with an exact checksum, compatibility-report binding, tag/source/report
+provenance, and provider-free browser diagnostics. npm is an additional
+discovery channel after a provenance-backed bootstrap, not a prerequisite for
+the first external integration and never a substitute for BrowserPod runtime
+evidence. The reviewed publication record keeps those distribution surfaces in
+sync without weakening the `probing` gate.
 The SDK host example is a copy-ready consumer with an integrity-pinned Release
 dependency; the normal SDK gate rebuilds the package and rejects lock drift.
 
