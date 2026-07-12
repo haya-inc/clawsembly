@@ -137,3 +137,21 @@ The adapter therefore reports these features as unavailable. `terminate()`
 fails explicitly and `dispose()` reports a logical-only close with active task
 IDs. These are runtime support blockers, not TODOs hidden behind a successful
 interface.
+
+## Exact-artifact BrowserPod evidence
+
+`runBrowserPodOpenClawProbe` now composes the adapter into the first real
+provider-evidence boundary. In one metered Pod it runs the Node/crypto/SQLite
+preflight, installs the exact OpenClaw version, compares the installed
+`package-lock.json` SHA-512 with the inspected npm artifact, starts the real
+Gateway, observes `[gateway] ready` plus an HTTPS portal, and requires HTTP 200
+from guest-local `/healthz` and `/readyz`.
+
+The resulting raw record is governed by
+`packages/compatibility/browserpod-evidence.schema.json`. Report generation
+matches runtime version, browser string, package, OpenClaw version, and
+integrity before it promotes only the preflight and boot checks. Handshake,
+broker, tool, reconnect, cancellation, persistence, and full performance gates
+stay pending. No owner-authorized record is checked in yet; the current public
+report therefore remains WebContainer-targeted and BrowserPod launch remains
+blocked. See [BrowserPod evidence workflow](browserpod-evidence.md).

@@ -129,7 +129,11 @@ evidence as the baseline. Remote execution does not satisfy this criterion.
 
 Status: the BrowserPod adapter contract now covers documented boot, persistent
 storage, bounded terminal output/readiness, long-running command tracking,
-HTTPS portal discovery, and bounded file I/O. The public 2.12.1 API exposes no
+HTTPS portal discovery, and bounded file I/O. The exact-artifact readiness
+harness now composes preflight, npm SHA-512 verification, real Gateway log and
+portal readiness, and guest-local `/healthz` plus `/readyz` into a versioned
+evidence schema. Its fake-provider end-to-end path and report attachment pass;
+an owner-authorized commercial run is still required. The public 2.12.1 API exposes no
 terminal input, process termination, or hard disposal, leaving cancellation
 and teardown blocked pending a documented provider mechanism.
 

@@ -39,28 +39,16 @@ function parseEvidence(output) {
 }
 
 /**
- * Runs a fail-closed Node compatibility probe in a browser-local BrowserPod.
- * The vendor module is injected so this package never loads proprietary code
- * or transmits an API key until a caller explicitly opts into that runtime.
+ * Runs the Node baseline probe in an already-booted BrowserRuntime. Keeping
+ * this step separate lets the OpenClaw probe reuse one metered BrowserPod.
  */
-export async function runBrowserPodPreflight({
-  BrowserPod,
-  apiKey,
-  storageKey = "clawsembly-browserpod-probe",
+export async function runBrowserRuntimePreflight({
+  runtime,
   onOutput = () => {}
 }) {
-  if (!BrowserPod || typeof BrowserPod.boot !== "function") {
-    throw new TypeError("BrowserPod.boot is required");
+  if (!runtime || runtime.provider !== "browserpod" || typeof runtime.start !== "function") {
+    throw new TypeError("A booted BrowserPod runtime is required");
   }
-  if (typeof apiKey !== "string" || apiKey.trim().length === 0) {
-    throw new TypeError("A BrowserPod API key is required for the metered boot");
-  }
-
-  const runtime = await createBrowserPodRuntime({
-    BrowserPod,
-    apiKey,
-    storageKey
-  });
   const task = await runtime.start({
     executable: "node",
     args: ["-e", PROBE_SOURCE],
@@ -89,6 +77,28 @@ export async function runBrowserPodPreflight({
     lifecycle: runtime.features,
     diagnostics: evidence.sqliteError ? { sqliteError: evidence.sqliteError } : {}
   };
+}
+
+/**
+ * Runs a fail-closed Node compatibility probe in a browser-local BrowserPod.
+ * The vendor module is injected so this package never loads proprietary code
+ * or transmits an API key until a caller explicitly opts into that runtime.
+ */
+export async function runBrowserPodPreflight({
+  BrowserPod,
+  apiKey,
+  storageKey = "clawsembly-browserpod-probe",
+  onOutput = () => {}
+}) {
+  if (!BrowserPod || typeof BrowserPod.boot !== "function") {
+    throw new TypeError("BrowserPod.boot is required");
+  }
+  if (typeof apiKey !== "string" || apiKey.trim().length === 0) {
+    throw new TypeError("A BrowserPod API key is required for the metered boot");
+  }
+
+  const runtime = await createBrowserPodRuntime({ BrowserPod, apiKey, storageKey });
+  return runBrowserRuntimePreflight({ runtime, onOutput });
 }
 
 export { EVIDENCE_PREFIX, PROBE_SOURCE, assertNodeBaseline, parseEvidence };

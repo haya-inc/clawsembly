@@ -20,6 +20,9 @@ The project does not yet promise semantic-version compatibility.
   long-running output readiness, portal discovery, and bounded file I/O;
 - evidence-gated `bootVerifiedEmbed` that rejects unsupported or cross-runtime
   reports before BrowserPod token consumption;
+- exact-artifact BrowserPod readiness harness and raw-evidence schema covering
+  Node/crypto/SQLite preflight, npm SHA-512 matching, Gateway log/portal
+  readiness, and guest-local health/readiness probes;
 - stable / previous / preview release tracking with generated update pull
   requests and cross-version evidence rejection;
 - report-driven project page, release ledger, compatibility badge, contribution

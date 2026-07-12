@@ -9,6 +9,68 @@ import {
   findShrinkwrapRootDrift
 } from "./report.mjs";
 
+const BROWSERPOD_INTEGRITY = `sha512-${"A".repeat(86)}==`;
+
+function browserPodEvidence() {
+  return {
+    schemaVersion: 1,
+    capturedAt: "2026-07-12T02:00:00.000Z",
+    source: "owner-authorized BrowserPod probe",
+    target: {
+      runtime: "browserpod",
+      runtimeVersion: "2.12.1",
+      browser: "Chromium 140.0.0",
+      browserLocal: true
+    },
+    artifact: { package: "openclaw", version: "2026.6.11", integrity: BROWSERPOD_INTEGRITY },
+    preflight: {
+      node: "22.19.0",
+      platform: "linux",
+      arch: "wasm32",
+      checks: { nodeBaseline: true, cryptoVerify: true, sqlite: true },
+      lifecycle: {
+        browserLocal: true,
+        nodeMajor: 22,
+        persistentFilesystem: true,
+        portals: true,
+        portalVisibility: "public-url",
+        fileApi: true,
+        interactiveInput: false,
+        processTermination: false,
+        hardDispose: false
+      }
+    },
+    install: {
+      result: "pass",
+      command: "npm install --save-exact openclaw@<version>",
+      durationMs: 42_000,
+      installedVersion: "2026.6.11",
+      lockIntegrity: BROWSERPOD_INTEGRITY,
+      integrityMatched: true,
+      outputTruncated: false
+    },
+    gateway: {
+      result: "pass",
+      port: 18_789,
+      bind: "loopback",
+      auth: "token",
+      taskId: "browserpod-task-3",
+      durationMs: 9_000,
+      readiness: { output: true, portal: true, healthz: true, readyz: true },
+      portal: { port: 18_789, url: "https://browserpod.example/session", visibility: "public-url" },
+      healthz: { status: 200, body: "{\"ok\":true}" },
+      readyz: { status: 200, body: "{\"ready\":true}" },
+      outputTruncated: false
+    },
+    limitations: [
+      "interactive-input-unavailable",
+      "provider-process-termination-unavailable",
+      "hard-dispose-unavailable",
+      "portal-is-public-url"
+    ]
+  };
+}
+
 test("evidenceDigest is stable across object key order", () => {
   assert.equal(
     evidenceDigest({ nested: { second: 2, first: 1 }, items: [{ beta: true, alpha: false }] }),
@@ -121,6 +183,93 @@ test("buildReport rejects unversioned BrowserPod targets and legacy cross-runtim
       hostEvidence: { capturedAt: "2026-07-12T00:00:00.000Z" }
     }),
     /legacy WebContainer schema cannot prove browserpod@2\.12\.1/u
+  );
+});
+
+test("buildReport attaches exact BrowserPod readiness evidence without overstating handshake support", () => {
+  const evidence = browserPodEvidence();
+  const report = buildReport({
+    packageName: "openclaw",
+    generatedAt: "2026-07-12T02:05:00.000Z",
+    target: {
+      runtime: "browserpod",
+      runtimeVersion: "2.12.1",
+      browserBaseline: "Chromium 140.0.0"
+    },
+    manifest: { version: "2026.6.11", dependencies: {} },
+    pack: { integrity: BROWSERPOD_INTEGRITY, size: 10, unpackedSize: 20 },
+    shrinkwrap: { packages: {} },
+    browserRuntimeEvidence: evidence
+  });
+
+  assert.equal(report.status, "partial");
+  assert.equal(report.evidence[0].id, "browserpod-runtime");
+  assert.equal(report.evidence[0].sha256, evidenceDigest(evidence));
+  assert.match(report.evidence[0].summary, /matched its SHA-512 lock integrity/u);
+  assert.equal(report.checks.find((check) => check.id === "host-preflight")?.status, "pass");
+  assert.equal(report.checks.find((check) => check.id === "openclaw-browserpod-boot")?.status, "pass");
+  assert.equal(report.checks.find((check) => check.id === "gateway-handshake")?.status, "pending");
+  assert.equal(report.checks.find((check) => check.id === "runtime-performance")?.status, "warn");
+  assert.match(report.checks.find((check) => check.id === "runtime-performance")?.detail, /42\.0s/u);
+});
+
+test("buildReport rejects BrowserPod evidence from another runtime, browser, or artifact", () => {
+  const input = {
+    packageName: "openclaw",
+    generatedAt: "2026-07-12T02:05:00.000Z",
+    target: {
+      runtime: "browserpod",
+      runtimeVersion: "2.12.1",
+      browserBaseline: "Chromium 140.0.0"
+    },
+    manifest: { version: "2026.6.11", dependencies: {} },
+    pack: { integrity: BROWSERPOD_INTEGRITY, size: 10, unpackedSize: 20 },
+    shrinkwrap: { packages: {} }
+  };
+  const evidence = browserPodEvidence();
+  assert.throws(
+    () => buildReport({
+      ...input,
+      browserRuntimeEvidence: {
+        ...evidence,
+        target: { ...evidence.target, runtimeVersion: "2.13.0" }
+      }
+    }),
+    /runtime does not match/u
+  );
+  assert.throws(
+    () => buildReport({
+      ...input,
+      browserRuntimeEvidence: {
+        ...evidence,
+        target: { ...evidence.target, browser: "Chromium 141.0.0" }
+      }
+    }),
+    /browser does not match/u
+  );
+  assert.throws(
+    () => buildReport({
+      ...input,
+      browserRuntimeEvidence: {
+        ...evidence,
+        artifact: { ...evidence.artifact, integrity: `sha512-${"B".repeat(86)}==` },
+        install: { ...evidence.install, lockIntegrity: `sha512-${"B".repeat(86)}==` }
+      }
+    }),
+    /artifact does not match/u
+  );
+  assert.throws(
+    () => buildReport({
+      ...input,
+      browserRuntimeEvidence: {
+        ...evidence,
+        gateway: {
+          ...evidence.gateway,
+          readiness: { ...evidence.gateway.readiness, readyz: false }
+        }
+      }
+    }),
+    /Invalid BrowserPod evidence: Gateway readiness/u
   );
 });
 

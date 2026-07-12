@@ -23,6 +23,7 @@ passed every production gate. It must not be interpreted as fully supported.
 | Release index | `https://haya-inc.github.io/clawsembly/data/release-history.json` | Stable, previous, and preview summaries with report paths |
 | Report schema | repository `packages/compatibility/report.schema.json` | Validation contract for a complete report |
 | History schema | repository `packages/compatibility/release-history.schema.json` | Validation contract for the channel index |
+| BrowserPod evidence schema | repository `packages/compatibility/browserpod-evidence.schema.json` | Raw exact-artifact BrowserPod readiness contract |
 
 Consumers should:
 
@@ -65,6 +66,8 @@ only to the exact OpenClaw version and runtime identity named inside that
 evidence. Clawsembly's generator rejects attempts to reuse legacy WebContainer
 evidence for BrowserPod, and the embedding manifest also requires the exact
 BrowserPod adapter version.
-The checked-in validator also schema-checks the source evidence, verifies its
+BrowserPod source evidence additionally binds the exact browser string and npm
+SHA-512, and requires log, portal, `/healthz`, and `/readyz` readiness before
+the boot check passes. The checked-in validator also schema-checks the source evidence, verifies its
 canonical SHA-256 digest, and recomputes every evidence-derived check status so
 that edited or stale reports fail CI.

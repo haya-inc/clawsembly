@@ -18,6 +18,7 @@ function parseArgs(argv) {
     browserBaseline: "Desktop Chromium; Firefox and Safari are experimental until runtime evidence exists.",
     hostEvidence: undefined,
     gatewayEvidence: undefined,
+    browserRuntimeEvidence: undefined,
     skipUnchanged: false
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -32,6 +33,7 @@ function parseArgs(argv) {
     if (argv[index] === "--browser-baseline" && value) options.browserBaseline = value;
     if (argv[index] === "--host-evidence" && value) options.hostEvidence = value;
     if (argv[index] === "--gateway-evidence" && value) options.gatewayEvidence = value;
+    if (argv[index] === "--browserpod-evidence" && value) options.browserRuntimeEvidence = value;
     if (argv[index] === "--skip-unchanged") options.skipUnchanged = true;
   }
   return options;
@@ -67,6 +69,9 @@ const finalOutputs = Object.fromEntries(Object.entries(channels).map(([channel, 
 const gatewayEvidenceVersion = options.gatewayEvidence
   ? JSON.parse(readFileSync(resolve(process.cwd(), options.gatewayEvidence), "utf8"))?.openclaw?.version
   : undefined;
+const browserRuntimeEvidenceVersion = options.browserRuntimeEvidence
+  ? JSON.parse(readFileSync(resolve(process.cwd(), options.browserRuntimeEvidence), "utf8"))?.artifact?.version
+  : undefined;
 
 if (options.skipUnchanged) {
   try {
@@ -99,6 +104,9 @@ try {
     if (options.runtimeVersion) args.push("--runtime-version", options.runtimeVersion);
     if (options.hostEvidence) args.push("--host-evidence", options.hostEvidence);
     if (version === gatewayEvidenceVersion) args.push("--gateway-evidence", options.gatewayEvidence);
+    if (version === browserRuntimeEvidenceVersion) {
+      args.push("--browserpod-evidence", options.browserRuntimeEvidence);
+    }
     run(process.execPath, args);
     stagedOutputs[channel] = stagedOutput;
     reports[channel] = JSON.parse(readFileSync(stagedOutput, "utf8"));

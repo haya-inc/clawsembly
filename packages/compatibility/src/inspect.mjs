@@ -14,7 +14,8 @@ function parseArgs(argv) {
     runtimeVersion: undefined,
     browserBaseline: "Desktop Chromium; Firefox and Safari are experimental until runtime evidence exists.",
     hostEvidence: undefined,
-    gatewayEvidence: undefined
+    gatewayEvidence: undefined,
+    browserRuntimeEvidence: undefined
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -27,6 +28,7 @@ function parseArgs(argv) {
     if (argv[index] === "--browser-baseline" && value) result.browserBaseline = value;
     if (argv[index] === "--host-evidence" && value) result.hostEvidence = value;
     if (argv[index] === "--gateway-evidence" && value) result.gatewayEvidence = value;
+    if (argv[index] === "--browserpod-evidence" && value) result.browserRuntimeEvidence = value;
   }
   return result;
 }
@@ -57,6 +59,9 @@ try {
   const gatewayEvidence = options.gatewayEvidence
     ? JSON.parse(readFileSync(resolve(process.cwd(), options.gatewayEvidence), "utf8"))
     : undefined;
+  const browserRuntimeEvidence = options.browserRuntimeEvidence
+    ? JSON.parse(readFileSync(resolve(process.cwd(), options.browserRuntimeEvidence), "utf8"))
+    : undefined;
   const report = assertReport(buildReport({
     packageName: options.packageName,
     manifest,
@@ -64,6 +69,7 @@ try {
     shrinkwrap,
     hostEvidence,
     gatewayEvidence,
+    browserRuntimeEvidence,
     target: {
       runtime: options.runtime,
       ...(options.runtimeVersion ? { runtimeVersion: options.runtimeVersion } : {}),

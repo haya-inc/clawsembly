@@ -24,6 +24,11 @@ export function runBrowserPodPreflight(options: {
   onOutput?: (chunk: string) => void;
 }): Promise<BrowserPodPreflightEvidence>;
 
+export function runBrowserRuntimePreflight(options: {
+  runtime: BrowserPodRuntime;
+  onOutput?: (chunk: string) => void;
+}): Promise<BrowserPodPreflightEvidence>;
+
 export const EVIDENCE_PREFIX: string;
 export const PROBE_SOURCE: string;
 export function assertNodeBaseline(version: string): void;

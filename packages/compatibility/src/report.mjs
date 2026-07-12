@@ -46,12 +46,69 @@ export function evidenceDigest(value) {
   return createHash("sha256").update(JSON.stringify(canonicalize(value))).digest("hex");
 }
 
-export function deriveRuntimeClaimStatuses({ hostEvidence, gatewayEvidence, targetRuntime = "webcontainer" } = {}) {
+export function assertBrowserRuntimeEvidence(evidence) {
+  const failures = [];
+  if (evidence?.schemaVersion !== 1 || !Number.isFinite(Date.parse(evidence?.capturedAt))) {
+    failures.push("identity");
+  }
+  if (evidence?.target?.runtime !== "browserpod" || evidence?.target?.browserLocal !== true
+    || typeof evidence?.target?.runtimeVersion !== "string" || typeof evidence?.target?.browser !== "string") {
+    failures.push("target");
+  }
+  if (evidence?.preflight?.checks?.nodeBaseline !== true
+    || evidence?.preflight?.checks?.cryptoVerify !== true
+    || evidence?.preflight?.checks?.sqlite !== true) {
+    failures.push("preflight");
+  }
+  if (evidence?.install?.result !== "pass" || evidence?.install?.integrityMatched !== true
+    || evidence?.install?.installedVersion !== evidence?.artifact?.version
+    || evidence?.install?.lockIntegrity !== evidence?.artifact?.integrity) {
+    failures.push("install integrity");
+  }
+  const readiness = evidence?.gateway?.readiness;
+  let portalProtocol;
+  try { portalProtocol = new URL(evidence?.gateway?.portal?.url).protocol; }
+  catch { portalProtocol = undefined; }
+  if (evidence?.gateway?.result !== "pass" || readiness?.output !== true
+    || readiness?.portal !== true || readiness?.healthz !== true || readiness?.readyz !== true
+    || evidence?.gateway?.portal?.visibility !== "public-url" || portalProtocol !== "https:"
+    || evidence?.gateway?.healthz?.status !== 200 || evidence?.gateway?.readyz?.status !== 200) {
+    failures.push("Gateway readiness");
+  }
+  if (!Array.isArray(evidence?.limitations)
+    || !["provider-process-termination-unavailable", "hard-dispose-unavailable", "portal-is-public-url"]
+      .every((limitation) => evidence.limitations.includes(limitation))) {
+    failures.push("limitations");
+  }
+  if (failures.length) {
+    throw new Error(`Invalid BrowserPod evidence: ${failures.join(", ")}`);
+  }
+  return evidence;
+}
+
+export function deriveRuntimeClaimStatuses({
+  hostEvidence,
+  gatewayEvidence,
+  browserRuntimeEvidence,
+  targetRuntime = "webcontainer"
+} = {}) {
   const deviceVerification = gatewayEvidence?.hostBroker?.deviceIdentity?.verification;
   const performance = gatewayEvidence?.gateway?.performance;
+  const browserPodPreflightPassed = browserRuntimeEvidence?.preflight?.checks?.nodeBaseline === true
+    && browserRuntimeEvidence?.preflight?.checks?.cryptoVerify === true
+    && browserRuntimeEvidence?.preflight?.checks?.sqlite === true;
+  const browserPodGatewayPassed = browserRuntimeEvidence?.gateway?.healthz?.status === 200
+    && browserRuntimeEvidence?.gateway?.readyz?.status === 200
+    && browserRuntimeEvidence?.gateway?.readiness?.output === true
+    && browserRuntimeEvidence?.gateway?.readiness?.portal === true
+    && browserRuntimeEvidence?.gateway?.readiness?.healthz === true
+    && browserRuntimeEvidence?.gateway?.readiness?.readyz === true;
   return {
-    "host-preflight": hostEvidence ? hostEvidence.nodeSqlite?.close === "function" ? "pass" : "warn" : "pending",
-    [runtimeBootCheckId(targetRuntime)]: gatewayEvidence?.gateway?.healthz?.status === 200 ? "pass" : "pending",
+    "host-preflight": browserPodPreflightPassed
+      ? "pass"
+      : hostEvidence ? hostEvidence.nodeSqlite?.close === "function" ? "pass" : "warn" : "pending",
+    [runtimeBootCheckId(targetRuntime)]: browserPodGatewayPassed
+      || gatewayEvidence?.gateway?.healthz?.status === 200 ? "pass" : "pending",
     "gateway-handshake": gatewayEvidence?.gateway?.handshake?.result === "pass" ? "pass" : "pending",
     "mocked-chat-turn": gatewayEvidence?.gateway?.chat?.result === "pass" ? "pass" : "pending",
     "mocked-tool-call": gatewayEvidence?.gateway?.chat?.tool?.result === "pass" ? "pass" : "pending",
@@ -66,7 +123,11 @@ export function deriveRuntimeClaimStatuses({ hostEvidence, gatewayEvidence, targ
       && deviceVerification?.controlUiPairing === true
       && deviceVerification?.deviceTokenReconnect === true ? "pass" : "pending",
     "opfs-recovery": gatewayEvidence?.gateway?.persistence?.result === "pass" ? "pass" : "pending",
-    "runtime-performance": performance?.result === "pass" ? performance.assessment === "warn" ? "warn" : "pass" : "pending"
+    "runtime-performance": performance?.result === "pass"
+      ? performance.assessment === "warn" ? "warn" : "pass"
+      : browserRuntimeEvidence?.install?.result === "pass" && browserRuntimeEvidence?.gateway?.result === "pass"
+        ? "warn"
+        : "pending"
   };
 }
 
@@ -112,7 +173,17 @@ export function findShrinkwrapRootDrift(manifest = {}, shrinkwrap = {}) {
   };
 }
 
-export function buildReport({ packageName, manifest, pack, shrinkwrap, generatedAt, hostEvidence, gatewayEvidence, target }) {
+export function buildReport({
+  packageName,
+  manifest,
+  pack,
+  shrinkwrap,
+  generatedAt,
+  hostEvidence,
+  gatewayEvidence,
+  browserRuntimeEvidence,
+  target
+}) {
   if (!manifest?.version) throw new Error("The npm manifest is missing a version.");
   if (!pack?.integrity) throw new Error("The npm pack result is missing integrity metadata.");
   if (gatewayEvidence && gatewayEvidence?.openclaw?.version !== manifest.version) {
@@ -122,6 +193,24 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
   if (reportTarget.runtime !== "webcontainer" && (hostEvidence || gatewayEvidence)) {
     throw new Error(`Evidence captured for the legacy WebContainer schema cannot prove ${reportTarget.runtime}@${reportTarget.runtimeVersion}.`);
   }
+  if (reportTarget.runtime !== "browserpod" && browserRuntimeEvidence) {
+    throw new Error(`BrowserPod evidence cannot prove ${reportTarget.runtime}.`);
+  }
+  if (browserRuntimeEvidence) {
+    assertBrowserRuntimeEvidence(browserRuntimeEvidence);
+    if (browserRuntimeEvidence?.target?.runtime !== "browserpod"
+      || browserRuntimeEvidence?.target?.runtimeVersion !== reportTarget.runtimeVersion) {
+      throw new Error("BrowserPod evidence runtime does not match the report target.");
+    }
+    if (browserRuntimeEvidence?.target?.browser !== reportTarget.browserBaseline) {
+      throw new Error("BrowserPod evidence browser does not match the report baseline.");
+    }
+    if (browserRuntimeEvidence?.artifact?.package !== packageName
+      || browserRuntimeEvidence?.artifact?.version !== manifest.version
+      || browserRuntimeEvidence?.artifact?.integrity !== pack.integrity) {
+      throw new Error("BrowserPod evidence artifact does not match the inspected npm package.");
+    }
+  }
 
   const dependencies = manifest.dependencies ?? {};
   const nativeRiskDependencies = findNativeRisks(shrinkwrap?.packages);
@@ -130,6 +219,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
   const runtimeStatuses = deriveRuntimeClaimStatuses({
     hostEvidence,
     gatewayEvidence,
+    browserRuntimeEvidence,
     targetRuntime: reportTarget.runtime
   });
   const bootCheckId = runtimeBootCheckId(reportTarget.runtime);
@@ -138,7 +228,7 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
   return {
     schemaVersion: 1,
     generatedAt,
-    status: gatewayEvidence?.gateway?.healthz?.status === 200 ? "partial" : "probing",
+    status: runtimeStatuses[bootCheckId] === "pass" ? "partial" : "probing",
     target: reportTarget,
     artifact: {
       package: packageName,
@@ -158,6 +248,14 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
       }
     },
     evidence: [
+      ...browserRuntimeEvidence ? [{
+        id: "browserpod-runtime",
+        kind: "browser-runtime",
+        capturedAt: browserRuntimeEvidence.capturedAt,
+        path: `evidence/browserpod-openclaw-${browserRuntimeEvidence.artifact.version}.json`,
+        sha256: evidenceDigest(browserRuntimeEvidence),
+        summary: `BrowserPod ${browserRuntimeEvidence.target.runtimeVersion} installed exact OpenClaw ${browserRuntimeEvidence.artifact.version}, matched its SHA-512 lock integrity, and returned HTTP 200 from /healthz and /readyz in ${browserRuntimeEvidence.target.browser}; the portal is public and provider termination remains unavailable.`
+      }] : [],
       ...hostEvidence ? [{
         id: "host-preflight",
         kind: "browser-runtime",
@@ -262,7 +360,9 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
         id: "host-preflight",
         label: "Browser host preflight",
         status: runtimeStatuses["host-preflight"],
-        detail: hostEvidence
+        detail: browserRuntimeEvidence
+          ? `BrowserPod ${browserRuntimeEvidence.target.runtimeVersion} booted Node ${browserRuntimeEvidence.preflight.node}; node:crypto verification and node:sqlite passed in ${browserRuntimeEvidence.target.browser}.`
+          : hostEvidence
           ? `WebContainer ${hostEvidence.webcontainerApi} booted Node ${hostEvidence.nodeVersion}; built-in node:sqlite requires an adapter.`
           : "A dated browser-host evidence record has not been attached."
       },
@@ -270,7 +370,9 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
         id: bootCheckId,
         label: `OpenClaw ${runtimeLabel} boot`,
         status: runtimeStatuses[bootCheckId],
-        detail: gatewayEvidence?.gateway?.healthz?.status === 200
+        detail: browserRuntimeEvidence?.gateway?.healthz?.status === 200
+          ? `The exact SHA-512 artifact reached [gateway] ready, opened an HTTPS public portal, and returned HTTP 200 from /healthz and /readyz in BrowserPod.`
+          : gatewayEvidence?.gateway?.healthz?.status === 200
           ? `The official artifact reached server-ready and /healthz returned HTTP ${gatewayEvidence.gateway.healthz.status} through explicit dependency and SQLite adapters.`
           : "The host runtime works, but this exact OpenClaw artifact has not booted in it yet."
       },
@@ -376,7 +478,9 @@ export function buildReport({ packageName, manifest, pack, shrinkwrap, generated
         id: "runtime-performance",
         label: "Measured browser runtime cost",
         status: runtimeStatuses["runtime-performance"],
-        detail: gatewayEvidence?.gateway?.performance?.result === "pass"
+        detail: browserRuntimeEvidence?.gateway?.result === "pass"
+          ? `BrowserPod measured a ${(browserRuntimeEvidence.install.durationMs / 1000).toFixed(1)}s exact-artifact install and ${(browserRuntimeEvidence.gateway.durationMs / 1000).toFixed(1)}s Gateway readiness path; cold/warm distributions and storage footprint budgets are still required.`
+          : gatewayEvidence?.gateway?.performance?.result === "pass"
           ? `Chromium measured ${(gatewayEvidence.gateway.performance.install.coldTotalMs / 1000).toFixed(1)}s cold install (${(gatewayEvidence.gateway.performance.install.nestedDependencyRepairMs / 1000).toFixed(1)}s dependency repair), ${(gatewayEvidence.gateway.performance.install.warmInstallMs / 1000).toFixed(1)}s warm reinstall, ${Math.round(gatewayEvidence.gateway.performance.footprint.nodeModules.bytes / 1_000_000)} MB node_modules, ${Math.round(gatewayEvidence.gateway.performance.footprint.npmCache.bytes / 1_000_000)} MB npm cache, and ${(gatewayEvidence.gateway.performance.gateway.protocolReadyMs / 1000).toFixed(1)}s to protocol-ready. Suppressing redundant repair lifecycle scripts improved cold time by ${gatewayEvidence.gateway.performance.install.improvement?.coldTotalPercent ?? 0}%; npm ci remains blocked by missing published shrinkwrap entries.`
           : "Cold/warm install time, actual filesystem footprint, and Gateway-ready latency have not been measured in the browser lane."
       }

@@ -64,6 +64,12 @@ The canonical promise is:
 - `packages/embed-sdk/boot.mjs` asserts provider-matched supported evidence
   before spending BrowserPod tokens, then binds the runtime and broker to the
   same artifact identity.
+- `packages/browser-runtime/browserpod-openclaw-probe.mjs` installs the exact
+  artifact, matches its package-lock SHA-512, and requires Gateway log, HTTPS
+  portal, `/healthz`, and `/readyz` readiness before emitting raw evidence.
+- `packages/compatibility/browserpod-evidence.schema.json` and the report
+  generator bind that evidence to runtime version, browser, and artifact while
+  leaving later protocol gates pending.
 - the protected provider smoke-test path now passes through the capability
   broker after the report has supplied the exact OpenClaw version and integrity.
 - BrowserPod boot remains behind the dependency-injected preflight until an
@@ -73,6 +79,7 @@ The canonical promise is:
 
 - BrowserPod process termination, interactive input, and hard teardown through
   a documented vendor API; version 2.12.1 exposes none of these operations;
+- an owner-authorized run of the implemented exact-artifact readiness harness;
 - a guest-to-host typed transport that cannot invoke undeclared capabilities;
 - user-facing grant, expiry, and revocation prompts;
 - exportable audit and capability manifests with a stable schema;

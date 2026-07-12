@@ -116,6 +116,13 @@ every filesystem handle. BrowserPod 2.12.1 documents no terminal input,
 process termination, or Pod disposal, so the contract exposes those features
 as false and refuses to claim complete teardown.
 
+The BrowserPod evidence runner composes that contract without adding a second
+provider-specific control path. It verifies Node/crypto/SQLite, performs the
+exact npm install, matches the installed lock integrity, starts the real
+Gateway, and gathers log, portal, `/healthz`, and `/readyz` evidence. Raw
+records are schema-validated and only promote matching runtime-version,
+browser, and artifact checks; they do not imply protocol or broker support.
+
 ### Compatibility adapter
 
 Contains browser-specific behavior that upstream OpenClaw does not provide.
