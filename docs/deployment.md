@@ -32,6 +32,11 @@ it uses.
 - The same build publishes the byte-reproducible SDK tarball, checksum, and
   report-bound release manifest under `dist/downloads/`. This is a source-alpha
   distribution channel, not an npm publication or runtime-support claim.
+- A matching prerelease tag runs `.github/workflows/sdk-release.yml`. Its
+  read-only job repeats the full release check and transfers an exact asset set
+  to a separate write-capable job that executes no npm code. GitHub Release
+  assets include the same tarball, checksum, report corpus, browser diagnostics,
+  and source/tag/Pages provenance.
 - Cloudflare Pages reads `apps/web/public/_headers`.
 - Netlify uses `netlify.toml`.
 - Vercel uses `vercel.json`.

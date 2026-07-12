@@ -82,3 +82,5 @@ consumer is still the next distribution proof.
 The reproducible SDK alpha is also directly installable from Pages with a
 machine-readable checksum/report binding. This removes registry access as an
 adoption prerequisite without relabeling the `probing` runtime as supported.
+The matching GitHub prerelease adds a conventional discovery surface, browser
+diagnostics, and tag/source/Pages/report provenance for independent review.

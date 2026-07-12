@@ -86,6 +86,9 @@ The project does not yet promise semantic-version compatibility.
   diagnostics, schema validation, and review-before-promotion runbook;
 - Pages-distributed byte-reproducible SDK alpha, checksum, public release
   schema, and exact compatibility-report binding without an npm/support claim;
+- tag-gated GitHub source prerelease automation with read/write job separation,
+  exact transferred-asset allowlisting, browser diagnostics, checksum validation,
+  and tag/source/Pages/report provenance;
 - report-driven project page, release ledger, compatibility badge, contribution
   templates, security policy, and downstream consumption guide.
 

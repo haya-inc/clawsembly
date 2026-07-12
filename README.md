@@ -157,6 +157,7 @@ the release is reported as `probing` rather than production-compatible.
 - [Release-channel history](apps/web/public/data/release-history.json)
 - [Promotion policy](https://haya-inc.github.io/clawsembly/data/promotion-policy.json)
 - [SDK alpha release manifest](https://haya-inc.github.io/clawsembly/downloads/sdk-release.json)
+- [SDK source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.0)
 - [Report schema](packages/compatibility/report.schema.json)
 - [Release-history schema](packages/compatibility/release-history.schema.json)
 - [Downstream consumption guide](docs/consuming-reports.md)
@@ -208,6 +209,15 @@ is `probing`, but the exact verified bytes are available from Pages:
 
 ```bash
 npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz
+```
+
+The same checked bytes are attached to the
+[GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.0)
+with provider-free browser diagnostics and a provenance record binding the tag,
+source commit, Pages manifest, and compatibility report:
+
+```bash
+npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.0/haya-inc-clawsembly-0.1.0-alpha.0.tgz
 ```
 
 The adjacent release manifest binds the tarball SHA-256 to the exact public

@@ -65,3 +65,12 @@ prerelease may also attach the generated tarball and checksum, clearly stating
 that npm publication and verified BrowserPod boot remain unavailable. State
 warnings and pending checks in prose; do not summarize a `partial` result as
 supported.
+
+Pushing a tag that exactly matches `v` plus the SDK package version runs the
+source-prerelease workflow. The read-only build job repeats `npm run
+release:check`, creates the release assets and provenance, and packages the
+provider-free browser diagnostics. A separate `contents:write` job accepts only
+the fixed artifact allowlist, rejects traversal and symlinks, checks the SDK
+checksum, executes no npm code, and publishes the tag as a prerelease. A version
+bump must deliberately update the package, schema, and workflow allowlist
+together.

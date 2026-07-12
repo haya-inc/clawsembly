@@ -36,6 +36,7 @@
     "protocol:check": "node scripts/validate-openclaw-gateway-contract.mjs",
     "sdk:check": "node scripts/build-sdk-package.mjs --check",
     "sdk:pack": "node scripts/build-sdk-package.mjs",
+    "sdk:release-assets": "node scripts/build-sdk-release-assets.mjs",
     "sdk:example": "node scripts/serve-sdk-host-example.mjs",
     "report-pin:generate": "node scripts/generate-sdk-host-report-pin.mjs",
     "report-pin:check": "node scripts/generate-sdk-host-report-pin.mjs --check",

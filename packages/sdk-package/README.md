@@ -13,10 +13,18 @@ and tested without making a runtime-support claim.
 npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.0.tgz
 ```
 
+The identical checked tarball is also attached to the
+[GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.0):
+
+```bash
+npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.0/haya-inc-clawsembly-0.1.0-alpha.0.tgz
+```
+
 Verify the SHA-256 and compatibility binding through the public
 [`sdk-release.json`](https://haya-inc.github.io/clawsembly/downloads/sdk-release.json).
 Distribution does not change the public `probing` status or authorize
-BrowserPod boot.
+BrowserPod boot. The release-attached `source-release.json` additionally binds
+those bytes to the Git tag and source commit.
 
 ## Install after an npm prerelease is published
 

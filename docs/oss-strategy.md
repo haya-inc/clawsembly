@@ -100,7 +100,10 @@ consumption and multi-release runtime evidence are not yet proven.
 
 The byte-reproducible SDK alpha is distributed from Pages with an exact
 checksum and compatibility-report binding. npm remains a later discovery
-channel, not a prerequisite for the first external integration.
+channel, not a prerequisite for the first external integration. The same bytes
+also ship as a GitHub prerelease with an exact tag/source/report provenance
+record and provider-free browser diagnostics, giving reviewers a conventional
+release surface without weakening the `probing` gate.
 
 ### Gate 3 — contributor flywheel
 

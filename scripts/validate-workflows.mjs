@@ -24,6 +24,7 @@ for (const name of workflowFiles) {
 
 const compatibility = readFileSync(resolve(workflowDirectory, "compatibility.yml"), "utf8");
 const runtimeBrowser = readFileSync(resolve(workflowDirectory, "runtime-browser.yml"), "utf8");
+const sdkRelease = readFileSync(resolve(workflowDirectory, "sdk-release.yml"), "utf8");
 const publishMarker = "\n  publish-report-pr:\n";
 const publishIndex = compatibility.indexOf(publishMarker);
 assert.ok(publishIndex > 0, "compatibility workflow must separate report generation from publishing");
@@ -58,5 +59,24 @@ assert.match(runtimeBrowser, /github\.event_name == 'workflow_dispatch'/u, "mete
 assert.match(runtimeBrowser, /npm ci --prefix examples\/browserpod-evidence-host --ignore-scripts/u, "BrowserPod capture must install its exact isolated lock without scripts");
 assert.equal(runtimeBrowser.match(/secrets\.BROWSERPOD_API_KEY/gu)?.length, 1, "BrowserPod key must enter one capture step only");
 assert.match(runtimeBrowser, /path: test-results\/browserpod-evidence/u, "BrowserPod capture must retain reviewed evidence artifacts");
+
+const sdkPublishMarker = "\n  publish:\n";
+const sdkPublishIndex = sdkRelease.indexOf(sdkPublishMarker);
+assert.ok(sdkPublishIndex > 0, "SDK release workflow must separate build from publishing");
+const sdkBuildJob = sdkRelease.slice(0, sdkPublishIndex);
+const sdkPublishJob = sdkRelease.slice(sdkPublishIndex);
+assert.match(sdkRelease, /tags:\n\s+- "v\*\.\*\.\*-\*"/u, "SDK release must require an explicit prerelease tag");
+assert.match(sdkBuildJob, /permissions:\n\s+contents: read/u, "SDK release build must remain read-only");
+assert.doesNotMatch(sdkBuildJob, /contents: write/u, "SDK release build must not write repository contents");
+assert.match(sdkBuildJob, /npm run release:check/u, "SDK release build must pass the full release gate");
+assert.match(sdkBuildJob, /build-sdk-release-assets\.mjs/u, "SDK release build must generate bound assets");
+assert.match(sdkPublishJob, /permissions:\n\s+contents: write/u, "SDK release publishing requires contents write permission");
+assert.doesNotMatch(sdkPublishJob, /npm ci|npm install|npm run|npx /u, "write-capable SDK publishing must not execute npm code");
+assert.match(sdkPublishJob, /Release artifact contains an unsafe path/u, "SDK publishing must reject archive path traversal");
+assert.match(sdkPublishJob, /Release artifact must not contain symlinks/u, "SDK publishing must reject artifact symlinks");
+assert.match(sdkPublishJob, /gh release create/u, "SDK publishing must create a GitHub release");
+assert.match(sdkPublishJob, /--verify-tag/u, "SDK publishing must bind the release to the pushed tag");
+assert.match(sdkPublishJob, /--prerelease/u, "SDK publishing must never mark the source alpha stable");
+assert.doesNotMatch(sdkPublishJob, /--latest/u, "SDK publishing must not promote the source alpha as latest");
 
 process.stdout.write(`Validated ${workflowFiles.length} pinned workflows and compatibility-job permissions.\n`);

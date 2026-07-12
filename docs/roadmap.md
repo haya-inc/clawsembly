@@ -210,7 +210,10 @@ its read-only job and publishes it with the report through the isolated
 write-capable PR job. npm publication remains blocked on the same runtime
 evidence and maintainer release gates. The identical checked tarball is now
 available from Pages with a schema-valid release manifest and checksum, so
-external source-alpha consumers do not depend on registry publication.
+external source-alpha consumers do not depend on registry publication. A
+fail-closed prerelease workflow repeats the complete gate on a matching Git tag,
+then publishes the same bytes with provider-free browser diagnostics and a
+source-commit/Pages/report provenance record from an npm-free write job.
 
 Exit criterion: an external web application can embed one supported upstream
 OpenClaw version without granting ambient credentials, filesystem, or network
