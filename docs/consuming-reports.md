@@ -128,7 +128,7 @@ Downstream GitHub Actions users can skip checkout and Node setup entirely:
 
 ```yaml
 - id: clawsembly
-  uses: haya-inc/clawsembly/actions/promotion-policy@codex/oss-launch
+  uses: haya-inc/clawsembly/actions/promotion-policy@main
   with:
     mode: observe # change to gate to require PROMOTE
 ```
