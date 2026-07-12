@@ -53,7 +53,11 @@ adapter never fabricates a green provider lifecycle result from that higher
 level protocol.
 
 Portal URLs are treated as public URLs, not loopback endpoints or secrets. The
-OpenClaw Gateway still requires its own authentication and origin policy.
+OpenClaw Gateway still requires its own authentication and origin policy. The
+shared controller writes only exact HTTPS or loopback origins through the
+installed OpenClaw CLI before launch; wildcard and public plaintext HTTP values
+are rejected. The embedding client must present the same origin policy before
+it can derive a `wss://` portal.
 
 ## Credential boundary
 

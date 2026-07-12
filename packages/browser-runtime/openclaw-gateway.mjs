@@ -66,6 +66,31 @@ export function assertOpenClawGatewayToken(token) {
   return token;
 }
 
+function isLoopbackHostname(hostname) {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]" || hostname === "::1";
+}
+
+export function assertOpenClawBrowserOrigins(origins) {
+  if (!Array.isArray(origins) || origins.length > 8) {
+    throw new TypeError("OpenClaw browser origins must be a bounded array");
+  }
+  const normalized = [];
+  for (const value of origins) {
+    if (typeof value !== "string" || value === "*" || value.length > 512) {
+      throw new TypeError("an exact OpenClaw browser origin is required");
+    }
+    let url;
+    try { url = new URL(value); }
+    catch { throw new TypeError("an exact OpenClaw browser origin is required"); }
+    if (url.origin !== value || url.username || url.password
+      || (url.protocol !== "https:" && !(url.protocol === "http:" && isLoopbackHostname(url.hostname)))) {
+      throw new TypeError("an exact HTTPS or loopback OpenClaw browser origin is required");
+    }
+    if (!normalized.includes(url.origin)) normalized.push(url.origin);
+  }
+  return Object.freeze(normalized);
+}
+
 function safeSink(sink, value) {
   try { sink?.(Object.freeze(value)); }
   catch { /* Diagnostics cannot break the Gateway lifecycle. */ }
@@ -75,6 +100,7 @@ export function createVerifiedOpenClawGateway({
   runtime,
   installer,
   port = OPENCLAW_GATEWAY_PORT,
+  allowedOrigins = [],
   tokenFactory = () => `clawsembly-${globalThis.crypto.randomUUID()}`,
   supervisorNonceFactory,
   onOutput,
@@ -91,6 +117,7 @@ export function createVerifiedOpenClawGateway({
     throw new TypeError("a verified OpenClaw installer is required for the Gateway");
   }
   const gatewayPort = assertOpenClawGatewayPort(port);
+  const browserOrigins = assertOpenClawBrowserOrigins(allowedOrigins);
   if (typeof tokenFactory !== "function") throw new TypeError("Gateway token factory is invalid");
   if (supervisorNonceFactory !== undefined && typeof supervisorNonceFactory !== "function") {
     throw new TypeError("Gateway supervisor nonce factory is invalid");
@@ -118,6 +145,34 @@ export function createVerifiedOpenClawGateway({
     });
     let supervised;
     try {
+      if (browserOrigins.length > 0) {
+        const configuration = await runtime.start({
+          executable: "node",
+          args: [
+            installed.executablePath,
+            "--dev",
+            "config",
+            "set",
+            "gateway.controlUi.allowedOrigins",
+            JSON.stringify(browserOrigins),
+            "--strict-json"
+          ],
+          cwd: installed.root,
+          env: ["CI=1", "NO_COLOR=1", `OPENCLAW_STATE_DIR=${installed.stateRoot}`],
+          outputLimitBytes: 64 * 1024
+        });
+        configuration.onOutput((chunk) => safeSink(onOutput, { phase: "configure", chunk }));
+        const configured = await configuration.wait();
+        if (configured.status !== "completed") {
+          throw new BrowserRuntimeError("origin_config_failed", "OpenClaw browser origin configuration failed");
+        }
+        safeSink(onAudit, {
+          action: "gateway-origin-policy",
+          outcome: "configured",
+          count: browserOrigins.length,
+          taskId: configuration.id
+        });
+      }
       supervised = await startCooperativeProcess({
         runtime,
         root: `${installed.root}/supervision`,
@@ -195,6 +250,7 @@ export function createVerifiedOpenClawGateway({
         port: gatewayPort,
         bind: "loopback",
         auth: "token",
+        allowedOrigins: browserOrigins,
         portal: gatewayOutcome.portal,
         healthz: Object.freeze(health.healthz),
         readyz: Object.freeze(health.readyz),
@@ -211,7 +267,8 @@ export function createVerifiedOpenClawGateway({
         taskId: result.taskId,
         durationMs: result.durationMs,
         outputTruncated: result.outputTruncated,
-        portalVisibility: result.portal.visibility
+        portalVisibility: result.portal.visibility,
+        allowedOriginCount: result.allowedOrigins.length
       });
       return result;
     } catch (error) {
@@ -238,6 +295,7 @@ export function createVerifiedOpenClawGateway({
     schemaVersion: 1,
     artifact: installer.artifact,
     port: gatewayPort,
+    allowedOrigins: browserOrigins,
     get state() { return state; },
     start() {
       if (state === "ready") return Promise.resolve(readyResult);
@@ -280,6 +338,7 @@ export function createVerifiedOpenClawGateway({
       return Object.freeze({
         schemaVersion: 1,
         portal: readyResult.portal,
+        allowedOrigins: browserOrigins,
         auth: Object.freeze({ mode: "token", token: authToken })
       });
     },

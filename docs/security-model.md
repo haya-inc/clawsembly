@@ -62,6 +62,14 @@ The browser sandbox is one boundary, not the only control.
   from ready records, session serialization, output-independent audit, and
   public evidence, and return it only from an explicit trusted-host connection
   request while the Gateway is ready.
+- Configure `gateway.controlUi.allowedOrigins` before launch from an exact,
+  bounded allowlist. Reject wildcard, path-bearing, credential-bearing, and
+  public plaintext HTTP values; the client refuses to open a portal unless its
+  browser origin is present in the same returned policy.
+- Keep the browser Ed25519 private key non-extractable in IndexedDB. Sign only
+  the server-provided challenge nonce with the exact OpenClaw v3 payload, cap
+  pre-authentication frames, and never copy shared/device tokens into hello
+  summaries, pairing errors, or protocol audit.
 - Refuse logical runtime disposal while the Gateway is active; ordered session
   close must preserve the filesystem control path until cooperative stop is
   acknowledged, and a failed stop must leave runtime access available for

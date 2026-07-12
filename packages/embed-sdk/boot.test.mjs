@@ -7,6 +7,7 @@ import {
   createEmbedSessionLifecycle
 } from "./boot.mjs";
 import { createEmbedManifest } from "./embed-manifest.mjs";
+import { OPENCLAW_GATEWAY_CONTRACT } from "./openclaw-gateway-contract.generated.mjs";
 
 const INTEGRITY = `sha512-${"A".repeat(86)}==`;
 
@@ -126,7 +127,43 @@ test("rejects invalid Gateway options before BrowserPod boot", async () => {
     }),
     /Gateway options contain an unknown field/u
   );
+  await assert.rejects(
+    bootVerifiedEmbed({
+      manifest: createEmbedManifest({ report: report() }),
+      BrowserPod: fake.BrowserPod,
+      browserPodApiKey: "secret",
+      gatewayOptions: { allowedOrigins: ["*"] }
+    }),
+    /exact OpenClaw browser origin/u
+  );
   assert.equal(fake.calls.length, 0);
+});
+
+test("creates an artifact-bound protocol client without issuing connection authority early", async () => {
+  const fake = fakeBrowserPod();
+  const exactReport = report();
+  exactReport.artifact = {
+    package: "openclaw",
+    version: OPENCLAW_GATEWAY_CONTRACT.artifact.version,
+    integrity: OPENCLAW_GATEWAY_CONTRACT.artifact.integrity
+  };
+  const session = await bootVerifiedEmbed({
+    manifest: createEmbedManifest({ report: exactReport }),
+    BrowserPod: fake.BrowserPod,
+    browserPodApiKey: "secret",
+    gatewayOptions: { allowedOrigins: ["https://embed.example"] }
+  });
+  const client = session.createGatewayClient({
+    browserOrigin: "https://embed.example",
+    identity: {
+      async descriptor() { return {}; },
+      async signConnect() { return {}; }
+    },
+    createWebSocket() { throw new Error("must not open before Gateway readiness"); }
+  });
+  assert.equal(client.state, "idle");
+  await assert.rejects(client.connect(), (error) => error.code === "gateway_not_ready");
+  assert.equal(client.state, "idle");
 });
 
 test("boots a verified BrowserPod session and binds capability authority to its artifact", async () => {
@@ -235,6 +272,7 @@ test("session lifecycle stops an active Gateway before logical disposal", async 
   let gatewayState = "ready";
   let disposeCalls = 0;
   let stopCalls = 0;
+  let closeConnectionCalls = 0;
   const lifecycle = createEmbedSessionLifecycle({
     runtime: {
       dispose() {
@@ -256,7 +294,8 @@ test("session lifecycle stops an active Gateway before logical disposal", async 
           durationMs: 10
         };
       }
-    }
+    },
+    closeConnections() { closeConnectionCalls += 1; }
   });
   const refused = lifecycle.dispose();
   assert.equal(refused.complete, false);
@@ -269,6 +308,7 @@ test("session lifecycle stops an active Gateway before logical disposal", async 
   assert.equal(closed.gatewayStop.complete, true);
   assert.equal(closed.runtimeDisposition.complete, false);
   assert.equal(stopCalls, 1);
+  assert.equal(closeConnectionCalls, 1);
   assert.equal(disposeCalls, 1);
   assert.equal(lifecycle.closed, true);
 });

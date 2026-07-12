@@ -80,6 +80,13 @@ The canonical promise is:
 - `packages/browser-runtime/cooperative-process.mjs` stops Clawsembly-launched
   children through a nonce-bound guest supervisor without claiming provider
   process termination or Pod disposal.
+- `packages/embed-sdk/openclaw-gateway-contract.generated.mjs` binds protocol 4
+  and the browser client profile to the exact npm integrity and hashed upstream
+  declarations; regeneration verifies the published tarball before updating.
+- `packages/embed-sdk/gateway-device-identity.mjs` and `gateway-client.mjs`
+  implement non-extractable Ed25519 identity, challenge-bound v3 signing,
+  exact-origin WSS connection, token-private connect, strict `hello-ok`
+  validation, and explicit pairing-required metadata.
 - `packages/compatibility/browserpod-evidence.schema.json` and the report
   generator bind that evidence to runtime version, browser, and artifact while
   leaving later protocol gates pending.
@@ -94,8 +101,8 @@ The canonical promise is:
   teardown through a documented vendor API; version 2.12.1 exposes none of
   these operations;
 - an owner-authorized run of the implemented exact-artifact readiness harness;
-- a reusable rendered prompt component over the implemented headless consent
-  controller;
+- an explicit device-pairing approval UI and issued-token lifecycle;
+- streamed chat/history/cancellation RPC and reconnect on the generated client;
 - a small public `boot()` SDK after BrowserPod reaches the Gateway evidence
   gate.
 

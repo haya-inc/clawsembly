@@ -35,6 +35,10 @@ The project does not yet promise semantic-version compatibility.
 - shared verified Gateway controller with token-private supervised launch,
   portal/log plus guest-local health/readiness gates, explicit trusted-host
   connection material, failure cleanup, and cooperative stop;
+- exact-artifact generated Gateway protocol 4 contract, strict browser-origin
+  configuration, persistent non-extractable Ed25519 device identity,
+  challenge-bound v3 connect signing, redacted `hello-ok` validation, and
+  bounded pairing-required results;
 - ordered embed-session close that refuses runtime disposal while the Gateway
   is active and retains cleanup access when cooperative stop fails;
 - nonce-bound guest process supervisor for cooperative child shutdown without

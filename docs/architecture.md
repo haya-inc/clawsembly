@@ -78,13 +78,20 @@ browser permission prompts. It must not contain OpenClaw agent logic.
 ### Generated Gateway client
 
 Generated from the upstream Gateway schema and wrapped by a small handwritten
-transport layer. It should:
+transport layer. The implemented handshake slice:
 
-- negotiate the supported protocol range;
-- honor limits advertised by `hello-ok`;
-- discover supported methods and events;
-- preserve unknown event or frame payloads for forward compatibility;
-- avoid depending on private OpenClaw workspace packages at runtime.
+- pins the exact npm artifact, protocol 4, accepted client identity, and hashes
+  of the upstream declaration sources;
+- waits for `connect.challenge` and signs the v3 payload with a persistent,
+  non-extractable browser Ed25519 key;
+- sends the shared token only in the authenticated connect frame;
+- validates the exact-version `hello-ok` and returns method/event discovery
+  plus advertised limits without returning issued bearer tokens;
+- caps pre-authentication frames and emits payload-free audit metadata;
+- avoids depending on private OpenClaw workspace packages at runtime.
+
+General RPC dispatch, event delivery, reconnect, device-token persistence, and
+forward-compatible unknown post-authentication frames remain to be generated.
 
 OpenClaw documents its Gateway protocol and TypeBox code-generation pipeline in
 [Gateway protocol](https://docs.openclaw.ai/gateway/protocol) and
@@ -224,7 +231,15 @@ sessions. It calls the verified installer, launches the exact executable behind
 the guest supervisor, requires both log/portal readiness and guest-local
 `/healthz` plus `/readyz`, and clears its ephemeral token on stop. Ready records
 and audit events exclude the token; only an explicit trusted-host
-`connection()` call returns it.
+`connection()` call returns it. Before launch it configures an exact
+`gateway.controlUi.allowedOrigins` allowlist through the installed OpenClaw CLI;
+wildcards, path-bearing values, and public plaintext HTTP origins fail closed.
+
+`gateway-device-identity.mjs` keeps a non-extractable Ed25519 private key in
+IndexedDB and exposes only a descriptor and challenge-signing operation.
+`gateway-client.mjs` consumes `connection()` inside the host closure, performs
+the protocol 4 handshake, and serializes neither the shared token nor an issued
+device token into results or audit.
 
 The embed session lifecycle prevents logical runtime disposal from racing the
 Gateway. `close()` stops the supervised child first and retains runtime access

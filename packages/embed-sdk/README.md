@@ -31,7 +31,11 @@ const session = await bootVerifiedEmbed({
   BrowserPod,
   browserPodApiKey,
   workspaceId: "primary",
-  capabilityHandlers
+  capabilityHandlers,
+  gatewayOptions: {
+    // Exact browser origins only. Wildcards and non-loopback HTTP fail closed.
+    allowedOrigins: [globalThis.location.origin]
+  }
 });
 
 // Explicitly install the manifest-bound artifact. The SDK exposes no executable
@@ -39,9 +43,18 @@ const session = await bootVerifiedEmbed({
 const installed = await session.installer.install();
 
 // Start the same supervised, health-checked Gateway lifecycle used by evidence
-// probes. The token is available only through this explicit trusted-host call.
+// probes, then complete the artifact-matched protocol 4 handshake.
 const gateway = await session.gateway.start();
-const connection = session.gateway.connection();
+const client = session.createGatewayClient();
+try {
+  const hello = await client.connect();
+  console.log(hello.protocol, hello.server.version);
+} catch (error) {
+  if (error.code === "pairing_required") {
+    // Render error.pairing and require explicit owner approval before retry.
+  }
+  throw error;
+}
 
 // Manifest capabilities start pending, not granted.
 session.permissions.approve("storage.snapshot", "workspace:primary", {
@@ -86,11 +99,19 @@ environment in `session.guestTransport`; integrators no longer copy protocol
 files by hand. `session.installer` writes an exact dependency manifest, runs one
 bounded npm install, and exposes its executable only after installed version and
 package-lock integrity match the verified embed manifest. Gateway launch and
-readiness now use the same controller as evidence probes: a private ephemeral
-token, loopback bind, HTTPS portal discovery, `/healthz` and `/readyz`, and a
-cooperative supervisor stop. `session.gateway.connection()` is the only API that
-returns the token and it becomes unavailable after stop. Authenticated protocol
-handshake and the generated Gateway client remain the next SDK slice.
+readiness use the same controller as evidence probes: a private ephemeral
+token, exact browser-origin policy, loopback bind, HTTPS portal discovery,
+`/healthz` and `/readyz`, and a cooperative supervisor stop.
+`session.gateway.connection()` is the internal authority source and becomes
+unavailable after stop. `session.createGatewayClient()` consumes it only during
+the protocol 4 handshake: it waits for `connect.challenge`, signs the exact v3
+device payload with a persistent non-extractable Ed25519 key, sends the token
+only in `connect.params.auth.token`, validates `hello-ok`, and returns a
+token-free summary. First-use or scope-upgrade pairing is surfaced as bounded
+metadata for explicit approval; it is never auto-approved. The generated
+contract is pinned to the same npm artifact and can be reproduced with
+`npm run protocol:verify`. Streamed RPC, reconnect, device-token persistence,
+and approval UI remain later slices.
 `session.close()` orders cooperative Gateway stop before logical runtime
 disposal; synchronous `dispose()` refuses to close a session while a Gateway is
 active, so the stop control path cannot be cut off accidentally.

@@ -57,6 +57,14 @@ The transport boundary is documented in
 [Capability mailbox](docs/capability-mailbox.md), and the authority lifecycle
 in [Capability permissions](docs/capability-permissions.md).
 
+The first generated Gateway-client slice is also implemented. A reproducible
+contract pins protocol 4 and hashed upstream declarations to the same exact npm
+integrity. The SDK configures an exact browser-origin allowlist, persists a
+non-extractable Ed25519 identity, signs `connect.challenge`, sends the ephemeral
+token only in the connect frame, and validates a token-free `hello-ok` summary.
+Mock contract tests cover pairing-required and secret-redaction paths; this is
+not yet real BrowserPod handshake evidence.
+
 ## Browser runtime direction
 
 Browser-local execution is a product invariant; a remote sandbox is not the
@@ -101,8 +109,9 @@ the verified report.
 
 The same session now owns a verified Gateway controller shared with the
 evidence probe. It performs supervised launch, HTTPS portal and log readiness,
-guest-local health/readiness checks, explicit trusted-host token issuance, and
-cooperative stop without serializing the ephemeral token.
+guest-local health/readiness checks, exact origin configuration, authenticated
+protocol-client creation, and cooperative stop without serializing the
+ephemeral token.
 
 The page provides a credential-and-explicit-consent gate for one fixed-prompt
 `gpt-5.6-luna` live smoke test. It enforces `store:false`, 128 maximum output
@@ -130,6 +139,14 @@ Requirements: Node.js 22.19 or newer.
 npm install
 npm run check
 npm run dev
+```
+
+To regenerate and byte-check the Gateway contract against the exact published
+npm artifact:
+
+```bash
+npm run protocol:generate
+npm run protocol:verify
 ```
 
 The browser lane requires Playwright Chromium and verifies the public page,

@@ -118,11 +118,16 @@ const session = await bootVerifiedEmbed({
   BrowserPod,
   browserPodApiKey,
   workspaceId: "primary",
-  capabilityHandlers
+  capabilityHandlers,
+  gatewayOptions: { allowedOrigins: [globalThis.location.origin] }
 });
 
+await session.gateway.start();
+const gatewayClient = session.createGatewayClient();
+const hello = await gatewayClient.connect();
+
 const audit = session.capabilities.auditSnapshot();
-const result = session.dispose();
+const result = await session.close();
 ```
 
 The boot function first calls `assertVerifiedLaunch`, before BrowserPod spends
@@ -197,10 +202,22 @@ exact-artifact installer as the BrowserPod evidence probe and returns paths only
 after installed manifest and package-lock integrity match. Gateway launch,
 portal/log readiness, guest-local health checks, explicit connection-token
 issuance, and cooperative stop now use the same `session.gateway` controller as
-the evidence probe. The token remains in a private closure until trusted host
-code calls `connection()` and is discarded on stop. Authenticated protocol
-handshake, generated client integration, and owner-authorized BrowserPod
-evidence remain later SDK slices.
+the evidence probe. `gatewayOptions.allowedOrigins` is written through the
+exact OpenClaw CLI before launch; only exact HTTPS origins (plus explicit
+loopback HTTP origins) are accepted, and `*` is rejected.
+
+`session.createGatewayClient()` is the first generated-client slice. Its
+contract records the exact npm integrity plus SHA-256 digests of the upstream
+protocol declarations. The handwritten transport waits for
+`connect.challenge`, uses a persistent non-extractable browser Ed25519 key to
+sign OpenClaw's v3 payload, sends the ephemeral Gateway token only inside the
+`connect` frame, requires protocol 4 and an exact-version `hello-ok`, and
+returns no bearer token. Pre-authentication frames are capped at 64 KiB and all
+errors/audits are reduced to fixed metadata. A first-use or scope-upgrade
+`PAIRING_REQUIRED` response returns only the bounded request/device/role/scope
+contract; approval remains an explicit owner action. The real BrowserPod
+handshake evidence, pairing approval UI, device-token persistence, RPC
+streaming, reconnect, and remote-mode parity remain pending.
 
 Use `await session.close()` for ordered teardown. It first requires a successful
 cooperative Gateway stop, then closes the logical runtime adapter. The legacy

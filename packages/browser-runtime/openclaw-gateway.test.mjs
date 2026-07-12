@@ -21,8 +21,9 @@ function deferred() {
   return { promise, resolve };
 }
 
-function runtimeFixture({ healthStatus = "completed" } = {}) {
+function runtimeFixture({ healthStatus = "completed", configStatus = "completed" } = {}) {
   const files = new Map();
+  const commands = [];
   const supervisorCompletion = deferred();
   let supervisorTranscript = `${COOPERATIVE_SUPERVISOR_PREFIX}{"event":"ready"}\n[gateway] ready\n`;
   let supervisorStatus = "running";
@@ -56,6 +57,14 @@ function runtimeFixture({ healthStatus = "completed" } = {}) {
     onOutput(listener) { listener(healthTranscript); return () => true; },
     async wait() { return { status: healthStatus, outputBytes: healthTranscript.length, outputTruncated: false }; }
   };
+  const configTask = {
+    id: "config-task-1",
+    status: configStatus,
+    transcript: "Updated gateway.controlUi.allowedOrigins\n",
+    outputTruncated: false,
+    onOutput(listener) { listener(this.transcript); return () => true; },
+    async wait() { return { status: configStatus, outputBytes: this.transcript.length, outputTruncated: false }; }
+  };
   const runtime = {
     provider: "browserpod",
     files,
@@ -70,6 +79,8 @@ function runtimeFixture({ healthStatus = "completed" } = {}) {
       }
     },
     async start(command) {
+      commands.push(command);
+      if (command.args.includes("gateway.controlUi.allowedOrigins")) return configTask;
       if (command.args[0]?.endsWith("/supervisor-gateway.mjs")) return supervisorTask;
       if (command.args.includes(BROWSERPOD_HEALTH_SOURCE)) return healthTask;
       throw new Error(`unexpected command ${command.executable}`);
@@ -78,7 +89,7 @@ function runtimeFixture({ healthStatus = "completed" } = {}) {
       return { port, url: "https://browserpod.example/session", visibility: "public-url" };
     }
   };
-  return { runtime, supervisorTask };
+  return { runtime, supervisorTask, commands };
 }
 
 function installerFixture() {
@@ -104,8 +115,8 @@ function installerFixture() {
   };
 }
 
-test("starts once, exposes token only explicitly, and revokes it on stop", async () => {
-  const { runtime, supervisorTask } = runtimeFixture();
+test("starts once, pins browser origins, exposes token only explicitly, and revokes it on stop", async () => {
+  const { runtime, supervisorTask, commands } = runtimeFixture();
   const installer = installerFixture();
   const output = [];
   const audit = [];
@@ -113,6 +124,7 @@ test("starts once, exposes token only explicitly, and revokes it on stop", async
   const gateway = createVerifiedOpenClawGateway({
     runtime,
     installer,
+    allowedOrigins: ["https://embed.example"],
     tokenFactory: () => "gateway-private-token",
     supervisorNonceFactory: () => "supervisor_nonce_123456",
     onOutput: (event) => output.push(event),
@@ -127,16 +139,25 @@ test("starts once, exposes token only explicitly, and revokes it on stop", async
   assert.equal(installer.calls, 1);
   assert.equal(ready.healthz.status, 200);
   assert.equal(ready.readyz.status, 200);
+  assert.deepEqual(ready.allowedOrigins, ["https://embed.example"]);
   assert.equal(gateway.task, supervisorTask);
   assert.deepEqual(gateway.connection(), {
     schemaVersion: 1,
     portal: { port: 18_789, url: "https://browserpod.example/session", visibility: "public-url" },
+    allowedOrigins: ["https://embed.example"],
     auth: { mode: "token", token: "gateway-private-token" }
   });
   assert.equal(JSON.stringify(gateway).includes("gateway-private-token"), false);
   assert.equal(JSON.stringify(ready).includes("gateway-private-token"), false);
   assert.equal(JSON.stringify(audit).includes("gateway-private-token"), false);
-  assert.deepEqual(new Set(output.map((event) => event.phase)), new Set(["gateway", "health"]));
+  assert.deepEqual(new Set(output.map((event) => event.phase)), new Set(["configure", "gateway", "health"]));
+  const originCommand = commands.find((command) => command.args.includes("gateway.controlUi.allowedOrigins"));
+  assert.deepEqual(originCommand.args.slice(-3), [
+    "gateway.controlUi.allowedOrigins",
+    '["https://embed.example"]',
+    "--strict-json"
+  ]);
+  assert.equal(JSON.stringify(originCommand).includes("gateway-private-token"), false);
 
   await assert.rejects(gateway.stop({ timeoutMs: 1 }), /stop timeout is invalid/u);
   assert.equal(gateway.state, "ready");
@@ -161,6 +182,19 @@ test("health failure cooperatively stops the child and clears connection authori
   assert.throws(() => gateway.connection(), (error) => error.code === "gateway_not_ready");
 });
 
+test("fails before Gateway launch when the exact origin policy cannot be configured", async () => {
+  const { runtime, commands } = runtimeFixture({ configStatus: "failed" });
+  const gateway = createVerifiedOpenClawGateway({
+    runtime,
+    installer: installerFixture(),
+    allowedOrigins: ["https://embed.example"],
+    tokenFactory: () => "gateway-private-token"
+  });
+  await assert.rejects(gateway.start(), (error) => error.code === "origin_config_failed");
+  assert.equal(commands.some((command) => command.args[0]?.endsWith("/supervisor-gateway.mjs")), false);
+  assert.throws(() => gateway.connection(), (error) => error.code === "gateway_not_ready");
+});
+
 test("invalid token fails before installation", async () => {
   const { runtime } = runtimeFixture();
   const installer = installerFixture();
@@ -172,6 +206,19 @@ test("invalid token fails before installation", async () => {
   assert.throws(() => gateway.start(), /token of at least 16 characters/u);
   assert.equal(installer.calls, 0);
   assert.equal(gateway.state, "idle");
+});
+
+test("rejects wildcard, path-bearing, and insecure non-loopback browser origins", () => {
+  const { runtime } = runtimeFixture();
+  const create = (allowedOrigins) => createVerifiedOpenClawGateway({
+    runtime,
+    installer: installerFixture(),
+    allowedOrigins
+  });
+  assert.throws(() => create(["*"]), /exact OpenClaw browser origin/u);
+  assert.throws(() => create(["https://embed.example/path"]), /exact HTTPS or loopback/u);
+  assert.throws(() => create(["http://embed.example"]), /exact HTTPS or loopback/u);
+  assert.deepEqual(create(["http://127.0.0.1:5173"]).allowedOrigins, ["http://127.0.0.1:5173"]);
 });
 
 test("health parser rejects missing and oversized evidence", () => {

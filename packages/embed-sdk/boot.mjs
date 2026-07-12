@@ -1,6 +1,7 @@
 import { createBrowserPodRuntime } from "../browser-runtime/browserpod-runtime.mjs";
 import { createVerifiedOpenClawInstaller } from "../browser-runtime/openclaw-installer.mjs";
 import {
+  assertOpenClawBrowserOrigins,
   assertOpenClawGatewayPort,
   createVerifiedOpenClawGateway
 } from "../browser-runtime/openclaw-gateway.mjs";
@@ -9,6 +10,8 @@ import { CapabilityConsentController } from "../capability-broker/capability-con
 import { FilesystemCapabilityMailboxHost } from "../capability-broker/filesystem-mailbox-host.mjs";
 import { stageGuestMailboxClient } from "../capability-broker/guest-mailbox-artifact.mjs";
 import { assertVerifiedLaunch } from "./embed-manifest.mjs";
+import { createBrowserDeviceIdentity } from "./gateway-device-identity.mjs";
+import { createOpenClawGatewayClient } from "./gateway-client.mjs";
 
 const SESSION_ID_PATTERN = /^[A-Za-z0-9_-]{1,64}$/u;
 const MAILBOX_CHANNEL_PATTERN = /^[A-Za-z0-9_-]{1,64}$/u;
@@ -23,9 +26,10 @@ export function createArtifactStorageKey(manifest, workspaceId) {
   return key;
 }
 
-export function createEmbedSessionLifecycle({ runtime, gateway }) {
+export function createEmbedSessionLifecycle({ runtime, gateway, closeConnections = () => {} }) {
   if (!runtime || typeof runtime.dispose !== "function" || !gateway
-    || typeof gateway.stop !== "function" || typeof gateway.state !== "string") {
+    || typeof gateway.stop !== "function" || typeof gateway.state !== "string"
+    || typeof closeConnections !== "function") {
     throw new TypeError("embed session lifecycle dependencies are invalid");
   }
   let closed = false;
@@ -65,6 +69,7 @@ export function createEmbedSessionLifecycle({ runtime, gateway }) {
           runtimeDisposition: null
         });
       }
+      closeConnections();
       let gatewayStop = null;
       if (gatewayNeedsStop()) {
         try { gatewayStop = await gateway.stop(); }
@@ -115,6 +120,7 @@ export async function bootVerifiedEmbed({
   onInstallAudit,
   onGatewayOutput,
   onGatewayAudit,
+  onProtocolAudit,
   onCapabilityAudit,
   onPermissionAudit,
   mailboxOptions = {},
@@ -152,14 +158,24 @@ export async function bootVerifiedEmbed({
   if (onGatewayAudit !== undefined && typeof onGatewayAudit !== "function") {
     throw new TypeError("embed Gateway audit sink is invalid");
   }
+  if (onProtocolAudit !== undefined && typeof onProtocolAudit !== "function") {
+    throw new TypeError("embed protocol audit sink is invalid");
+  }
   if (!gatewayOptions || typeof gatewayOptions !== "object" || Array.isArray(gatewayOptions)) {
     throw new TypeError("embed Gateway options are invalid");
   }
-  const allowedGatewayOptions = new Set(["port", "tokenFactory", "supervisorNonceFactory", "clock"]);
+  const allowedGatewayOptions = new Set([
+    "port",
+    "allowedOrigins",
+    "tokenFactory",
+    "supervisorNonceFactory",
+    "clock"
+  ]);
   if (Object.keys(gatewayOptions).some((key) => !allowedGatewayOptions.has(key))) {
     throw new TypeError("embed Gateway options contain an unknown field");
   }
   if (gatewayOptions.port !== undefined) assertOpenClawGatewayPort(gatewayOptions.port);
+  if (gatewayOptions.allowedOrigins !== undefined) assertOpenClawBrowserOrigins(gatewayOptions.allowedOrigins);
   for (const key of ["tokenFactory", "supervisorNonceFactory", "clock"]) {
     if (gatewayOptions[key] !== undefined && typeof gatewayOptions[key] !== "function") {
       throw new TypeError(`embed Gateway ${key} is invalid`);
@@ -198,6 +214,7 @@ export async function bootVerifiedEmbed({
     runtime,
     installer,
     ...(gatewayOptions.port === undefined ? {} : { port: gatewayOptions.port }),
+    ...(gatewayOptions.allowedOrigins === undefined ? {} : { allowedOrigins: gatewayOptions.allowedOrigins }),
     ...(gatewayOptions.tokenFactory === undefined ? {} : { tokenFactory: gatewayOptions.tokenFactory }),
     ...(gatewayOptions.supervisorNonceFactory === undefined
       ? {}
@@ -235,7 +252,15 @@ export async function bootVerifiedEmbed({
       `CLAWSEMBLY_MAILBOX_CLIENT=${guestClient.entrypointPath}`
     ])
   });
-  const lifecycle = createEmbedSessionLifecycle({ runtime, gateway });
+  const protocolClients = new Set();
+  const lifecycle = createEmbedSessionLifecycle({
+    runtime,
+    gateway,
+    closeConnections() {
+      for (const client of protocolClients) client.close();
+      protocolClients.clear();
+    }
+  });
   return Object.freeze({
     schemaVersion: 1,
     manifest: verifiedManifest,
@@ -246,6 +271,36 @@ export async function bootVerifiedEmbed({
     permissions,
     mailbox,
     guestTransport,
+    createGatewayClient(options = {}) {
+      if (!options || typeof options !== "object" || Array.isArray(options)) {
+        throw new TypeError("Gateway client options are invalid");
+      }
+      const allowed = new Set([
+        "identity",
+        "browserOrigin",
+        "createWebSocket",
+        "requestIdFactory",
+        "timeoutMs",
+        "onAudit",
+        "now"
+      ]);
+      if (Object.keys(options).some((key) => !allowed.has(key))) {
+        throw new TypeError("Gateway client options contain an unknown field");
+      }
+      const client = createOpenClawGatewayClient({
+        artifact: verifiedManifest.artifact,
+        getConnection: () => gateway.connection(),
+        identity: options.identity ?? createBrowserDeviceIdentity(),
+        ...(options.browserOrigin === undefined ? {} : { browserOrigin: options.browserOrigin }),
+        ...(options.createWebSocket === undefined ? {} : { createWebSocket: options.createWebSocket }),
+        ...(options.requestIdFactory === undefined ? {} : { requestIdFactory: options.requestIdFactory }),
+        ...(options.timeoutMs === undefined ? {} : { timeoutMs: options.timeoutMs }),
+        onAudit: options.onAudit ?? onProtocolAudit,
+        ...(options.now === undefined ? {} : { now: options.now })
+      });
+      protocolClients.add(client);
+      return client;
+    },
     get closed() { return lifecycle.closed; },
     dispose() { return lifecycle.dispose(); },
     close() { return lifecycle.close(); }

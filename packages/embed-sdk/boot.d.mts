@@ -13,6 +13,8 @@ import type {
   PermissionAuditEvent
 } from "../capability-broker/capability-consent.mjs";
 import type { EmbedManifest } from "./embed-manifest.mjs";
+import type { BrowserDeviceIdentity } from "./gateway-device-identity.mjs";
+import type { OpenClawGatewayClient } from "./gateway-client.mjs";
 
 export function bootVerifiedEmbed(options: {
   manifest: EmbedManifest;
@@ -25,8 +27,9 @@ export function bootVerifiedEmbed(options: {
   onRuntimeAudit?: (event: Readonly<Record<string, unknown>>) => void;
   onInstallOutput?: (event: Readonly<{ phase: "install"; chunk: string }>) => void;
   onInstallAudit?: (event: Readonly<Record<string, unknown>>) => void;
-  onGatewayOutput?: (event: Readonly<{ phase: "gateway" | "health"; chunk: string }>) => void;
+  onGatewayOutput?: (event: Readonly<{ phase: "configure" | "gateway" | "health"; chunk: string }>) => void;
   onGatewayAudit?: (event: Readonly<Record<string, unknown>>) => void;
+  onProtocolAudit?: (event: Readonly<Record<string, unknown>>) => void;
   onCapabilityAudit?: (event: CapabilityAuditEvent) => void;
   onPermissionAudit?: (event: PermissionAuditEvent) => void;
   mailboxOptions?: {
@@ -38,6 +41,7 @@ export function bootVerifiedEmbed(options: {
   };
   gatewayOptions?: {
     port?: number;
+    allowedOrigins?: readonly string[];
     tokenFactory?: () => string;
     supervisorNonceFactory?: () => string;
     clock?: () => number;
@@ -63,6 +67,15 @@ export function bootVerifiedEmbed(options: {
       `CLAWSEMBLY_MAILBOX_CLIENT=${string}`
     ];
   }>;
+  createGatewayClient(options?: {
+    identity?: BrowserDeviceIdentity;
+    browserOrigin?: string;
+    createWebSocket?: (url: string) => WebSocket;
+    requestIdFactory?: () => string;
+    timeoutMs?: number;
+    onAudit?: (event: Readonly<Record<string, unknown>>) => void;
+    now?: () => number;
+  }): Readonly<OpenClawGatewayClient>;
   readonly closed: boolean;
   dispose(): Readonly<{ complete: false; reason: string; activeTaskIds: readonly string[] }>;
   close(): Promise<Readonly<{
@@ -78,6 +91,7 @@ export function createArtifactStorageKey(manifest: EmbedManifest, workspaceId: s
 export function createEmbedSessionLifecycle(options: {
   runtime: Pick<BrowserPodRuntime, "dispose">;
   gateway: Pick<VerifiedOpenClawGateway, "state" | "task" | "stop">;
+  closeConnections?: () => void;
 }): Readonly<{
   readonly closed: boolean;
   dispose(): Readonly<{ complete: false; reason: string; activeTaskIds: readonly string[] }>;

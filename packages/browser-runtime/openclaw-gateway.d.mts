@@ -11,6 +11,7 @@ export interface VerifiedOpenClawGatewayReady {
   port: number;
   bind: "loopback";
   auth: "token";
+  allowedOrigins: readonly string[];
   portal: Readonly<BrowserPodPortal>;
   healthz: Readonly<{ status: 200; body: string }>;
   readyz: Readonly<{ status: 200; body: string }>;
@@ -23,12 +24,14 @@ export interface VerifiedOpenClawGateway {
   schemaVersion: 1;
   artifact: Readonly<{ package: "openclaw"; version: string; integrity: string }>;
   port: number;
+  readonly allowedOrigins: readonly string[];
   readonly state: "idle" | "starting" | "ready" | "stopping" | "stopped" | "failed";
   readonly task: BrowserPodTask | undefined;
   start(): Promise<Readonly<VerifiedOpenClawGatewayReady>>;
   connection(): Readonly<{
     schemaVersion: 1;
     portal: Readonly<BrowserPodPortal>;
+    allowedOrigins: readonly string[];
     auth: Readonly<{ mode: "token"; token: string }>;
   }>;
   stop(options?: { timeoutMs?: number }): Promise<Readonly<{
@@ -44,15 +47,17 @@ export function createVerifiedOpenClawGateway(options: {
   runtime: BrowserPodRuntime;
   installer: VerifiedOpenClawInstaller;
   port?: number;
+  allowedOrigins?: readonly string[];
   tokenFactory?: () => string;
   supervisorNonceFactory?: () => string;
-  onOutput?: (event: Readonly<{ phase: "gateway" | "health"; chunk: string }>) => void;
+  onOutput?: (event: Readonly<{ phase: "configure" | "gateway" | "health"; chunk: string }>) => void;
   onAudit?: (event: Readonly<Record<string, unknown>>) => void;
   now?: () => number;
 }): Readonly<VerifiedOpenClawGateway>;
 
 export function assertOpenClawGatewayPort(port: unknown): number;
 export function assertOpenClawGatewayToken(token: unknown): string;
+export function assertOpenClawBrowserOrigins(origins: unknown): readonly string[];
 export function parseBrowserPodHealthEvidence(output: string): {
   healthz: { status: 200; body: string };
   readyz: { status: 200; body: string };

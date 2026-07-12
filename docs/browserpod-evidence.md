@@ -25,9 +25,11 @@ cooperative Gateway stop from BrowserPod 2.12.1's still-unavailable documented
 terminal-input, provider-process-termination, and hard-disposal APIs.
 
 This is a readiness boundary, not full support. A successful record promotes
-the BrowserPod preflight and OpenClaw boot checks only. Gateway `hello-ok`, the
-broker turn, tool execution, reconnect, cancellation, persistence, and
-performance-distribution checks remain pending.
+the BrowserPod preflight and OpenClaw boot checks only. Clawsembly now has a
+provider-free, exact-artifact contract test for challenge signing and
+`hello-ok`, but no owner-authorized BrowserPod record has exercised that client.
+The real Gateway handshake, broker turn, tool execution, reconnect,
+cancellation, persistence, and performance-distribution checks remain pending.
 
 ## Capture from an embedding host
 
