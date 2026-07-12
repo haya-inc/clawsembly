@@ -303,7 +303,7 @@
 
         <div class="broker-proof reveal">
           <span>Implemented slice</span>
-          <p>Exact artifact subject → explicit grant → bounded handler → metadata-only audit. The live provider smoke path now uses this broker.</p>
+          <p>Exact artifact → verified manifest → BrowserPod boot → explicit grant → bounded handler → metadata-only audit. Cross-runtime evidence is rejected before tokens are spent.</p>
           <a href="https://github.com/haya-inc/clawsembly/blob/main/docs/embedding.md">Read the embedding contract ↗</a>
         </div>
       </section>
@@ -324,9 +324,9 @@
           <a class="runtime-row runtime-row-primary" href="https://browserpod.io/docs/more/licensing" target="_blank" rel="noreferrer">
             <span class="runtime-rank">01 / adopted</span>
             <div class="runtime-name"><strong>BrowserPod 2.x</strong><span>Node 22 · browser-local</span></div>
-            <p>The selected execution provider, not the product identity. Commercial terms are explicit; metered API key, proprietary delivery, and OpenClaw proof remain visible.</p>
+            <p>Adapter core covers Node 22 boot, persistent storage, bounded output, files, and portal readiness. Public 2.12.1 APIs still expose no input, terminate, or hard dispose.</p>
             <span class="runtime-license">Commercial</span>
-            <span class="runtime-state">Selected ↗</span>
+            <span class="runtime-state">Adapter core ✓</span>
           </a>
           <a class="runtime-row" href="https://github.com/container2wasm/container2wasm" target="_blank" rel="noreferrer">
             <span class="runtime-rank">02 / archived probe</span>
@@ -352,7 +352,7 @@
         </div>
         <div class="runtime-guardrail reveal">
           <span>Default gate</span>
-          <p>Node 22.19+ → Gateway handshake → broker turn → tool → history → cancel → persistent restore → license/SBOM review.</p>
+          <p>Node 22.19+ → Gateway handshake → broker turn → tool → history → cancel → persistent restore → documented terminate/dispose → license review.</p>
           <a href="https://github.com/haya-inc/clawsembly/blob/main/docs/decisions/0002-commercial-browser-runtime.md">Read ADR 0002 ↗</a>
         </div>
       </section>
