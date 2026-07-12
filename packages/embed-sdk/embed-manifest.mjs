@@ -1,5 +1,7 @@
 import { BROWSERPOD_ADAPTER_VERSION } from "../browser-runtime/browserpod-runtime.mjs";
 
+export { bootVerifiedEmbed, createArtifactStorageKey } from "./boot.mjs";
+
 const CAPABILITY_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/u;
 const VERSION_PATTERN = /^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/u;
 const INTEGRITY_PATTERN = /^sha512-[A-Za-z0-9+/]+={0,2}$/u;

@@ -22,6 +22,10 @@ const manifest = createEmbedManifest({
 assertVerifiedLaunch(manifest);
 ```
 
+The canonical source entrypoint is `embed-manifest.mjs`. Its ESM runtime exports
+are parity-tested against the public declaration surface, including
+`bootVerifiedEmbed` and `createArtifactStorageKey`.
+
 `bootVerifiedEmbed` then boots the BrowserPod adapter and creates a capability
 broker plus a fresh filesystem mailbox whose subject is the same exact artifact:
 

@@ -48,6 +48,8 @@ The project does not yet promise semantic-version compatibility.
 - artifact/device/role/scope-bound AES-GCM device-token vault,
   token-authenticated signed reconnect, redacted metadata, and stale-token
   clearing;
+- parity-tested ESM source entrypoint whose runtime boot exports match the
+  public TypeScript declarations;
 - ordered embed-session close that refuses runtime disposal while the Gateway
   is active and retains cleanup access when cooperative stop fails;
 - nonce-bound guest process supervisor for cooperative child shutdown without

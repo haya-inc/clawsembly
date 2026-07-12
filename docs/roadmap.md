@@ -181,7 +181,9 @@ trusted-host connection material, and cooperative stop. The first
 generated-client slice is artifact-bound: it persists a non-extractable
 Ed25519 device identity, signs the protocol 4 challenge, sends the shared token
 only in the connect frame, validates and redacts `hello-ok`, and exposes bounded
-explicit-pairing metadata. Provider-free contract tests pass;
+explicit-pairing metadata. The declared source entrypoint now exports the same
+boot helpers at ESM runtime and is protected by an exact consumer export test.
+Provider-free contract tests pass;
 the post-authentication client now limits itself to chat send/history/abort,
 forces local-only delivery, validates streamed chat events, detects gaps,
 rejects pending RPCs on disconnect, and supports an explicit fresh signed

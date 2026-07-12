@@ -65,6 +65,7 @@ test("project page distinguishes stable, previous, and preview evidence", async 
   await expect(runtimes.getByText("Pairing + chat ✓", { exact: true })).toBeVisible();
   await expect(runtimes.getByText(/npm identity and browser origin/)).toBeVisible();
   await expect(runtimes.getByText(/rechecks exact pairing access/)).toBeVisible();
+  await expect(runtimes.getByText(/parity-tests its ESM entrypoint/)).toBeVisible();
   await expect(runtimes.getByText(/encrypts issued device tokens/)).toBeVisible();
   await expect(runtimes.getByText(/bounded chat\/history\/abort RPC/)).toBeVisible();
   await expect(runtimes.getByText(/digest-pinned Node client carries broker calls/)).toBeVisible();

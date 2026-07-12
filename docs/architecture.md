@@ -95,6 +95,8 @@ transport layer. The implemented handshake slice:
   handshake with the same persistent identity;
 - reviews exact pending pairing state before a one-shot local approve/reject,
   encrypts issued device tokens, and uses them for explicit signed reconnect;
+- exposes the declared boot helpers from the same ESM entrypoint and tests the
+  exact runtime export surface as a consumer would import it;
 - avoids depending on private OpenClaw workspace packages at runtime.
 
 Broader RPC generation, automatic reconnect/backoff, token

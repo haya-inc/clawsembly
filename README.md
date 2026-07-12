@@ -76,6 +76,10 @@ used for signed reconnect; rejected stale tokens are cleared without entering
 results or audit. These paths are provider-free contract evidence, not a claim
 that BrowserPod pairing has been run.
 
+The source-level ESM entrypoint now exports the same boot functions declared by
+its `.d.mts` contract, and an exact runtime export-surface test prevents typed
+consumer examples from failing only after deployment.
+
 ## Browser runtime direction
 
 Browser-local execution is a product invariant; a remote sandbox is not the

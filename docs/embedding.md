@@ -17,6 +17,7 @@ The launch-manifest core is implemented in
 ```js
 import {
   assertVerifiedLaunch,
+  bootVerifiedEmbed,
   createEmbedManifest
 } from "./packages/embed-sdk/embed-manifest.mjs";
 
