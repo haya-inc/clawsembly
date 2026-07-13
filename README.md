@@ -12,6 +12,8 @@
 
 [![Clawsembly — OpenClaw, verified in the browser](apps/web/public/social-preview.png)](https://haya-inc.github.io/clawsembly/)
 
+日本語: [README.ja.md](README.ja.md)
+
 Clawsembly is an evidence-gated embedding layer that runs upstream coding
 agents browser-locally, behind a host boundary the embedding application
 controls. [OpenClaw](https://github.com/openclaw/openclaw) is the first
