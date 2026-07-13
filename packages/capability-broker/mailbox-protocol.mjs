@@ -122,7 +122,10 @@ export function serializeMailboxValue(value, maxBytes = DEFAULT_MAILBOX_MAX_BYTE
   let serialized;
   try { serialized = JSON.stringify(value); }
   catch { throw new MailboxProtocolError("invalid_payload", `${label} is not JSON serializable`); }
-  if (typeof serialized !== "string" || new TextEncoder().encode(serialized).byteLength > maxBytes) {
+  if (typeof serialized !== "string") {
+    throw new MailboxProtocolError("invalid_payload", `${label} is not JSON serializable`);
+  }
+  if (new TextEncoder().encode(serialized).byteLength > maxBytes) {
     throw new MailboxProtocolError("payload_too_large", `${label} exceeds the byte limit`);
   }
   return serialized;

@@ -21,8 +21,8 @@ security fixes. Older prereleases are unsupported after a replacement ships.
 
 | Version | Security fixes |
 | --- | --- |
-| `0.1.0-alpha.1` | Yes |
-| `0.1.0-alpha.0` and older or untagged source archives | No |
+| `0.1.0-alpha.2` | Yes |
+| `0.1.0-alpha.1` and older or untagged source archives | No |
 
 This policy covers defects in the SDK, evidence pipeline, capability boundary,
 and release artifacts. It does not make the current `probing` BrowserPod result

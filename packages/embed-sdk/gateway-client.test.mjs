@@ -577,3 +577,60 @@ test("refuses a protocol client generated for a different artifact", () => {
     browserOrigin: "https://embed.example"
   }), /does not match the verified OpenClaw artifact/u);
 });
+
+test("ignores frames arriving after a failed handshake", async () => {
+  const current = fixture();
+  const connecting = current.client.connect();
+  current.socket.emit("message", {
+    data: JSON.stringify({ type: "event", event: "connect.challenge", payload: { nonce: "server-nonce", ts: 1 } })
+  });
+  await waitFor(() => current.socket.sent.length === 1);
+  const request = JSON.parse(current.socket.sent[0]);
+  current.socket.emit("message", {
+    data: JSON.stringify({ type: "res", id: request.id, ok: true, payload: { type: "hello-ok", protocol: 3 } })
+  });
+  await assert.rejects(connecting, (error) => error.code === "invalid_hello");
+  assert.equal(current.client.state, "failed");
+
+  const delivered = [];
+  current.client.chat.onEvent((event) => delivered.push(event));
+  current.socket.emit("message", {
+    data: JSON.stringify({
+      type: "event",
+      event: OPENCLAW_GATEWAY_CONTRACT.rpc.event,
+      seq: 1,
+      payload: { runId: "run-1", sessionKey: "session", seq: 1, state: "delta", deltaText: "injected-after-failure" }
+    })
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(delivered.length, 0);
+});
+
+test("rejects a challenge nonce carrying signed-payload delimiters", async () => {
+  const current = fixture();
+  const connecting = current.client.connect();
+  current.socket.emit("message", {
+    data: JSON.stringify({ type: "event", event: "connect.challenge", payload: { nonce: "bad|nonce", ts: 1 } })
+  });
+  await assert.rejects(connecting, (error) => error.code === "invalid_challenge");
+});
+
+test("drops stale or rewound event sequences without delivery", async () => {
+  const current = fixture();
+  await completeHandshake(current);
+  const delivered = [];
+  current.client.chat.onEvent((event) => delivered.push(event.seq));
+  const chatEvent = (seq) => ({
+    type: "event",
+    event: OPENCLAW_GATEWAY_CONTRACT.rpc.event,
+    seq,
+    payload: { runId: "run-1", sessionKey: "session", seq, state: "delta", deltaText: "x" }
+  });
+  current.socket.emit("message", { data: JSON.stringify(chatEvent(5)) });
+  current.socket.emit("message", { data: JSON.stringify(chatEvent(5)) });
+  current.socket.emit("message", { data: JSON.stringify(chatEvent(3)) });
+  current.socket.emit("message", { data: JSON.stringify(chatEvent(6)) });
+  await waitFor(() => delivered.length === 2);
+  assert.deepEqual(delivered, [5, 6]);
+  assert.equal(current.audit.filter((event) => event.reason === "stale_sequence").length, 2);
+});

@@ -20,6 +20,29 @@ for (const name of workflowFiles) {
     const ref = action.slice(separator + 1);
     assert.match(ref, /^[a-f0-9]{40}$/, `${name}: action must be pinned to a full commit SHA: ${action}`);
   }
+  const jobCount = source.match(/^ {4}runs-on:/gm)?.length ?? 0;
+  const timeoutCount = source.match(/^ {4}timeout-minutes:/gm)?.length ?? 0;
+  assert.ok(
+    timeoutCount >= jobCount,
+    `${name}: every job needs an explicit timeout-minutes (${timeoutCount}/${jobCount})`
+  );
+}
+
+// The release workflow names the packaged tarball literally; a version bump
+// that misses it would otherwise surface only after the tag is pushed.
+const sdkPackageVersion = JSON.parse(
+  readFileSync(resolve(root, "packages/sdk-package/package.json"), "utf8")
+).version;
+const sdkReleaseSource = readFileSync(resolve(workflowDirectory, "sdk-release.yml"), "utf8");
+const tarballVersions = [...sdkReleaseSource.matchAll(/haya-inc-clawsembly-([0-9A-Za-z.-]+?)\.tgz/gu)]
+  .map((match) => match[1]);
+assert.ok(tarballVersions.length > 0, "sdk-release.yml must reference the packaged tarball by exact name");
+for (const version of tarballVersions) {
+  assert.equal(
+    version,
+    sdkPackageVersion,
+    `sdk-release.yml pins tarball version ${version}; packages/sdk-package/package.json declares ${sdkPackageVersion}`
+  );
 }
 
 const compatibility = readFileSync(resolve(workflowDirectory, "compatibility.yml"), "utf8");
@@ -39,6 +62,7 @@ assert.match(generationJob, /npm ci/, "report generation must install the locked
 assert.match(generationJob, /npm run report-pin:generate/, "report generation must update the reviewed SDK host pin");
 assert.match(generationJob, /npm run report-pin:check/, "report generation must verify the SDK host pin");
 assert.match(generationJob, /npm run compat:validate/, "report generation must validate evidence before upload");
+assert.match(generationJob, /npm run protocol:verify/, "report generation must verify the Gateway contract against the exact npm artifact");
 assert.match(generationJob, /examples\/sdk-host\/src\/report-pin\.ts/, "validated report artifacts must contain the SDK host pin");
 assert.match(generationJob, /apps\/web\/public\/data\/promotion-policy\.json/, "validated report artifacts must contain the promotion policy");
 assert.ok(

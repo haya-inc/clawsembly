@@ -368,3 +368,20 @@ test("refuses broader or changed pairing requests before approval", async () => 
   await assert.rejects(changedGateway.pairing.approve(review.reviewId), (error) => error.code === "pairing_device_mismatch");
   assert.equal(changedFixture.commands.some((command) => command.args.includes("approve")), false);
 });
+
+test("stop during a failing start resolves as not running instead of rethrowing", async () => {
+  const { runtime } = runtimeFixture({ configStatus: "failed" });
+  const gateway = createVerifiedOpenClawGateway({
+    runtime,
+    installer: installerFixture(),
+    allowedOrigins: ["https://embed.example"],
+    tokenFactory: () => "gateway-private-token"
+  });
+  const failing = gateway.start();
+  const stopping = gateway.stop();
+  await assert.rejects(failing, (error) => error.code === "origin_config_failed");
+  const stopped = await stopping;
+  assert.equal(stopped.complete, false);
+  assert.match(stopped.reason, /not running/u);
+  assert.equal(gateway.state, "failed");
+});

@@ -79,3 +79,25 @@ test("rejects stored identities whose device id does not match the public key", 
     /does not match its public key/u
   );
 });
+
+test("rejects signed-payload delimiters in the auth nonce and token", () => {
+  const base = {
+    deviceId: "a".repeat(64),
+    clientId: "clawsembly",
+    clientMode: "embed",
+    role: "operator",
+    scopes: ["operator.read"],
+    signedAtMs: 1,
+    nonce: "safe-nonce",
+    platform: "browser",
+    deviceFamily: "clawsembly"
+  };
+  assert.equal(typeof buildDeviceAuthPayloadV3(base), "string");
+  for (const nonce of ["with|pipe", "with\nnewline", "with\rreturn", "with\0nul", ""]) {
+    assert.throws(() => buildDeviceAuthPayloadV3({ ...base, nonce }), /nonce is invalid/u);
+  }
+  assert.throws(
+    () => buildDeviceAuthPayloadV3({ ...base, token: "tok|en" }),
+    /token is invalid/u
+  );
+});

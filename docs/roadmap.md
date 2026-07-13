@@ -204,7 +204,7 @@ cutting off an active Gateway's cooperative stop path. The boot slice is not pro
 owner-authorized BrowserPod evidence remains missing.
 
 The repository now also produces a byte-reproducible
-`@haya-inc/clawsembly@0.1.0-alpha.1` tarball without making the compatibility lab
+`@haya-inc/clawsembly@0.1.0-alpha.2` tarball without making the compatibility lab
 itself publishable. CI installs that tarball into an isolated ESM/TypeScript
 consumer, verifies every declared public subpath, and builds an independent
 host application from the packed dependency with no workspace alias. Its
@@ -215,9 +215,10 @@ artifact, and BrowserPod version; raw or hand-edited `supported` objects cannot
 authorize launch. The six-hour tracker deterministically rotates that pin in
 its read-only job and publishes it with the report through the isolated
 write-capable PR job. Package distribution is gated independently from runtime
-support: the identical checked alpha.1 tarball is available from Pages and its
-GitHub prerelease while npm bootstrap is pending, but none of those channels
-can turn missing BrowserPod evidence into a supported launch. The Pages release
+support: the identical checked alpha.2 tarball is available from Pages, its
+GitHub prerelease, and the npm `alpha` dist-tag now that the provenance-backed
+bootstrap publication is complete, but none of those channels can turn missing
+BrowserPod evidence into a supported launch. The Pages release
 manifest records that distinction with exact checksums and reviewed npm
 publication state, so external source-alpha consumers do not depend on registry
 publication. A
@@ -288,6 +289,13 @@ These features should not delay the compatibility harness or create a new
 agent runtime inside Clawsembly.
 
 ## Immediate next tasks
+
+Owner-authorized BrowserPod evidence capture is currently blocked by the
+vendor runtime: BrowserPod 2.12.1 provisions Node 22.15.0, below the 22.19
+baseline pinned by `openclaw@2026.6.11`, so the readiness probe fails closed
+with `node_baseline_unsatisfied`; the vendor has been notified
+([issue #6](https://github.com/haya-inc/clawsembly/issues/6)). Tasks 3 and 4
+depend on a vendor Node upgrade or a revisited baseline decision.
 
 1. Extend the versioned mock-state envelope to cover user workspaces and migration fixtures.
 2. Execute the protected live smoke test with an owner-provided key, archive redacted evidence, and expand moderation UX.

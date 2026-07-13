@@ -17,6 +17,7 @@ jobs:
         with:
           mode: observe
         # Use mode: gate when HOLD should block this workflow.
-        # Pin the v0.1.0-alpha.1 tag or a reviewed commit SHA instead of the
-        # moving default branch in production.
+        # Pin the latest reviewed prerelease tag (v0.1.0-alpha.2 at the time
+        # of writing) or a reviewed commit SHA instead of the moving default
+        # branch in production.
       - run: echo "${{ steps.policy.outputs.decision }} / ${{ steps.policy.outputs.candidate_version }}"

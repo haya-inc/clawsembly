@@ -33,7 +33,7 @@ OpenClaw project.
 | Hosted project page | **Works** | [Live reports plus a permission-prompt demo](https://haya-inc.github.io/clawsembly/) against an inert local broker: approve, deny, revoke, export a payload-free audit. |
 | npm alpha package | **Published now** | `npm install @haya-inc/clawsembly@alpha` — the reviewed [publication record](packages/compatibility/npm-publication.json) records `status: published` with SHA-512 integrity and Sigstore provenance. |
 | Evidence-gated boot demo | **Works** | The [SDK host example](examples/sdk-host/README.md) verifies the pinned report and shows `Provider boot blocked`. Refusing an unverified report is the security feature, working. |
-| Verified BrowserPod boot | **Blocked** | Pending owner-authorized runtime evidence ([#6](https://github.com/haya-inc/clawsembly/issues/6)). |
+| Verified BrowserPod boot | **Blocked** | BrowserPod 2.12.1 provisions Node 22.15.0, below the 22.19 baseline, so the readiness probe fails closed (`node_baseline_unsatisfied`); reported to the vendor. Owner-authorized runtime evidence remains pending ([#6](https://github.com/haya-inc/clawsembly/issues/6)). |
 | Live provider smoke test | **Blocked** | The gated path exists but has never been executed. |
 | Performance baselines | **Blocked** | Not yet measured ([#8](https://github.com/haya-inc/clawsembly/issues/8)). |
 
@@ -403,6 +403,7 @@ uploads evidence for review without committing or promoting it automatically.
 - [Verified OpenClaw embedding decision](docs/decisions/0003-verified-openclaw-embedding.md)
 - [Upstream-portable embedding boundary decision](docs/decisions/0004-upstream-portable-embedding-boundary.md)
 - [Verified embedding contract](docs/embedding.md)
+- [Upstream binding contract](docs/upstream-binding-contract.md)
 
 ## Contributing
 

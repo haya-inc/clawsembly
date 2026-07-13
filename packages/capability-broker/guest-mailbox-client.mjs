@@ -72,6 +72,7 @@ export class FilesystemCapabilityMailboxClient {
   #clock;
   #nextSequence;
   #manifest;
+  #submitQueue = Promise.resolve();
 
   constructor({
     root,
@@ -117,16 +118,18 @@ export class FilesystemCapabilityMailboxClient {
     ].map((path) => rm(path, { force: true })));
   }
 
-  async request({ id, capability, scope, input }, { signal, timeoutMs = 30_000 } = {}) {
-    if (!this.#manifest) throw new MailboxGuestError("not_connected", "mailbox client is not connected");
-    if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 50 || timeoutMs > 300_000) {
-      throw new TypeError("mailbox response timeout is invalid");
-    }
-    if (signal !== undefined && !(signal instanceof AbortSignal)) {
-      throw new TypeError("mailbox request signal is invalid");
-    }
+  // The host consumes slots strictly in order, so a slot may only be counted
+  // as used once its ready marker exists; otherwise the channel desynchronizes
+  // permanently. Submissions therefore serialize, and the sequence advances
+  // only after both slot files are written.
+  #enqueueSubmit(operation) {
+    const run = this.#submitQueue.then(operation);
+    this.#submitQueue = run.then(() => undefined, () => undefined);
+    return run;
+  }
 
-    const sequence = this.#nextSequence++;
+  async #submit({ id, capability, scope, input }) {
+    const sequence = this.#nextSequence;
     const paths = mailboxPaths(this.#root, sequence);
     let request;
     let serialized;
@@ -151,9 +154,30 @@ export class FilesystemCapabilityMailboxClient {
       }
       throw error;
     }
+    try {
+      await writeExclusive(paths.request, serialized);
+      await writeExclusive(paths.requestReady, "ready");
+    } catch (error) {
+      await Promise.allSettled([paths.request, paths.requestReady]
+        .map((path) => rm(path, { force: true })));
+      throw error;
+    }
+    this.#nextSequence = sequence + 1;
+    return { paths, request };
+  }
 
-    await writeExclusive(paths.request, serialized);
-    await writeExclusive(paths.requestReady, "ready");
+  async request({ id, capability, scope, input }, { signal, timeoutMs = 30_000 } = {}) {
+    if (!this.#manifest) throw new MailboxGuestError("not_connected", "mailbox client is not connected");
+    if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 50 || timeoutMs > 300_000) {
+      throw new TypeError("mailbox response timeout is invalid");
+    }
+    if (signal !== undefined && !(signal instanceof AbortSignal)) {
+      throw new TypeError("mailbox request signal is invalid");
+    }
+
+    const { paths, request } = await this.#enqueueSubmit(
+      () => this.#submit({ id, capability, scope, input })
+    );
 
     const startedAt = this.#clock();
     let cancelSent = false;
@@ -178,7 +202,7 @@ export class FilesystemCapabilityMailboxClient {
       );
       response = parseMailboxResponse(text, {
         channelId: this.#channelId,
-        sequence,
+        sequence: request.sequence,
         id: request.id,
         maxBytes: this.#manifest.limits.maxResponseBytes
       });

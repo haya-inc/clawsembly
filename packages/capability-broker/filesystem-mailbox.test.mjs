@@ -243,3 +243,96 @@ test("rejects extra protocol fields and traversal roots", () => {
     (error) => error.code === "invalid_envelope"
   );
 });
+
+test("keeps the sequence slot when a request fails before announcement", async (t) => {
+  const { host, client } = await setup(t, {
+    grants: [{ capability: "storage.read", scope: "workspace:primary", maxCalls: 1 }],
+    handlers: { "storage.read": async () => ({ ok: true }) }
+  });
+
+  await assert.rejects(
+    client.request({
+      id: "invalid identifier!",
+      capability: "storage.read",
+      scope: "workspace:primary",
+      input: null
+    }),
+    (error) => error instanceof MailboxGuestError
+  );
+  const oversized = "x".repeat(client.manifest.limits.maxRequestBytes + 1);
+  await assert.rejects(
+    client.request({
+      id: "oversized-request",
+      capability: "storage.read",
+      scope: "workspace:primary",
+      input: { value: oversized }
+    }),
+    (error) => error instanceof MailboxGuestError && error.code === "payload_too_large"
+  );
+  assert.equal(client.nextSequence, 1);
+
+  const serving = host.processNext();
+  assert.deepEqual(await client.request({
+    id: "recovered-request",
+    capability: "storage.read",
+    scope: "workspace:primary",
+    input: null
+  }), { ok: true });
+  await serving;
+  assert.equal(client.nextSequence, 2);
+});
+
+test("releases a slot whose files could not be fully written", async (t) => {
+  const { root, host, client } = await setup(t, {
+    grants: [{ capability: "storage.read", scope: "workspace:primary", maxCalls: 1 }],
+    handlers: { "storage.read": async () => ({ ok: true }) }
+  });
+  const blocked = mailboxPaths(root, 1);
+  await writeFile(blocked.request, "stale foreign residue", "utf8");
+
+  await assert.rejects(
+    client.request({
+      id: "blocked-request",
+      capability: "storage.read",
+      scope: "workspace:primary",
+      input: null
+    }),
+    (error) => error instanceof MailboxGuestError && error.code === "slot_unavailable"
+  );
+  assert.equal(client.nextSequence, 1);
+
+  const serving = host.processNext();
+  assert.deepEqual(await client.request({
+    id: "retried-request",
+    capability: "storage.read",
+    scope: "workspace:primary",
+    input: null
+  }), { ok: true });
+  await serving;
+});
+
+test("serializes concurrent submissions onto distinct slots", async (t) => {
+  const { host, client } = await setup(t, {
+    grants: [{ capability: "storage.read", scope: "workspace:primary", maxCalls: 2 }],
+    handlers: { "storage.read": async (input) => ({ echoed: input.value }) }
+  });
+  const serving = (async () => {
+    await host.processNext();
+    await host.processNext();
+  })();
+  const [first, second] = await Promise.all([
+    client.request({ id: "concurrent-1", capability: "storage.read", scope: "workspace:primary", input: { value: 1 } }),
+    client.request({ id: "concurrent-2", capability: "storage.read", scope: "workspace:primary", input: { value: 2 } })
+  ]);
+  await serving;
+  assert.deepEqual(first, { echoed: 1 });
+  assert.deepEqual(second, { echoed: 2 });
+  assert.equal(client.nextSequence, 3);
+});
+
+test("classifies non-serializable payloads separately from oversized payloads", () => {
+  assert.throws(
+    () => serializeMailboxValue(undefined),
+    (error) => error instanceof MailboxProtocolError && error.code === "invalid_payload"
+  );
+});

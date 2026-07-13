@@ -787,28 +787,37 @@ export async function runProviderBrokerPolicyProbe(): Promise<ProviderBrokerProb
   ]);
   const bodyCancellationPropagated = stalledOutcome === "cancelled" && bodyAbortObserved;
 
-  const passed = capturedUrl === OPENAI_RESPONSES_ENDPOINT
-    && capturedInit?.method === "POST"
-    && capturedInit.redirect === "error"
-    && capturedInit.credentials === "omit"
-    && capturedInit.referrerPolicy === "no-referrer"
-    && body.store === false
-    && body.stream === false
-    && Object.keys(body).sort().join(",") === "input,model,store,stream"
-    && authorizationApplied
-    && secretRedacted
-    && outputTextValidated
-    && invalidOutputRejected
-    && invalidModelRejected
-    && oversizedResponseRejected
-    && streamingEventsValidated
-    && functionCallEventsValidated
-    && functionResultInputValidated
-    && maxOutputTokensValidated
-    && requestBudgetValidated
-    && cancellationPropagated
-    && bodyCancellationPropagated;
-  if (!passed) throw new Error("provider broker policy self-test failed");
+  // Named conditions so a regression reports which invariant broke instead of
+  // one opaque boolean. Names are static identifiers; no payload material.
+  const conditions: Record<string, boolean> = {
+    endpointPinned: capturedUrl === OPENAI_RESPONSES_ENDPOINT,
+    postMethod: capturedInit?.method === "POST",
+    redirectRefused: capturedInit?.redirect === "error",
+    credentialsOmitted: capturedInit?.credentials === "omit",
+    referrerSuppressed: capturedInit?.referrerPolicy === "no-referrer",
+    storeDisabled: body.store === false,
+    streamDisabledByDefault: body.stream === false,
+    exactBodyKeys: Object.keys(body).sort().join(",") === "input,model,store,stream",
+    authorizationApplied,
+    secretRedacted,
+    outputTextValidated,
+    invalidOutputRejected,
+    invalidModelRejected,
+    oversizedResponseRejected,
+    streamingEventsValidated,
+    functionCallEventsValidated,
+    functionResultInputValidated,
+    maxOutputTokensValidated,
+    requestBudgetValidated,
+    cancellationPropagated,
+    bodyCancellationPropagated
+  };
+  const failedConditions = Object.entries(conditions)
+    .filter(([, satisfied]) => !satisfied)
+    .map(([name]) => name);
+  if (failedConditions.length > 0) {
+    throw new Error(`provider broker policy self-test failed: ${failedConditions.join(", ")}`);
+  }
 
   return {
     endpoint: OPENAI_RESPONSES_ENDPOINT,

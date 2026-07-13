@@ -45,9 +45,12 @@ is officially representing the community in public spaces.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported through the repository maintainers' public organization contact path.
-All complaints will be reviewed and investigated promptly and fairly. Community
-leaders are obligated to respect the privacy and security of the reporter.
+reported by contacting the maintainer, [@yhay81](https://github.com/yhay81),
+directly on GitHub, or through GitHub's private reporting tools (Report
+content on the material itself, or private vulnerability reporting for
+sensitive matters). All complaints will be reviewed and investigated promptly
+and fairly. Community leaders are obligated to respect the privacy and
+security of the reporter.
 
 ## Attribution
 

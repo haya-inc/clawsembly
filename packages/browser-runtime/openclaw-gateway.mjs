@@ -549,10 +549,12 @@ export function createVerifiedOpenClawGateway({
       reject(reviewId) { return decidePairing(reviewId, "rejected"); }
     }),
     async stop({ timeoutMs = 15_000 } = {}) {
-      if (state === "starting") await inFlight;
       if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 5_000 || timeoutMs > 60_000) {
         throw new TypeError("Gateway stop timeout is invalid");
       }
+      // A start failure settles into the not-running branch below; its error
+      // belongs to start() and must not surface from cleanup.
+      if (state === "starting") await inFlight.catch(() => undefined);
       if ((state !== "ready" && state !== "failed") || !active) {
         return Object.freeze({
           complete: false,

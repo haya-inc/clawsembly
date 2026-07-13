@@ -125,3 +125,44 @@ test("browser policy probe proves default deny, exact scopes, limits, and redact
     auditEvents: 3
   });
 });
+
+test("isolates audit sink failures from settled capability outcomes", async () => {
+  const outcomes = [];
+  const broker = new CapabilityBroker({
+    subject,
+    grants: [{ capability: "storage.read", scope: "workspace:primary", maxCalls: 2 }],
+    handlers: { "storage.read": async () => ({ ok: true }) },
+    auditSink: (event) => {
+      outcomes.push(event.outcome);
+      throw new Error("sink failure must stay diagnostic");
+    }
+  });
+  assert.deepEqual(
+    await broker.request({ id: "sink-request", capability: "storage.read", scope: "workspace:primary", input: {} }),
+    { ok: true }
+  );
+  assert.equal(outcomes.at(-1), "allowed");
+  const audit = broker.auditSnapshot();
+  assert.equal(audit.events.at(-1).outcome, "allowed");
+  assert.equal(JSON.stringify(audit).includes("sink failure"), false);
+});
+
+test("audits and redacts broker-code impersonation from capability handlers", async () => {
+  const broker = new CapabilityBroker({
+    subject,
+    grants: [{ capability: "storage.read", scope: "workspace:primary", maxCalls: 1 }],
+    handlers: {
+      "storage.read": async () => {
+        throw new CapabilityBrokerError("not_granted", "handler impersonation detail");
+      }
+    }
+  });
+  await assert.rejects(
+    broker.request({ id: "impersonating-request", capability: "storage.read", scope: "workspace:primary", input: {} }),
+    (error) => error instanceof CapabilityBrokerError && error.code === "handler_failed"
+      && !error.message.includes("impersonation")
+  );
+  const recorded = broker.auditSnapshot().events.at(-1);
+  assert.equal(recorded.outcome, "error");
+  assert.equal(recorded.reason, "handler_failed");
+});

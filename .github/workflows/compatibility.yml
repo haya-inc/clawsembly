@@ -5,9 +5,16 @@ on:
     - cron: "17 */6 * * *"
   workflow_dispatch:
 
+# A manual dispatch racing the six-hour cron would contend for the same
+# tracking branch; queue instead of overlapping.
+concurrency:
+  group: compatibility-tracking
+  cancel-in-progress: false
+
 jobs:
   static-inspection:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -23,6 +30,8 @@ jobs:
       - run: npm run report-pin:generate
       - run: npm run report-pin:check
       - run: npm run compat:validate
+      - name: Verify the generated Gateway contract against the exact npm artifact
+        run: npm run protocol:verify
       - name: Write summary
         run: |
           echo '## OpenClaw release-channel inspection' >> "$GITHUB_STEP_SUMMARY"
@@ -44,6 +53,7 @@ jobs:
   publish-report-pr:
     needs: static-inspection
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
       pull-requests: write

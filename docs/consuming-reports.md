@@ -26,6 +26,8 @@ passed every production gate. It must not be interpreted as fully supported.
 | History schema | `https://haya-inc.github.io/clawsembly/schemas/release-history.schema.json` | Validation contract for the channel index |
 | Promotion schema | `https://haya-inc.github.io/clawsembly/schemas/promotion-policy.schema.json` | Validation contract for the derived decision artifact |
 | BrowserPod evidence schema | `https://haya-inc.github.io/clawsembly/schemas/browserpod-evidence.schema.json` | Raw exact-artifact BrowserPod readiness contract |
+| Capability-manifest schema | `https://haya-inc.github.io/clawsembly/schemas/capability-manifest.schema.json` | Validation contract for exported requested and decided capability-permission state |
+| Capability-audit schema | `https://haya-inc.github.io/clawsembly/schemas/capability-audit.schema.json` | Validation contract for the combined payload-free permission and broker audit export |
 | SDK release | `https://haya-inc.github.io/clawsembly/downloads/sdk-release.json` | Pages tarball/checksum identity, reviewed npm integrity/provenance state, install command, and exact compatibility-report binding |
 | SDK release schema | `https://haya-inc.github.io/clawsembly/schemas/sdk-release.schema.json` | Validation contract for the source-alpha distribution manifest |
 | Source-release schema | `https://haya-inc.github.io/clawsembly/schemas/source-release.schema.json` | Validation contract for Git tag, source commit, tarball, Pages manifest, and report provenance attached to each GitHub prerelease |
@@ -143,8 +145,9 @@ Downstream GitHub Actions users can skip checkout and Node setup entirely:
 ```
 
 The Action exposes `decision`, `candidate_version`, and `reasons`. `@main`
-follows the default branch as it moves; pin the `v0.1.0-alpha.1` tag or a
-reviewed commit SHA for a reproducible reference in production.
+follows the default branch as it moves; pin the latest reviewed prerelease
+tag (`v0.1.0-alpha.2` at the time of writing) or a reviewed commit SHA for a
+reproducible reference in production.
 
 ## Evidence-bound SDK loading
 

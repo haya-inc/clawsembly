@@ -25,7 +25,7 @@ Clawsembly は実験的なシングルメンテナのプロジェクトであり
 | ホスト済みプロジェクトページ | **動く** | [ライブレポートと許可プロンプトのデモ](https://haya-inc.github.io/clawsembly/)(不活性なローカルブローカー相手に承認・拒否・失効・監査エクスポート) |
 | npm アルファパッケージ | **公開済み** | `npm install @haya-inc/clawsembly@alpha` — SHA-512 整合性と Sigstore provenance 付き |
 | 証拠ゲート付きブートのデモ | **動く** | [SDK ホスト例](examples/sdk-host/README.md)が pinned レポートを検証し `Provider boot blocked` を表示(未検証リリースの拒否はセキュリティ機能が正しく動いている状態) |
-| 検証済み BrowserPod ブート | **ブロック中** | オーナー承認のランタイム証拠待ち([#6](https://github.com/haya-inc/clawsembly/issues/6)) |
+| 検証済み BrowserPod ブート | **ブロック中** | BrowserPod 2.12.1 の Node は 22.15.0 で 22.19 ベースライン未満のため、readiness probe が `node_baseline_unsatisfied` で fail closed(ベンダーへ報告済み)。オーナー承認のランタイム証拠待ち([#6](https://github.com/haya-inc/clawsembly/issues/6)) |
 | ライブプロバイダーのスモークテスト | **ブロック中** | ゲート付き経路は実装済みだが未実行 |
 | 性能ベースライン | **ブロック中** | 未計測([#8](https://github.com/haya-inc/clawsembly/issues/8)) |
 
