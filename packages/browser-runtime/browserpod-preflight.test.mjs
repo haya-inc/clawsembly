@@ -2,33 +2,15 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { EVIDENCE_PREFIX, runBrowserPodPreflight } from "./browserpod-preflight.mjs";
+import { createFakeBrowserPod, preflightEvidenceLine } from "../test-support/fake-browserpod.mjs";
 
 function fakeBrowserPod(evidence) {
-  const calls = [];
-  return {
-    calls,
-    BrowserPod: {
-      async boot(options) {
-        calls.push(["boot", options]);
-        return {
-          onPortal() {},
-          async createCustomTerminal(terminalOptions) {
-            calls.push(["terminal", { cols: terminalOptions.cols, rows: terminalOptions.rows }]);
-            return { emit: terminalOptions.onOutput };
-          },
-          async run(command, args, runOptions) {
-            calls.push(["run", { command, args, echo: runOptions.echo }]);
-            const bytes = new TextEncoder().encode(`${EVIDENCE_PREFIX}${JSON.stringify(evidence)}\n`);
-            runOptions.terminal.emit(bytes.buffer);
-            return {};
-          },
-          async createDirectory() {},
-          async createFile() { return { async write() {}, async close() {} }; },
-          async openFile() { return { async getSize() { return 0; }, async read() { return ""; }, async close() {} }; }
-        };
-      }
+  return createFakeBrowserPod({
+    onRun({ emit }) {
+      emit(preflightEvidenceLine(evidence));
+      return {};
     }
-  };
+  });
 }
 
 test("proves the pinned Node baseline without exposing the API key to the guest command", async () => {
@@ -98,25 +80,14 @@ test("requires an explicit metered-runtime credential before boot", async () => 
 });
 
 test("classifies malformed preflight evidence as invalid output", async () => {
-  const BrowserPod = {
-    async boot() {
-      return {
-        onPortal() {},
-        async createCustomTerminal(options) {
-          return { emit: options.onOutput };
-        },
-        async run(_command, _args, options) {
-          options.terminal.emit(new TextEncoder().encode(`${EVIDENCE_PREFIX}{not-json\n`).buffer);
-          return {};
-        },
-        async createDirectory() {},
-        async createFile() { return { async write() {}, async close() {} }; },
-        async openFile() { return { async getSize() { return 0; }, async read() { return ""; }, async close() {} }; }
-      };
+  const fake = createFakeBrowserPod({
+    onRun({ emit }) {
+      emit(`${EVIDENCE_PREFIX}{not-json\n`);
+      return {};
     }
-  };
+  });
   await assert.rejects(
-    runBrowserPodPreflight({ BrowserPod, apiKey: "runtime-secret" }),
+    runBrowserPodPreflight({ BrowserPod: fake.BrowserPod, apiKey: "runtime-secret" }),
     (error) => error.code === "preflight_output_invalid"
   );
 });

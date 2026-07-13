@@ -2,30 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { createVerifiedOpenClawInstaller } from "./openclaw-installer.mjs";
+import { TEST_OPENCLAW_ARTIFACT, createFakeRuntime } from "../test-support/fake-browserpod.mjs";
 
-const artifact = {
-  package: "openclaw",
-  version: "2026.6.11",
-  integrity: `sha512-${"A".repeat(86)}==`
-};
+const artifact = TEST_OPENCLAW_ARTIFACT;
 
 function fakeRuntime({ lockIntegrity = artifact.integrity, completionStatus = "completed" } = {}) {
-  const files = new Map();
-  const commands = [];
-  let starts = 0;
-  return {
-    files,
-    commands,
-    get starts() { return starts; },
-    async createDirectory() {},
-    async writeTextFile(path, source) { files.set(path, source); },
-    async readTextFile(path) {
-      if (!files.has(path)) throw new Error(`missing ${path}`);
-      return files.get(path);
-    },
-    async start(command) {
-      starts += 1;
-      commands.push(command);
+  return createFakeRuntime({
+    onStart(command, { starts, files }) {
       const listeners = [];
       return {
         id: `install-${starts}`,
@@ -54,7 +37,7 @@ function fakeRuntime({ lockIntegrity = artifact.integrity, completionStatus = "c
         }
       };
     }
-  };
+  });
 }
 
 test("installs once, verifies lock integrity, and exposes exact paths", async () => {

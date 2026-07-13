@@ -4,13 +4,18 @@ import test from "node:test";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 
-import { EVIDENCE_PREFIX } from "./browserpod-preflight.mjs";
+import { runBrowserPodOpenClawProbe } from "./browserpod-openclaw-probe.mjs";
 import {
-  BROWSERPOD_HEALTH_PREFIX,
-  runBrowserPodOpenClawProbe
-} from "./browserpod-openclaw-probe.mjs";
+  TEST_OPENCLAW_ARTIFACT,
+  createFakeBrowserPod,
+  deferred,
+  healthEvidenceLine,
+  preflightEvidenceLine,
+  supervisorExitTranscript,
+  supervisorReadyTranscript
+} from "../test-support/fake-browserpod.mjs";
 
-const INTEGRITY = `sha512-${"A".repeat(86)}==`;
+const INTEGRITY = TEST_OPENCLAW_ARTIFACT.integrity;
 const evidenceSchema = JSON.parse(readFileSync(
   new URL("../compatibility/browserpod-evidence.schema.json", import.meta.url),
   "utf8"
@@ -19,102 +24,51 @@ const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
 const validateEvidence = ajv.compile(evidenceSchema);
 
-function deferred() {
-  let resolve;
-  const promise = new Promise((done) => { resolve = done; });
-  return { promise, resolve };
-}
-
 function fakeBrowserPod({
   lockIntegrity = INTEGRITY,
   cryptoVerify = true,
   sqlite = true,
   gatewayExitEarly = false
 } = {}) {
-  const calls = [];
-  const files = new Map();
-  const portals = [];
   const gateway = deferred();
-  let gatewayTerminal;
-  const emit = (terminal, text) => {
-    terminal.emit(new TextEncoder().encode(text).buffer);
-  };
-  return {
-    calls,
-    files,
-    gateway,
-    BrowserPod: {
-      async boot(options) {
-        calls.push(["boot", options]);
-        return {
-          onPortal(handler) { portals.push(handler); },
-          async createCustomTerminal(terminalOptions) { return { emit: terminalOptions.onOutput }; },
-          async run(executable, args, runOptions) {
-            calls.push(["run", { executable, args, env: runOptions.env, cwd: runOptions.cwd }]);
-            if (executable === "node" && args[0]?.endsWith("/clawsembly-preflight/probe.cjs")) {
-              emit(runOptions.terminal, `${EVIDENCE_PREFIX}${JSON.stringify({
-                node: "22.19.0",
-                platform: "linux",
-                arch: "wasm32",
-                cryptoVerify,
-                sqlite
-              })}\n`);
-              return {};
-            }
-            if (executable === "npm") {
-              files.set(`${runOptions.cwd}/node_modules/openclaw/package.json`, JSON.stringify({ version: "2026.6.11" }));
-              files.set(`${runOptions.cwd}/package-lock.json`, JSON.stringify({
-                packages: { "node_modules/openclaw": { version: "2026.6.11", integrity: lockIntegrity } }
-              }));
-              emit(runOptions.terminal, "added openclaw\n");
-              return {};
-            }
-            if (executable === "node" && args[0]?.endsWith("/supervisor-gateway.mjs")) {
-              if (gatewayExitEarly) return {};
-              gatewayTerminal = runOptions.terminal;
-              queueMicrotask(() => {
-                emit(runOptions.terminal, "[clawsembly-supervisor]{\"event\":\"ready\"}\n[gateway] ready\n");
-                for (const handler of portals) {
-                  handler({ port: 18_789, url: "https://browserpod.example/session" });
-                }
-              });
-              return gateway.promise;
-            }
-            if (executable === "node" && args[0]?.endsWith("/clawsembly-health.mjs")) {
-              emit(runOptions.terminal, `${BROWSERPOD_HEALTH_PREFIX}${JSON.stringify({
-                healthz: { status: 200, body: "{\"ok\":true}" },
-                readyz: { status: 200, body: "{\"ready\":true}" }
-              })}\n`);
-              return {};
-            }
-            throw new Error(`unexpected fake BrowserPod command: ${executable}`);
-          },
-          async createDirectory(path, directoryOptions) { calls.push(["mkdir", { path, options: directoryOptions }]); },
-          async createFile(path) {
-            let text = "";
-            return {
-              async write(value) { text += value; files.set(path, text); },
-              async close() {
-                if (path.endsWith("/stop-gateway.json")) {
-                  emit(gatewayTerminal, "[clawsembly-supervisor]{\"event\":\"exit\",\"requestedStop\":true,\"code\":0,\"signal\":null,\"error\":false}\n");
-                  gateway.resolve({});
-                }
-              }
-            };
-          },
-          async openFile(path) {
-            const text = files.get(path);
-            if (text === undefined) throw new Error(`missing fake file: ${path}`);
-            return {
-              async getSize() { return text.length; },
-              async read(length) { return text.slice(0, length); },
-              async close() {}
-            };
-          }
-        };
+  let emitToGateway;
+  return createFakeBrowserPod({
+    missingFiles: "throw",
+    onRun({ executable, args, options, emit, emitPortal, files }) {
+      if (executable === "node" && args[0]?.endsWith("/clawsembly-preflight/probe.cjs")) {
+        emit(preflightEvidenceLine({ cryptoVerify, sqlite }));
+        return {};
+      }
+      if (executable === "npm") {
+        files.set(`${options.cwd}/node_modules/openclaw/package.json`, JSON.stringify({ version: TEST_OPENCLAW_ARTIFACT.version }));
+        files.set(`${options.cwd}/package-lock.json`, JSON.stringify({
+          packages: { "node_modules/openclaw": { version: TEST_OPENCLAW_ARTIFACT.version, integrity: lockIntegrity } }
+        }));
+        emit("added openclaw\n");
+        return {};
+      }
+      if (executable === "node" && args[0]?.endsWith("/supervisor-gateway.mjs")) {
+        if (gatewayExitEarly) return {};
+        emitToGateway = emit;
+        queueMicrotask(() => {
+          emit(supervisorReadyTranscript());
+          emitPortal({ port: 18_789, url: "https://browserpod.example/session" });
+        });
+        return gateway.promise;
+      }
+      if (executable === "node" && args[0]?.endsWith("/clawsembly-health.mjs")) {
+        emit(healthEvidenceLine());
+        return {};
+      }
+      throw new Error(`unexpected fake BrowserPod command: ${executable}`);
+    },
+    onFileClose(path) {
+      if (path.endsWith("/stop-gateway.json")) {
+        emitToGateway(supervisorExitTranscript());
+        gateway.resolve({});
       }
     }
-  };
+  });
 }
 
 test("captures exact-artifact BrowserPod Gateway readiness without serializing credentials", async () => {
@@ -124,7 +78,7 @@ test("captures exact-artifact BrowserPod Gateway readiness without serializing c
   const session = await runBrowserPodOpenClawProbe({
     BrowserPod: fake.BrowserPod,
     apiKey: "browserpod-owner-secret",
-    artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY },
+    artifact: TEST_OPENCLAW_ARTIFACT,
     browser: "Chromium 140.0.0",
     storageKey: "clawsembly-openclaw-2026.6.11",
     gatewayToken: "gateway-ephemeral-secret",
@@ -181,7 +135,7 @@ test("rejects a package-lock integrity mismatch before starting the Gateway", as
     runBrowserPodOpenClawProbe({
       BrowserPod: fake.BrowserPod,
       apiKey: "browserpod-owner-secret",
-      artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY },
+      artifact: TEST_OPENCLAW_ARTIFACT,
       browser: "Chromium 140.0.0",
       gatewayToken: "gateway-ephemeral-secret"
     }),
@@ -198,7 +152,7 @@ test("rejects a failed crypto preflight before installing OpenClaw", async () =>
     runBrowserPodOpenClawProbe({
       BrowserPod: fake.BrowserPod,
       apiKey: "browserpod-owner-secret",
-      artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY },
+      artifact: TEST_OPENCLAW_ARTIFACT,
       browser: "Chromium 140.0.0",
       gatewayToken: "gateway-ephemeral-secret"
     }),
@@ -213,7 +167,7 @@ test("fails immediately when the Gateway supervisor exits before readiness", asy
     runBrowserPodOpenClawProbe({
       BrowserPod: fake.BrowserPod,
       apiKey: "browserpod-owner-secret",
-      artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY },
+      artifact: TEST_OPENCLAW_ARTIFACT,
       browser: "Chromium 140.0.0",
       gatewayToken: "gateway-ephemeral-secret"
     }),

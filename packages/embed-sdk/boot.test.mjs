@@ -10,8 +10,9 @@ import {
 import { createEmbedManifest } from "./embed-manifest.mjs";
 import { OPENCLAW_GATEWAY_CONTRACT } from "./openclaw-gateway-contract.generated.mjs";
 import { loadVerifiedCompatibilityReport } from "./report-loader.mjs";
+import { TEST_OPENCLAW_ARTIFACT, createFakeBrowserPod } from "../test-support/fake-browserpod.mjs";
 
-const INTEGRITY = `sha512-${"A".repeat(86)}==`;
+const INTEGRITY = TEST_OPENCLAW_ARTIFACT.integrity;
 
 function report({ status = "supported", runtime = "browserpod", runtimeVersion = "2.12.1" } = {}) {
   return {
@@ -46,38 +47,7 @@ async function verifyReport(value) {
 const VERIFIED_REPORT = await verifyReport(report());
 
 function fakeBrowserPod() {
-  const calls = [];
-  const files = new Map();
-  return {
-    calls,
-    files,
-    BrowserPod: {
-      async boot(options) {
-        calls.push(options);
-        return {
-          onPortal() {},
-          async createCustomTerminal() { return {}; },
-          async run() { return {}; },
-          async createDirectory() {},
-          async createFile(path) {
-            let text = "";
-            return {
-              async write(value) { text += value; files.set(path, text); },
-              async close() {}
-            };
-          },
-          async openFile(path) {
-            const text = files.get(path) ?? "";
-            return {
-              async getSize() { return text.length; },
-              async read() { return text; },
-              async close() {}
-            };
-          }
-        };
-      }
-    }
-  };
+  return createFakeBrowserPod();
 }
 
 test("refuses cross-runtime or partial evidence before spending BrowserPod tokens", async () => {
@@ -230,7 +200,7 @@ test("boots a verified BrowserPod session and binds capability authority to its 
   assert.equal(session.gateway.state, "idle");
   assert.equal(session.gateway.port, 18_789);
   assert.deepEqual(session.gateway.artifact, manifest.artifact);
-  assert.equal(fake.calls[0].storageKey, "clawsembly:openclaw:2026.6.11:primary");
+  assert.equal(fake.calls[0][1].storageKey, "clawsembly:openclaw:2026.6.11:primary");
   assert.deepEqual(session.capabilities.subject, {
     artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY },
     runtime: "browserpod",
