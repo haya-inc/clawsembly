@@ -56,6 +56,7 @@ export async function runBrowserPodOpenClawProbe({
   BrowserPod,
   apiKey,
   artifact: untrustedArtifact,
+  nodeEngine,
   browser,
   source = "owner-authorized BrowserPod OpenClaw readiness probe",
   storageKey,
@@ -70,6 +71,7 @@ export async function runBrowserPodOpenClawProbe({
   const runtime = await createBrowserPodRuntime({ BrowserPod, apiKey, storageKey });
   const preflight = await runBrowserRuntimePreflight({
     runtime,
+    nodeEngine,
     onOutput: (chunk) => relayOutput(onOutput, "preflight", chunk)
   });
   if (!preflight.checks.cryptoVerify || !preflight.checks.sqlite) {
@@ -113,6 +115,7 @@ export async function runBrowserPodOpenClawProbe({
     artifact,
     preflight: Object.freeze({
       node: preflight.node,
+      nodeEngine: preflight.nodeEngine,
       platform: preflight.platform,
       arch: preflight.arch,
       checks: preflight.checks,

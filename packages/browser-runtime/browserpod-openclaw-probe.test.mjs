@@ -79,6 +79,7 @@ test("captures exact-artifact BrowserPod Gateway readiness without serializing c
     BrowserPod: fake.BrowserPod,
     apiKey: "browserpod-owner-secret",
     artifact: TEST_OPENCLAW_ARTIFACT,
+    nodeEngine: ">=22.19.0",
     browser: "Chromium 140.0.0",
     storageKey: "clawsembly-openclaw-2026.6.11",
     gatewayToken: "gateway-ephemeral-secret",
@@ -136,6 +137,7 @@ test("rejects a package-lock integrity mismatch before starting the Gateway", as
       BrowserPod: fake.BrowserPod,
       apiKey: "browserpod-owner-secret",
       artifact: TEST_OPENCLAW_ARTIFACT,
+      nodeEngine: ">=22.19.0",
       browser: "Chromium 140.0.0",
       gatewayToken: "gateway-ephemeral-secret"
     }),
@@ -153,6 +155,7 @@ test("rejects a failed crypto preflight before installing OpenClaw", async () =>
       BrowserPod: fake.BrowserPod,
       apiKey: "browserpod-owner-secret",
       artifact: TEST_OPENCLAW_ARTIFACT,
+      nodeEngine: ">=22.19.0",
       browser: "Chromium 140.0.0",
       gatewayToken: "gateway-ephemeral-secret"
     }),
@@ -168,6 +171,7 @@ test("fails immediately when the Gateway supervisor exits before readiness", asy
       BrowserPod: fake.BrowserPod,
       apiKey: "browserpod-owner-secret",
       artifact: TEST_OPENCLAW_ARTIFACT,
+      nodeEngine: ">=22.19.0",
       browser: "Chromium 140.0.0",
       gatewayToken: "gateway-ephemeral-secret"
     }),

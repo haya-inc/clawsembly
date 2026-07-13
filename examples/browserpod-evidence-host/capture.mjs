@@ -7,7 +7,12 @@ import { assertBrowserRuntimeEvidence } from "../../packages/compatibility/src/r
 
 const root = resolve(import.meta.dirname, "../..");
 const outputDirectory = resolve(root, "test-results/browserpod-evidence");
-const reportPath = resolve(root, "apps/web/public/data/compatibility.json");
+// The capture target defaults to the current stable report; a pinned
+// alternative (for example an older-baseline artifact) may be selected with
+// a repo-relative path that must stay inside the public data directory.
+const publicDataDirectory = resolve(root, "apps/web/public/data");
+const requestedReport = process.env.CLAWSEMBLY_EVIDENCE_REPORT?.trim() || "apps/web/public/data/compatibility.json";
+const reportPath = resolve(root, requestedReport);
 const apiKey = process.env.BROWSERPOD_API_KEY;
 const statusPath = resolve(outputDirectory, "capture-status.json");
 await mkdir(outputDirectory, { recursive: true });
@@ -31,11 +36,16 @@ try {
   if (apiKey.length > 4_096) {
     throw fail("api_key_too_long", "BROWSERPOD_API_KEY exceeds the expected credential length.");
   }
+  if (!reportPath.startsWith(publicDataDirectory)) {
+    throw fail("invalid_report_path", "The evidence target report must live in the public data directory.");
+  }
   const report = JSON.parse(await readFile(reportPath, "utf8"));
   const version = report?.artifact?.version;
+  const nodeEngine = report?.artifact?.nodeEngine;
   if (!/^[0-9A-Za-z][0-9A-Za-z._+-]{0,127}$/u.test(version ?? "")
-    || report?.artifact?.package !== "openclaw" || typeof report?.artifact?.integrity !== "string") {
-    throw fail("invalid_report_identity", "The checked-in stable compatibility report identity is invalid.");
+    || report?.artifact?.package !== "openclaw" || typeof report?.artifact?.integrity !== "string"
+    || typeof nodeEngine !== "string" || !/^>=\d+\.\d+(\.\d+)?$/u.test(nodeEngine)) {
+    throw fail("invalid_report_identity", "The checked-in compatibility report identity is invalid.");
   }
   artifact = {
     package: "openclaw",
@@ -70,20 +80,21 @@ try {
     { timeout: 60_000 }
   );
   stage = "capture-run";
-  const evidence = await page.evaluate(async ({ credential, exactArtifact, evidenceSource }) => {
+  const evidence = await page.evaluate(async ({ credential, exactArtifact, artifactNodeEngine, evidenceSource }) => {
     if (typeof globalThis.__RUN_CLAWSEMBLY_BROWSERPOD_EVIDENCE__ !== "function") {
       throw new Error("BrowserPod evidence host is not ready.");
     }
     const capture = globalThis.__RUN_CLAWSEMBLY_BROWSERPOD_EVIDENCE__({
       apiKey: credential,
       artifact: exactArtifact,
+      nodeEngine: artifactNodeEngine,
       source: evidenceSource
     });
     const timeout = new Promise((_, reject) => {
       setTimeout(() => reject(new Error("BrowserPod evidence capture timed out.")), 15 * 60 * 1_000);
     });
     return Promise.race([capture, timeout]);
-  }, { credential: apiKey, exactArtifact: artifact, evidenceSource: source });
+  }, { credential: apiKey, exactArtifact: artifact, artifactNodeEngine: nodeEngine, evidenceSource: source });
   stage = "evidence-validate";
   assertBrowserRuntimeEvidence(evidence);
   stage = "persist";
@@ -94,6 +105,7 @@ try {
     capturedAt: evidence.capturedAt,
     result: "pass",
     artifact,
+    reportPath: requestedReport,
     phaseCounts
   }, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
   process.stdout.write(`Captured validated BrowserPod evidence for openclaw@${artifact.version}.\n`);
@@ -116,6 +128,7 @@ try {
     capturedAt: new Date().toISOString(),
     result: "fail",
     artifact: artifact ?? null,
+    reportPath: requestedReport,
     errorCode,
     failedStage: stage,
     phaseCounts

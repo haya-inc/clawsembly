@@ -22,6 +22,7 @@ test("BrowserPod evidence schema rejects credentials and incomplete readiness", 
     artifact: { package: "openclaw", version: "2026.6.11", integrity },
     preflight: {
       node: "22.19.0",
+      nodeEngine: ">=22.19.0",
       platform: "linux",
       arch: "wasm32",
       checks: { nodeBaseline: true, cryptoVerify: true, sqlite: true },
@@ -85,4 +86,10 @@ test("BrowserPod evidence schema rejects credentials and incomplete readiness", 
       readiness: { ...evidence.gateway.readiness, readyz: false }
     }
   }), false);
+  assert.equal(validate({
+    ...evidence,
+    preflight: { ...evidence.preflight, nodeEngine: "^22.19.0" }
+  }), false, "only exact >= pins are a valid recorded baseline");
+  const { nodeEngine: _nodeEngine, ...withoutBaseline } = evidence.preflight;
+  assert.equal(validate({ ...evidence, preflight: withoutBaseline }), false);
 });

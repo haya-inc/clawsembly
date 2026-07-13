@@ -29,6 +29,37 @@ The project does not yet promise semantic-version compatibility.
 
 ## [0.1.0-alpha.3] - 2026-07-13
 
+### Changed (evidence baseline)
+
+- the Node runtime baseline is no longer hard-coded to 22.19: the preflight,
+  the readiness probe, and the capture harness now derive it from the target
+  report's `artifact.nodeEngine` (only the exact `>=major.minor.patch` form
+  is accepted; anything else fails closed as `node_baseline_unsupported`),
+  captured evidence records the `nodeEngine` it proved, and the evidence
+  schema plus `compat:validate` bind that recorded baseline to the report's
+  artifact;
+- the evidence capture target is selectable: `capture.mjs` honours
+  `CLAWSEMBLY_EVIDENCE_REPORT` (contained to the public data directory) and
+  the capture workflow exposes it as the `evidence_report` dispatch input,
+  defaulting to the current stable report.
+
+### Added (evidence baseline)
+
+- a pinned static report for `openclaw@2026.5.7`
+  (`apps/web/public/data/releases/openclaw-2026.5.7.json`), the newest
+  upstream release whose `>=22.14.0` engines declaration the BrowserPod
+  guest Node 22.15.0 satisfies, making an owner-authorized readiness capture
+  possible before the vendor ships Node 22.19+. The report honestly records
+  the version's limits: no npm-shrinkwrap (all direct dependencies
+  unresolved, shrinkwrap check warns) and Gateway protocol 3 (`incomplete`
+  contract inspection). `compat:validate` now validates every pinned report
+  under `releases/`, not only the tracked channels;
+- static inspection works on Windows checkouts: `compat:inspect` resolves
+  the npm CLI through the invoking npm's JS entry point and passes tar a
+  cwd-relative filename (GNU tar parses the colon in absolute Windows paths
+  as a remote-host separator), and tolerates artifacts that predate
+  npm-shrinkwrap adoption.
+
 ### Fixed
 
 - the Gateway protocol client no longer routes frames that arrive after a

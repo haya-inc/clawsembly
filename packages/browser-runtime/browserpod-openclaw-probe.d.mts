@@ -13,6 +13,8 @@ export interface BrowserPodOpenClawEvidence {
   artifact: Readonly<{ package: "openclaw"; version: string; integrity: string }>;
   preflight: Readonly<{
     node: string;
+    /** The artifact engines declaration this capture proved. */
+    nodeEngine: string;
     platform: string;
     arch: string;
     checks: Readonly<{ nodeBaseline: true; cryptoVerify: boolean; sqlite: boolean }>;
@@ -61,6 +63,8 @@ export function runBrowserPodOpenClawProbe(options: {
   BrowserPod: BrowserPodApi;
   apiKey: string;
   artifact: { package: "openclaw"; version: string; integrity: string };
+  /** Required ">=major.minor.patch" pin from the verified report's artifact. */
+  nodeEngine: string;
   browser: string;
   source?: string;
   storageKey?: string;
