@@ -103,33 +103,49 @@ each requirement above for a trivial upstream:
    SHA-512 integrity, and per-file digests are pinned in a generated module
    (`npm run hello-agent:check` rejects fixture drift). It is deliberately
    `private: true` and not on any registry; the identity machinery treats it
-   exactly like a registry artifact.
+   exactly like a registry artifact. Growing the fixture is a version bump
+   plus regenerated pins — the internal growth path of
+   [ADR 0005](decisions/0005-reference-agent-growth-paths.md) — never an
+   in-place mutation.
 2. **Boot recipe** — digest-verified staging (nothing executes before every
    file matches its pin), two deterministic readiness signals (the
-   `[hello-agent] ready` log line and a parseable session record), and
-   shutdown through the generic nonce-bound cooperative supervisor.
-3. **Protocol client** — a bounded surface of exactly one method,
-   `hello.say`, constructed against the artifact's protocol descriptor and
-   pinned to its hash; descriptor drift fails closed. The guest mints a
-   session token at boot that every request must present and that the client
-   holds in memory only.
-4. **Capability requirements** — an explicit empty declaration
-   (`HELLO_AGENT_CAPABILITY_REQUIREMENTS`); the greeting agent needs no host
-   capabilities, and the empty mapping is the declaration.
+   `[hello-agent] ready` log line and a parseable session record that also
+   names its capability transport), and shutdown through the generic
+   nonce-bound cooperative supervisor. Partial capability wiring is a boot
+   failure, not a degraded mode.
+3. **Protocol client** — a bounded surface pinned to the artifact's protocol
+   descriptor hash (`clawsembly-hello/2`): `hello.say` plus the
+   OpenClaw-shaped `chat.send`, `chat.history`, and `chat.abort`, with a
+   validated delta/done event stream and in-flight abort; descriptor drift
+   fails closed. The guest mints a session token at boot that every request
+   must present and that the client holds in memory only.
+4. **Capability requirements** — a non-empty declaration
+   (`HELLO_AGENT_CAPABILITY_REQUIREMENTS`) derived from the artifact's own
+   descriptor: `chat.send` delegates every completion to the host capability
+   `chat.complete` (scope `provider:reference`) through the staged,
+   digest-pinned mailbox client. The agent holds no provider access of its
+   own; without wiring, chat fails closed as `capability_unavailable`, and
+   without a grant it fails closed as `capability_denied`. This is the
+   external extension path: the embedding application changes what the agent
+   can do by supplying handlers and grants, not by patching the agent.
 5. **Evidence gates** — a minimal gate that accepts only records bound to the
-   exact artifact identity with verified staging, both readiness signals, at
-   least one protocol round trip, and an acknowledged cooperative stop; check
-   statuses derive as `pending` without such a record.
+   exact artifact identity with verified staging, both readiness signals
+   including a live capability transport, hello and chat round trips, at
+   least one denied and one allowed capability outcome across the boundary,
+   and an acknowledged cooperative stop; check statuses derive as `pending`
+   without such a record.
 
 Its tests boot the staged fixture as a real Node child process behind a local
 provider double implementing the documented BrowserPod 2.x surface — no
 metered provider tokens — and drive the unmodified core end to end:
 verified-report loading, embed-manifest creation, the fail-closed launch
-assertion, the capability broker and consent controller, and the shared
-session lifecycle, all for a package that is not OpenClaw.
+assertion, the capability broker, consent approval, denial, revocation,
+mid-turn cancellation across the typed mailbox, payload-free audit, and the
+shared session lifecycle, all for a package that is not OpenClaw.
 
 Its purpose is to demonstrate that the core does not hard-code OpenClaw
-specifics, not to support a second real agent: hello-agent carries no
-BrowserPod runtime evidence, never appears in published reports or Pages, and
-statements about running other real agents remain claims about this contract,
-not about shipped capability.
+specifics and that the boundary extends an agent from the outside, not to
+support a second real agent: hello-agent carries no BrowserPod runtime
+evidence, never appears in published reports or Pages, and statements about
+running other real agents remain claims about this contract, not about
+shipped capability.

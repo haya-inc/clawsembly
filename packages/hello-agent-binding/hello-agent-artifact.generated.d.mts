@@ -5,6 +5,11 @@ export interface HelloAgentArtifactFile {
   contents: string;
 }
 
+export interface HelloAgentArtifactCapability {
+  capability: string;
+  scope: string;
+}
+
 export interface HelloAgentArtifact {
   schemaVersion: 1;
   name: "clawsembly-hello-agent";
@@ -12,10 +17,12 @@ export interface HelloAgentArtifact {
   integrity: string;
   tarballBytes: number;
   registryPublished: false;
-  protocol: "clawsembly-hello/1";
+  protocol: "clawsembly-hello/2";
   protocolFile: "protocol.json";
   protocolSha256: string;
   entrypoint: "hello-agent.mjs";
+  methods: readonly string[];
+  capabilities: readonly Readonly<HelloAgentArtifactCapability>[];
   files: readonly Readonly<HelloAgentArtifactFile>[];
 }
 

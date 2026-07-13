@@ -8,17 +8,25 @@ import type {
   CapabilityConsentController,
   PermissionAuditEvent
 } from "../capability-broker/capability-consent.mjs";
+import type { FilesystemCapabilityMailboxHost } from "../capability-broker/filesystem-mailbox-host.mjs";
+import type { StagedGuestMailboxClient } from "../capability-broker/guest-mailbox-artifact.mjs";
 import type { EmbedManifest } from "../embed-sdk/embed-manifest.mjs";
 
 export const HELLO_AGENT_INSTALL_ROOT: "/workspace/.clawsembly/hello-agent";
 export const HELLO_AGENT_READY_LINE: "[hello-agent] ready";
-export const HELLO_AGENT_CAPABILITY_REQUIREMENTS: readonly never[];
+export const HELLO_AGENT_CAPABILITY_REQUIREMENTS: readonly Readonly<{
+  capability: string;
+  scope: string;
+  maxCalls: number;
+}>[];
 
 export type HelloAgentArtifactIdentity = Readonly<{
   package: "clawsembly-hello-agent";
   version: string;
   integrity: string;
 }>;
+
+export type HelloAgentCapabilityTransport = "filesystem-mailbox" | "none";
 
 export class HelloAgentBindingError extends Error {
   constructor(code: string, message: string);
@@ -64,15 +72,18 @@ export function createVerifiedHelloAgentInstaller(options: {
 export interface HelloAgentReadiness {
   output: true;
   readyFile: true;
-  protocol: "clawsembly-hello/1";
+  protocol: "clawsembly-hello/2";
+  capabilityTransport: HelloAgentCapabilityTransport;
 }
 
 export interface HelloAgentSession {
   root: string;
   requestsRoot: string;
   responsesRoot: string;
+  eventsRoot: string;
   protocolPath: string;
-  protocol: "clawsembly-hello/1";
+  protocol: "clawsembly-hello/2";
+  capabilityTransport: HelloAgentCapabilityTransport;
   startedAt: string;
 }
 
@@ -101,17 +112,42 @@ export function createVerifiedHelloAgentProcess(options: {
   graceMs?: number;
   readyTimeoutMs?: number;
   pollIntervalMs?: number;
+  environment?: readonly string[];
   nonceFactory?: () => string;
   onOutput?: (event: Readonly<{ phase: "hello-agent"; chunk: string }>) => void;
   onAudit?: (event: Readonly<Record<string, unknown>>) => void;
   now?: () => number;
 }): Readonly<VerifiedHelloAgentProcess>;
 
+export interface HelloAgentChatTurn {
+  id: string;
+  reply: string | null;
+  reason: "completed" | "aborted";
+  events: number;
+}
+
+export interface HelloAgentChatHistoryTurn {
+  id: string;
+  at: string;
+  message: string;
+  reply: string | null;
+  reason: string;
+}
+
 export interface HelloAgentClient {
   artifact: HelloAgentArtifactIdentity;
   readonly requestCount: number;
   readonly closed: boolean;
   say(params: { name: string }): Promise<Readonly<{ greeting: string }>>;
+  startChat(params: { message: string }): Promise<Readonly<{
+    id: string;
+    completion: Promise<Readonly<HelloAgentChatTurn>>;
+  }>>;
+  abortChat(params: { target: string }): Promise<Readonly<{ aborted: boolean }>>;
+  chatHistory(): Promise<Readonly<{
+    turns: readonly Readonly<HelloAgentChatHistoryTurn>[];
+    total: number;
+  }>>;
   close(): void;
 }
 
@@ -133,10 +169,16 @@ export interface HelloAgentRuntimeEvidence {
   install: { result: "pass"; integrityMatched: true; fileCount: number; durationMs: number };
   process: {
     result: "pass";
-    readiness: { output: true; readyFile: true; protocol: string };
+    readiness: {
+      output: true;
+      readyFile: true;
+      protocol: string;
+      capabilityTransport: "filesystem-mailbox";
+    };
     termination: { mode: "guest-supervisor"; result: "pass" };
   };
-  protocol: { method: "hello.say"; roundTrips: number };
+  protocol: { methods: readonly string[]; helloRoundTrips: number; chatRoundTrips: number };
+  capability: { capability: string; scope: string; denied: number; allowed: number };
 }
 
 export function assertHelloAgentRuntimeEvidence(evidence: unknown): HelloAgentRuntimeEvidence;
@@ -154,7 +196,17 @@ export function deriveHelloAgentCheckStatuses(evidence?: unknown): Readonly<{
   "hello-agent-install": "pass" | "pending";
   "hello-agent-boot": "pass" | "pending";
   "hello-agent-protocol": "pass" | "pending";
+  "hello-agent-capability": "pass" | "pending";
 }>;
+
+export interface HelloAgentGuestTransport {
+  schemaVersion: 1;
+  kind: "filesystem-mailbox";
+  channelId: string;
+  mailboxRoot: string;
+  client: Readonly<StagedGuestMailboxClient>;
+  environment: readonly string[];
+}
 
 export function bootHelloAgentEmbed(options: {
   manifest: EmbedManifest;
@@ -164,6 +216,15 @@ export function bootHelloAgentEmbed(options: {
   installRoot?: string;
   capabilityHandlers?: Record<string, (input: unknown, context: CapabilityHandlerContext) => unknown | Promise<unknown>>;
   sessionId?: string;
+  mailboxChannelId?: string;
+  mailboxRoot?: string;
+  mailboxOptions?: {
+    pollIntervalMs?: number;
+    maxRequestBytes?: number;
+    maxResponseBytes?: number;
+    maxRequests?: number;
+    clock?: () => number;
+  };
   onRuntimeAudit?: (event: Readonly<Record<string, unknown>>) => void;
   onInstallAudit?: (event: Readonly<Record<string, unknown>>) => void;
   onProcessOutput?: (event: Readonly<{ phase: "hello-agent"; chunk: string }>) => void;
@@ -184,6 +245,8 @@ export function bootHelloAgentEmbed(options: {
   process: Readonly<VerifiedHelloAgentProcess>;
   capabilities: CapabilityBroker;
   permissions: CapabilityConsentController;
+  mailbox: FilesystemCapabilityMailboxHost;
+  guestTransport: Readonly<HelloAgentGuestTransport>;
   createClient(options?: {
     requestIdFactory?: () => string;
     timeoutMs?: number;

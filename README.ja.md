@@ -82,6 +82,7 @@ Clawsembly がコミットするブラウザローカルランタイムは
 - [検証済み埋め込み契約](docs/embedding.md)
 - [上流バインディング契約](docs/upstream-binding-contract.md)
 - [ADR 0004: 上流可搬な埋め込み境界](docs/decisions/0004-upstream-portable-embedding-boundary.md)
+- [ADR 0005: 参照エージェントと二つの成長パス](docs/decisions/0005-reference-agent-growth-paths.md)
 - [コントリビューションガイド](CONTRIBUTING.md)(コミットには DCO 署名が必要です)
 
 ## ライセンス
