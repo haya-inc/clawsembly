@@ -9,7 +9,7 @@ const PAIRING_REASONS = new Set(["not-paired", "role-upgrade", "scope-upgrade", 
 const REVIEW_TTL_MS = 5 * 60_000;
 
 export const BROWSERPOD_HEALTH_SOURCE = String.raw`
-const port = Number(process.argv[1]);
+const port = Number(process.argv[2]);
 const result = {};
 for (const endpoint of ["healthz", "readyz"]) {
   let lastError = "not ready";
@@ -391,9 +391,14 @@ export function createVerifiedOpenClawGateway({
       }
       readinessController.abort();
 
+      // BrowserPod 2.12.1's guest node implements no CLI flags, so the health
+      // probe is staged as an .mjs file next to the installed artifact; the
+      // port becomes argv[2] of the staged script.
+      const healthScriptPath = `${installed.root}/clawsembly-health.mjs`;
+      await runtime.writeTextFile(healthScriptPath, BROWSERPOD_HEALTH_SOURCE);
       const healthTask = await runtime.start({
         executable: "node",
-        args: ["--input-type=module", "-e", BROWSERPOD_HEALTH_SOURCE, String(gatewayPort)],
+        args: [healthScriptPath, String(gatewayPort)],
         cwd: installed.root,
         env: ["NO_COLOR=1"],
         outputLimitBytes: 64 * 1024

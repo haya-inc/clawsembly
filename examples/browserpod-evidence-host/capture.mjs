@@ -99,11 +99,18 @@ try {
   process.stdout.write(`Captured validated BrowserPod evidence for openclaw@${artifact.version}.\n`);
 } catch (error) {
   let phaseCounts = {};
+  let pageFailureCode = null;
   try { phaseCounts = await page?.evaluate(() => globalThis.__CLAWSEMBLY_PHASE_COUNTS__) ?? {}; }
   catch { /* Browser failure cannot expose raw diagnostics. */ }
-  const errorCode = typeof error?.code === "string" && /^[a-z0-9_-]{1,64}$/u.test(error.code)
+  try { pageFailureCode = await page?.evaluate(() => globalThis.__CLAWSEMBLY_FAILURE_CODE__) ?? null; }
+  catch { /* Browser failure cannot expose raw diagnostics. */ }
+  const directCode = typeof error?.code === "string" && /^[a-z0-9_-]{1,64}$/u.test(error.code)
     ? error.code
-    : "capture_failed";
+    : null;
+  const sanitizedPageCode = typeof pageFailureCode === "string" && /^[a-z0-9_-]{1,64}$/u.test(pageFailureCode)
+    ? pageFailureCode
+    : null;
+  const errorCode = directCode ?? sanitizedPageCode ?? "capture_failed";
   await writeFile(statusPath, `${JSON.stringify({
     schemaVersion: 1,
     capturedAt: new Date().toISOString(),

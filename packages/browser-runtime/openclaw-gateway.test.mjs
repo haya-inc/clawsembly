@@ -91,7 +91,7 @@ function runtimeFixture({ healthStatus = "completed", configStatus = "completed"
       commands.push(command);
       if (command.args.includes("gateway.controlUi.allowedOrigins")) return configTask;
       if (command.args[0]?.endsWith("/supervisor-gateway.mjs")) return supervisorTask;
-      if (command.args.includes(BROWSERPOD_HEALTH_SOURCE)) return healthTask;
+      if (command.args[0]?.endsWith("/clawsembly-health.mjs")) return healthTask;
       const devicesIndex = command.args.indexOf("devices");
       if (devicesIndex >= 0) {
         const action = command.args[devicesIndex + 1];

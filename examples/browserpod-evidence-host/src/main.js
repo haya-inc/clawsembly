@@ -4,6 +4,7 @@ import { runBrowserPodOpenClawProbe } from "../../../packages/browser-runtime/br
 const status = document.querySelector("[data-capture-status]");
 const encoder = new TextEncoder();
 globalThis.__CLAWSEMBLY_PHASE_COUNTS__ = Object.create(null);
+globalThis.__CLAWSEMBLY_FAILURE_CODE__ = null;
 
 globalThis.__RUN_CLAWSEMBLY_BROWSERPOD_EVIDENCE__ = async (options) => {
   const apiKey = options?.apiKey;
@@ -32,6 +33,15 @@ globalThis.__RUN_CLAWSEMBLY_BROWSERPOD_EVIDENCE__ = async (options) => {
     });
     status.textContent = "Evidence captured and Gateway cooperatively stopped.";
     return session.evidence;
+  } catch (error) {
+    // Error objects lose custom properties across the driver's evaluate
+    // boundary, so the sanitized machine code is exposed separately; the
+    // driver reads it the same way it reads the phase counters.
+    globalThis.__CLAWSEMBLY_FAILURE_CODE__ = typeof error?.code === "string"
+      && /^[a-z0-9_-]{1,64}$/u.test(error.code)
+      ? error.code
+      : null;
+    throw error;
   } finally {
     session?.dispose();
   }

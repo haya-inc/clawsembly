@@ -51,8 +51,7 @@ function fakeBrowserPod({
           async createCustomTerminal(options) { return { emit: options.onOutput }; },
           async run(executable, args, options) {
             calls.push(["run", { executable, args, env: options.env, cwd: options.cwd }]);
-            const source = args.find((arg) => typeof arg === "string" && arg.includes("clawsembly-")) ?? "";
-            if (executable === "node" && source.includes(EVIDENCE_PREFIX)) {
+            if (executable === "node" && args[0]?.endsWith("/clawsembly-preflight/probe.cjs")) {
               emit(options.terminal, `${EVIDENCE_PREFIX}${JSON.stringify({
                 node: "22.19.0",
                 platform: "linux",
@@ -81,7 +80,7 @@ function fakeBrowserPod({
               });
               return gateway.promise;
             }
-            if (executable === "node" && source.includes(BROWSERPOD_HEALTH_PREFIX)) {
+            if (executable === "node" && args[0]?.endsWith("/clawsembly-health.mjs")) {
               emit(options.terminal, `${BROWSERPOD_HEALTH_PREFIX}${JSON.stringify({
                 healthz: { status: 200, body: "{\"ok\":true}" },
                 readyz: { status: 200, body: "{\"ready\":true}" }

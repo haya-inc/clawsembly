@@ -2,6 +2,8 @@ import { BrowserRuntimeError } from "./browser-runtime.mjs";
 import { createBrowserPodRuntime } from "./browserpod-runtime.mjs";
 
 const EVIDENCE_PREFIX = "[clawsembly-browserpod]";
+const PROBE_ROOT = "/workspace/clawsembly-preflight";
+const PROBE_PATH = `${PROBE_ROOT}/probe.cjs`;
 
 const PROBE_SOURCE = String.raw`
 const result = {
@@ -26,13 +28,18 @@ console.log("${EVIDENCE_PREFIX}" + JSON.stringify(result));
 function assertNodeBaseline(version) {
   const [major, minor] = String(version).split(".").map(Number);
   if (major !== 22 || !Number.isInteger(minor) || minor < 19) {
-    throw new Error(`BrowserPod Node ${version} does not satisfy the pinned 22.19+ baseline`);
+    throw new BrowserRuntimeError(
+      "node_baseline_unsatisfied",
+      `BrowserPod Node ${version} does not satisfy the pinned 22.19+ baseline`
+    );
   }
 }
 
 function parseEvidence(output) {
   const line = output.split(/\r?\n/u).find((entry) => entry.includes(EVIDENCE_PREFIX));
-  if (!line) throw new Error("BrowserPod preflight did not emit runtime evidence");
+  if (!line) {
+    throw new BrowserRuntimeError("preflight_output_missing", "BrowserPod preflight did not emit runtime evidence");
+  }
   const evidence = JSON.parse(line.slice(line.indexOf(EVIDENCE_PREFIX) + EVIDENCE_PREFIX.length));
   assertNodeBaseline(evidence.node);
   return evidence;
@@ -46,12 +53,19 @@ export async function runBrowserRuntimePreflight({
   runtime,
   onOutput = () => {}
 }) {
-  if (!runtime || runtime.provider !== "browserpod" || typeof runtime.start !== "function") {
+  if (!runtime || runtime.provider !== "browserpod" || typeof runtime.start !== "function"
+    || typeof runtime.createDirectory !== "function" || typeof runtime.writeTextFile !== "function") {
     throw new TypeError("A booted BrowserPod runtime is required");
   }
+  // BrowserPod 2.12.1's guest node resolves its first argument as a module
+  // path and implements no CLI flags (-e fails with MODULE_NOT_FOUND, bare
+  // flags fall through to a REPL that never exits), so the probe must be
+  // staged as a real file before it can run.
+  await runtime.createDirectory(PROBE_ROOT, { recursive: true });
+  await runtime.writeTextFile(PROBE_PATH, PROBE_SOURCE);
   const task = await runtime.start({
     executable: "node",
-    args: ["-e", PROBE_SOURCE],
+    args: [PROBE_PATH],
     echo: false
   });
   task.onOutput(onOutput);
