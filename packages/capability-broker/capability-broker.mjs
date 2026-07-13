@@ -141,7 +141,8 @@ export class CapabilityBroker {
       this.#auditTruncated = true;
     }
     this.#audit.push(event);
-    this.#auditSink?.(event);
+    try { this.#auditSink?.(event); }
+    catch { /* Diagnostics cannot fail a request whose outcome is already recorded. */ }
     return event;
   }
 
@@ -234,22 +235,16 @@ export class CapabilityBroker {
     }
 
     grant.callsUsed += 1;
+    let result;
     try {
-      const result = await handler(untrustedRequest.input, Object.freeze({
+      result = await handler(untrustedRequest.input, Object.freeze({
         subject: this.#subject,
         capability,
         scope,
         requestId: untrustedRequest.id,
         signal
       }));
-      if (signal?.aborted) {
-        audit("cancelled", "request_cancelled");
-        throw new CapabilityBrokerError("cancelled", "capability request was cancelled");
-      }
-      audit("allowed", "grant_matched");
-      return result;
-    } catch (error) {
-      if (error instanceof CapabilityBrokerError) throw error;
+    } catch {
       if (signal?.aborted) {
         audit("cancelled", "request_cancelled");
         throw new CapabilityBrokerError("cancelled", "capability request was cancelled");
@@ -257,6 +252,12 @@ export class CapabilityBroker {
       audit("error", "handler_failed");
       throw new CapabilityBrokerError("handler_failed", "capability handler failed");
     }
+    if (signal?.aborted) {
+      audit("cancelled", "request_cancelled");
+      throw new CapabilityBrokerError("cancelled", "capability request was cancelled");
+    }
+    audit("allowed", "grant_matched");
+    return result;
   }
 }
 

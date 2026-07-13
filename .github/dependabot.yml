@@ -1,3 +1,6 @@
+# examples/sdk-host and examples/browserpod-evidence-host are intentionally
+# not tracked here: their locks pin the reviewed SDK tarball and the exact
+# metered provider (browserpod@2.12.1), and only move with reviewed releases.
 version: 2
 updates:
   - package-ecosystem: npm

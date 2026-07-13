@@ -2,7 +2,7 @@
 
 Evidence-gated browser embedding infrastructure for upstream OpenClaw.
 
-This package is prepared as `0.1.0-alpha.1` for the npm `alpha` channel.
+This package is prepared as `0.1.0-alpha.3` for the npm `alpha` channel.
 Publication follows the matching provenance-bound GitHub prerelease; consumers
 can verify registry availability before preferring the npm install path.
 The checked-in BrowserPod report remains `probing`, so verified boot correctly
@@ -12,14 +12,14 @@ and tested without making a runtime-support claim.
 ## Install the Pages-distributed source alpha
 
 ```bash
-npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.1.tgz
+npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.3.tgz
 ```
 
 The identical checked tarball is also attached to the
-[GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.1):
+[GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.3):
 
 ```bash
-npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.1/haya-inc-clawsembly-0.1.0-alpha.1.tgz
+npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.3/haya-inc-clawsembly-0.1.0-alpha.3.tgz
 ```
 
 Verify the SHA-256 and compatibility binding through the public

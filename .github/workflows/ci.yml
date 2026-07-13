@@ -16,6 +16,7 @@ jobs:
   node_check:
     name: node-${{ matrix.node-version }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -35,13 +36,19 @@ jobs:
           node packages/compatibility/src/release-readiness.mjs
 
   windows_check:
-    name: windows-node-24
+    name: windows-node-${{ matrix.node-version }}
     runs-on: windows-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        # The engines floor must hold on Windows too, not only on Linux.
+        node-version: ["22.19.0", "24"]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          node-version: "24"
+          node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
       - run: npm run check
@@ -51,6 +58,7 @@ jobs:
     if: ${{ always() }}
     needs: [node_check, windows_check]
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Require every Node lane
         env:

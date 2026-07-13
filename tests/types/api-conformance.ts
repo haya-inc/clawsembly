@@ -1,0 +1,83 @@
+// Compile-only conformance for the handwritten .d.mts API contracts.
+// Exercises the public modules through Node16 resolution exactly as a strict
+// TypeScript consumer would, including negative-space assertions that keep
+// declaration drift visible in `npm run typecheck`.
+import {
+  CapabilityBroker,
+  CapabilityBrokerError
+} from "../../packages/capability-broker/capability-broker.mjs";
+import { FilesystemCapabilityMailboxHost } from "../../packages/capability-broker/filesystem-mailbox-host.mjs";
+import { FilesystemCapabilityMailboxClient } from "../../packages/capability-broker/guest-mailbox-client.mjs";
+import { startCooperativeProcess } from "../../packages/browser-runtime/cooperative-process.mjs";
+import {
+  createVerifiedOpenClawGateway,
+  type GatewayPairingRequirement as HostPairingRequirement,
+  type ReviewableGatewayPairingRequirement,
+  type VerifiedOpenClawGateway
+} from "../../packages/browser-runtime/openclaw-gateway.mjs";
+import {
+  createOpenClawGatewayClient,
+  OpenClawGatewayClientError,
+  resolveGatewayWebSocketConnection,
+  type GatewayPairingRequirement
+} from "../../packages/embed-sdk/gateway-client.mjs";
+import { createBrowserDeviceIdentity } from "../../packages/embed-sdk/gateway-device-identity.mjs";
+import { createGatewayDeviceTokenVault } from "../../packages/embed-sdk/gateway-device-token-vault.mjs";
+import { mountGatewayPairingPrompt } from "../../packages/embed-sdk/gateway-pairing-prompt.mjs";
+import { mountCapabilityPermissionPrompt } from "../../packages/embed-sdk/permission-prompt.mjs";
+import { bootVerifiedEmbed } from "../../packages/embed-sdk/boot.mjs";
+import { createEmbedManifest } from "../../packages/embed-sdk/embed-manifest.mjs";
+import { loadVerifiedCompatibilityReport } from "../../packages/embed-sdk/report-loader.mjs";
+
+declare const gateway: VerifiedOpenClawGateway;
+declare const clientError: OpenClawGatewayClientError;
+
+// The client pairing requirement narrows the shared host contract.
+const sharedPairing: HostPairingRequirement | undefined = clientError.pairing;
+void sharedPairing;
+
+// review() only accepts requirements whose ids are proven present.
+declare const unproven: GatewayPairingRequirement;
+// @ts-expect-error -- requestId/deviceId are optional on the client shape.
+void gateway.pairing.review(unproven);
+declare const reviewable: ReviewableGatewayPairingRequirement;
+void gateway.pairing.review(reviewable);
+
+// Broker construction and its request surface stay exercisable.
+const broker = new CapabilityBroker({
+  subject: {
+    artifact: { package: "openclaw", version: "2026.6.11", integrity: "sha512-types" },
+    runtime: "browserpod",
+    sessionId: "type-conformance"
+  },
+  grants: [{ capability: "storage.read", scope: "workspace:primary", maxCalls: 1 }],
+  handlers: { "storage.read": async () => null }
+});
+const brokerRequest: Promise<unknown> = broker.request({
+  id: "request-1",
+  capability: "storage.read",
+  scope: "workspace:primary",
+  input: null
+});
+void brokerRequest;
+void CapabilityBrokerError;
+
+// Value-level identity between implementation exports and declared callables.
+const callableSurface = [
+  createOpenClawGatewayClient,
+  createVerifiedOpenClawGateway,
+  startCooperativeProcess,
+  createBrowserDeviceIdentity,
+  createGatewayDeviceTokenVault,
+  mountGatewayPairingPrompt,
+  mountCapabilityPermissionPrompt,
+  bootVerifiedEmbed,
+  createEmbedManifest,
+  loadVerifiedCompatibilityReport,
+  resolveGatewayWebSocketConnection
+] as const;
+callableSurface.forEach((entry) => void (entry satisfies (...parameters: never[]) => unknown));
+void FilesystemCapabilityMailboxHost;
+void FilesystemCapabilityMailboxClient;
+
+export {};

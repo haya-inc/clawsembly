@@ -87,6 +87,13 @@ schedule. Before the first run, a maintainer must:
    review;
 5. dispatch the workflow with `capture_browserpod` enabled.
 
+Warning: a metered capture against `browserpod@2.12.1` currently fails closed
+with `node_baseline_unsatisfied` — the guest provisions Node 22.15.0, below
+the required 22.19 baseline — before any promotable evidence exists. Do not
+spend BrowserPod tokens until the vendor ships Node 22.19 or newer, or the
+baseline decision is revisited
+([issue #6](https://github.com/haya-inc/clawsembly/issues/6)).
+
 The job installs `@leaningtech/browserpod@2.12.1` from its isolated lock with
 scripts disabled, launches a cross-origin-isolated Chromium host, and passes the
 secret directly into one page evaluation. The key is never written to source,

@@ -106,6 +106,14 @@ export function buildDeviceAuthPayloadV3(params) {
   if (!params || typeof params !== "object" || !Array.isArray(params.scopes)) {
     throw new TypeError("device auth payload parameters are invalid");
   }
+  // "|" delimits this payload; a nonce or token containing it could move
+  // attacker-chosen bytes across field boundaries of the signed string.
+  if (typeof params.nonce !== "string" || params.nonce.length === 0 || /[|\0\r\n]/u.test(params.nonce)) {
+    throw new TypeError("device auth nonce is invalid");
+  }
+  if (typeof params.token === "string" && /[|\0\r\n]/u.test(params.token)) {
+    throw new TypeError("device auth token is invalid");
+  }
   return [
     "v3",
     params.deviceId,

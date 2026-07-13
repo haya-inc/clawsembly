@@ -32,13 +32,24 @@ export interface GatewayPairingReview {
 }
 
 export interface GatewayPairingRequirement {
-  required: true;
-  requestId: string;
-  deviceId: string;
-  reason: GatewayPairingReview["reason"];
-  role: string;
-  scopes: readonly string[];
+  readonly required: true;
+  /** Absent when the Gateway error carried no reviewable request id. */
+  readonly requestId?: string;
+  /** Absent when neither the Gateway nor the signed connect named a device. */
+  readonly deviceId?: string;
+  readonly reason: GatewayPairingReview["reason"];
+  readonly role: string;
+  readonly scopes: readonly string[];
 }
+
+/**
+ * `pairing.review()` rejects requirements missing the exact request and
+ * device ids at runtime; this narrowing states that contract in the types.
+ */
+export type ReviewableGatewayPairingRequirement = GatewayPairingRequirement & {
+  readonly requestId: string;
+  readonly deviceId: string;
+};
 
 export interface VerifiedOpenClawGateway {
   schemaVersion: 1;
@@ -55,7 +66,7 @@ export interface VerifiedOpenClawGateway {
     auth: Readonly<{ mode: "token"; token: string }>;
   }>;
   readonly pairing: Readonly<{
-    review(requirement: GatewayPairingRequirement): Promise<Readonly<GatewayPairingReview>>;
+    review(requirement: ReviewableGatewayPairingRequirement): Promise<Readonly<GatewayPairingReview>>;
     approve(reviewId: string): Promise<Readonly<{
       schemaVersion: 1;
       decision: "approved";

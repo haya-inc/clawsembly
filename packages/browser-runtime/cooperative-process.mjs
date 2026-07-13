@@ -138,22 +138,9 @@ export async function startCooperativeProcess({
     rows: command.rows,
     outputLimitBytes: command.outputLimitBytes
   });
-  const readyController = new AbortController();
-  const ready = task.waitForOutput(`${COOPERATIVE_SUPERVISOR_PREFIX}{"event":"ready"}`, {
-    timeoutMs: readyTimeoutMs,
-    signal: readyController.signal
-  });
-  const outcome = await Promise.race([
-    ready.then(() => "ready"),
-    task.wait().then(() => "exit")
-  ]);
-  readyController.abort();
-  if (outcome !== "ready") {
-    throw new BrowserRuntimeError("supervisor_exited", "cooperative supervisor exited before readiness");
-  }
 
   let stopRequested = false;
-  return Object.freeze({
+  const handle = Object.freeze({
     id,
     mode: "guest-supervisor",
     task,
@@ -163,8 +150,10 @@ export async function startCooperativeProcess({
         throw new TypeError("cooperative stop timeout is invalid");
       }
       if (!stopRequested) {
-        stopRequested = true;
+        // The flag is confirmed only after the control file exists; a failed
+        // write must stay retryable or stop becomes a permanent no-op.
         await runtime.writeTextFile(controlPath, `${JSON.stringify({ action: "stop", nonce })}\n`);
+        stopRequested = true;
       }
       let timer;
       const completion = await Promise.race([
@@ -192,4 +181,33 @@ export async function startCooperativeProcess({
       });
     }
   });
+
+  const readyController = new AbortController();
+  const ready = task.waitForOutput(`${COOPERATIVE_SUPERVISOR_PREFIX}{"event":"ready"}`, {
+    timeoutMs: readyTimeoutMs,
+    signal: readyController.signal
+  });
+  let outcome;
+  try {
+    outcome = await Promise.race([
+      ready.then(() => "ready"),
+      task.wait().then(() => "exit")
+    ]);
+  } catch {
+    // Readiness never surfaced while the supervisor may still be polling for
+    // control files; request a cooperative stop so no orphan survives the
+    // failed start, then surface the readiness failure.
+    readyController.abort();
+    try { await handle.stop({ timeoutMs: graceMs + 5_000 }); }
+    catch { /* The readiness failure remains the primary error. */ }
+    throw new BrowserRuntimeError(
+      "supervisor_ready_timeout",
+      "cooperative supervisor did not report readiness; a cooperative stop was requested"
+    );
+  }
+  readyController.abort();
+  if (outcome !== "ready") {
+    throw new BrowserRuntimeError("supervisor_exited", "cooperative supervisor exited before readiness");
+  }
+  return handle;
 }

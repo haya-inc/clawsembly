@@ -138,7 +138,7 @@ function assertDeviceTokenVault(vault) {
 
 function assertStoredDeviceToken(value) {
   if (value === undefined) return undefined;
-  if (!isRecord(value) || !isNonEmptyString(value.token, 2_048) || /[\0\r\n]/u.test(value.token)
+  if (!isRecord(value) || !isNonEmptyString(value.token, 2_048) || /[|\0\r\n]/u.test(value.token)
     || !stringArray(value.scopes, 64)
     || (value.issuedAtMs !== undefined && (!Number.isSafeInteger(value.issuedAtMs) || value.issuedAtMs < 0))) {
     throw new Error("stored Gateway device token is invalid");
@@ -149,6 +149,7 @@ function assertStoredDeviceToken(value) {
 export function resolveGatewayWebSocketConnection(connection, browserOrigin) {
   if (!connection || connection.schemaVersion !== 1 || connection.auth?.mode !== "token"
     || !isNonEmptyString(connection.auth.token, 512) || connection.auth.token.length < 16
+    || /[|\0\r\n]/u.test(connection.auth.token)
     || connection.portal?.visibility !== "public-url" || !isNonEmptyString(connection.portal.url, 2_048)) {
     throw fail("invalid_connection", "verified Gateway connection material is invalid");
   }
@@ -207,7 +208,7 @@ function parseHello(payload, artifactVersion) {
     throw fail("scope_mismatch", "Gateway did not grant the requested operator scopes");
   }
   const deviceToken = payload.auth.deviceToken;
-  if (deviceToken !== undefined && (!isNonEmptyString(deviceToken, 2_048) || /[\0\r\n]/u.test(deviceToken))) {
+  if (deviceToken !== undefined && (!isNonEmptyString(deviceToken, 2_048) || /[|\0\r\n]/u.test(deviceToken))) {
     throw fail("invalid_hello", "Gateway returned an invalid hello-ok device token");
   }
   if (payload.auth.issuedAtMs !== undefined
@@ -345,6 +346,10 @@ export function createOpenClawGatewayClient({
     if (frame.type !== "event" || !isNonEmptyString(frame.event, 128)) return;
     if (frame.seq !== undefined) {
       if (!Number.isSafeInteger(frame.seq) || frame.seq < 0) return;
+      if (lastSequence !== null && frame.seq <= lastSequence) {
+        safeSink(onAudit, { action: "gateway-frame", outcome: "rejected", reason: "stale_sequence" });
+        return;
+      }
       if (lastSequence !== null && frame.seq > lastSequence + 1) {
         const gap = Object.freeze({ expected: lastSequence + 1, received: frame.seq });
         safeSink(onAudit, { action: "gateway-event-gap", outcome: "detected", ...gap });
@@ -481,6 +486,9 @@ export function createOpenClawGatewayClient({
         token = undefined;
         state = error.code === "aborted" ? "idle" : "failed";
         try { activeSocket?.close(1008, "handshake failed"); } catch { /* best effort */ }
+        // Frames queued behind the failure must not reach authenticated
+        // handling; detaching the socket makes every listener drop them.
+        if (socket === activeSocket) socket = undefined;
         safeSink(onAudit, {
           action: "gateway-handshake",
           outcome: "failed",
@@ -565,7 +573,7 @@ export function createOpenClawGatewayClient({
           return;
         }
         if (settled) {
-          handleAuthenticatedFrame(frame);
+          if (state === "ready") handleAuthenticatedFrame(frame);
           return;
         }
 
@@ -575,7 +583,9 @@ export function createOpenClawGatewayClient({
             return;
           }
           const nonce = frame.payload?.nonce;
-          if (!isNonEmptyString(nonce, 512)) {
+          // "|" delimits the signed v3 payload; control characters and the
+          // delimiter cannot be allowed into signature material.
+          if (!isNonEmptyString(nonce, 512) || /[|\0\r\n]/u.test(nonce)) {
             finishFailure(fail("invalid_challenge", "Gateway connect challenge is missing a valid nonce"));
             return;
           }

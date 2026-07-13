@@ -143,13 +143,15 @@ suppression, generated-report pull requests, public schemas, and a fail-closed
 promotion policy with dependency-free Node and GitHub Action consumers are implemented. External
 consumption and multi-release runtime evidence are not yet proven.
 
-The byte-reproducible SDK alpha.1 is distributed from Pages and GitHub Releases
-with an exact checksum, compatibility-report binding, tag/source/report
-provenance, and provider-free browser diagnostics. npm is an additional
-discovery channel after a provenance-backed bootstrap, not a prerequisite for
-the first external integration and never a substitute for BrowserPod runtime
-evidence. The reviewed publication record keeps those distribution surfaces in
-sync without weakening the `probing` gate.
+The byte-reproducible SDK alpha.2 is distributed from Pages, GitHub Releases,
+and npm with an exact checksum, compatibility-report binding,
+tag/source/report provenance, and provider-free browser diagnostics. The
+provenance-backed npm bootstrap is complete: the reviewed publication record
+(`packages/compatibility/npm-publication.json`) binds the registry bytes to
+the same SHA-512 integrity and Sigstore provenance. npm remains an additional
+discovery channel, not a prerequisite for the first external integration and
+never a substitute for BrowserPod runtime evidence; no distribution surface
+weakens the `probing` gate.
 The SDK host example is a copy-ready consumer with an integrity-pinned Release
 dependency; the normal SDK gate rebuilds the package and rejects lock drift.
 
@@ -211,7 +213,10 @@ deadline pressure:
    [issue #6](https://github.com/haya-inc/clawsembly/issues/6) and establish
    the cold/warm/persistent performance baselines in
    [issue #8](https://github.com/haya-inc/clawsembly/issues/8). Nothing else
-   converts `probing` into evidence.
+   converts `probing` into evidence. As of 2026-07-13 the capture is blocked
+   by the vendor runtime: BrowserPod 2.12.1 provisions Node 22.15.0, below
+   the 22.19 baseline, so the readiness probe fails closed with
+   `node_baseline_unsatisfied`; the vendor has been notified.
 2. Apply to the BrowserPod OSS grant program, and keep disclosing plainly that
    every downstream deployment needs its own metered BrowserPod API key and
    that the free tier is non-commercial.

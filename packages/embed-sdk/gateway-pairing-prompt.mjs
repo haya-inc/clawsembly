@@ -142,24 +142,29 @@ export function mountGatewayPairingPrompt({
     reject.disabled = true;
     root.dataset.pairingState = "deciding";
     live.textContent = decision === "approved" ? "Approving the reviewed request…" : "Rejecting the reviewed request…";
+    let result;
     try {
-      const result = assertDecision(
+      result = assertDecision(
         await (decision === "approved" ? onApprove(model.reviewId) : onReject(model.reviewId)),
         model,
         decision
       );
-      root.dataset.pairingState = decision;
-      live.textContent = decision === "approved"
-        ? "Approved. Reconnect to receive an encrypted device token."
-        : "Rejected. The pending request cannot authenticate.";
-      onDecision?.(Object.freeze({ decision, requestId: result.requestId, deviceId: result.deviceId }));
     } catch {
       decided = false;
       approve.disabled = false;
       reject.disabled = false;
       root.dataset.pairingState = "failed";
       live.textContent = "Pairing decision failed. Refresh the pending request before retrying.";
+      return;
     }
+    root.dataset.pairingState = decision;
+    live.textContent = decision === "approved"
+      ? "Approved. Reconnect to receive an encrypted device token."
+      : "Rejected. The pending request cannot authenticate.";
+    // The decision is already executed; a throwing consumer sink must not
+    // re-arm the buttons into a second decision.
+    try { onDecision?.(Object.freeze({ decision, requestId: result.requestId, deviceId: result.deviceId })); }
+    catch { /* diagnostic sink only */ }
   }
   approve.addEventListener("click", () => { void decide("approved"); });
   reject.addEventListener("click", () => { void decide("rejected"); });

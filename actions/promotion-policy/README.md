@@ -17,8 +17,9 @@ jobs:
 
 `observe` reports either result successfully. `gate` exits nonzero unless the
 validated candidate is `promote`. `@main` follows the default branch as it
-moves; for a reproducible reference, pin the `v0.1.0-alpha.1` tag or, stricter
-still, a reviewed commit SHA for production use.
+moves; for a reproducible reference, pin the latest reviewed prerelease tag
+(`v0.1.0-alpha.2` at the time of writing) or, stricter still, a reviewed
+commit SHA for production use.
 
 Outputs:
 

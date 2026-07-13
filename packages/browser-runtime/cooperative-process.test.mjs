@@ -144,3 +144,95 @@ test("does not claim a cooperative stop when the child exits before the request"
   assert.equal(result.complete, false);
   assert.match(result.reason, /did not acknowledge/u);
 });
+
+test("keeps stop retryable when the control write fails", async () => {
+  const files = new Map();
+  let completionResolve;
+  const completion = new Promise((resolve) => { completionResolve = resolve; });
+  let failNextControlWrite = true;
+  const task = {
+    id: "retryable-stop",
+    transcript: `${COOPERATIVE_SUPERVISOR_PREFIX}{"event":"ready"}\n`,
+    outputTruncated: false,
+    onOutput() { return () => false; },
+    wait() { return completion; },
+    waitForOutput() { return Promise.resolve(this.transcript); }
+  };
+  const runtime = {
+    provider: "browserpod",
+    async createDirectory() {},
+    async writeTextFile(path, text) {
+      if (path.endsWith("/stop-retry.json") && failNextControlWrite) {
+        failNextControlWrite = false;
+        throw new Error("transient runtime write failure");
+      }
+      files.set(path, text);
+      if (path.endsWith("/stop-retry.json")) {
+        task.transcript += `${COOPERATIVE_SUPERVISOR_PREFIX}{"event":"exit","requestedStop":true,"code":0,"signal":null,"error":false}\n`;
+        completionResolve({ status: "completed" });
+      }
+    },
+    async start() { return task; }
+  };
+  const supervised = await startCooperativeProcess({
+    runtime,
+    root: "/workspace/supervision",
+    id: "retry",
+    command: { executable: "node", args: ["worker.mjs"], cwd: "/workspace" },
+    nonceFactory: () => "retryable_nonce_123456"
+  });
+  await assert.rejects(supervised.stop(), /transient runtime write failure/u);
+  assert.equal(supervised.stopRequested, false);
+  const result = await supervised.stop();
+  assert.equal(result.complete, true);
+  assert.equal(supervised.stopRequested, true);
+});
+
+test("requests a cooperative stop when readiness never surfaces", async () => {
+  const files = new Map();
+  let completionResolve;
+  const completion = new Promise((resolve) => { completionResolve = resolve; });
+  const task = {
+    id: "never-ready",
+    transcript: "",
+    outputTruncated: false,
+    onOutput() { return () => false; },
+    wait() { return completion; },
+    waitForOutput(_needle, { timeoutMs, signal } = {}) {
+      return new Promise((_resolve, reject) => {
+        const timer = setTimeout(
+          () => reject(new Error("runtime output did not contain readiness")),
+          timeoutMs
+        );
+        signal?.addEventListener("abort", () => {
+          clearTimeout(timer);
+          reject(new Error("aborted"));
+        }, { once: true });
+      });
+    }
+  };
+  const runtime = {
+    provider: "browserpod",
+    async createDirectory() {},
+    async writeTextFile(path, text) {
+      files.set(path, text);
+      if (path.endsWith("/stop-stuck.json")) {
+        task.transcript += `${COOPERATIVE_SUPERVISOR_PREFIX}{"event":"exit","requestedStop":true,"code":0,"signal":null,"error":false}\n`;
+        completionResolve({ status: "completed" });
+      }
+    },
+    async start() { return task; }
+  };
+  await assert.rejects(
+    startCooperativeProcess({
+      runtime,
+      root: "/workspace/supervision",
+      id: "stuck",
+      command: { executable: "node", args: ["worker.mjs"], cwd: "/workspace" },
+      readyTimeoutMs: 100,
+      nonceFactory: () => "stuck_nonce_1234567890"
+    }),
+    (error) => error.code === "supervisor_ready_timeout"
+  );
+  assert.match(files.get("/workspace/supervision/stop-stuck.json"), /stuck_nonce_1234567890/u);
+});

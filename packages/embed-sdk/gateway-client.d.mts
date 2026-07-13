@@ -1,11 +1,14 @@
+import type { GatewayPairingRequirement as GatewayPairingRequirementContract } from "../browser-runtime/openclaw-gateway.mjs";
 import type { BrowserDeviceIdentity } from "./gateway-device-identity.mjs";
 import type { GatewayDeviceTokenMetadata, GatewayDeviceTokenVault } from "./gateway-device-token-vault.mjs";
 import type { OpenClawGatewayContract } from "./openclaw-gateway-contract.generated.mjs";
 
-export interface GatewayPairingRequirement {
-  readonly required: true;
-  readonly requestId?: string;
-  readonly deviceId?: string;
+/**
+ * Narrows the shared pairing-requirement contract to the exact generated
+ * client profile. `requestId`/`deviceId` stay optional here; the Gateway's
+ * `pairing.review()` accepts only its reviewable narrowing.
+ */
+export interface GatewayPairingRequirement extends GatewayPairingRequirementContract {
   readonly reason: "not-paired" | "role-upgrade" | "scope-upgrade" | "metadata-upgrade";
   readonly role: "operator";
   readonly scopes: readonly ["operator.read", "operator.write"];

@@ -3,6 +3,12 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { extname, relative, resolve } from "node:path";
 
+import {
+  assertCompatibilityReportBinding,
+  assertSdkReleaseBinding,
+  localMarkdownTargets
+} from "./release-binding.mjs";
+
 const IGNORED_DIRECTORIES = new Set([".git", "dist", "node_modules", "playwright-report", "test-results"]);
 
 function walk(directory) {
@@ -13,17 +19,6 @@ function walk(directory) {
     if (entry.isDirectory()) return walk(path);
     return [path];
   });
-}
-
-function localMarkdownTargets(source) {
-  const targets = [];
-  const pattern = /!?(?:\[[^\]]*\])\(([^)]+)\)/g;
-  for (const match of source.matchAll(pattern)) {
-    const raw = match[1].trim().replace(/^<|>$/g, "").split(/\s+["']/)[0];
-    if (!raw || raw.startsWith("#") || /^[a-z][a-z0-9+.-]*:/i.test(raw)) continue;
-    targets.push(decodeURIComponent(raw.split("#")[0]));
-  }
-  return targets;
 }
 
 const root = process.cwd();
@@ -202,47 +197,17 @@ for (const expected of ["Provider boot blocked", "Not attempted", "report status
 
 const sdkRelease = JSON.parse(readFileSync(resolve(root, "dist/downloads/sdk-release.json"), "utf8"));
 const npmPublication = JSON.parse(readFileSync(resolve(root, "packages/compatibility/npm-publication.json"), "utf8"));
-const sdkTarballName = sdkRelease.distribution?.tarball?.file;
-if (sdkRelease.schemaVersion !== 1 || sdkRelease.package?.name !== "@haya-inc/clawsembly"
-  || sdkRelease.package?.version !== sdkPackageManifest.version
-  || sdkRelease.distribution?.npmPublished !== (npmPublication.status === "published")
-  || sdkTarballName !== sdkTarballFile) {
-  throw new Error("The Pages SDK release manifest misidentifies the reviewed publication state.");
-}
-const sdkTarball = readFileSync(resolve(root, "dist/downloads", sdkTarballName));
-const sdkTarballSha256 = createHash("sha256").update(sdkTarball).digest("hex");
-if (sdkTarballSha256 !== sdkRelease.distribution.tarball.sha256
-  || sdkTarball.byteLength !== sdkRelease.distribution.tarball.bytes) {
-  throw new Error("The Pages SDK tarball bytes do not match the release manifest.");
-}
-const sdkTarballIntegrity = `sha512-${createHash("sha512").update(sdkTarball).digest("base64")}`;
-if (npmPublication.status === "published") {
-  if (sdkRelease.distribution.npm?.integrity !== sdkTarballIntegrity
-    || sdkRelease.install?.command !== `npm install @haya-inc/clawsembly@${sdkPackageManifest.version}`) {
-    throw new Error("The published npm record is not bound to the deployed SDK bytes.");
-  }
-} else if (sdkRelease.distribution.npm !== undefined
-  || sdkRelease.install?.command !== `npm install ${sdkRelease.distribution?.tarball?.url}`) {
-  throw new Error("The pending npm record must keep installation on the verified Pages tarball.");
-}
-const sdkChecksumName = sdkRelease.distribution.checksum.file;
-const sdkChecksum = readFileSync(resolve(root, "dist/downloads", sdkChecksumName), "utf8");
-if (sdkRelease.distribution.checksum.value !== sdkTarballSha256
-  || sdkChecksum !== `${sdkTarballSha256}  ${sdkTarballName}\n`) {
-  throw new Error("The Pages SDK checksum does not match the release tarball.");
-}
-const publicReport = readFileSync(resolve(root, "dist/data/compatibility.json"), "utf8");
-if (createHash("sha256").update(publicReport).digest("hex") !== sdkRelease.compatibility.reportSha256) {
-  throw new Error("The Pages SDK release is not bound to the deployed compatibility report.");
-}
-const deployedReport = JSON.parse(publicReport);
-if (sdkRelease.compatibility.status !== deployedReport.status
-  || sdkRelease.compatibility.openclaw.version !== deployedReport.artifact.version
-  || sdkRelease.compatibility.openclaw.integrity !== deployedReport.artifact.integrity
-  || sdkRelease.compatibility.runtime.provider !== deployedReport.target.runtime
-  || sdkRelease.compatibility.runtime.version !== deployedReport.target.runtimeVersion) {
-  throw new Error("The Pages SDK release compatibility identity drifted from its deployed report.");
-}
+assertSdkReleaseBinding({
+  sdkRelease,
+  npmPublication,
+  sdkTarballBytes: readFileSync(resolve(root, "dist/downloads", sdkTarballFile)),
+  sdkPackageVersion: sdkPackageManifest.version,
+  checksumFileText: readFileSync(resolve(root, "dist/downloads", `${sdkTarballFile}.sha256`), "utf8")
+});
+assertCompatibilityReportBinding({
+  sdkRelease,
+  publicReportText: readFileSync(resolve(root, "dist/data/compatibility.json"), "utf8")
+});
 
 const socialPreview = readFileSync(resolve(root, "apps/web/public/social-preview.png"));
 if (socialPreview.readUInt32BE(16) !== 1200 || socialPreview.readUInt32BE(20) !== 630) {
