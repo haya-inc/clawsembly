@@ -1,4 +1,6 @@
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
+const PACKAGE_NAME_PATTERN = /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/u;
+const PACKAGE_NAME_MAX_LENGTH = 214;
 const VERSION_PATTERN = /^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/u;
 const INTEGRITY_PATTERN = /^sha512-[A-Za-z0-9+/]+={0,2}$/u;
 const DEFAULT_MAX_BYTES = 1_000_000;
@@ -56,7 +58,9 @@ function assertExpectation(expectation) {
     throw new TypeError("verified report URL must be credential-free HTTPS without query or fragment");
   }
   if (!SHA256_PATTERN.test(expectation?.sha256)
-    || expectation?.artifact?.package !== "openclaw"
+    || typeof expectation?.artifact?.package !== "string"
+    || expectation.artifact.package.length > PACKAGE_NAME_MAX_LENGTH
+    || !PACKAGE_NAME_PATTERN.test(expectation.artifact.package)
     || !VERSION_PATTERN.test(expectation?.artifact?.version)
     || !INTEGRITY_PATTERN.test(expectation?.artifact?.integrity)
     || expectation?.target?.runtime !== "browserpod"
@@ -110,7 +114,7 @@ function assertReportShape(report, expectation) {
 
 /**
  * Fetches one exact compatibility report and binds its raw bytes, source URL,
- * OpenClaw artifact, and BrowserPod target before it can authorize launch.
+ * upstream artifact, and BrowserPod target before it can authorize launch.
  */
 export async function loadVerifiedCompatibilityReport(expectation, {
   fetchImpl = globalThis.fetch,

@@ -3,7 +3,7 @@ export interface CompatibilityReportInput {
   generatedAt: string;
   status: "probing" | "partial" | "supported" | "unsupported";
   target: { runtime: string; runtimeVersion?: string; browserBaseline?: string };
-  artifact: { package: "openclaw"; version: string; integrity: string };
+  artifact: { package: string; version: string; integrity: string };
   evidence?: Array<{ id: string; kind: string; path: string; sha256: string }>;
   checks?: Array<{ id: string; status: "pass" | "warn" | "fail" | "pending" }>;
 }
@@ -13,7 +13,7 @@ export interface CompatibilityReportExpectation {
   readonly sha256: string;
   readonly maxAgeMs: number;
   readonly artifact: Readonly<{
-    package: "openclaw";
+    package: string;
     version: string;
     integrity: string;
   }>;

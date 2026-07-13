@@ -4,9 +4,16 @@ import { unwrapVerifiedCompatibilityReport } from "./report-loader.mjs";
 export { bootVerifiedEmbed, createArtifactStorageKey } from "./boot.mjs";
 
 const CAPABILITY_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/u;
+const PACKAGE_NAME_PATTERN = /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/u;
+const PACKAGE_NAME_MAX_LENGTH = 214;
 const VERSION_PATTERN = /^[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/u;
 const INTEGRITY_PATTERN = /^sha512-[A-Za-z0-9+/]+={0,2}$/u;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
+
+function exactPackageName(value) {
+  return typeof value === "string" && value.length <= PACKAGE_NAME_MAX_LENGTH
+    && PACKAGE_NAME_PATTERN.test(value);
+}
 
 function plainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -33,14 +40,14 @@ function normalizeCapabilities(capabilities) {
 
 function assertReport(report) {
   if (!plainObject(report) || !plainObject(report.artifact) || !plainObject(report.target)
-    || report.artifact.package !== "openclaw" || typeof report.artifact.version !== "string"
+    || !exactPackageName(report.artifact.package) || typeof report.artifact.version !== "string"
     || !VERSION_PATTERN.test(report.artifact.version)
     || typeof report.artifact.integrity !== "string" || !INTEGRITY_PATTERN.test(report.artifact.integrity)
     || typeof report.generatedAt !== "string" || !Number.isFinite(Date.parse(report.generatedAt))
     || !["probing", "partial", "supported", "unsupported"].includes(report.status)
     || typeof report.target.runtime !== "string"
     || (report.target.runtimeVersion !== undefined && typeof report.target.runtimeVersion !== "string")) {
-    throw new TypeError("compatibility report cannot identify an exact OpenClaw artifact");
+    throw new TypeError("compatibility report cannot identify an exact upstream artifact");
   }
 }
 
@@ -68,7 +75,7 @@ export function createEmbedManifest({ report, runtime = "browserpod", capabiliti
   return Object.freeze({
     schemaVersion: 1,
     artifact: Object.freeze({
-      package: "openclaw",
+      package: reportValue.artifact.package,
       version: reportValue.artifact.version,
       integrity: reportValue.artifact.integrity
     }),
@@ -95,7 +102,7 @@ export function createEmbedManifest({ report, runtime = "browserpod", capabiliti
 export function assertVerifiedLaunch(manifest) {
   if (!plainObject(manifest) || manifest.schemaVersion !== 1 || manifest.runtime !== "browserpod"
     || manifest.runtimeVersion !== BROWSERPOD_ADAPTER_VERSION || !plainObject(manifest.artifact)
-    || manifest.artifact.package !== "openclaw" || typeof manifest.artifact.version !== "string"
+    || !exactPackageName(manifest.artifact.package) || typeof manifest.artifact.version !== "string"
     || !VERSION_PATTERN.test(manifest.artifact.version) || typeof manifest.artifact.integrity !== "string"
     || !INTEGRITY_PATTERN.test(manifest.artifact.integrity) || !Array.isArray(manifest.capabilities)) {
     throw new TypeError("embed manifest is invalid");

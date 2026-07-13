@@ -1,4 +1,6 @@
 const IDENTIFIER_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/u;
+const PACKAGE_NAME_PATTERN = /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/u;
+const PACKAGE_NAME_MAX_LENGTH = 214;
 const REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/u;
 const MAX_SCOPE_LENGTH = 256;
 
@@ -26,9 +28,11 @@ function assertSubject(subject) {
     throw new TypeError("broker subject must include an exact artifact identity");
   }
   const artifact = subject.artifact;
-  if (artifact.package !== "openclaw" || typeof artifact.version !== "string" || artifact.version.length === 0
+  if (typeof artifact.package !== "string" || artifact.package.length > PACKAGE_NAME_MAX_LENGTH
+    || !PACKAGE_NAME_PATTERN.test(artifact.package)
+    || typeof artifact.version !== "string" || artifact.version.length === 0
     || typeof artifact.integrity !== "string" || !artifact.integrity.startsWith("sha512-")) {
-    throw new TypeError("broker subject OpenClaw artifact identity is invalid");
+    throw new TypeError("broker subject artifact identity is invalid");
   }
   assertIdentifier(subject.runtime, "broker runtime");
   if (typeof subject.sessionId !== "string" || !REQUEST_ID_PATTERN.test(subject.sessionId)) {

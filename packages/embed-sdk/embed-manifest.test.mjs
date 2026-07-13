@@ -109,12 +109,30 @@ test("rejects duplicate grants and non-BrowserPod embedded runtimes", () => {
 test("rejects reports without exact artifact integrity", () => {
   assert.throws(
     () => createEmbedManifest({ report: { ...report, artifact: { ...report.artifact, integrity: "latest" } } }),
-    /exact OpenClaw artifact/u
+    /exact upstream artifact/u
   );
   assert.throws(
     () => createEmbedManifest({ report: { ...report, artifact: { ...report.artifact, integrity: "sha512-not-base64-" } } }),
-    /exact OpenClaw artifact/u
+    /exact upstream artifact/u
   );
+});
+
+test("rejects malformed upstream package names without weakening exactness", () => {
+  for (const forged of ["../openclaw", "OpenClaw", "openclaw claw", `x${"a".repeat(214)}`, "", 7]) {
+    assert.throws(
+      () => createEmbedManifest({ report: { ...report, artifact: { ...report.artifact, package: forged } } }),
+      /exact upstream artifact/u
+    );
+  }
+});
+
+test("identifies a second upstream artifact through the same fail-closed path", () => {
+  const manifest = createEmbedManifest({
+    report: { ...report, artifact: { ...report.artifact, package: "clawsembly-hello-agent" } }
+  });
+  assert.equal(manifest.artifact.package, "clawsembly-hello-agent");
+  assert.equal(manifest.launchable, false);
+  assert.throws(() => assertVerifiedLaunch(manifest), /verified BrowserPod launch blocked/u);
 });
 
 test("rejects a forged launchable manifest with inconsistent evidence", async () => {

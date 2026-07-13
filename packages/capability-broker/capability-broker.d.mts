@@ -1,5 +1,5 @@
 export interface BrokerSubject {
-  artifact: { package: "openclaw"; version: string; integrity: string };
+  artifact: { package: string; version: string; integrity: string };
   runtime: string;
   sessionId: string;
 }

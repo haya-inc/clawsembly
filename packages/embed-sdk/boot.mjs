@@ -22,7 +22,12 @@ export function createArtifactStorageKey(manifest, workspaceId) {
   if (typeof workspaceId !== "string" || !WORKSPACE_ID_PATTERN.test(workspaceId)) {
     throw new TypeError("embed workspace identifier is invalid");
   }
-  const key = `clawsembly:${manifest.artifact.version}:${workspaceId}`;
+  if (typeof manifest?.artifact?.package !== "string" || manifest.artifact.package.length === 0) {
+    throw new TypeError("embed artifact package is required for storage keys");
+  }
+  // Scoped npm names carry "@" and "/", which BrowserPod storage keys reject.
+  const packageSegment = manifest.artifact.package.replaceAll(/[^A-Za-z0-9._-]/gu, "-");
+  const key = `clawsembly:${packageSegment}:${manifest.artifact.version}:${workspaceId}`;
   if (key.length > 128) throw new TypeError("embed artifact storage key is too long");
   return key;
 }
@@ -46,7 +51,7 @@ export function createEmbedSessionLifecycle({ runtime, gateway, closeConnections
       if (gatewayNeedsStop()) {
         return Object.freeze({
           complete: false,
-          reason: "OpenClaw Gateway must stop before logical runtime disposal",
+          reason: "the upstream gateway must stop before logical runtime disposal",
           activeTaskIds: Object.freeze(gateway.task?.id ? [gateway.task.id] : [])
         });
       }
@@ -65,7 +70,7 @@ export function createEmbedSessionLifecycle({ runtime, gateway, closeConnections
       if (gateway.state === "stopping") {
         return Object.freeze({
           logicalSessionClosed: false,
-          reason: "OpenClaw Gateway stop is already in progress",
+          reason: "an upstream gateway stop is already in progress",
           gatewayStop: null,
           runtimeDisposition: null
         });
@@ -77,7 +82,7 @@ export function createEmbedSessionLifecycle({ runtime, gateway, closeConnections
         catch {
           return Object.freeze({
             logicalSessionClosed: false,
-            reason: "OpenClaw Gateway stop failed",
+            reason: "the upstream gateway stop failed",
             gatewayStop: null,
             runtimeDisposition: null
           });
@@ -104,9 +109,11 @@ export function createEmbedSessionLifecycle({ runtime, gateway, closeConnections
 }
 
 /**
- * Boots the first evidence-bound Clawsembly session. There is intentionally no
- * unverified escape hatch here; BrowserPod probes use the lower runtime adapter
- * until the provider earns a supported compatibility report.
+ * Boots an evidence-bound Clawsembly session for the OpenClaw binding. There
+ * is intentionally no unverified escape hatch here; BrowserPod probes use the
+ * lower runtime adapter until the provider earns a supported compatibility
+ * report. Other upstream bindings compose the same core primitives through
+ * their own boot path instead of passing through this one.
  */
 export async function bootVerifiedEmbed({
   manifest,
@@ -128,6 +135,9 @@ export async function bootVerifiedEmbed({
   gatewayOptions = {}
 }) {
   const verifiedManifest = assertVerifiedLaunch(manifest);
+  if (verifiedManifest.artifact.package !== "openclaw") {
+    throw new TypeError("bootVerifiedEmbed wires the OpenClaw binding; another upstream artifact requires its own binding boot path");
+  }
   if (typeof sessionId !== "string" || !SESSION_ID_PATTERN.test(sessionId)) {
     throw new TypeError("embed session identifier is invalid");
   }

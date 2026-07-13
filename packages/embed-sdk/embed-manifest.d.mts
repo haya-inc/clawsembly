@@ -5,7 +5,7 @@ export type { CompatibilityReportInput, VerifiedCompatibilityReport } from "./re
 
 export interface EmbedManifest {
   schemaVersion: 1;
-  artifact: Readonly<{ package: "openclaw"; version: string; integrity: string }>;
+  artifact: Readonly<{ package: string; version: string; integrity: string }>;
   runtime: "browserpod";
   runtimeVersion: "2.12.1";
   evidence: Readonly<{

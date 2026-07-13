@@ -90,6 +90,21 @@ test("refuses cross-runtime or partial evidence before spending BrowserPod token
   assert.equal(fake.calls.length, 0);
 });
 
+test("refuses to wire the OpenClaw binding for another upstream artifact", async () => {
+  const fake = fakeBrowserPod();
+  const helloReport = report();
+  helloReport.artifact = { ...helloReport.artifact, package: "clawsembly-hello-agent" };
+  await assert.rejects(
+    bootVerifiedEmbed({
+      manifest: createEmbedManifest({ report: await verifyReport(helloReport) }),
+      BrowserPod: fake.BrowserPod,
+      browserPodApiKey: "secret"
+    }),
+    /wires the OpenClaw binding/u
+  );
+  assert.equal(fake.calls.length, 0);
+});
+
 test("rejects an unsafe mailbox channel before BrowserPod boot", async () => {
   const fake = fakeBrowserPod();
   await assert.rejects(
@@ -215,7 +230,7 @@ test("boots a verified BrowserPod session and binds capability authority to its 
   assert.equal(session.gateway.state, "idle");
   assert.equal(session.gateway.port, 18_789);
   assert.deepEqual(session.gateway.artifact, manifest.artifact);
-  assert.equal(fake.calls[0].storageKey, "clawsembly:2026.6.11:primary");
+  assert.equal(fake.calls[0].storageKey, "clawsembly:openclaw:2026.6.11:primary");
   assert.deepEqual(session.capabilities.subject, {
     artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY },
     runtime: "browserpod",
@@ -269,14 +284,19 @@ test("boots a verified BrowserPod session and binds capability authority to its 
   assert.equal(JSON.stringify(session).includes("secret"), false);
 });
 
-test("binds persistent storage keys to the exact OpenClaw version", () => {
+test("binds persistent storage keys to the exact upstream package and version", () => {
   const one = createEmbedManifest({ report: report() });
   const nextReport = report();
   const two = createEmbedManifest({
     report: { ...nextReport, artifact: { ...nextReport.artifact, version: "2026.7.0" } }
   });
-  assert.equal(createArtifactStorageKey(one, "primary"), "clawsembly:2026.6.11:primary");
-  assert.equal(createArtifactStorageKey(two, "primary"), "clawsembly:2026.7.0:primary");
+  const helloReport = report();
+  const hello = createEmbedManifest({
+    report: { ...helloReport, artifact: { ...helloReport.artifact, package: "@scope/hello-agent" } }
+  });
+  assert.equal(createArtifactStorageKey(one, "primary"), "clawsembly:openclaw:2026.6.11:primary");
+  assert.equal(createArtifactStorageKey(two, "primary"), "clawsembly:openclaw:2026.7.0:primary");
+  assert.equal(createArtifactStorageKey(hello, "primary"), "clawsembly:-scope-hello-agent:2026.6.11:primary");
   assert.throws(() => createArtifactStorageKey(one, "../shared"), /workspace identifier is invalid/u);
 });
 

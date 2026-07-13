@@ -367,7 +367,10 @@ Code (`contributor`):
   recipe, protocol client, capability requirements, and evidence gates — plus
   a minimal reference binding (a trivial hello-agent used only in tests) that
   proves the boundary is upstream-portable rather than a stated design
-  property (`contributor`);
+  property (`contributor`; shipped 2026-07-13 as
+  [`packages/hello-agent-binding/`](../packages/hello-agent-binding/README.md)
+  after the core artifact-identity checks were generalized from an `openclaw`
+  literal to exact npm-name validation);
 - an embedder-DX slice: a ten-line host integration, declarative capability
   configuration, and a pluggable permission UI (`contributor`);
 - the compatibility dataset published as an npm data package and/or a Renovate

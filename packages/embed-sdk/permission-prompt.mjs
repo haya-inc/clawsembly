@@ -13,7 +13,14 @@ const STATUS_LABELS = Object.freeze({
 });
 
 const IDENTIFIER_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/u;
+const PACKAGE_NAME_PATTERN = /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/u;
+const PACKAGE_NAME_MAX_LENGTH = 214;
 const SESSION_PATTERN = /^[A-Za-z0-9_-]{1,128}$/u;
+
+function exactPackageName(value) {
+  return typeof value === "string" && value.length <= PACKAGE_NAME_MAX_LENGTH
+    && PACKAGE_NAME_PATTERN.test(value);
+}
 
 function isPlainObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -40,7 +47,7 @@ function assertManifest(manifest) {
   if (!isPlainObject(manifest) || manifest.schemaVersion !== 1 || !isPlainObject(manifest.subject)
     || !isPlainObject(manifest.subject.artifact) || !Array.isArray(manifest.permissions)
     || !Number.isFinite(Date.parse(manifest.generatedAt))
-    || manifest.subject.artifact.package !== "openclaw"
+    || !exactPackageName(manifest.subject.artifact.package)
     || typeof manifest.subject.artifact.version !== "string" || manifest.subject.artifact.version.length === 0
     || typeof manifest.subject.artifact.integrity !== "string" || !manifest.subject.artifact.integrity.startsWith("sha512-")
     || manifest.subject.runtime !== "browserpod" || !SESSION_PATTERN.test(manifest.subject.sessionId)) {
@@ -301,7 +308,7 @@ function assertExactKeys(value, allowed, label) {
 function normalizeAuditSubject(subject) {
   assertExactKeys(subject, ["artifact", "runtime", "sessionId"], "audit subject");
   assertExactKeys(subject.artifact, ["package", "version", "integrity"], "audit artifact");
-  if (subject.artifact.package !== "openclaw" || typeof subject.artifact.version !== "string"
+  if (!exactPackageName(subject.artifact.package) || typeof subject.artifact.version !== "string"
     || subject.artifact.version.length === 0 || typeof subject.artifact.integrity !== "string"
     || !subject.artifact.integrity.startsWith("sha512-") || subject.runtime !== "browserpod"
     || typeof subject.sessionId !== "string" || !SESSION_PATTERN.test(subject.sessionId)) {
@@ -309,7 +316,7 @@ function normalizeAuditSubject(subject) {
   }
   return {
     artifact: {
-      package: "openclaw",
+      package: subject.artifact.package,
       version: subject.artifact.version,
       integrity: subject.artifact.integrity
     },

@@ -1,0 +1,13 @@
+{
+  "name": "clawsembly-hello-agent",
+  "version": "0.1.0",
+  "description": "Trivial reference upstream for the Clawsembly binding contract. In-repository test fixture; deliberately private and not published to any registry.",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "hello-agent.mjs",
+  "files": [
+    "hello-agent.mjs",
+    "protocol.json"
+  ]
+}
