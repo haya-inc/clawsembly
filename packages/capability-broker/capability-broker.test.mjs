@@ -90,11 +90,17 @@ test("fails closed on expired grants and redacts handler exceptions", async () =
   );
 });
 
-test("cancels before dispatch and validates the exact OpenClaw subject", async () => {
-  assert.throws(
-    () => new CapabilityBroker({ subject: { ...subject, artifact: { package: "fork", version: "1", integrity: "sha512-x" } } }),
-    /artifact identity is invalid/u
-  );
+test("cancels before dispatch and validates the exact artifact subject", async () => {
+  for (const forged of ["../fork", "Fork", "fork ", `x${"a".repeat(214)}`, 7]) {
+    assert.throws(
+      () => new CapabilityBroker({ subject: { ...subject, artifact: { package: forged, version: "1", integrity: "sha512-x" } } }),
+      /artifact identity is invalid/u
+    );
+  }
+  const secondUpstream = new CapabilityBroker({
+    subject: { ...subject, artifact: { package: "clawsembly-hello-agent", version: "0.1.0", integrity: "sha512-hello" } }
+  });
+  assert.equal(secondUpstream.subject.artifact.package, "clawsembly-hello-agent");
   const broker = new CapabilityBroker({
     subject,
     grants: [{ capability: "notification.show", scope: "channel:browser" }],

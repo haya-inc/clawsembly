@@ -3,6 +3,8 @@ export const DEFAULT_MAILBOX_MAX_BYTES = 256 * 1024;
 const CHANNEL_PATTERN = /^[A-Za-z0-9_-]{1,64}$/u;
 const REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]{1,128}$/u;
 const IDENTIFIER_PATTERN = /^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$/u;
+const PACKAGE_NAME_PATTERN = /^(?:@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/u;
+const PACKAGE_NAME_MAX_LENGTH = 214;
 const MAX_SEQUENCE = 99_999_999;
 
 function isPlainObject(value) {
@@ -73,11 +75,13 @@ function assertScope(value) {
 function assertArtifact(value) {
   if (!isPlainObject(value)) throw new MailboxProtocolError("invalid_manifest", "mailbox artifact is invalid");
   assertExactKeys(value, ["package", "version", "integrity"], "mailbox artifact");
-  if (value.package !== "openclaw" || typeof value.version !== "string" || value.version.length === 0
+  if (typeof value.package !== "string" || value.package.length > PACKAGE_NAME_MAX_LENGTH
+    || !PACKAGE_NAME_PATTERN.test(value.package)
+    || typeof value.version !== "string" || value.version.length === 0
     || typeof value.integrity !== "string" || !value.integrity.startsWith("sha512-")) {
     throw new MailboxProtocolError("invalid_manifest", "mailbox artifact is invalid");
   }
-  return Object.freeze({ package: "openclaw", version: value.version, integrity: value.integrity });
+  return Object.freeze({ package: value.package, version: value.version, integrity: value.integrity });
 }
 
 function assertSubject(value) {

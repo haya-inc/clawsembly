@@ -8,7 +8,7 @@
     "dev": "vite"
   },
   "dependencies": {
-    "@haya-inc/clawsembly": "https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.2/haya-inc-clawsembly-0.1.0-alpha.2.tgz"
+    "@haya-inc/clawsembly": "https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.3/haya-inc-clawsembly-0.1.0-alpha.3.tgz"
   },
   "devDependencies": {
     "typescript": "7.0.2",

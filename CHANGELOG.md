@@ -9,6 +9,33 @@ The project does not yet promise semantic-version compatibility.
 
 No changes yet.
 
+## [0.1.0-alpha.3] - 2026-07-13
+
+### Added
+
+- the `hello-agent` reference binding (`packages/hello-agent-binding/`): a
+  trivial second upstream with an exact npm-shaped identity, a digest-verified
+  staging recipe, dual deterministic readiness signals, a one-method protocol
+  client pinned to the artifact's descriptor, an explicit empty
+  capability-requirement declaration, and a minimal digest-bound evidence
+  gate. Its tests execute the staged guest as a real Node child process
+  behind a local provider double, without a metered runtime, proving the
+  binding contract is satisfiable by something other than OpenClaw. The
+  fixture is private, unpublished, and carries no runtime-support claim.
+
+### Changed
+
+- the core no longer hard-codes the `openclaw` package literal: the verified
+  report loader, embed manifest, launch assertion, capability-broker subject,
+  mailbox artifact, and permission-prompt subject now validate an exact
+  npm-shaped package name (with the same version and SHA-512 exactness as
+  before), and `bootVerifiedEmbed` explicitly rejects non-OpenClaw manifests
+  as the OpenClaw binding boot path;
+- BrowserPod persistent storage keys now include the upstream package name
+  (`clawsembly:<package>:<version>:<workspace>`) so two upstreams at the same
+  version cannot collide; existing persisted workspaces keyed under the old
+  format start fresh.
+
 ## [0.1.0-alpha.2] - 2026-07-13
 
 ### Fixed

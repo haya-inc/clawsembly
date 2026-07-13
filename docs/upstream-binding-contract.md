@@ -9,9 +9,9 @@ contract for the repository, not a stable plugin API: the shapes below may
 change before 1.0, and satisfying them requires changes inside this repository
 today.
 
-Honesty constraint: OpenClaw is the only implemented binding. Upstream
-portability is a stated design property until a second binding exists; nothing
-in this document claims another agent already runs.
+Honesty constraint: OpenClaw is the only bound real agent. The `hello-agent`
+reference binding below exists solely to prove the core is upstream-portable
+in tests; nothing in this document claims another real agent already runs.
 
 ## What the core provides
 
@@ -94,10 +94,42 @@ resolution, tarball verification) and `packages/browser-runtime/openclaw-install
 
 ## Adding a second binding
 
-The intended proof of this contract is deliberately small: a `hello-agent`
-reference binding — a trivial published npm package with a boot recipe, a
-one-method protocol surface, and a minimal evidence gate — exercised in tests
-without a metered provider. Its purpose is to demonstrate that the core does
-not hard-code OpenClaw specifics, not to support a second real agent. Until it
-exists, statements about multi-upstream support must point at this contract,
-not at shipped capability.
+The proof of this contract is deliberately small and now exists: the
+`hello-agent` reference binding (`packages/hello-agent-binding/`). It supplies
+each requirement above for a trivial upstream:
+
+1. **Exact artifact identity** — `clawsembly-hello-agent`, an in-repository
+   fixture packed to a byte-reproducible tarball whose name, exact version,
+   SHA-512 integrity, and per-file digests are pinned in a generated module
+   (`npm run hello-agent:check` rejects fixture drift). It is deliberately
+   `private: true` and not on any registry; the identity machinery treats it
+   exactly like a registry artifact.
+2. **Boot recipe** — digest-verified staging (nothing executes before every
+   file matches its pin), two deterministic readiness signals (the
+   `[hello-agent] ready` log line and a parseable session record), and
+   shutdown through the generic nonce-bound cooperative supervisor.
+3. **Protocol client** — a bounded surface of exactly one method,
+   `hello.say`, constructed against the artifact's protocol descriptor and
+   pinned to its hash; descriptor drift fails closed. The guest mints a
+   session token at boot that every request must present and that the client
+   holds in memory only.
+4. **Capability requirements** — an explicit empty declaration
+   (`HELLO_AGENT_CAPABILITY_REQUIREMENTS`); the greeting agent needs no host
+   capabilities, and the empty mapping is the declaration.
+5. **Evidence gates** — a minimal gate that accepts only records bound to the
+   exact artifact identity with verified staging, both readiness signals, at
+   least one protocol round trip, and an acknowledged cooperative stop; check
+   statuses derive as `pending` without such a record.
+
+Its tests boot the staged fixture as a real Node child process behind a local
+provider double implementing the documented BrowserPod 2.x surface — no
+metered provider tokens — and drive the unmodified core end to end:
+verified-report loading, embed-manifest creation, the fail-closed launch
+assertion, the capability broker and consent controller, and the shared
+session lifecycle, all for a package that is not OpenClaw.
+
+Its purpose is to demonstrate that the core does not hard-code OpenClaw
+specifics, not to support a second real agent: hello-agent carries no
+BrowserPod runtime evidence, never appears in published reports or Pages, and
+statements about running other real agents remain claims about this contract,
+not about shipped capability.

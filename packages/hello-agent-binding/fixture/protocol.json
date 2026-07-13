@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "protocol": "clawsembly-hello/1",
+  "methods": [
+    {
+      "name": "hello.say",
+      "params": {
+        "name": "printable string, 1-64 characters"
+      },
+      "result": {
+        "greeting": "string, at most 256 characters"
+      }
+    }
+  ]
+}
