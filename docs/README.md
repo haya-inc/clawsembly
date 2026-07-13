@@ -15,6 +15,7 @@ design does not become stale when OpenClaw changes.
 | [Roadmap](roadmap.md) | Milestones and acceptance criteria for the first implementation |
 | [Product](product.md) | Initial user, adoption loop, public artifacts, and success metrics |
 | [Verified embedding](embedding.md) | Artifact, evidence, capability, and BrowserPod launch contract |
+| [Upstream binding contract](upstream-binding-contract.md) | What any bound upstream must supply: identity, boot recipe, protocol client, capabilities, evidence gates |
 | [BrowserPod evidence](browserpod-evidence.md) | Exact-artifact readiness capture, schema, and report attachment workflow |
 | [Capability mailbox](capability-mailbox.md) | Typed file transport, cancellation, replay defense, and cooperative Gateway stop |
 | [Capability permissions](capability-permissions.md) | Pending requests, bounded approval, deny, revoke, expiry, and audit export |
