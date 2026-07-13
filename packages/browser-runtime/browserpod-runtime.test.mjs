@@ -3,63 +3,12 @@ import test from "node:test";
 
 import { BrowserRuntimeError } from "./browser-runtime.mjs";
 import { createBrowserPodRuntime } from "./browserpod-runtime.mjs";
-
-function deferred() {
-  let resolve;
-  let reject;
-  const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
-  return { promise, resolve, reject };
-}
+import { createFakeBrowserPod, deferred } from "../test-support/fake-browserpod.mjs";
 
 function fakeProvider() {
-  const calls = [];
-  const portalHandlers = [];
   const run = deferred();
-  let terminalOutput;
-  const files = new Map();
-  const BrowserPod = {
-    async boot(options) {
-      calls.push(["boot", options]);
-      return {
-        onPortal(handler) { portalHandlers.push(handler); },
-        async createCustomTerminal(terminalOptions) {
-          calls.push(["terminal", { cols: terminalOptions.cols, rows: terminalOptions.rows }]);
-          terminalOutput = terminalOptions.onOutput;
-          return { kind: "terminal" };
-        },
-        run(executable, args, runOptions) {
-          calls.push(["run", { executable, args, options: runOptions }]);
-          return run.promise;
-        },
-        async createDirectory(path, directoryOptions) { calls.push(["mkdir", { path, options: directoryOptions }]); },
-        async createFile(path, mode) {
-          calls.push(["createFile", { path, mode }]);
-          let text = "";
-          return {
-            async write(value) { text += value; files.set(path, text); return value.length; },
-            async close() { calls.push(["close", path]); }
-          };
-        },
-        async openFile(path, mode) {
-          calls.push(["openFile", { path, mode }]);
-          const text = files.get(path) ?? "";
-          return {
-            async getSize() { return text.length; },
-            async read(length) { return text.slice(0, length); },
-            async close() { calls.push(["close", path]); }
-          };
-        }
-      };
-    }
-  };
-  return {
-    BrowserPod,
-    calls,
-    run,
-    emitOutput(text) { terminalOutput(new TextEncoder().encode(text).buffer); },
-    emitRawOutput(value, vt) { terminalOutput(value, vt); },
-    emitPortal(value) { for (const handler of portalHandlers) handler(value); }
-  };
+  const fake = createFakeBrowserPod({ onRun: () => run.promise });
+  return { ...fake, run };
 }
 
 test("boots a persistent BrowserPod without passing its API key to guest work", async () => {

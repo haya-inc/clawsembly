@@ -1,95 +1,46 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { COOPERATIVE_SUPERVISOR_PREFIX } from "./cooperative-process.mjs";
 import {
   BROWSERPOD_HEALTH_PREFIX,
   createVerifiedOpenClawGateway,
   parseBrowserPodHealthEvidence
 } from "./openclaw-gateway.mjs";
+import {
+  TEST_OPENCLAW_ARTIFACT,
+  createFakeRuntime,
+  createFakeSupervisorTask,
+  createFakeTask,
+  healthEvidenceLine
+} from "../test-support/fake-browserpod.mjs";
 
-const ARTIFACT = Object.freeze({
-  package: "openclaw",
-  version: "2026.6.11",
-  integrity: `sha512-${"A".repeat(86)}==`
-});
-
-function deferred() {
-  let resolve;
-  const promise = new Promise((done) => { resolve = done; });
-  return { promise, resolve };
-}
+const ARTIFACT = TEST_OPENCLAW_ARTIFACT;
 
 function runtimeFixture({ healthStatus = "completed", configStatus = "completed", pairingLists = [] } = {}) {
-  const files = new Map();
-  const commands = [];
-  const supervisorCompletion = deferred();
-  let supervisorTranscript = `${COOPERATIVE_SUPERVISOR_PREFIX}{"event":"ready"}\n[gateway] ready\n`;
-  let supervisorStatus = "running";
-  const supervisorListeners = new Set();
-  const supervisorTask = {
-    id: "gateway-task-1",
-    get status() { return supervisorStatus; },
-    get transcript() { return supervisorTranscript; },
-    outputTruncated: false,
-    onOutput(listener, options = {}) {
-      supervisorListeners.add(listener);
-      if (options.replay !== false && supervisorTranscript) listener(supervisorTranscript);
-      return () => supervisorListeners.delete(listener);
-    },
-    wait() { return supervisorCompletion.promise; },
-    waitForOutput(needle) {
-      return supervisorTranscript.includes(needle)
-        ? Promise.resolve(supervisorTranscript)
-        : Promise.reject(new Error(`missing ${needle}`));
-    }
-  };
-  const healthTranscript = `${BROWSERPOD_HEALTH_PREFIX}${JSON.stringify({
-    healthz: { status: 200, body: "{\"ok\":true}" },
-    readyz: { status: 200, body: "{\"ready\":true}" }
-  })}\n`;
-  const healthTask = {
+  const supervisor = createFakeSupervisorTask();
+  const healthTask = createFakeTask({
     id: "health-task-1",
     status: healthStatus,
-    transcript: healthTranscript,
-    outputTruncated: false,
-    onOutput(listener) { listener(healthTranscript); return () => true; },
-    async wait() { return { status: healthStatus, outputBytes: healthTranscript.length, outputTruncated: false }; }
-  };
-  const configTask = {
+    transcript: healthEvidenceLine()
+  });
+  const configTask = createFakeTask({
     id: "config-task-1",
     status: configStatus,
-    transcript: "Updated gateway.controlUi.allowedOrigins\n",
-    outputTruncated: false,
-    onOutput(listener) { listener(this.transcript); return () => true; },
-    async wait() { return { status: configStatus, outputBytes: this.transcript.length, outputTruncated: false }; }
-  };
-  const deviceTask = (transcript) => ({
-    id: `device-task-${commands.length + 1}`,
-    status: "completed",
+    transcript: "Updated gateway.controlUi.allowedOrigins\n"
+  });
+  const deviceTask = (starts, transcript) => createFakeTask({
+    id: `device-task-${starts}`,
     transcript: `${JSON.stringify(transcript)}\n`,
-    outputTruncated: false,
-    onOutput() { return () => true; },
-    async wait() { return { status: "completed", outputBytes: this.transcript.length, outputTruncated: false }; }
+    replayOnOutput: false
   });
   let pairingListIndex = 0;
-  const runtime = {
-    provider: "browserpod",
-    files,
-    async createDirectory() {},
-    async writeTextFile(path, source) {
-      files.set(path, source);
-      if (path.endsWith("/stop-gateway.json")) {
-        supervisorTranscript += `${COOPERATIVE_SUPERVISOR_PREFIX}{"event":"exit","requestedStop":true,"code":0,"signal":null,"error":false}\n`;
-        for (const listener of supervisorListeners) listener(supervisorTranscript);
-        supervisorStatus = "completed";
-        supervisorCompletion.resolve({ status: "completed", outputBytes: supervisorTranscript.length, outputTruncated: false });
-      }
+  const runtime = createFakeRuntime({
+    onWriteTextFile(path) {
+      if (path.endsWith("/stop-gateway.json")) supervisor.stop();
     },
-    async start(command) {
-      commands.push(command);
+    onStart(command, { starts }) {
       if (command.args.includes("gateway.controlUi.allowedOrigins")) return configTask;
-      if (command.args[0]?.endsWith("/supervisor-gateway.mjs")) return supervisorTask;
+      if (command.args[0]?.endsWith("/supervisor-gateway.mjs")) return supervisor.task;
       if (command.args[0]?.endsWith("/clawsembly-health.mjs")) return healthTask;
       const devicesIndex = command.args.indexOf("devices");
       if (devicesIndex >= 0) {
@@ -97,22 +48,19 @@ function runtimeFixture({ healthStatus = "completed", configStatus = "completed"
         if (action === "list") {
           const selected = pairingLists[Math.min(pairingListIndex, pairingLists.length - 1)] ?? { pending: [], paired: [] };
           pairingListIndex += 1;
-          return deviceTask(selected);
+          return deviceTask(starts, selected);
         }
         const requestId = command.args[devicesIndex + 2];
         const selected = pairingLists[Math.max(0, Math.min(pairingListIndex - 1, pairingLists.length - 1))];
         const pending = selected?.pending?.find((entry) => entry.requestId === requestId);
-        return deviceTask(action === "approve"
+        return deviceTask(starts, action === "approve"
           ? { requestId, device: { deviceId: pending?.deviceId } }
           : { requestId, deviceId: pending?.deviceId });
       }
       throw new Error(`unexpected command ${command.executable}`);
-    },
-    async waitForPortal(port) {
-      return { port, url: "https://browserpod.example/session", visibility: "public-url" };
     }
-  };
-  return { runtime, supervisorTask, commands };
+  });
+  return { runtime, supervisorTask: supervisor.task, commands: runtime.commands };
 }
 
 function installerFixture() {
