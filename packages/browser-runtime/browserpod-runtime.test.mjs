@@ -22,16 +22,16 @@ function fakeProvider() {
       calls.push(["boot", options]);
       return {
         onPortal(handler) { portalHandlers.push(handler); },
-        async createCustomTerminal(options) {
-          calls.push(["terminal", { cols: options.cols, rows: options.rows }]);
-          terminalOutput = options.onOutput;
+        async createCustomTerminal(terminalOptions) {
+          calls.push(["terminal", { cols: terminalOptions.cols, rows: terminalOptions.rows }]);
+          terminalOutput = terminalOptions.onOutput;
           return { kind: "terminal" };
         },
-        run(executable, args, options) {
-          calls.push(["run", { executable, args, options }]);
+        run(executable, args, runOptions) {
+          calls.push(["run", { executable, args, options: runOptions }]);
           return run.promise;
         },
-        async createDirectory(path, options) { calls.push(["mkdir", { path, options }]); },
+        async createDirectory(path, directoryOptions) { calls.push(["mkdir", { path, options: directoryOptions }]); },
         async createFile(path, mode) {
           calls.push(["createFile", { path, mode }]);
           let text = "";

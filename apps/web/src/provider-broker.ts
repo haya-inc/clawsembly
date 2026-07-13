@@ -633,8 +633,8 @@ export async function runProviderBrokerPolicyProbe(): Promise<ProviderBrokerProb
       { type: "response.output_text.delta", delta: "stream passed." },
       { type: "response.completed", response: { status: "completed" } }
     ];
-    const body = `${events.map((event) => `event: ${event.type}\ndata: ${JSON.stringify(event)}`).join("\n\n")}\n\n`;
-    return new Response(body, {
+    const streamText = `${events.map((event) => `event: ${event.type}\ndata: ${JSON.stringify(event)}`).join("\n\n")}\n\n`;
+    return new Response(streamText, {
       status: 200,
       headers: { "content-type": "text/event-stream", "x-request-id": "req_stream_probe" }
     });
@@ -662,8 +662,8 @@ export async function runProviderBrokerPolicyProbe(): Promise<ProviderBrokerProb
       { type: "response.function_call_arguments.done", item_id: item.id, arguments: "{}" },
       { type: "response.completed", response: { status: "completed" } }
     ];
-    const body = `${events.map((event) => `event: ${event.type}\ndata: ${JSON.stringify(event)}`).join("\n\n")}\n\n`;
-    return new Response(body, { status: 200, headers: { "content-type": "text/event-stream" } });
+    const streamText = `${events.map((event) => `event: ${event.type}\ndata: ${JSON.stringify(event)}`).join("\n\n")}\n\n`;
+    return new Response(streamText, { status: 200, headers: { "content-type": "text/event-stream" } });
   };
   const functionCalls: OpenAIStreamFunctionCall[] = [];
   const functionResult = await performOpenAIStream(

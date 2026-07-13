@@ -141,13 +141,13 @@ test("returns a generic broker denial and rejects request-id replay", async (t) 
 
 test("propagates guest cancellation to the running capability handler", async (t) => {
   let handlerStarted;
-  const started = new Promise((resolve) => { handlerStarted = resolve; });
+  const started = new Promise((release) => { handlerStarted = release; });
   const { broker, host, client } = await setup(t, {
     grants: [{ capability: "provider.request", scope: "model:approved", maxCalls: 1 }],
     handlers: {
       "provider.request": async (_input, { signal }) => {
         handlerStarted();
-        await new Promise((resolve, reject) => {
+        await new Promise((_resolve, reject) => {
           signal?.addEventListener("abort", () => reject(new Error("provider secret detail")), { once: true });
         });
         return null;

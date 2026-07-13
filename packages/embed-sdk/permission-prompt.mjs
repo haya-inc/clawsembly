@@ -296,7 +296,10 @@ export function downloadCapabilityAudit(audit, {
   document.body.append(link);
   link.click();
   link.remove();
-  queueMicrotask(() => urlApi.revokeObjectURL(url));
+  // Revoking in the same microtask can race the download in some engines;
+  // a short deferral keeps the blob alive until the save begins.
+  const revokeTimer = setTimeout(() => urlApi.revokeObjectURL(url), 10_000);
+  revokeTimer?.unref?.();
 }
 
 function assertExactKeys(value, allowed, label) {

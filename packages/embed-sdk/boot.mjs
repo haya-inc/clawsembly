@@ -317,8 +317,22 @@ export async function bootVerifiedEmbed({
         ...(options.onGap === undefined ? {} : { onGap: options.onGap }),
         ...(options.now === undefined ? {} : { now: options.now })
       });
-      protocolClients.add(client);
-      return client;
+      // Track a delegating wrapper so an individually closed client leaves
+      // the session's close set instead of lingering until session close.
+      const tracked = Object.freeze({
+        schemaVersion: client.schemaVersion,
+        contract: client.contract,
+        get state() { return client.state; },
+        connect: client.connect,
+        chat: client.chat,
+        deviceAuth: client.deviceAuth,
+        close() {
+          protocolClients.delete(tracked);
+          return client.close();
+        }
+      });
+      protocolClients.add(tracked);
+      return tracked;
     },
     get closed() { return lifecycle.closed; },
     dispose() { return lifecycle.dispose(); },
