@@ -370,9 +370,14 @@ uploads evidence for review without committing or promoting it automatically.
 ## Goals
 
 - Run upstream coding agents rather than maintaining an independent agent
-  rewrite. OpenClaw is the first bound upstream; binding additional upstreams
-  is a design commitment whose next concrete step is a documented
-  upstream-binding contract, not a shipped capability.
+  rewrite. OpenClaw is the first bound upstream; additional upstreams bind
+  through the documented
+  [upstream-binding contract](docs/upstream-binding-contract.md), whose
+  test-only hello-agent reference binding demonstrates that the boundary is
+  upstream-portable and extends an agent through embedder-granted host
+  capabilities
+  ([ADR 0005](docs/decisions/0005-reference-agent-growth-paths.md)). No
+  second real agent runs today.
 - Keep the host boundary — default-deny capability broker, evidence-bound
   embed manifest, permission prompts, and payload-free audit — embedder-
   controlled and upstream-portable, as the reusable product across upstreams.
@@ -402,6 +407,7 @@ uploads evidence for review without committing or promoting it automatically.
 - [Commercial browser runtime decision](docs/decisions/0002-commercial-browser-runtime.md)
 - [Verified OpenClaw embedding decision](docs/decisions/0003-verified-openclaw-embedding.md)
 - [Upstream-portable embedding boundary decision](docs/decisions/0004-upstream-portable-embedding-boundary.md)
+- [Reference-agent growth paths decision](docs/decisions/0005-reference-agent-growth-paths.md)
 - [Verified embedding contract](docs/embedding.md)
 - [Upstream binding contract](docs/upstream-binding-contract.md)
 

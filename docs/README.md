@@ -29,6 +29,7 @@ design does not become stale when OpenClaw changes.
 | [ADR 0002](decisions/0002-commercial-browser-runtime.md) | Commercial browser-local runtime decision and acceptance gates |
 | [ADR 0003](decisions/0003-verified-openclaw-embedding.md) | BrowserPod selection and verified capability-safe embedding position |
 | [ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md) | Upstream-portable embedding boundary; OpenClaw repositioned as the first bound upstream |
+| [ADR 0005](decisions/0005-reference-agent-growth-paths.md) | The reference agent demonstrates both growth paths: internal exact-identity growth and external capability extension |
 
 ## Current position
 

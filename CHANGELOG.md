@@ -7,7 +7,25 @@ The project does not yet promise semantic-version compatibility.
 
 ## Unreleased
 
-No changes yet.
+### Changed
+
+- the `hello-agent` reference binding grows from a greeter into a minimal
+  capability-consuming chat agent (fixture 0.1.0 → 0.2.0, protocol
+  `clawsembly-hello/2`): `chat.send`, `chat.history`, and `chat.abort` join
+  `hello.say`, with a validated delta/done event stream and in-flight abort.
+  Every chat completion is delegated to the embedder-granted host capability
+  `chat.complete` (scope `provider:reference`) through the staged,
+  digest-pinned mailbox client, so the binding now demonstrates both growth
+  paths of [ADR 0005](docs/decisions/0005-reference-agent-growth-paths.md):
+  growing the first-party agent under exact-identity discipline, and
+  extending the agent's abilities from outside through the default-deny
+  boundary — deny, approve, revoke, and mid-turn cancellation are all
+  exercised in provider-free tests. The hello-agent evidence gate now also
+  requires a live capability transport, hello and chat round trips, and at
+  least one denied plus one allowed boundary outcome. The fixture pins Node
+  `>=22.12.0`, below the OpenClaw baseline, so the full verified chain stays
+  capturable on the vendor's currently provisioned Node. No runtime-support
+  claim is added; OpenClaw remains the only bound real upstream.
 
 ## [0.1.0-alpha.3] - 2026-07-13
 

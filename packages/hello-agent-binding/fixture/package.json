@@ -1,11 +1,14 @@
 {
   "name": "clawsembly-hello-agent",
-  "version": "0.1.0",
-  "description": "Trivial reference upstream for the Clawsembly binding contract. In-repository test fixture; deliberately private and not published to any registry.",
+  "version": "0.2.0",
+  "description": "Minimal capability-consuming chat reference upstream for the Clawsembly binding contract. In-repository test fixture; deliberately private and not published to any registry.",
   "private": true,
   "license": "MIT",
   "type": "module",
   "main": "hello-agent.mjs",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "files": [
     "hello-agent.mjs",
     "protocol.json"

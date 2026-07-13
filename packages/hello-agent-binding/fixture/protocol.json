@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "protocol": "clawsembly-hello/1",
+  "protocol": "clawsembly-hello/2",
   "methods": [
     {
       "name": "hello.say",
@@ -10,6 +10,41 @@
       "result": {
         "greeting": "string, at most 256 characters"
       }
+    },
+    {
+      "name": "chat.send",
+      "params": {
+        "message": "printable string, 1-1024 characters"
+      },
+      "result": {
+        "reply": "printable string up to 2048 characters, or null when the turn was aborted",
+        "reason": "completed | aborted",
+        "events": "count of streamed event records for this turn"
+      }
+    },
+    {
+      "name": "chat.history",
+      "params": {},
+      "result": {
+        "turns": "up to the last 8 turns with id, at, message, reply, reason (text truncated to 96 characters)",
+        "total": "count of retained turns"
+      }
+    },
+    {
+      "name": "chat.abort",
+      "params": {
+        "target": "chat.send request identifier"
+      },
+      "result": {
+        "aborted": "true when the targeted turn was in flight and has been signalled"
+      }
+    }
+  ],
+  "capabilities": [
+    {
+      "capability": "chat.complete",
+      "scope": "provider:reference",
+      "purpose": "chat.send delegates every completion to the embedder-controlled host boundary; the agent holds no provider access of its own"
     }
   ]
 }

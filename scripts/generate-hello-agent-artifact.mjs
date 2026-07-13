@@ -95,10 +95,19 @@ async function buildGeneratedModule() {
     }
     const protocolText = files.find((file) => file.relativePath === "protocol.json").contents;
     const protocol = JSON.parse(protocolText);
-    if (protocol.schemaVersion !== 1 || protocol.protocol !== "clawsembly-hello/1"
-      || !Array.isArray(protocol.methods) || protocol.methods.length !== 1
-      || protocol.methods[0]?.name !== "hello.say") {
-      throw new Error("hello-agent protocol descriptor must declare exactly hello.say");
+    const expectedMethods = ["hello.say", "chat.send", "chat.history", "chat.abort"];
+    const methodNames = Array.isArray(protocol.methods)
+      ? protocol.methods.map((method) => method?.name)
+      : [];
+    if (protocol.schemaVersion !== 1 || protocol.protocol !== "clawsembly-hello/2"
+      || JSON.stringify(methodNames) !== JSON.stringify(expectedMethods)) {
+      throw new Error("hello-agent protocol descriptor must declare exactly hello.say, chat.send, chat.history, chat.abort");
+    }
+    if (!Array.isArray(protocol.capabilities) || protocol.capabilities.length !== 1
+      || protocol.capabilities[0]?.capability !== "chat.complete"
+      || protocol.capabilities[0]?.scope !== "provider:reference"
+      || typeof protocol.capabilities[0]?.purpose !== "string") {
+      throw new Error("hello-agent protocol descriptor must declare exactly the chat.complete capability requirement");
     }
 
     const descriptor = {
@@ -112,6 +121,8 @@ async function buildGeneratedModule() {
       protocolFile: "protocol.json",
       protocolSha256: sha256Hex(protocolText),
       entrypoint: "hello-agent.mjs",
+      methods: methodNames,
+      capabilities: protocol.capabilities.map(({ capability, scope }) => ({ capability, scope })),
       files
     };
     return [
@@ -123,6 +134,9 @@ async function buildGeneratedModule() {
       `const artifact = ${JSON.stringify(descriptor, null, 2)};`,
       "for (const file of artifact.files) Object.freeze(file);",
       "Object.freeze(artifact.files);",
+      "Object.freeze(artifact.methods);",
+      "for (const capability of artifact.capabilities) Object.freeze(capability);",
+      "Object.freeze(artifact.capabilities);",
       "export const HELLO_AGENT_ARTIFACT = Object.freeze(artifact);",
       ""
     ].join("\n");
