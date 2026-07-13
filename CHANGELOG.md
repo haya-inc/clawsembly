@@ -9,6 +9,28 @@ The project does not yet promise semantic-version compatibility.
 
 No changes yet.
 
+## [0.1.0-alpha.2] - 2026-07-13
+
+### Fixed
+
+- the BrowserPod adapter now matches observed 2.12.1 runtime behavior:
+  terminal output arrives as SharedArrayBuffer-backed `Uint8Array` views (the
+  published type declares `ArrayBuffer`) and is copied before decoding, and
+  the preflight and Gateway health probes are staged as guest files because
+  the guest `node` resolves its first argument as a module path and
+  implements no CLI flags;
+- capture failures now surface a sanitized machine code (for example
+  `missing_api_key` or `node_baseline_unsatisfied`) and the failed stage in
+  the payload-free status artifact, including codes raised inside the
+  evidence host page.
+
+### Known limitations
+
+- BrowserPod 2.12.1 provisions Node 22.15.0, below the 22.19+ baseline pinned
+  by `openclaw@2026.6.11`; the readiness probe therefore fails closed with
+  `node_baseline_unsatisfied` and every report remains `probing`. Reported to
+  the runtime vendor.
+
 ## [0.1.0-alpha.1] - 2026-07-12
 
 ### Fixed
