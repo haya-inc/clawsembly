@@ -25,17 +25,42 @@ try {
 console.log("${EVIDENCE_PREFIX}" + JSON.stringify(result));
 `;
 
-function assertNodeBaseline(version) {
-  const [major, minor] = String(version).split(".").map(Number);
-  if (major !== 22 || !Number.isInteger(minor) || minor < 19) {
+// The baseline is the inspected artifact's own engines declaration, recorded
+// in the verified report as `nodeEngine`. Only the exact ">=major.minor" or
+// ">=major.minor.patch" form npm publishes for OpenClaw is accepted; any
+// other range syntax fails closed rather than being approximated.
+const NODE_ENGINE_PATTERN = /^>=(\d+)\.(\d+)(?:\.(\d+))?$/u;
+
+function assertSupportedNodeEngine(nodeEngine) {
+  const requirement = typeof nodeEngine === "string" ? nodeEngine.trim().match(NODE_ENGINE_PATTERN) : null;
+  if (!requirement) {
+    throw new BrowserRuntimeError(
+      "node_baseline_unsupported",
+      `artifact node engine "${String(nodeEngine)}" is not a supported ">=major.minor.patch" declaration`
+    );
+  }
+  return [Number(requirement[1]), Number(requirement[2]), Number(requirement[3] ?? 0)];
+}
+
+function assertNodeBaseline(version, nodeEngine) {
+  const required = assertSupportedNodeEngine(nodeEngine);
+  const provided = String(version).split(".").map(Number);
+  const satisfied = provided.length >= 3
+    && provided.slice(0, 3).every((part) => Number.isInteger(part) && part >= 0)
+    && (provided[0] !== required[0]
+      ? provided[0] > required[0]
+      : provided[1] !== required[1]
+        ? provided[1] > required[1]
+        : provided[2] >= required[2]);
+  if (!satisfied) {
     throw new BrowserRuntimeError(
       "node_baseline_unsatisfied",
-      `BrowserPod Node ${version} does not satisfy the pinned 22.19+ baseline`
+      `BrowserPod Node ${version} does not satisfy the artifact's ${String(nodeEngine).trim()} baseline`
     );
   }
 }
 
-function parseEvidence(output) {
+function parseEvidence(output, nodeEngine) {
   const line = output.split(/\r?\n/u).find((entry) => entry.includes(EVIDENCE_PREFIX));
   if (!line) {
     throw new BrowserRuntimeError("preflight_output_missing", "BrowserPod preflight did not emit runtime evidence");
@@ -46,7 +71,7 @@ function parseEvidence(output) {
   } catch {
     throw new BrowserRuntimeError("preflight_output_invalid", "BrowserPod preflight emitted malformed runtime evidence");
   }
-  assertNodeBaseline(evidence.node);
+  assertNodeBaseline(evidence.node, nodeEngine);
   return evidence;
 }
 
@@ -56,12 +81,14 @@ function parseEvidence(output) {
  */
 export async function runBrowserRuntimePreflight({
   runtime,
+  nodeEngine,
   onOutput = () => {}
 }) {
   if (!runtime || runtime.provider !== "browserpod" || typeof runtime.start !== "function"
     || typeof runtime.createDirectory !== "function" || typeof runtime.writeTextFile !== "function") {
     throw new TypeError("A booted BrowserPod runtime is required");
   }
+  assertSupportedNodeEngine(nodeEngine);
   // BrowserPod 2.12.1's guest node resolves its first argument as a module
   // path and implements no CLI flags (-e fails with MODULE_NOT_FOUND, bare
   // flags fall through to a REPL that never exits), so the probe must be
@@ -79,13 +106,14 @@ export async function runBrowserRuntimePreflight({
     throw new BrowserRuntimeError("preflight_failed", "BrowserPod preflight command failed");
   }
 
-  const evidence = parseEvidence(task.transcript);
+  const evidence = parseEvidence(task.transcript, nodeEngine);
   return {
     schemaVersion: 1,
     runtime: "browserpod",
     runtimeVersion: runtime.version,
     browserLocal: true,
     node: evidence.node,
+    nodeEngine: String(nodeEngine).trim(),
     platform: evidence.platform,
     arch: evidence.arch,
     checks: {
@@ -107,6 +135,7 @@ export async function runBrowserPodPreflight({
   BrowserPod,
   apiKey,
   storageKey = "clawsembly-browserpod-probe",
+  nodeEngine,
   onOutput = () => {}
 }) {
   if (!BrowserPod || typeof BrowserPod.boot !== "function") {
@@ -115,9 +144,10 @@ export async function runBrowserPodPreflight({
   if (typeof apiKey !== "string" || apiKey.trim().length === 0) {
     throw new TypeError("A BrowserPod API key is required for the metered boot");
   }
+  assertSupportedNodeEngine(nodeEngine);
 
   const runtime = await createBrowserPodRuntime({ BrowserPod, apiKey, storageKey });
-  return runBrowserRuntimePreflight({ runtime, onOutput });
+  return runBrowserRuntimePreflight({ runtime, nodeEngine, onOutput });
 }
 
 export { EVIDENCE_PREFIX, PROBE_SOURCE, assertNodeBaseline, parseEvidence };

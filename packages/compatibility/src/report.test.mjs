@@ -42,6 +42,7 @@ function browserPodEvidence() {
     artifact: { package: "openclaw", version: "2026.6.11", integrity: INTEGRITY },
     preflight: {
       node: "22.19.0",
+      nodeEngine: ">=22.19.0",
       platform: "linux",
       arch: "wasm32",
       checks: { nodeBaseline: true, cryptoVerify: true, sqlite: true },
@@ -100,7 +101,7 @@ function staticInput(overrides = {}) {
     packageName: "openclaw",
     generatedAt: "2026-07-12T00:00:00.000Z",
     target: { runtime: "browserpod", runtimeVersion: "2.12.1", browserBaseline: "Desktop Chromium" },
-    manifest: { version: "2026.6.11", dependencies: {} },
+    manifest: { version: "2026.6.11", engines: { node: ">=22.19.0" }, dependencies: {} },
     pack: { integrity: "sha512-test", size: 10, unpackedSize: 20 },
     shrinkwrap: { packages: {} },
     gatewayContract: gatewayContract(),

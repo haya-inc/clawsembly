@@ -9,8 +9,10 @@ globalThis.__CLAWSEMBLY_FAILURE_CODE__ = null;
 globalThis.__RUN_CLAWSEMBLY_BROWSERPOD_EVIDENCE__ = async (options) => {
   const apiKey = options?.apiKey;
   const artifact = options?.artifact;
+  const nodeEngine = options?.nodeEngine;
   const source = options?.source;
-  if (typeof apiKey !== "string" || !apiKey || !artifact || typeof source !== "string") {
+  if (typeof apiKey !== "string" || !apiKey || !artifact || typeof source !== "string"
+    || typeof nodeEngine !== "string" || !nodeEngine) {
     throw new Error("Owner-authorized BrowserPod capture options are incomplete.");
   }
   options.apiKey = undefined;
@@ -21,6 +23,7 @@ globalThis.__RUN_CLAWSEMBLY_BROWSERPOD_EVIDENCE__ = async (options) => {
       BrowserPod,
       apiKey,
       artifact,
+      nodeEngine,
       browser: navigator.userAgent,
       source,
       onOutput({ phase, chunk }) {

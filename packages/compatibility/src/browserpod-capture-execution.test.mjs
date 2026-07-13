@@ -42,3 +42,34 @@ test("capture harness fails closed without an owner-authorized API key", async (
   assert.equal(status.failedStage, "initialize");
   assert.equal(JSON.stringify(status).includes("BROWSERPOD_API_KEY="), false);
 });
+
+test("capture harness refuses an evidence report outside the public data directory", async (t) => {
+  let previousStatus;
+  try { previousStatus = await readFile(statusUrl, "utf8"); }
+  catch { previousStatus = undefined; }
+  t.after(async () => {
+    if (previousStatus === undefined) await rm(statusUrl, { force: true });
+    else await writeFile(statusUrl, previousStatus, "utf8");
+  });
+
+  const result = await new Promise((settle) => {
+    const child = spawn(process.execPath, [capturePath], {
+      cwd: fileURLToPath(root),
+      env: {
+        ...process.env,
+        BROWSERPOD_API_KEY: "fail-fast-placeholder",
+        CLAWSEMBLY_EVIDENCE_REPORT: "packages/compatibility/npm-publication.json"
+      },
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+    let stderr = "";
+    child.stderr.on("data", (chunk) => { stderr += chunk; });
+    child.once("close", (code) => settle({ code, stderr }));
+  });
+
+  assert.notEqual(result.code, 0);
+  const status = JSON.parse(await readFile(statusUrl, "utf8"));
+  assert.equal(status.result, "fail");
+  assert.equal(status.errorCode, "invalid_report_path");
+  assert.equal(status.failedStage, "initialize");
+});

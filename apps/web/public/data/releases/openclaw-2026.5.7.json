@@ -1,0 +1,538 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-13T05:51:14.654Z",
+  "reportLatencySeconds": 5735537,
+  "status": "probing",
+  "target": {
+    "runtime": "browserpod",
+    "runtimeVersion": "2.12.1",
+    "browserBaseline": "Desktop Chromium; Firefox and WebKit pending BrowserPod evidence."
+  },
+  "artifact": {
+    "package": "openclaw",
+    "version": "2026.5.7",
+    "integrity": "sha512-hjvpgconK20YltQPrzDY6cehjM8ijQyZnLKhqLBTngiFEPum9gmXwCDsrisPEXVRFtzuMhap+w6zSEmSQ1047Q==",
+    "upstreamPublishedAt": "2026-05-07T20:38:57.626Z",
+    "nodeEngine": ">=22.14.0",
+    "tarballBytes": 24422745,
+    "unpackedBytes": 74661804,
+    "directDependencyCount": 58,
+    "directDependencies": [
+      {
+        "name": "@agentclientprotocol/sdk",
+        "spec": "0.21.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@anthropic-ai/sdk",
+        "spec": "0.93.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@anthropic-ai/vertex-sdk",
+        "spec": "^0.16.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@aws-sdk/client-bedrock",
+        "spec": "3.1042.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@aws-sdk/client-bedrock-runtime",
+        "spec": "3.1042.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@aws-sdk/credential-provider-node",
+        "spec": "3.972.39",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@aws/bedrock-token-generator",
+        "spec": "^1.1.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@clack/prompts",
+        "spec": "^1.3.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@google/genai",
+        "spec": "^1.51.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@grammyjs/runner",
+        "spec": "^2.0.3",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@grammyjs/transformer-throttler",
+        "spec": "^1.2.1",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@homebridge/ciao",
+        "spec": "^1.3.8",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@lydell/node-pty",
+        "spec": "1.2.0-beta.12",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@mariozechner/pi-agent-core",
+        "spec": "0.73.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@mariozechner/pi-ai",
+        "spec": "0.73.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@mariozechner/pi-coding-agent",
+        "spec": "0.73.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@mariozechner/pi-tui",
+        "spec": "0.73.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@modelcontextprotocol/sdk",
+        "spec": "1.29.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@mozilla/readability",
+        "spec": "^0.6.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@slack/bolt",
+        "spec": "^4.7.2",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@slack/types",
+        "spec": "^2.21.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "@slack/web-api",
+        "spec": "^7.15.2",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "ajv",
+        "spec": "^8.20.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "chalk",
+        "spec": "^5.6.2",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "chokidar",
+        "spec": "^5.0.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "commander",
+        "spec": "^14.0.3",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "croner",
+        "spec": "^10.0.1",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "dotenv",
+        "spec": "^17.4.2",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "express",
+        "spec": "5.2.1",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "file-type",
+        "spec": "22.0.1",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "global-agent",
+        "spec": "^4.1.3",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "grammy",
+        "spec": "^1.42.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "https-proxy-agent",
+        "spec": "^9.0.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "ipaddr.js",
+        "spec": "^2.4.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "jiti",
+        "spec": "^2.6.1",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "json5",
+        "spec": "^2.2.3",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "jszip",
+        "spec": "^3.10.1",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "linkedom",
+        "spec": "^0.18.12",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "markdown-it",
+        "spec": "14.1.1",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "minimatch",
+        "spec": "10.2.5",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "node-edge-tts",
+        "spec": "^1.2.10",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "openai",
+        "spec": "^6.36.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "openshell",
+        "spec": "0.1.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "pdfjs-dist",
+        "spec": "^5.7.284",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "playwright-core",
+        "spec": "1.59.1",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "proxy-agent",
+        "spec": "^8.0.1",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "qrcode",
+        "spec": "1.5.4",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "tar",
+        "spec": "7.5.13",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "tokenjuice",
+        "spec": "0.7.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "tree-sitter-bash",
+        "spec": "^0.25.1",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "tslog",
+        "spec": "^4.10.2",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "typebox",
+        "spec": "1.1.37",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "undici",
+        "spec": "8.2.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "web-push",
+        "spec": "^3.6.7",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "web-tree-sitter",
+        "spec": "^0.26.8",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "ws",
+        "spec": "^8.20.0",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "yaml",
+        "spec": "^2.8.4",
+        "resolvedVersion": null,
+        "integrity": null
+      },
+      {
+        "name": "zod",
+        "spec": "^4.4.3",
+        "resolvedVersion": null,
+        "integrity": null
+      }
+    ],
+    "gatewayContract": {
+      "inspection": {
+        "status": "incomplete",
+        "limitations": [
+          "core-methods-empty",
+          "protocol-constants-incomplete",
+          "public-declaration-missing",
+          "schema-exports-empty",
+          "validators-empty"
+        ]
+      },
+      "protocol": {
+        "current": 3,
+        "minClient": null,
+        "minProbe": null,
+        "minNode": null
+      },
+      "distribution": {
+        "legacyPluginDeclarationCount": 0
+      },
+      "inventories": {
+        "coreMethods": [],
+        "schemaExports": [],
+        "validators": [],
+        "eventSchemas": []
+      },
+      "sources": {
+        "publicDeclaration": null,
+        "publicRuntime": {
+          "path": "dist/gateway/protocol/index.js",
+          "sha256": "sha256-b1eefa375f2ad09c25b87fa60a36aa6f3a8e42793b1410d3ad5bb490ac990674"
+        },
+        "versionModule": {
+          "path": "dist/version-C5Vv59Zq.js",
+          "sha256": "sha256-1d526b29c0a08bd46c7fa5dc2966ab9355167cd09259b26e8945ad32c3529010"
+        },
+        "serverMethods": {
+          "path": "dist/server-methods-DStUV8Sh.js",
+          "sha256": "sha256-8050801ce52da7dcc18f1c132f5a1952ea266ddaa0b7b6d8abb3bf2e196d6fa0"
+        }
+      }
+    },
+    "nativeRiskDependencies": [],
+    "shrinkwrapRootConsistency": {
+      "lockfileVersion": 0,
+      "compatible": false,
+      "missingCount": 81,
+      "mismatchedCount": 0,
+      "missingDevDependencyCount": 22
+    }
+  },
+  "evidence": [],
+  "checks": [
+    {
+      "id": "artifact-pinned",
+      "label": "Exact upstream artifact",
+      "status": "pass",
+      "detail": "openclaw@2026.5.7 is pinned by version and integrity."
+    },
+    {
+      "id": "lifecycle-scripts",
+      "label": "Lifecycle scripts classified",
+      "status": "warn",
+      "detail": "The artifact declares lifecycle scripts; the BrowserPod probe must capture their behavior without silently skipping them."
+    },
+    {
+      "id": "shrinkwrap-root-consistency",
+      "label": "Published shrinkwrap consistency",
+      "status": "warn",
+      "detail": "The published manifest has 81 missing and 0 mismatched root declarations in shrinkwrap lockfile v0."
+    },
+    {
+      "id": "native-dependencies",
+      "label": "Native dependency inventory",
+      "status": "pass",
+      "detail": "No known platform-specific packages were found in the lockfile."
+    },
+    {
+      "id": "host-preflight",
+      "label": "BrowserPod preflight",
+      "status": "pending",
+      "detail": "A dated BrowserPod evidence record has not been attached."
+    },
+    {
+      "id": "openclaw-browserpod-boot",
+      "label": "OpenClaw BrowserPod boot",
+      "status": "pending",
+      "detail": "This exact OpenClaw artifact has not booted in BrowserPod yet."
+    },
+    {
+      "id": "gateway-handshake",
+      "label": "Gateway handshake",
+      "status": "pending",
+      "detail": "A successful hello-ok frame is required before this release can be supported."
+    },
+    {
+      "id": "mocked-chat-turn",
+      "label": "Provider-independent chat turn",
+      "status": "pending",
+      "detail": "A streamed mocked turn through the real agent runner is required."
+    },
+    {
+      "id": "mocked-tool-call",
+      "label": "Constrained tool execution",
+      "status": "pending",
+      "detail": "A deterministic tool request and result round-trip is required."
+    },
+    {
+      "id": "history-reconnect",
+      "label": "History after reconnect",
+      "status": "pending",
+      "detail": "History must survive a WebSocket disconnect and authenticated reconnect."
+    },
+    {
+      "id": "chat-cancellation",
+      "label": "Streaming cancellation",
+      "status": "pending",
+      "detail": "An active streamed turn must stop through chat.abort and emit an aborted event."
+    },
+    {
+      "id": "credential-vault",
+      "label": "Encrypted credential boundary",
+      "status": "pending",
+      "detail": "Provider credentials must remain encrypted in the browser host and outside BrowserPod."
+    },
+    {
+      "id": "provider-broker",
+      "label": "Provider request policy",
+      "status": "pending",
+      "detail": "Provider traffic must cross a fixed-destination, secret-redacting browser-host broker before live testing."
+    },
+    {
+      "id": "host-broker-turn",
+      "label": "OpenClaw host-broker turn",
+      "status": "pending",
+      "detail": "A real OpenClaw agent turn must cross the browser-host provider broker without mounting or logging credentials in BrowserPod."
+    },
+    {
+      "id": "provider-budget",
+      "label": "User-configurable provider budget",
+      "status": "pending",
+      "detail": "Provider traffic needs user-visible request, input, and streamed-output limits before live opt-in."
+    },
+    {
+      "id": "live-opt-in-gate",
+      "label": "Protected live opt-in gate",
+      "status": "pending",
+      "detail": "Live traffic needs a fixed-prompt, cost-bounded, credential-and-consent gate before it can be enabled."
+    },
+    {
+      "id": "device-identity",
+      "label": "Device pairing and token reconnect",
+      "status": "pending",
+      "detail": "A browser-owned non-extractable device key must complete pairing and token-authenticated reconnect without leaking credentials."
+    },
+    {
+      "id": "opfs-recovery",
+      "label": "Runtime state recovery",
+      "status": "pending",
+      "detail": "The mock session must survive persisted save, fresh BrowserPod boot, restore, and document reload."
+    },
+    {
+      "id": "runtime-performance",
+      "label": "Measured browser runtime cost",
+      "status": "pending",
+      "detail": "Cold/warm install time, filesystem footprint, and Gateway-ready latency have not been measured in BrowserPod."
+    }
+  ]
+}

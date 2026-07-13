@@ -80,6 +80,22 @@ export function computeReportLatencySeconds(upstreamPublishedAt, generatedAt) {
   return Math.round((generated - published) / 1000);
 }
 
+export function nodeVersionSatisfies(version, nodeEngine) {
+  // Mirrors the browser-runtime preflight baseline: only the exact
+  // ">=major.minor(.patch)" form npm publishes for OpenClaw is supported;
+  // anything else fails closed.
+  const requirement = typeof nodeEngine === "string"
+    ? nodeEngine.trim().match(/^>=(\d+)\.(\d+)(?:\.(\d+))?$/u)
+    : null;
+  if (!requirement) return false;
+  const required = [Number(requirement[1]), Number(requirement[2]), Number(requirement[3] ?? 0)];
+  const provided = String(version).split(".").map(Number);
+  if (provided.length < 3 || provided.slice(0, 3).some((part) => !Number.isInteger(part) || part < 0)) return false;
+  if (provided[0] !== required[0]) return provided[0] > required[0];
+  if (provided[1] !== required[1]) return provided[1] > required[1];
+  return provided[2] >= required[2];
+}
+
 export function assertBrowserRuntimeEvidence(evidence) {
   const failures = [];
   if (evidence?.schemaVersion !== 1 || !Number.isFinite(Date.parse(evidence?.capturedAt))) failures.push("identity");
@@ -89,7 +105,8 @@ export function assertBrowserRuntimeEvidence(evidence) {
   }
   if (evidence?.preflight?.checks?.nodeBaseline !== true
     || evidence?.preflight?.checks?.cryptoVerify !== true
-    || evidence?.preflight?.checks?.sqlite !== true) failures.push("preflight");
+    || evidence?.preflight?.checks?.sqlite !== true
+    || !nodeVersionSatisfies(evidence?.preflight?.node, evidence?.preflight?.nodeEngine)) failures.push("preflight");
   if (evidence?.install?.result !== "pass" || evidence?.install?.integrityMatched !== true
     || evidence?.install?.installedVersion !== evidence?.artifact?.version
     || evidence?.install?.lockIntegrity !== evidence?.artifact?.integrity) failures.push("install integrity");
@@ -214,6 +231,9 @@ export function buildReport({
       || browserRuntimeEvidence.artifact?.version !== manifest.version
       || browserRuntimeEvidence.artifact?.integrity !== pack.integrity) {
       throw new Error("BrowserPod evidence artifact does not match the inspected npm package.");
+    }
+    if (browserRuntimeEvidence.preflight?.nodeEngine !== (manifest.engines?.node ?? "unspecified")) {
+      throw new Error("BrowserPod evidence node baseline does not match the inspected artifact's engines declaration.");
     }
   }
 

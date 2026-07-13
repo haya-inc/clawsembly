@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { lstatSync } from "node:fs";
+import { basename, dirname } from "node:path";
 
 const PUBLIC_DECLARATION_PATH = "dist/gateway/protocol/index.d.ts";
 const PUBLIC_RUNTIME_PATH = "dist/gateway/protocol/index.js";
@@ -117,7 +118,10 @@ export function classifyGatewayContract({
 function readTarEntry(tarball, path, fileMap) {
   const metadata = fileMap.get(path);
   if (!metadata || metadata.size > MAX_SOURCE_BYTES) return undefined;
-  return execFileSync("tar", ["-xOzf", tarball, `package/${path}`], {
+  // tar receives the bare filename relative to its cwd: GNU tar parses the
+  // colon in an absolute Windows path as a remote-host separator.
+  return execFileSync("tar", ["-xOzf", basename(tarball), `package/${path}`], {
+    cwd: dirname(tarball),
     encoding: "utf8",
     maxBuffer: MAX_SOURCE_BYTES + 1024,
     stdio: ["ignore", "pipe", "pipe"]

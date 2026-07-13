@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { dirname, resolve, sep } from "node:path";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
@@ -58,6 +58,7 @@ function assertEvidenceClaims(report, label) {
       assert.equal(evidence.artifact.package, report.artifact.package, `${label} BrowserPod package drift`);
       assert.equal(evidence.artifact.version, report.artifact.version, `${label} BrowserPod OpenClaw version drift`);
       assert.equal(evidence.artifact.integrity, report.artifact.integrity, `${label} BrowserPod integrity drift`);
+      assert.equal(evidence.preflight.nodeEngine, report.artifact.nodeEngine, `${label} BrowserPod node baseline drift`);
       browserRuntimeEvidence = evidence;
     } else throw new Error(`${label} contains unsupported evidence ${entry.id}`);
   }
@@ -156,4 +157,20 @@ const latest = readJson(latestPath);
 assertValid(validateReport, latest, "compatibility.json");
 assertEvidenceClaims(latest, "compatibility.json");
 assert.deepEqual(latest, reports[0], "compatibility.json must be an exact copy of the stable channel report");
-process.stdout.write(`Validated ${reports.length + 1} compatibility reports, release-history.json, and promotion-policy.json.\n`);
+
+// Every published report must validate, including pinned evidence targets
+// that are not release channels (for example an older-baseline artifact
+// selected for owner-authorized capture).
+const releasesDirectory = resolve(dataDirectory, "releases");
+const channelReportPaths = new Set(history.releases.map((release) => resolve(dirname(historyPath), release.reportPath)));
+let extraReports = 0;
+for (const name of readdirSync(releasesDirectory).filter((entry) => entry.endsWith(".json")).sort()) {
+  const reportPath = resolve(releasesDirectory, name);
+  if (channelReportPaths.has(reportPath)) continue;
+  const report = readJson(reportPath);
+  assertValid(validateReport, report, `releases/${name}`);
+  assertEvidenceClaims(report, `releases/${name}`);
+  extraReports += 1;
+}
+
+process.stdout.write(`Validated ${reports.length + 1 + extraReports} compatibility reports, release-history.json, and promotion-policy.json.\n`);

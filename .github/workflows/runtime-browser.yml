@@ -8,6 +8,13 @@ on:
         required: true
         type: boolean
         default: false
+      evidence_report:
+        description: >-
+          Repo-relative pinned report the capture targets (must live under
+          apps/web/public/data). Defaults to the current stable report.
+        required: false
+        type: string
+        default: apps/web/public/data/compatibility.json
   schedule:
     - cron: "17 3 * * 6"
   pull_request:
@@ -62,6 +69,7 @@ jobs:
       - name: Capture one exact-artifact BrowserPod record
         env:
           BROWSERPOD_API_KEY: ${{ secrets.BROWSERPOD_API_KEY }}
+          CLAWSEMBLY_EVIDENCE_REPORT: ${{ inputs.evidence_report }}
         run: node examples/browserpod-evidence-host/capture.mjs
       - name: Upload redacted evidence and payload-free status
         if: always()

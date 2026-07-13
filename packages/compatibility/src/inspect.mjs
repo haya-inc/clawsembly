@@ -35,7 +35,7 @@ function parseArgs(argv) {
 function resolveUpstreamPublishedAt(options, version, cwd) {
   if (options.upstreamPublishedAt !== undefined) return options.upstreamPublishedAt;
   try {
-    const time = JSON.parse(run("npm", ["view", `${options.packageName}@${version}`, "time", "--json"], cwd));
+    const time = JSON.parse(runNpm(["view", `${options.packageName}@${version}`, "time", "--json"], cwd));
     if (typeof time?.[version] === "string") return time[version];
     process.stderr.write(`The npm registry has no publish time for ${options.packageName}@${version}; omitting upstreamPublishedAt.\n`);
   } catch {
@@ -44,13 +44,22 @@ function resolveUpstreamPublishedAt(options, version, cwd) {
   return undefined;
 }
 
-function run(command, args, cwd) {
+function run(command, args, cwd, options = {}) {
   return execFileSync(command, args, {
     cwd,
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
-    stdio: ["ignore", "pipe", "pipe"]
+    stdio: ["ignore", "pipe", "pipe"],
+    ...options
   });
+}
+
+// Windows cannot spawn npm's .cmd shim directly, so prefer the invoking npm's
+// JS entry point (matches the release scripts' runNpm helper).
+const npmCli = process.env.npm_execpath;
+function runNpm(args, cwd) {
+  if (npmCli && /\.[cm]?js$/u.test(npmCli)) return run(process.execPath, [npmCli, ...args], cwd);
+  return run("npm", args, cwd, { shell: process.platform === "win32" });
 }
 
 const options = parseArgs(process.argv.slice(2));
@@ -58,12 +67,23 @@ const workingDirectory = mkdtempSync(resolve(tmpdir(), "clawsembly-inspect-"));
 
 try {
   const spec = `${options.packageName}@${options.version}`;
-  const packed = JSON.parse(run("npm", ["pack", spec, "--json"], workingDirectory))[0];
+  const packed = JSON.parse(runNpm(["pack", spec, "--json"], workingDirectory))[0];
   const tarball = resolve(workingDirectory, packed.filename);
-  run("tar", ["-xzf", tarball, "package/package.json", "package/npm-shrinkwrap.json"], workingDirectory);
+  // tar receives the bare filename relative to its cwd: GNU tar parses the
+  // colon in an absolute Windows path as a remote-host separator.
+  run("tar", ["-xzf", packed.filename, "package/package.json"], workingDirectory);
 
   const manifest = JSON.parse(readFileSync(resolve(workingDirectory, "package/package.json"), "utf8"));
-  const shrinkwrap = JSON.parse(readFileSync(resolve(workingDirectory, "package/npm-shrinkwrap.json"), "utf8"));
+  // Older upstream releases predate npm-shrinkwrap adoption; the report then
+  // records every direct dependency as unresolved and the shrinkwrap check
+  // degrades to warn instead of blocking static inspection entirely.
+  let shrinkwrap;
+  try {
+    run("tar", ["-xzf", packed.filename, "package/npm-shrinkwrap.json"], workingDirectory);
+    shrinkwrap = JSON.parse(readFileSync(resolve(workingDirectory, "package/npm-shrinkwrap.json"), "utf8"));
+  } catch {
+    process.stderr.write(`${spec} ships no npm-shrinkwrap.json; recording unresolved direct dependencies.\n`);
+  }
   const gatewayContract = inspectGatewayContract({ tarball, pack: packed });
   const browserRuntimeEvidence = options.browserRuntimeEvidence
     ? JSON.parse(readFileSync(resolve(process.cwd(), options.browserRuntimeEvidence), "utf8"))

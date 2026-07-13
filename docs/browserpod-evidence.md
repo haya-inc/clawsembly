@@ -87,12 +87,33 @@ schedule. Before the first run, a maintainer must:
    review;
 5. dispatch the workflow with `capture_browserpod` enabled.
 
-Warning: a metered capture against `browserpod@2.12.1` currently fails closed
+Warning: a metered capture against the current stable report fails closed
 with `node_baseline_unsatisfied` — the guest provisions Node 22.15.0, below
-the required 22.19 baseline — before any promotable evidence exists. Do not
-spend BrowserPod tokens until the vendor ships Node 22.19 or newer, or the
-baseline decision is revisited
+the `>=22.19.0` engines declaration of current OpenClaw releases — before any
+promotable evidence exists. Do not spend BrowserPod tokens on the stable
+target until the vendor ships Node 22.19 or newer
 ([issue #6](https://github.com/haya-inc/clawsembly/issues/6)).
+
+### Targeting the pinned older-baseline artifact
+
+The baseline is derived from the target report's `artifact.nodeEngine`, not
+hard-coded. `openclaw@2026.5.7` is the newest upstream release whose engines
+declaration (`>=22.14.0`) the current guest Node 22.15.0 satisfies; its exact
+static report is checked in as
+[`openclaw-2026.5.7.json`](../apps/web/public/data/releases/openclaw-2026.5.7.json)
+and validated by `npm run compat:validate`. Dispatch the workflow with
+`evidence_report: apps/web/public/data/releases/openclaw-2026.5.7.json` to
+capture readiness evidence for that pair today.
+
+Scope of the resulting claim: the evidence binds to
+`openclaw@2026.5.7` + `browserpod@2.12.1` only. It never attaches to the
+tracked release channels (the attach gate requires an exact version match),
+so channel reports stay `probing` and the promotion decision stays `HOLD`.
+Known static caveats recorded in the pinned report: 2026.5.7 predates
+upstream npm-shrinkwrap adoption (every direct dependency is unresolved and
+the shrinkwrap check warns) and its Gateway protocol is version 3, so the
+generated protocol-4 SDK client does not speak to it; the readiness harness
+does not depend on that client.
 
 The job installs `@leaningtech/browserpod@2.12.1` from its isolated lock with
 scripts disabled, launches a cross-origin-isolated Chromium host, and passes the
