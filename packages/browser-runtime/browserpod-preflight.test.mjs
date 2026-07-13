@@ -12,14 +12,14 @@ function fakeBrowserPod(evidence) {
         calls.push(["boot", options]);
         return {
           onPortal() {},
-          async createCustomTerminal(options) {
-            calls.push(["terminal", { cols: options.cols, rows: options.rows }]);
-            return { emit: options.onOutput };
+          async createCustomTerminal(terminalOptions) {
+            calls.push(["terminal", { cols: terminalOptions.cols, rows: terminalOptions.rows }]);
+            return { emit: terminalOptions.onOutput };
           },
-          async run(command, args, options) {
-            calls.push(["run", { command, args, echo: options.echo }]);
+          async run(command, args, runOptions) {
+            calls.push(["run", { command, args, echo: runOptions.echo }]);
             const bytes = new TextEncoder().encode(`${EVIDENCE_PREFIX}${JSON.stringify(evidence)}\n`);
-            options.terminal.emit(bytes.buffer);
+            runOptions.terminal.emit(bytes.buffer);
             return {};
           },
           async createDirectory() {},
@@ -94,5 +94,29 @@ test("requires an explicit metered-runtime credential before boot", async () => 
   await assert.rejects(
     runBrowserPodPreflight({ BrowserPod: { boot() {} }, apiKey: "" }),
     /API key is required/u
+  );
+});
+
+test("classifies malformed preflight evidence as invalid output", async () => {
+  const BrowserPod = {
+    async boot() {
+      return {
+        onPortal() {},
+        async createCustomTerminal(options) {
+          return { emit: options.onOutput };
+        },
+        async run(_command, _args, options) {
+          options.terminal.emit(new TextEncoder().encode(`${EVIDENCE_PREFIX}{not-json\n`).buffer);
+          return {};
+        },
+        async createDirectory() {},
+        async createFile() { return { async write() {}, async close() {} }; },
+        async openFile() { return { async getSize() { return 0; }, async read() { return ""; }, async close() {} }; }
+      };
+    }
+  };
+  await assert.rejects(
+    runBrowserPodPreflight({ BrowserPod, apiKey: "runtime-secret" }),
+    (error) => error.code === "preflight_output_invalid"
   );
 });

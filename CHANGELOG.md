@@ -11,6 +11,27 @@ No changes yet.
 
 ## [0.1.0-alpha.3] - 2026-07-13
 
+### Fixed
+
+- the Gateway protocol client no longer routes frames that arrive after a
+  failed handshake into authenticated handling: a rejected connect now
+  detaches the socket, and event delivery additionally requires the ready
+  state, so a refused Gateway cannot inject chat events into UI listeners;
+- the guest mailbox client no longer burns a sequence slot when request
+  validation, serialization, or the slot write fails before the ready marker:
+  submissions serialize on an internal queue, the sequence advances only
+  after announcement, and partially written slot files are released, so one
+  rejected request can no longer desynchronize the channel permanently;
+- a cooperative stop whose control-file write fails stays retryable instead
+  of becoming a permanent no-op, and a supervisor that never reports
+  readiness now receives a best-effort cooperative stop before the failure
+  surfaces (`supervisor_ready_timeout`) instead of leaking an orphaned guest
+  process;
+- `gateway.stop()` during a failing start now resolves as not running
+  instead of rethrowing the start error, and a successful pairing decision
+  can no longer be re-armed into a second decision by a throwing
+  `onDecision` sink.
+
 ### Added
 
 - the `hello-agent` reference binding (`packages/hello-agent-binding/`): a
@@ -21,10 +42,44 @@ No changes yet.
   gate. Its tests execute the staged guest as a real Node child process
   behind a local provider double, without a metered runtime, proving the
   binding contract is satisfiable by something other than OpenClaw. The
-  fixture is private, unpublished, and carries no runtime-support claim.
+  fixture is private, unpublished, and carries no runtime-support claim;
+- an `oxlint` gate (`npm run lint`, exact-pinned, wired into `npm run
+  check`) with correctness and suspicious categories enabled and the
+  codebase's deliberate idioms documented in `.oxlintrc.json`;
+- a security-header consistency check (`npm run headers:check`) pinning
+  netlify.toml, vercel.json, the index.html CSP meta, and the Vite server
+  headers to the Pages `_headers` declaration;
+- unit tests for the release gate itself: the SDK release manifest binding
+  (`packages/compatibility/src/release-binding.mjs`, extracted from
+  release-readiness and now fixture-tested, including the rule that the
+  npm publication record integrity must match the deployed bytes) plus
+  execution-based tests that run the promotion-policy Action runner and the
+  metered-capture harness on their fail-closed paths;
+- a compile-only API conformance suite (`tests/types/`) that exercises the
+  public `.d.mts` contracts against the shipped implementations, wired into
+  `npm run typecheck`;
+- CI hardening validated by `workflows:validate`: sdk-release tarball
+  literals are cross-checked against the packaged version, every job carries
+  an explicit `timeout-minutes`, the six-hour tracker verifies the generated
+  Gateway contract against the exact npm artifact (`protocol:verify`) under
+  a queued concurrency group, Pages deployments are never cancelled
+  mid-flight, and the Windows lane also proves the Node 22.19 floor.
 
 ### Changed
 
+- audit and diagnostic sinks are uniformly isolated: a throwing broker
+  `auditSink` can no longer fail a request whose outcome is already
+  recorded, and a capability handler that throws `CapabilityBrokerError`
+  is now audited and redacted as `handler_failed` instead of passing a
+  spoofed broker code through unrecorded;
+- Gateway challenge nonces, connection tokens, and issued device tokens now
+  reject the `|` payload delimiter and control characters before entering
+  the signed v3 material, and stale or rewound Gateway event sequences are
+  dropped with a payload-free audit record instead of rewinding the gap
+  detector;
+- the provider-broker self-probe reports the exact failed invariants by
+  name instead of one opaque boolean, and individually closed protocol
+  clients now leave the embed session's close set immediately;
 - the core no longer hard-codes the `openclaw` package literal: the verified
   report loader, embed manifest, launch assertion, capability-broker subject,
   mailbox artifact, and permission-prompt subject now validate an exact
@@ -185,3 +240,7 @@ No changes yet.
   BrowserPod baseline;
 - Firefox, Safari, remote Gateway parity, general workspace migration, and
   owner-authorized live-provider evidence remain unverified.
+
+[0.1.0-alpha.3]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.2...v0.1.0-alpha.3
+[0.1.0-alpha.2]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.1...v0.1.0-alpha.2
+[0.1.0-alpha.1]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.0...v0.1.0-alpha.1

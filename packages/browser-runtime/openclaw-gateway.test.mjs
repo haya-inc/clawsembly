@@ -4,7 +4,6 @@ import test from "node:test";
 import { COOPERATIVE_SUPERVISOR_PREFIX } from "./cooperative-process.mjs";
 import {
   BROWSERPOD_HEALTH_PREFIX,
-  BROWSERPOD_HEALTH_SOURCE,
   createVerifiedOpenClawGateway,
   parseBrowserPodHealthEvidence
 } from "./openclaw-gateway.mjs";

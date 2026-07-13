@@ -45,7 +45,9 @@
     "report-pin:check": "node scripts/generate-sdk-host-report-pin.mjs --check",
     "schemas:sync": "node scripts/sync-public-schemas.mjs",
     "schemas:check": "node scripts/sync-public-schemas.mjs --check",
-    "typecheck": "tsc -p apps/web/tsconfig.json --noEmit && npm run typecheck:api",
+    "headers:check": "node scripts/validate-security-headers.mjs",
+    "lint": "oxlint",
+    "typecheck": "tsc -p apps/web/tsconfig.json --noEmit && npm run typecheck:api && tsc -p tests/types/tsconfig.json",
     "typecheck:api": "tsc --noEmit --strict --skipLibCheck false --target ES2023 --module Node16 --moduleResolution Node16 --lib ES2023,DOM packages/browser-runtime/browser-runtime.d.mts packages/browser-runtime/browserpod-runtime.d.mts packages/browser-runtime/browserpod-preflight.d.mts packages/browser-runtime/cooperative-process.d.mts packages/browser-runtime/openclaw-installer.d.mts packages/browser-runtime/openclaw-gateway.d.mts packages/browser-runtime/browserpod-openclaw-probe.d.mts packages/capability-broker/capability-broker.d.mts packages/capability-broker/capability-consent.d.mts packages/capability-broker/mailbox-protocol.d.mts packages/capability-broker/filesystem-mailbox-host.d.mts packages/capability-broker/guest-mailbox-client.d.mts packages/capability-broker/guest-mailbox-artifact.d.mts packages/embed-sdk/report-loader.d.mts packages/embed-sdk/embed-manifest.d.mts packages/embed-sdk/openclaw-gateway-contract.generated.d.mts packages/embed-sdk/gateway-device-identity.d.mts packages/embed-sdk/gateway-device-token-vault.d.mts packages/embed-sdk/gateway-client.d.mts packages/embed-sdk/boot.d.mts packages/embed-sdk/gateway-pairing-prompt.d.mts packages/embed-sdk/permission-prompt.d.mts packages/hello-agent-binding/hello-agent-artifact.generated.d.mts packages/hello-agent-binding/hello-agent-binding.d.mts",
     "test": "node --test packages/browser-runtime/*.test.mjs packages/capability-broker/*.test.mjs packages/compatibility/src/*.test.mjs packages/embed-sdk/*.test.mjs packages/hello-agent-binding/*.test.mjs examples/release-policy/*.test.mjs",
     "pretest:browser": "npm run build",
@@ -58,16 +60,19 @@
     "docs:validate": "node scripts/validate-doc-refs.mjs",
     "pretest:page": "npm run build",
     "test:page": "playwright test tests/browser/project-page.spec.ts --config playwright.config.ts",
+    "pretest:security": "npm run build",
     "test:security": "playwright test tests/browser/security-probes.spec.ts --config playwright.config.ts",
     "social:render": "node scripts/render-social-preview.mjs",
     "build:pages": "node scripts/build-pages.mjs",
-    "check": "npm run mailbox:check && npm run protocol:check && npm run hello-agent:check && npm run schemas:check && npm run report-pin:check && npm run runtime:validate && npm run sdk:check && npm run test && npm run compat:validate && npm run workflows:validate && npm run docs:validate && npm run typecheck && npm run build",
+    "check": "npm run mailbox:check && npm run protocol:check && npm run hello-agent:check && npm run schemas:check && npm run headers:check && npm run report-pin:check && npm run runtime:validate && npm run sdk:check && npm run lint && npm run test && npm run compat:validate && npm run workflows:validate && npm run docs:validate && npm run typecheck && npm run build",
     "release:check": "npm run social:render && npm run check && npm run test:browser && npm run build:pages && node packages/compatibility/src/release-readiness.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
+    "oxlint": "1.73.0",
+    "playwright": "1.61.1",
     "typescript": "7.0.2",
     "vite": "8.1.4"
   }

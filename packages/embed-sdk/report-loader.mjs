@@ -143,7 +143,7 @@ export async function loadVerifiedCompatibilityReport(expectation, {
   if (Number.isFinite(declaredLength) && declaredLength > maxBytes) throw new Error("verified report exceeds the byte limit");
 
   const bytes = await readBoundedBody(response, maxBytes);
-  if (bytes.byteLength < 2) throw new Error("verified report exceeds the byte limit");
+  if (bytes.byteLength < 2) throw new Error("verified report is smaller than the minimum plausible document");
   const sha256 = bytesToHex(new Uint8Array(await cryptoApi.subtle.digest("SHA-256", bytes)));
   if (sha256 !== expectation.sha256) throw new Error("verified report SHA-256 does not match the pinned bytes");
 

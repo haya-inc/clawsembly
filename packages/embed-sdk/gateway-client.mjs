@@ -624,7 +624,7 @@ export function createOpenClawGatewayClient({
               throw new Error("identity signer returned an invalid device proof");
             }
             signedDeviceId = device.id;
-            const request = {
+            const connectRequest = {
               type: "req",
               id: requestId,
               method: "connect",
@@ -647,7 +647,7 @@ export function createOpenClawGatewayClient({
                 device
               }
             };
-            const serialized = JSON.stringify(request);
+            const serialized = JSON.stringify(connectRequest);
             if (new TextEncoder().encode(serialized).byteLength > OPENCLAW_GATEWAY_CONTRACT.limits.preauthPayloadBytes) {
               throw fail("connect_frame_too_large", "Gateway connect frame exceeds the pre-authentication limit");
             }

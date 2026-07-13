@@ -48,11 +48,11 @@ function fakeBrowserPod({
         calls.push(["boot", options]);
         return {
           onPortal(handler) { portals.push(handler); },
-          async createCustomTerminal(options) { return { emit: options.onOutput }; },
-          async run(executable, args, options) {
-            calls.push(["run", { executable, args, env: options.env, cwd: options.cwd }]);
+          async createCustomTerminal(terminalOptions) { return { emit: terminalOptions.onOutput }; },
+          async run(executable, args, runOptions) {
+            calls.push(["run", { executable, args, env: runOptions.env, cwd: runOptions.cwd }]);
             if (executable === "node" && args[0]?.endsWith("/clawsembly-preflight/probe.cjs")) {
-              emit(options.terminal, `${EVIDENCE_PREFIX}${JSON.stringify({
+              emit(runOptions.terminal, `${EVIDENCE_PREFIX}${JSON.stringify({
                 node: "22.19.0",
                 platform: "linux",
                 arch: "wasm32",
@@ -62,18 +62,18 @@ function fakeBrowserPod({
               return {};
             }
             if (executable === "npm") {
-              files.set(`${options.cwd}/node_modules/openclaw/package.json`, JSON.stringify({ version: "2026.6.11" }));
-              files.set(`${options.cwd}/package-lock.json`, JSON.stringify({
+              files.set(`${runOptions.cwd}/node_modules/openclaw/package.json`, JSON.stringify({ version: "2026.6.11" }));
+              files.set(`${runOptions.cwd}/package-lock.json`, JSON.stringify({
                 packages: { "node_modules/openclaw": { version: "2026.6.11", integrity: lockIntegrity } }
               }));
-              emit(options.terminal, "added openclaw\n");
+              emit(runOptions.terminal, "added openclaw\n");
               return {};
             }
             if (executable === "node" && args[0]?.endsWith("/supervisor-gateway.mjs")) {
               if (gatewayExitEarly) return {};
-              gatewayTerminal = options.terminal;
+              gatewayTerminal = runOptions.terminal;
               queueMicrotask(() => {
-                emit(options.terminal, "[clawsembly-supervisor]{\"event\":\"ready\"}\n[gateway] ready\n");
+                emit(runOptions.terminal, "[clawsembly-supervisor]{\"event\":\"ready\"}\n[gateway] ready\n");
                 for (const handler of portals) {
                   handler({ port: 18_789, url: "https://browserpod.example/session" });
                 }
@@ -81,7 +81,7 @@ function fakeBrowserPod({
               return gateway.promise;
             }
             if (executable === "node" && args[0]?.endsWith("/clawsembly-health.mjs")) {
-              emit(options.terminal, `${BROWSERPOD_HEALTH_PREFIX}${JSON.stringify({
+              emit(runOptions.terminal, `${BROWSERPOD_HEALTH_PREFIX}${JSON.stringify({
                 healthz: { status: 200, body: "{\"ok\":true}" },
                 readyz: { status: 200, body: "{\"ready\":true}" }
               })}\n`);
@@ -89,7 +89,7 @@ function fakeBrowserPod({
             }
             throw new Error(`unexpected fake BrowserPod command: ${executable}`);
           },
-          async createDirectory(path, options) { calls.push(["mkdir", { path, options }]); },
+          async createDirectory(path, directoryOptions) { calls.push(["mkdir", { path, options: directoryOptions }]); },
           async createFile(path) {
             let text = "";
             return {

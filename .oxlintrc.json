@@ -1,0 +1,43 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error"
+  },
+  "rules": {
+    // Control-character classes are this codebase's core defensive idiom:
+    // tokens, nonces, and identifiers must reject \0, \r, \n, and "|".
+    "no-control-regex": "off",
+    // Redacted rethrows are deliberate: public errors must not chain raw
+    // internal causes into logs, transports, or guest-visible messages.
+    "preserve-caught-error": "off",
+    // Double-underscore page globals are the deliberate evidence-host marker
+    // convention (__CLAWSEMBLY_*__); underscore prefixes mark unused values.
+    "no-underscore-dangle": "off",
+    // Rest-sibling destructuring is the omission idiom in tests.
+    "no-unused-vars": ["error", {
+      "argsIgnorePattern": "^_",
+      "varsIgnorePattern": "^_",
+      "ignoreRestSiblings": true
+    }],
+    // Sorting freshly created arrays in place is intentional and bounded.
+    "unicorn/no-array-sort": "off",
+    "unicorn/no-array-reverse": "off",
+    // Test fixtures intentionally inline non-capturing helper functions.
+    "unicorn/consistent-function-scoping": "off",
+    // Listener sets are snapshotted with spread before dispatch on purpose.
+    "unicorn/no-useless-spread": "off",
+    // `export {}` marks compile-only conformance files as modules.
+    "unicorn/require-module-specifiers": "off"
+  },
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    ".artifacts/**",
+    "test-results/**",
+    "playwright-report/**",
+    "**/*.generated.mjs",
+    "**/*.generated.d.mts",
+    "packages/capability-broker/generated-guest-mailbox-artifact.mjs"
+  ]
+}

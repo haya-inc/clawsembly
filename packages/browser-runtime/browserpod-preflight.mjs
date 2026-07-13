@@ -40,7 +40,12 @@ function parseEvidence(output) {
   if (!line) {
     throw new BrowserRuntimeError("preflight_output_missing", "BrowserPod preflight did not emit runtime evidence");
   }
-  const evidence = JSON.parse(line.slice(line.indexOf(EVIDENCE_PREFIX) + EVIDENCE_PREFIX.length));
+  let evidence;
+  try {
+    evidence = JSON.parse(line.slice(line.indexOf(EVIDENCE_PREFIX) + EVIDENCE_PREFIX.length));
+  } catch {
+    throw new BrowserRuntimeError("preflight_output_invalid", "BrowserPod preflight emitted malformed runtime evidence");
+  }
   assertNodeBaseline(evidence.node);
   return evidence;
 }
