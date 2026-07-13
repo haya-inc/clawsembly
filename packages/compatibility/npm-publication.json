@@ -2,12 +2,9 @@
   "schemaVersion": 1,
   "package": {
     "name": "@haya-inc/clawsembly",
-    "version": "0.1.0-alpha.1"
+    "version": "0.1.0-alpha.2"
   },
   "registry": "https://registry.npmjs.org/",
   "distTag": "alpha",
-  "status": "published",
-  "integrity": "sha512-VJlApuNHms/xsV1SCtNFDUc54fubRaLPLicp9AgJoCuT5on/xh91UzxquUWjYBgUa6BZW/4GEAsrDph+sFBJvw==",
-  "publishedAt": "2026-07-12T11:50:14.625Z",
-  "provenanceUrl": "https://search.sigstore.dev/?logIndex=2151530229"
+  "status": "pending"
 }

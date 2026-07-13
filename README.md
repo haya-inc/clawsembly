@@ -227,7 +227,7 @@ the release is reported as `probing` rather than production-compatible.
 - [Release-channel history](apps/web/public/data/release-history.json)
 - [Promotion policy](https://haya-inc.github.io/clawsembly/data/promotion-policy.json)
 - [SDK alpha release manifest](https://haya-inc.github.io/clawsembly/downloads/sdk-release.json)
-- [SDK source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.1)
+- [SDK source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.2)
 - [npm publication record](packages/compatibility/npm-publication.json)
 - [Report schema](packages/compatibility/report.schema.json)
 - [Release-history schema](packages/compatibility/release-history.schema.json)
@@ -266,11 +266,11 @@ prerelease:
 
 ```bash
 npm install @haya-inc/clawsembly@alpha
-npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.1.tgz
-npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.1/haya-inc-clawsembly-0.1.0-alpha.1.tgz
+npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.2.tgz
+npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.2/haya-inc-clawsembly-0.1.0-alpha.2.tgz
 ```
 
-The [GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.1)
+The [GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.2)
 carries provider-free browser diagnostics and a provenance record binding the
 tag, source commit, Pages manifest, and compatibility report. Runtime support
 remains `probing` independently of package distribution.
@@ -326,7 +326,7 @@ digests, installs it into an isolated temporary consumer, imports every public
 ESM subpath, and compiles a strict TypeScript consumer. `sdk:lock` deliberately
 updates the copy-ready starter URL and SHA-512 when the SDK version changes;
 normal checks reject silent drift. `sdk:pack` writes
-`@haya-inc/clawsembly@0.1.0-alpha.1` plus its checksum under ignored
+`@haya-inc/clawsembly@0.1.0-alpha.2` plus its checksum under ignored
 `.artifacts/sdk/`. The matching GitHub prerelease triggered provenance-backed
 npm publication under the `alpha` dist-tag; the reviewed
 [npm publication record](packages/compatibility/npm-publication.json) now

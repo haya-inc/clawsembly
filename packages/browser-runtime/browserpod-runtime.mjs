@@ -126,14 +126,23 @@ export async function createBrowserPodRuntime({
         cols: command.cols,
         rows: command.rows,
         onOutput(buffer) {
-          if (!(buffer instanceof ArrayBuffer)) return;
-          const chunkBytes = buffer.byteLength;
+          // BrowserPod 2.12.1 delivers terminal output as Uint8Array views,
+          // typically backed by a SharedArrayBuffer, although its published
+          // type declares ArrayBuffer; both shapes are accepted. Shared-memory
+          // views must be copied before TextDecoder will decode them.
+          let bytes;
+          if (buffer instanceof ArrayBuffer) bytes = new Uint8Array(buffer);
+          else if (ArrayBuffer.isView(buffer)) bytes = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+          else return;
+          const chunkBytes = bytes.byteLength;
           const remaining = Math.max(0, command.outputLimitBytes - transcriptBytes);
           if (remaining > 0) {
-            const view = new Uint8Array(buffer, 0, Math.min(chunkBytes, remaining));
-            const chunk = decoder.decode(view, { stream: true });
+            const bounded = bytes.subarray(0, Math.min(chunkBytes, remaining));
+            const copy = new Uint8Array(bounded.length);
+            copy.set(bounded);
+            const chunk = decoder.decode(copy, { stream: true });
             transcript += chunk;
-            transcriptBytes += view.byteLength;
+            transcriptBytes += copy.byteLength;
             for (const listener of outputListeners) {
               try { listener(chunk); }
               catch { /* Output consumers cannot break the runtime. */ }

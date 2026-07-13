@@ -57,6 +57,7 @@ function fakeProvider() {
     calls,
     run,
     emitOutput(text) { terminalOutput(new TextEncoder().encode(text).buffer); },
+    emitRawOutput(value, vt) { terminalOutput(value, vt); },
     emitPortal(value) { for (const handler of portalHandlers) handler(value); }
   };
 }
@@ -116,6 +117,29 @@ test("replays output emitted before a fast task can be observed", async () => {
   assert.deepEqual(received, ["fast\n"]);
   fake.run.resolve({});
   await task.wait();
+});
+
+test("decodes Uint8Array output views, including SharedArrayBuffer-backed views", async () => {
+  const fake = fakeProvider();
+  const runtime = await createBrowserPodRuntime({ BrowserPod: fake.BrowserPod, apiKey: "secret" });
+  const task = await runtime.start({ executable: "node", args: ["-e", "probe"] });
+  // BrowserPod 2.12.1 delivers terminal output as Uint8Array views, usually
+  // backed by a SharedArrayBuffer, with a numeric VT identifier as the second
+  // argument, although its published type declares a plain ArrayBuffer.
+  const encoded = new TextEncoder().encode("[clawsembly-browserpod]{\"ok\":true}\n");
+  const shared = new SharedArrayBuffer(encoded.byteLength + 8);
+  const sharedView = new Uint8Array(shared, 4, encoded.byteLength);
+  sharedView.set(encoded);
+  fake.emitRawOutput(sharedView, 3);
+  fake.emitRawOutput(new TextEncoder().encode("plain-view\n"), 3);
+  assert.equal(task.transcript.includes("[clawsembly-browserpod]{\"ok\":true}"), true);
+  assert.equal(task.transcript.includes("plain-view"), true);
+  fake.run.resolve(0);
+  assert.deepEqual(await task.wait(), {
+    status: "completed",
+    outputBytes: encoded.byteLength + "plain-view\n".length,
+    outputTruncated: false
+  });
 });
 
 test("bounds captured output and exposes no undocumented process-control success", async () => {
