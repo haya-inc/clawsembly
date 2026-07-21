@@ -80,6 +80,38 @@ because the first real capture is what produces hello-agent evidence at all.
 The captured record never inherits that report's status; it must pass the
 digest-bound evidence gate on its own.
 
+## Performance baseline
+
+`hello-agent-perf.mjs` defines the performance-baseline schema for
+[issue #8](https://github.com/haya-inc/clawsembly/issues/8) on this chain:
+three pass kinds (`cold` — fresh browser context and workspace, `warm` —
+reloaded page with hot caches and a fresh workspace, `persistentReuse` — the
+same workspace storage key as a previous boot), six phase timings per sample
+(embed boot, provider boot from the runtime boot audit, digest-verified
+staging, readiness, first `hello.say` round trip, cooperative close), storage
+estimates, and a digest-bound record. The schema is deliberately payload-free:
+the only strings a sample can carry are the pattern-bounded pass kind and
+workspace id. Aggregation reports the median next to every raw sample, and
+`meetsSampleFloor` marks whether a pass reaches the three samples issue #8
+requires for a publishable baseline.
+
+Capture (owner-authorized and metered; each planned boot is printed with the
+total cost before the first spend):
+
+```bash
+npm install --prefix examples/hello-agent-evidence-host --ignore-scripts
+node examples/hello-agent-evidence-host/perf-capture.mjs --samples 3
+```
+
+These are boundary-chain numbers on the reference binding, bound to the exact
+fixture identity and provider version. They claim nothing about any real
+upstream agent: OpenClaw npm-install and Gateway-start timings stay open until
+the vendor gaps in issues
+[#6](https://github.com/haya-inc/clawsembly/issues/6) and
+[#47](https://github.com/haya-inc/clawsembly/issues/47) close, and workspace
+persistence keys already isolate by artifact version, so a version or
+integrity change never reuses another artifact's storage.
+
 ## What it deliberately is not
 
 - Not a real agent, and not evidence that any second agent runs. OpenClaw
