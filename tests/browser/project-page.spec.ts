@@ -214,7 +214,9 @@ test("project page distinguishes stable, previous, and preview evidence", async 
       `${contract?.distribution.legacyPluginDeclarationCount.stable} → ${contract?.distribution.legacyPluginDeclarationCount.release}`,
       { exact: true }
     )).toBeVisible();
-    const firstMethod = contract?.coreMethods.added[0];
+    // The page lists removed entries before added ones and caps the visible
+    // inventory, so assert the first entry in that render order.
+    const firstMethod = contract?.coreMethods.removed[0] ?? contract?.coreMethods.added[0];
     if (firstMethod) await expect(gatewayDiff.getByText(firstMethod, { exact: true })).toBeVisible();
   });
 

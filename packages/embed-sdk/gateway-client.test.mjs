@@ -114,7 +114,7 @@ function helloFrame(id = "connect-1", methods = ["chat.send", "chat.history", "c
     payload: {
       type: "hello-ok",
       protocol: 4,
-      server: { version: "2026.6.11", connId: "connection-1" },
+      server: { version: OPENCLAW_GATEWAY_CONTRACT.artifact.version, connId: "connection-1" },
       features: { methods, events: ["chat", "tick"] },
       snapshot: { presence: [], health: {}, stateVersion: { presence: 1, health: 1 }, uptimeMs: 10 },
       auth: {
