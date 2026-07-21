@@ -54,6 +54,32 @@ embedder-supplied handler after explicit approval, cancels mid-turn across
 the typed mailbox, fails closed again after revocation, and never leaks chat
 payloads into any audit surface.
 
+## Runtime evidence
+
+One owner-authorized record of the full chain on the real provider is checked
+in under [`evidence/`](evidence/hello-agent-0.2.0.json): the exact fixture
+staged with verified per-file digests into `browserpod@2.12.1` in a real
+browser, both readiness signals with a live capability mailbox, one `hello.say`
+round trip, four capability-mediated chat turns across the default-deny
+boundary (denied before approval, completed after approval, aborted in flight,
+denied after revocation), and a completed guest-supervisor shutdown. The
+digest-bound reference next to it recomputes from the evidence bytes and both
+are validated by `hello-agent-evidence.test.mjs` in the normal test run.
+
+Recapture (owner-authorized and metered; requires a local `BROWSERPOD_API_KEY`
+and Playwright Chromium — GitHub-hosted runners are rejected by the provider):
+
+```bash
+npm install --prefix examples/hello-agent-evidence-host --ignore-scripts
+node examples/hello-agent-evidence-host/capture.mjs
+```
+
+The capture host feeds the verified-launch assertion a self-served bootstrap
+report pinned by its own SHA-256 — the same shape the provider-free test uses —
+because the first real capture is what produces hello-agent evidence at all.
+The captured record never inherits that report's status; it must pass the
+digest-bound evidence gate on its own.
+
 ## What it deliberately is not
 
 - Not a real agent, and not evidence that any second agent runs. OpenClaw
@@ -62,6 +88,7 @@ payloads into any audit surface.
 - Not published to any registry: the fixture is `private: true`, the generated
   descriptor records `registryPublished: false`, and its identity exists only
   in this repository.
-- Not covered by BrowserPod runtime evidence, and never surfaced through the
-  published reports or Pages. Test evidence exercises the gate machinery; it
-  is not runtime support evidence.
+- Not OpenClaw runtime support, and never surfaced through the published
+  reports or Pages. The checked-in record proves the embedding boundary chain
+  on the real provider for this reference fixture; every OpenClaw report stays
+  `probing` on its own evidence.

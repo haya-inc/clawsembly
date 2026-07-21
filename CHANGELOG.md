@@ -7,6 +7,21 @@ The project does not yet promise semantic-version compatibility.
 
 ## Unreleased
 
+### Added
+
+- the first owner-authorized runtime record on the real provider: the
+  hello-agent reference binding's complete chain — exact-digest staging, dual
+  readiness with a live capability mailbox, one `hello.say` round trip, four
+  capability-mediated chat turns across the default-deny boundary (denied,
+  completed, aborted in flight, denied after revocation), and cooperative
+  guest shutdown — executed on `browserpod@2.12.1` in a real browser. The
+  digest-bound evidence is checked in under
+  `packages/hello-agent-binding/evidence/` and validated in the normal test
+  run, and the reproducible capture host lives at
+  `examples/hello-agent-evidence-host/`. The record proves the embedding
+  boundary machinery, not any real upstream: OpenClaw runtime support remains
+  `probing`.
+
 ### Changed
 
 - the pinned Gateway contract migrates to the `dist/gateway/protocol`
