@@ -33,6 +33,7 @@ OpenClaw project.
 | Hosted project page | **Works** | [Live reports plus a permission-prompt demo](https://haya-inc.github.io/clawsembly/) against an inert local broker: approve, deny, revoke, export a payload-free audit. |
 | npm alpha package | **Published now** | `npm install @haya-inc/clawsembly@alpha` — the reviewed [publication record](packages/compatibility/npm-publication.json) records `status: published` with SHA-512 integrity and Sigstore provenance. |
 | Evidence-gated boot demo | **Works** | The [SDK host example](examples/sdk-host/README.md) verifies the pinned report and shows `Provider boot blocked`. Refusing an unverified report is the security feature, working. |
+| Boundary chain on real BrowserPod | **Works** | The hello-agent reference binding's full chain — exact-digest staging, dual readiness, capability-mediated chat with denied and allowed outcomes, in-flight abort, cooperative guest stop — has one owner-authorized record on `browserpod@2.12.1` ([evidence](packages/hello-agent-binding/evidence/hello-agent-0.2.0.json), [capture host](examples/hello-agent-evidence-host/capture.mjs)). A reference binding, not a real agent; OpenClaw boot stays blocked below. |
 | Verified BrowserPod boot | **Blocked** | Current stable `openclaw@2026.7.1-2` declares the compound engines range `>=22.22.3 <23 \|\| >=24.15.0 <25 \|\| >=25.9.0`, which the exact-form baseline gate rejects before any token spend (`node_baseline_unsupported`), and BrowserPod 2.12.1 provisions Node 22.15.0 — below every branch of that range; reported to the vendor. The checked-in `openclaw@2026.5.7` report remains the capturable target ([#6](https://github.com/haya-inc/clawsembly/issues/6)). |
 | Live provider smoke test | **Blocked** | The gated path exists but has never been executed. |
 | Performance baselines | **Blocked** | Not yet measured ([#8](https://github.com/haya-inc/clawsembly/issues/8)). |
@@ -378,8 +379,9 @@ uploads evidence for review without committing or promoting it automatically.
   rewrite. OpenClaw is the first bound upstream; additional upstreams bind
   through the documented
   [upstream-binding contract](docs/upstream-binding-contract.md), whose
-  test-only hello-agent reference binding demonstrates that the boundary is
-  upstream-portable and extends an agent through embedder-granted host
+  hello-agent reference binding — test-scoped, and since 2026-07-21 backed by
+  one owner-authorized real-BrowserPod record — demonstrates that the boundary
+  is upstream-portable and extends an agent through embedder-granted host
   capabilities
   ([ADR 0005](docs/decisions/0005-reference-agent-growth-paths.md)). No
   second real agent runs today.
@@ -438,6 +440,14 @@ exact pending-request review, explicit pairing controls, encrypted token
 retention, and token reconnect pass provider-free contract tests. They are not
 yet backed by an owner-authorized BrowserPod/Gateway record. Remote-mode
 approval, rotation, revocation, and recovery remain future work.
+The embedding boundary itself now has its first owner-authorized record on the
+real provider: the hello-agent reference chain — verified staging, readiness,
+capability-mediated chat with denied and allowed outcomes, in-flight abort,
+and cooperative stop — executed on `browserpod@2.12.1` in a real browser, with
+the digest-bound evidence checked in under
+[`packages/hello-agent-binding/evidence/`](packages/hello-agent-binding/evidence/hello-agent-0.2.0.json).
+That record proves the boundary machinery, not any real upstream: OpenClaw
+runtime support remains `probing` and blocked on the vendor gaps above.
 
 ## License
 
