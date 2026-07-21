@@ -36,7 +36,7 @@ OpenClaw project.
 | Boundary chain on real BrowserPod | **Works** | The hello-agent reference binding's full chain — exact-digest staging, dual readiness, capability-mediated chat with denied and allowed outcomes, in-flight abort, cooperative guest stop — has one owner-authorized record on `browserpod@2.12.1` ([evidence](packages/hello-agent-binding/evidence/hello-agent-0.2.0.json), [capture host](examples/hello-agent-evidence-host/capture.mjs)). A reference binding, not a real agent; OpenClaw boot stays blocked below. |
 | Verified BrowserPod boot | **Blocked** | Current stable `openclaw@2026.7.1-2` declares the compound engines range `>=22.22.3 <23 \|\| >=24.15.0 <25 \|\| >=25.9.0`, which the exact-form baseline gate rejects before any token spend (`node_baseline_unsupported`), and BrowserPod 2.12.1 provisions Node 22.15.0 — below every branch of that range; reported to the vendor. The checked-in `openclaw@2026.5.7` report remains the capturable target ([#6](https://github.com/haya-inc/clawsembly/issues/6)). |
 | Live provider smoke test | **Blocked** | The gated path exists but has never been executed. |
-| Performance baselines | **Blocked** | Not yet measured ([#8](https://github.com/haya-inc/clawsembly/issues/8)). |
+| Performance baselines | **Measured** | Owner-authorized baseline on `browserpod@2.12.1`, three samples per pass ([baseline](packages/hello-agent-binding/evidence/hello-agent-perf-0.2.0.json)): median provider boot under 0.9 s, digest-verified staging under 15 ms, first protocol round trip ≈6.2 s cold / ≈4.7 s with persistent workspace reuse. Boundary-chain numbers on the reference binding — OpenClaw install and Gateway timings stay open ([#8](https://github.com/haya-inc/clawsembly/issues/8)). |
 
 ## Try it
 

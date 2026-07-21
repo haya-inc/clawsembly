@@ -103,6 +103,17 @@ npm install --prefix examples/hello-agent-evidence-host --ignore-scripts
 node examples/hello-agent-evidence-host/perf-capture.mjs --samples 3
 ```
 
+One owner-authorized baseline is checked in under
+[`evidence/`](evidence/hello-agent-perf-0.2.0.json) (2026-07-21,
+`browserpod@2.12.1`, HeadlessChrome 149 on Windows 11, three samples per
+pass, 10 metered boots including the persistence seed). Medians for
+cold / warm / persistentReuse: provider boot 844 / 690 / 792 ms, staging
+12 / 7 / 8 ms, readiness 5.1 / 5.4 / 3.7 s, first `hello.say` round trip
+≈160 ms, cooperative close 123 / 109 / 62 ms — ≈6.2 s cold and ≈4.7 s with
+persistent workspace reuse to the first protocol round trip, with ≈1.75 MB
+of reported storage growth per fresh workspace. The digest-bound gate in
+`hello-agent-perf.test.mjs` revalidates both files on every test run.
+
 These are boundary-chain numbers on the reference binding, bound to the exact
 fixture identity and provider version. They claim nothing about any real
 upstream agent: OpenClaw npm-install and Gateway-start timings stay open until

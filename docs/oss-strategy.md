@@ -125,12 +125,18 @@ staging, default-deny broker, consent lifecycle, in-flight abort, revocation,
 payload-free audit, cooperative stop) has one owner-authorized runtime record
 on `browserpod@2.12.1` via the hello-agent reference binding
 ([evidence](../packages/hello-agent-binding/evidence/hello-agent-0.2.0.json),
-PR [#48](https://github.com/haya-inc/clawsembly/pull/48)), which also makes
-the performance capture executable without waiting on the vendor gaps. The
-owner-authorized BrowserPod performance capture (cold/warm install,
-persistent reuse, Gateway-ready latency, storage footprint) is still
-outstanding ([#8](https://github.com/haya-inc/clawsembly/issues/8)) and is
-now blocked by scheduling only. The runtime-evidence tier of the north-star
+PR [#48](https://github.com/haya-inc/clawsembly/pull/48)), and the
+boundary-chain performance baseline landed 2026-07-21 on that same chain
+(cold / warm / persistent-reuse, three samples per pass on
+`browserpod@2.12.1`,
+[baseline](../packages/hello-agent-binding/evidence/hello-agent-perf-0.2.0.json)):
+provider boot medians under 0.9 s and ≈6.2 s cold / ≈4.7 s persistent-reuse
+to the first protocol round trip. The OpenClaw-artifact portion of
+[#8](https://github.com/haya-inc/clawsembly/issues/8) (npm-install time,
+installed bytes, Gateway-ready latency) stays open behind the vendor gaps
+([#6](https://github.com/haya-inc/clawsembly/issues/6),
+[#47](https://github.com/haya-inc/clawsembly/issues/47)). The
+runtime-evidence tier of the north-star
 metric still awaits OpenClaw runtime evidence; the automated-report tier is
 already operating (see [docs/product.md](product.md) for the two-tier
 definition).
