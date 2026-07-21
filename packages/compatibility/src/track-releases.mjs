@@ -39,12 +39,21 @@ function parseArgs(argv) {
   return options;
 }
 
-function run(command, args) {
+function run(command, args, options = {}) {
   return execFileSync(command, args, {
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
-    stdio: ["ignore", "pipe", "pipe"]
+    stdio: ["ignore", "pipe", "pipe"],
+    ...options
   });
+}
+
+// Windows cannot spawn npm's .cmd shim directly, so prefer the invoking npm's
+// JS entry point (matches the release scripts' runNpm helper).
+const npmCli = process.env.npm_execpath;
+function runNpm(args) {
+  if (npmCli && /\.[cm]?js$/u.test(npmCli)) return run(process.execPath, [npmCli, ...args]);
+  return run("npm", args, { shell: process.platform === "win32" });
 }
 
 function safeSegment(value) {
@@ -52,11 +61,11 @@ function safeSegment(value) {
 }
 
 const options = parseArgs(process.argv.slice(2));
-const distTags = JSON.parse(run("npm", ["view", options.packageName, "dist-tags", "--json"]));
-const versions = JSON.parse(run("npm", ["view", options.packageName, "versions", "--json"]));
+const distTags = JSON.parse(runNpm(["view", options.packageName, "dist-tags", "--json"]));
+const versions = JSON.parse(runNpm(["view", options.packageName, "versions", "--json"]));
 let publishTimes = {};
 try {
-  publishTimes = JSON.parse(run("npm", ["view", options.packageName, "time", "--json"])) ?? {};
+  publishTimes = JSON.parse(runNpm(["view", options.packageName, "time", "--json"])) ?? {};
 } catch {
   process.stderr.write(`Could not read npm publish times for ${options.packageName}; reports will omit upstreamPublishedAt.\n`);
 }

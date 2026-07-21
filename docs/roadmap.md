@@ -129,7 +129,8 @@ superseded production boundary without moving execution to a server:
   the decision log rather than executable main-branch code;
 - use BrowserPod as the selected embedded production target while keeping its
   support status blocked on runtime evidence;
-- verify BrowserPod Node 22.19+, crypto, SQLite, long-lived Gateway process I/O,
+- verify BrowserPod against the artifact-declared Node baseline, crypto,
+  SQLite, long-lived Gateway process I/O,
   portal routing, persistence, cancellation, and commercial terms;
 - retain the 316.7 MB container2wasm boot failure as an archived feasibility
   result rather than splitting current implementation effort;
@@ -290,12 +291,16 @@ agent runtime inside Clawsembly.
 
 ## Immediate next tasks
 
-Owner-authorized BrowserPod evidence capture is currently blocked by the
-vendor runtime: BrowserPod 2.12.1 provisions Node 22.15.0, below the 22.19
-baseline pinned by `openclaw@2026.6.11`, so the readiness probe fails closed
-with `node_baseline_unsatisfied`; the vendor has been notified
-([issue #6](https://github.com/haya-inc/clawsembly/issues/6)). Tasks 3 and 4
-depend on a vendor Node upgrade or a revisited baseline decision.
+Owner-authorized BrowserPod evidence capture against the tracked stable is
+currently blocked: `openclaw@2026.7.1-2` declares the compound engines range
+`>=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0`, which the exact-form baseline
+gate rejects as `node_baseline_unsupported` before any token spend, and
+BrowserPod 2.12.1 provisions Node 22.15.0, below every branch of that range;
+the vendor has been notified
+([issue #6](https://github.com/haya-inc/clawsembly/issues/6)). The checked-in
+`openclaw@2026.5.7` report (engines `>=22.14.0`) remains the capturable target
+today. Tasks 3 and 4 depend on a vendor Node upgrade or a revisited baseline
+decision.
 
 1. Extend the versioned mock-state envelope to cover user workspaces and migration fixtures.
 2. Execute the protected live smoke test with an owner-provided key, archive redacted evidence, and expand moderation UX.
