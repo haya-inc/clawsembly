@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T03:18:55.401Z",
+  "generatedAt": "2026-07-21T12:47:47.515Z",
   "package": "openclaw",
   "channels": {
     "stable": "2026.7.1-2",
-    "previous": "2026.6.11",
+    "previous": "2026.6.33",
     "preview": "2026.7.2-beta.3"
   },
   "releases": [
@@ -13,9 +13,9 @@
       "version": "2026.7.1-2",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.7.1-2.json",
-      "generatedAt": "2026-07-21T03:18:11.113Z",
+      "generatedAt": "2026-07-21T12:47:30.235Z",
       "upstreamPublishedAt": "2026-07-18T03:53:48.967Z",
-      "reportLatencySeconds": 257062,
+      "reportLatencySeconds": 291221,
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-ycF3yPcbjN6bUPeaUx6Mh6vze1hQWoD3CT/wWcmD7a8xaHHHRUaAlaq+lFxMHf1ssEgODVAwjlzYqp2twkYZ7g==",
@@ -96,16 +96,16 @@
     },
     {
       "channel": "previous",
-      "version": "2026.6.11",
+      "version": "2026.6.33",
       "status": "probing",
-      "reportPath": "releases/openclaw-2026.6.11.json",
-      "generatedAt": "2026-07-21T03:18:14.546Z",
-      "upstreamPublishedAt": "2026-06-30T16:04:00.916Z",
-      "reportLatencySeconds": 1768454,
+      "reportPath": "releases/openclaw-2026.6.33.json",
+      "generatedAt": "2026-07-21T12:47:33.592Z",
+      "upstreamPublishedAt": "2026-07-21T11:25:55.513Z",
+      "reportLatencySeconds": 4898,
       "runtimeEvidence": false,
       "artifact": {
-        "integrity": "sha512-T+P/g19IheeT1ckXMoPN61dYuE8vBF4MderI+kWkvpuFYxPkJxn8AXLpu9IXCnN9g36Acpm9+mMD/V+lsvOkyA==",
-        "unpackedBytes": 86337310,
+        "integrity": "sha512-53MCYfnMEzQmrh/mFNpqfUcQunZASPZ2qYOmqn6wq3K4gZPzV0QOMwjxOCU2C+VmQ5FqzVU8exy7j7pyL3EBzQ==",
+        "unpackedBytes": 86557604,
         "directDependencyCount": 54,
         "nativeRiskCount": 13,
         "shrinkwrapConsistent": false,
@@ -199,7 +199,7 @@
           {
             "name": "tar",
             "stableSpec": "7.5.19",
-            "releaseSpec": "7.5.16"
+            "releaseSpec": "7.5.20"
           },
           {
             "name": "typebox",
@@ -741,13 +741,13 @@
         {
           "name": "tar",
           "change": "changed",
-          "declaredSpec": "7.5.16",
-          "resolvedVersion": "7.5.16",
-          "integrity": "sha512-56adEpPMouktRlBLXiaYFFzZ/3+JXa8P9n7WbR+ibIjtviN55mEaOkiysCnPnWm+7kkui1Dn8J9l+g6zV8731w==",
+          "declaredSpec": "7.5.20",
+          "resolvedVersion": "7.5.20",
+          "integrity": "sha512-9FcyK4PA6+WbzlTM9WhQm6vB5W7cP7dUiPsv1g7YDwEQnQ1CGpK3MGlKk/ITVWMk05kHZuBhmVhiv8LZoy/PFQ==",
           "scan": {
             "packageFileCount": 249,
             "sourceFileCount": 62,
-            "sourceBytes": 521609,
+            "sourceBytes": 528088,
             "truncated": false
           },
           "signals": {
@@ -876,8 +876,6 @@
           "removed": [
             "agents.workspace.get",
             "agents.workspace.list",
-            "attach.grant",
-            "attach.revoke",
             "audit.list",
             "controlUi.githubPreview",
             "crestodian.chat",
@@ -1002,7 +1000,7 @@
         }
       },
       "deltaFromStable": {
-        "unpackedBytes": -1140592,
+        "unpackedBytes": -920298,
         "directDependencyCount": -2,
         "nativeRiskCount": 0,
         "shrinkwrapMissingCount": 0
@@ -1013,9 +1011,9 @@
       "version": "2026.7.2-beta.3",
       "status": "probing",
       "reportPath": "releases/openclaw-2026.7.2-beta.3.json",
-      "generatedAt": "2026-07-21T03:18:18.900Z",
+      "generatedAt": "2026-07-21T12:47:37.753Z",
       "upstreamPublishedAt": "2026-07-18T23:15:12.160Z",
-      "reportLatencySeconds": 187387,
+      "reportLatencySeconds": 221546,
       "runtimeEvidence": false,
       "artifact": {
         "integrity": "sha512-b1U1Q2/IrP3NX3ZWruiasWEJPjl2dq0Hm8ZByZrE7GwLqo78wu8eB7eJAqCEu29MtlBxLLSKz58SE01WUBf7dw==",
