@@ -22,7 +22,7 @@ function sourceRecord(path, source) {
   return typeof source === "string" ? { path, sha256: sha256(source) } : null;
 }
 
-function declarationExports(source) {
+export function declarationExports(source) {
   if (typeof source !== "string") return [];
   const names = [];
   for (const match of source.matchAll(/\bexport\s*\{([\s\S]*?)\}\s*;?/gu)) {

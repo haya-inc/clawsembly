@@ -9,7 +9,8 @@ same exact OpenClaw artifact inside the selected runtime and browser.
 `runBrowserPodOpenClawProbe` uses one owner-authorized, metered BrowserPod to:
 
 1. boot BrowserPod 2.12.1 with Node 22;
-2. verify Node 22.19+, `node:crypto`, and `node:sqlite` in the guest;
+2. verify the target report's declared Node baseline, `node:crypto`, and
+   `node:sqlite` in the guest;
 3. install `openclaw@<exact-version>` without skipping lifecycle scripts;
 4. compare the installed manifest and `package-lock.json` integrity with the
    inspected npm SHA-512;
@@ -88,10 +89,12 @@ schedule. Before the first run, a maintainer must:
 5. dispatch the workflow with `capture_browserpod` enabled.
 
 Warning: a metered capture against the current stable report fails closed
-with `node_baseline_unsatisfied` — the guest provisions Node 22.15.0, below
-the `>=22.19.0` engines declaration of current OpenClaw releases — before any
-promotable evidence exists. Do not spend BrowserPod tokens on the stable
-target until the vendor ships Node 22.19 or newer
+before any promotable evidence exists: `openclaw@2026.7.1-2` declares the
+compound engines range `>=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0`, which the
+exact-form baseline gate rejects as `node_baseline_unsupported`, and the
+guest's Node 22.15.0 is below every branch of that range anyway. Do not spend
+BrowserPod tokens on the stable target until the vendor provisions a Node that
+satisfies the stable engines declaration
 ([issue #6](https://github.com/haya-inc/clawsembly/issues/6)).
 
 ### Targeting the pinned older-baseline artifact

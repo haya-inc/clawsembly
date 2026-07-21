@@ -7,8 +7,31 @@ The project does not yet promise semantic-version compatibility.
 
 ## Unreleased
 
+### Changed
+
+- the pinned Gateway contract migrates to the `dist/gateway/protocol`
+  declaration distribution that `openclaw@2026.7.x` ships instead of the
+  removed `dist/plugin-sdk/packages/` tree: contract-source resolution moves
+  into a shared, tested `gateway-contract-sources` module that supports both
+  layouts, follows the name-stable entry pair to the per-release content-hashed
+  chunks, verifies the renamed public surface (`validateChatAbortParams`,
+  `DevicePair*Params` + validators) plus the runtime's retained
+  `DeviceAuthPayloadV3` acceptance, and fails closed with a classified error on
+  an unrecognized layout. The tracked channels move to stable `2026.7.1-2`
+  (npm `latest`; compound engines `>=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0`
+  recorded verbatim and still rejected fail-closed by the exact-form capture
+  baseline), previous `2026.6.11`, and preview `2026.7.2-beta.3`, and the
+  regenerated contract, SDK host pin, promotion policy, and README/evidence
+  docs move with them. All channels remain `probing` with promotion `hold`.
+
 ### Fixed
 
+- `compat:track` and dependency-risk classification now run on Windows
+  maintainer machines: npm is invoked through the calling npm's JS entry
+  point, tar receives cwd-relative paths, and large dependency extractions
+  pass their member list via `-T` instead of argv (the Windows command-line
+  length limit made `spawnSync tar` fail with `ENAMETOOLONG`). The contract
+  generator gets the same tar treatment.
 - the six-hour release tracker no longer goes silent when a new upstream
   stable breaks Gateway-contract regeneration: the tracker records the
   `protocol:verify` outcome in its run summary and in the generated report
