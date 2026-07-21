@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import test from "node:test";
 
 import { HELLO_AGENT_ARTIFACT } from "./hello-agent-artifact.generated.mjs";
@@ -75,6 +77,33 @@ function validBaseline() {
     passes: { cold, persistentReuse: persist }
   };
 }
+
+const checkedInBaselinePath = resolve(
+  import.meta.dirname,
+  `evidence/hello-agent-perf-${HELLO_AGENT_ARTIFACT.version}.json`
+);
+const checkedInRecordPath = resolve(
+  import.meta.dirname,
+  `evidence/hello-agent-perf-${HELLO_AGENT_ARTIFACT.version}.record.json`
+);
+
+test("the checked-in owner-authorized baseline passes the digest-bound gate", async () => {
+  const baseline = JSON.parse(await readFile(checkedInBaselinePath, "utf8"));
+  assert.equal(assertHelloAgentPerfBaseline(baseline), baseline);
+
+  // The record reference must recompute from the stored baseline bytes; a
+  // hand-edited record or baseline file fails here.
+  const record = JSON.parse(await readFile(checkedInRecordPath, "utf8"));
+  const recomputed = await helloAgentPerfRecord(baseline);
+  assert.deepEqual(record, recomputed);
+
+  // The published baseline must meet the issue #8 sample floor on every pass.
+  const passKinds = Object.keys(baseline.passes).sort();
+  assert.deepEqual(passKinds, ["cold", "persistentReuse", "warm"]);
+  for (const summary of Object.values(baseline.passes)) {
+    assert.equal(summary.meetsSampleFloor, true);
+  }
+});
 
 test("pass kinds stay the documented cold/warm/persistent triple", () => {
   assert.deepEqual([...HELLO_AGENT_PERF_PASS_KINDS], ["cold", "warm", "persistentReuse"]);

@@ -1,0 +1,8 @@
+{
+  "id": "hello-agent-perf-baseline",
+  "kind": "browser-runtime-performance",
+  "capturedAt": "2026-07-21T18:15:01.411Z",
+  "path": "evidence/hello-agent-perf-0.2.0.json",
+  "sha256": "2250191981db15ebc8df155e6fb60c8a7eb18ddf57007d9816f4a6aeb4f9423e",
+  "summary": "Boundary-chain performance baseline for the exact clawsembly-hello-agent 0.2.0 artifact on 2.12.1 (cold×3, persistentReuse×3, warm×3 sampled boots; medians over provider boot, staging, readiness, first round trip, and cooperative close) in Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36 on win32 10.0.26200. Reference-binding numbers only; no upstream agent performance is claimed."
+}

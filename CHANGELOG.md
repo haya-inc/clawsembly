@@ -9,6 +9,15 @@ The project does not yet promise semantic-version compatibility.
 
 ### Added
 
+- an owner-authorized performance baseline on the hello-agent chain
+  (`browserpod@2.12.1`, HeadlessChrome 149 on Windows 11, three samples per
+  pass, 10 metered boots): median provider boot under 0.9 s, digest-verified
+  staging under 15 ms, readiness 5.1 s cold / 3.7 s with persistent workspace
+  reuse, ≈6.2 s cold and ≈4.7 s persistent-reuse to the first protocol round
+  trip. Checked in with its digest-bound record under
+  `packages/hello-agent-binding/evidence/` and revalidated by the normal test
+  run. Reference-binding numbers only; OpenClaw install and Gateway timings
+  stay open on issue #8.
 - a performance-baseline harness for issue #8 on the hello-agent reference
   chain, executable independent of the vendor gaps: a payload-free schema and
   digest-bound record (`packages/hello-agent-binding/hello-agent-perf.mjs`)
