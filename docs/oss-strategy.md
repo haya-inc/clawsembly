@@ -1,6 +1,6 @@
 # OSS success strategy
 
-Survey date: 2026-07-12.
+Survey date: 2026-07-12. Status annotations updated: 2026-07-21.
 
 ## Evaluation
 
@@ -22,11 +22,14 @@ application an adjustable, auditable authority boundary, with evidence behind
 every compatibility claim.
 
 Honesty constraints apply to every claim derived from this framing: today only
-OpenClaw is bound; no owner-authorized runtime evidence exists yet, so all
-published reports are status `probing`; and multi-upstream is a design
-commitment whose next concrete step is a documented upstream-binding contract,
-not a shipped capability. No surface may state or imply that other agents
-already run.
+OpenClaw is bound; the boundary chain has one owner-authorized runtime record
+on the real provider via the hello-agent reference binding (2026-07-21, PR
+[#48](https://github.com/haya-inc/clawsembly/pull/48)), while no OpenClaw
+release has owner-authorized runtime evidence, so all published OpenClaw
+reports are status `probing`; and multi-upstream is a design commitment whose
+next concrete step is a documented upstream-binding contract, not a shipped
+capability. No surface may state or imply that other agents already run, and
+no surface may present the reference-binding record as agent evidence.
 
 ## Market evidence
 
@@ -117,11 +120,20 @@ because the loop feeds the boundary rather than being the product itself.
 - Report upstream only failures reproduced against the current BrowserPod
   boundary; do not carry removed-runtime patches into the active backlog.
 
-Status: **unmet** — the owner-authorized BrowserPod performance capture
-(cold/warm install, persistent reuse, Gateway-ready latency, storage
-footprint) is still outstanding. This gate blocks the runtime-evidence tier of
-the north-star metric; the automated-report tier is already operating
-(see [docs/product.md](product.md) for the two-tier definition).
+Status: **partially met as of 2026-07-21** — the boundary chain (verified
+staging, default-deny broker, consent lifecycle, in-flight abort, revocation,
+payload-free audit, cooperative stop) has one owner-authorized runtime record
+on `browserpod@2.12.1` via the hello-agent reference binding
+([evidence](../packages/hello-agent-binding/evidence/hello-agent-0.2.0.json),
+PR [#48](https://github.com/haya-inc/clawsembly/pull/48)), which also makes
+the performance capture executable without waiting on the vendor gaps. The
+owner-authorized BrowserPod performance capture (cold/warm install,
+persistent reuse, Gateway-ready latency, storage footprint) is still
+outstanding ([#8](https://github.com/haya-inc/clawsembly/issues/8)) and is
+now blocked by scheduling only. The runtime-evidence tier of the north-star
+metric still awaits OpenClaw runtime evidence; the automated-report tier is
+already operating (see [docs/product.md](product.md) for the two-tier
+definition).
 
 Exit signal: an OpenClaw integrator can reproduce a report without maintainer
 help and can identify why a check is not green.
@@ -216,7 +228,15 @@ deadline pressure:
    converts `probing` into evidence. As of 2026-07-13 the capture is blocked
    by the vendor runtime: BrowserPod 2.12.1 provisions Node 22.15.0, below
    the 22.19 baseline, so the readiness probe fails closed with
-   `node_baseline_unsatisfied`; the vendor has been notified.
+   `node_baseline_unsatisfied`; the vendor has been notified. Update
+   2026-07-21: the OpenClaw capture (#6) remains vendor-blocked — the current
+   stable's compound engines range still exceeds the guest Node 22.15.0, and
+   the guest lacks the `node:sqlite` binding
+   ([#47](https://github.com/haya-inc/clawsembly/issues/47)), both reported —
+   but the boundary chain captured its first owner-authorized runtime record
+   on the real provider through the hello-agent reference binding (PR
+   [#48](https://github.com/haya-inc/clawsembly/pull/48)), so the #8
+   performance baselines are now executable independent of the vendor gaps.
 2. Apply to the BrowserPod OSS grant program, and keep disclosing plainly that
    every downstream deployment needs its own metered BrowserPod API key and
    that the free tier is non-commercial.
@@ -226,7 +246,11 @@ deadline pressure:
    judgments.
 4. Make one announcement, and only after the runtime evidence and the README
    fixes land. Do not spend the single credible launch on a `probing`-only
-   state.
+   state. Update 2026-07-21: the boundary-chain runtime record and the README
+   updates landed with PR
+   [#48](https://github.com/haya-inc/clawsembly/pull/48), so the
+   soft-announcement condition is met; the general-audience launch (for
+   example Show HN) stays reserved for the first OpenClaw verified boot.
 5. Manufacture the first external consumer — for example, a pull request to a
    stale-pinned downstream such as ClawLess that consumes the report or
    promotion-policy endpoint. Keep the packed-SDK host example reproducible as
