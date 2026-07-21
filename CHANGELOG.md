@@ -7,6 +7,17 @@ The project does not yet promise semantic-version compatibility.
 
 ## Unreleased
 
+### Fixed
+
+- the six-hour release tracker no longer goes silent when a new upstream
+  stable breaks Gateway-contract regeneration: the tracker records the
+  `protocol:verify` outcome in its run summary and in the generated report
+  pull request instead of aborting before publication, while the protocol
+  gate in the check chain keeps a report/contract mismatch fail-closed on
+  that pull request. `openclaw@2026.7.1` (stable since 2026-07-13) removed
+  the legacy `dist/plugin-sdk/packages/` declaration tree and had silenced
+  every scheduled tracker run since.
+
 ### Changed
 
 - the `hello-agent` reference binding grows from a greeter into a minimal

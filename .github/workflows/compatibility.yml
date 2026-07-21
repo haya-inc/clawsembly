@@ -17,6 +17,8 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+    outputs:
+      protocol-outcome: ${{ steps.protocol-verify.outcome }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
@@ -31,11 +33,21 @@ jobs:
       - run: npm run report-pin:check
       - run: npm run compat:validate
       - name: Verify the generated Gateway contract against the exact npm artifact
+        id: protocol-verify
+        # An upstream stable that breaks contract regeneration must not
+        # silence the tracker: publishing the report pull request is how that
+        # break becomes visible. The recorded outcome travels to the summary
+        # and the pull-request body, and the protocol gate in the check chain
+        # keeps a report/contract mismatch fail-closed on the pull request.
+        continue-on-error: true
         run: npm run protocol:verify
       - name: Write summary
+        env:
+          PROTOCOL_OUTCOME: ${{ steps.protocol-verify.outcome }}
         run: |
           echo '## OpenClaw release-channel inspection' >> "$GITHUB_STEP_SUMMARY"
           node -e 'const h=require("./apps/web/public/data/release-history.json"); for (const r of h.releases) console.log(`- ${r.channel}: ${r.version} · ${r.status} · ${r.runtimeEvidence ? "runtime evidenced" : "static only"}`)' >> "$GITHUB_STEP_SUMMARY"
+          echo "- Gateway-contract verification against the tracked stable: $PROTOCOL_OUTCOME" >> "$GITHUB_STEP_SUMMARY"
       - name: Package validated reports
         run: >-
           tar -czf "$RUNNER_TEMP/compatibility-reports.tgz"
@@ -109,12 +121,19 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH: ${{ steps.changes.outputs.branch }}
+          PROTOCOL_OUTCOME: ${{ needs.static-inspection.outputs.protocol-outcome }}
         run: |
+          body="$(printf '%s\n\n%s\n\n%s' \
+            'Automated stable / previous / preview compatibility inspection. Runtime evidence is attached only when its exact OpenClaw version matches.' \
+            "Gateway-contract verification against the tracked stable: **${PROTOCOL_OUTCOME}**. A failure means the generated contract cannot be regenerated from the tracked stable artifact (an upstream declaration-layout or contract change); the reviewed contract stays on the previous stable, and the protocol gate in the check chain keeps this pull request fail-closed until a contract migration lands." \
+            "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}")"
           existing="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
           if [ -z "$existing" ]; then
             gh pr create \
               --base main \
               --head "$BRANCH" \
               --title 'chore: update OpenClaw release reports' \
-              --body "Automated stable / previous / preview compatibility inspection. Runtime evidence is attached only when its exact OpenClaw version matches. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+              --body "$body"
+          else
+            gh pr edit "$existing" --body "$body"
           fi
