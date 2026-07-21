@@ -63,6 +63,22 @@ assert.match(generationJob, /npm run report-pin:generate/, "report generation mu
 assert.match(generationJob, /npm run report-pin:check/, "report generation must verify the SDK host pin");
 assert.match(generationJob, /npm run compat:validate/, "report generation must validate evidence before upload");
 assert.match(generationJob, /npm run protocol:verify/, "report generation must verify the Gateway contract against the exact npm artifact");
+assert.match(
+  generationJob,
+  /id: protocol-verify\n(?:\s+#[^\n]*\n)*\s+continue-on-error: true\n\s+run: npm run protocol:verify/u,
+  "an upstream contract break must surface as a recorded verification outcome, not a silenced tracker run"
+);
+assert.match(
+  generationJob,
+  /protocol-outcome: \$\{\{ steps\.protocol-verify\.outcome \}\}/u,
+  "report generation must export the Gateway-contract verification outcome"
+);
+assert.match(
+  publishJob,
+  /needs\.static-inspection\.outputs\.protocol-outcome/u,
+  "the report pull request must publish the Gateway-contract verification outcome"
+);
+assert.match(publishJob, /gh pr edit "\$existing" --body/u, "an existing report pull request must refresh its verification outcome");
 assert.match(generationJob, /examples\/sdk-host\/src\/report-pin\.ts/, "validated report artifacts must contain the SDK host pin");
 assert.match(generationJob, /apps\/web\/public\/data\/promotion-policy\.json/, "validated report artifacts must contain the promotion policy");
 assert.ok(

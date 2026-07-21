@@ -5,7 +5,8 @@ import {
   mkdtempSync,
   readFileSync,
   realpathSync,
-  rmSync
+  rmSync,
+  writeFileSync
 } from "node:fs";
 import { builtinModules } from "node:module";
 import { tmpdir } from "node:os";
@@ -162,13 +163,22 @@ export function classifyDependencyPackage({ dependency, manifest = {}, files = [
   };
 }
 
-function run(command, args, cwd) {
+function run(command, args, cwd, options = {}) {
   return execFileSync(command, args, {
     cwd,
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
-    stdio: ["ignore", "pipe", "pipe"]
+    stdio: ["ignore", "pipe", "pipe"],
+    ...options
   });
+}
+
+// Windows cannot spawn npm's .cmd shim directly, so prefer the invoking npm's
+// JS entry point (matches the release scripts' runNpm helper).
+const npmCli = process.env.npm_execpath;
+function runNpm(args, cwd) {
+  if (npmCli && /\.[cm]?js$/u.test(npmCli)) return run(process.execPath, [npmCli, ...args], cwd);
+  return run("npm", args, cwd, { shell: process.platform === "win32" });
 }
 
 export function inspectDependencyRisk(dependency) {
@@ -177,7 +187,7 @@ export function inspectDependencyRisk(dependency) {
   }
   const workingDirectory = mkdtempSync(resolve(tmpdir(), "clawsembly-dependency-risk-"));
   try {
-    const packed = JSON.parse(run("npm", [
+    const packed = JSON.parse(runNpm([
       "pack",
       "--json",
       "--ignore-scripts",
@@ -223,7 +233,16 @@ export function inspectDependencyRisk(dependency) {
     if (!tarball.startsWith(`${workingDirectory}${sep}`) || !lstatSync(tarball).isFile()) {
       throw new Error(`npm returned an unsafe dependency tarball path: ${dependency.name}.`);
     }
-    run("tar", ["-xzf", tarball, "-C", extractionDirectory, ...requested.map((path) => `package/${path}`)], workingDirectory);
+    // tar receives cwd-relative paths (GNU tar parses the colon in an
+    // absolute Windows path as a remote-host separator), and reads the member
+    // list from a file because a large dependency can exceed the Windows
+    // command-line length limit.
+    writeFileSync(
+      resolve(workingDirectory, "extract-list.txt"),
+      requested.map((path) => `package/${path}`).join("\n"),
+      "utf8"
+    );
+    run("tar", ["-xzf", packed.filename, "-C", "extract", "-T", "extract-list.txt"], workingDirectory);
     const packageRoot = realpathSync(resolve(extractionDirectory, "package"));
     const readSafe = (path) => {
       const filePath = resolve(packageRoot, path);

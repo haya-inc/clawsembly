@@ -2,12 +2,12 @@ import type { CompatibilityReportExpectation } from "@haya-inc/clawsembly/report
 
 export const REPORT_EXPECTATION = {
   url: "https://haya-inc.github.io/clawsembly/data/compatibility.json",
-  sha256: "81cce552628d761fd0accc26ba0354df214474b8c659bf20962858da1c42eb74",
+  sha256: "84f2957b2dcc2c93c6faf85749050b387d281cb3c6abf79364cf7d6d794b8749",
   maxAgeMs: 604800000,
   artifact: {
     package: "openclaw",
-    version: "2026.6.11",
-    integrity: "sha512-T+P/g19IheeT1ckXMoPN61dYuE8vBF4MderI+kWkvpuFYxPkJxn8AXLpu9IXCnN9g36Acpm9+mMD/V+lsvOkyA=="
+    version: "2026.7.1-2",
+    integrity: "sha512-ycF3yPcbjN6bUPeaUx6Mh6vze1hQWoD3CT/wWcmD7a8xaHHHRUaAlaq+lFxMHf1ssEgODVAwjlzYqp2twkYZ7g=="
   },
   target: {
     runtime: "browserpod",

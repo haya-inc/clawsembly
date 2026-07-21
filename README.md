@@ -33,7 +33,7 @@ OpenClaw project.
 | Hosted project page | **Works** | [Live reports plus a permission-prompt demo](https://haya-inc.github.io/clawsembly/) against an inert local broker: approve, deny, revoke, export a payload-free audit. |
 | npm alpha package | **Published now** | `npm install @haya-inc/clawsembly@alpha` — the reviewed [publication record](packages/compatibility/npm-publication.json) records `status: published` with SHA-512 integrity and Sigstore provenance. |
 | Evidence-gated boot demo | **Works** | The [SDK host example](examples/sdk-host/README.md) verifies the pinned report and shows `Provider boot blocked`. Refusing an unverified report is the security feature, working. |
-| Verified BrowserPod boot | **Blocked** | BrowserPod 2.12.1 provisions Node 22.15.0, below the 22.19 baseline, so the readiness probe fails closed (`node_baseline_unsatisfied`); reported to the vendor. Owner-authorized runtime evidence remains pending ([#6](https://github.com/haya-inc/clawsembly/issues/6)). |
+| Verified BrowserPod boot | **Blocked** | Current stable `openclaw@2026.7.1-2` declares the compound engines range `>=22.22.3 <23 \|\| >=24.15.0 <25 \|\| >=25.9.0`, which the exact-form baseline gate rejects before any token spend (`node_baseline_unsupported`), and BrowserPod 2.12.1 provisions Node 22.15.0 — below every branch of that range; reported to the vendor. The checked-in `openclaw@2026.5.7` report remains the capturable target ([#6](https://github.com/haya-inc/clawsembly/issues/6)). |
 | Live provider smoke test | **Blocked** | The gated path exists but has never been executed. |
 | Performance baselines | **Blocked** | Not yet measured ([#8](https://github.com/haya-inc/clawsembly/issues/8)). |
 
@@ -165,12 +165,12 @@ as an archived feasibility result after its measured boot failure.
 The evidence-gate machinery is generic trust infrastructure; the OpenClaw
 reports below are its first instance. The first implementation is a static
 compatibility inspector and a public, report-driven project page. For the
-pinned `openclaw@2026.6.11` artifact it
+pinned `openclaw@2026.7.1-2` artifact it
 records package integrity, Node requirements, artifact size, lifecycle scripts,
 and platform-specific dependency risks without executing install scripts.
 The same page tracks the npm `latest`, previous stable, and `beta` channels as
-separate reports. At the 2026-07-12 snapshot those resolve to `2026.6.11`,
-`2026.6.10`, and `2026.7.1-beta.5`. All three public reports now target
+separate reports. At the 2026-07-21 snapshot those resolve to `2026.7.1-2`,
+`2026.6.11`, and `2026.7.2-beta.3`. All three public reports now target
 `browserpod@2.12.1`, contain zero runtime evidence, and remain `probing`. A
 scheduled workflow skips unchanged channels and opens or updates a generated
 report pull request when a channel moves. Each report retains its exact direct
@@ -185,10 +185,15 @@ The same exact tarballs are inspected for their public Gateway declaration,
 runtime entrypoint, protocol constants, server-method inventory, and legacy
 plugin declaration distribution. The release index publishes a stable-relative
 contract diff with exact added/removed method and schema names. At this
-snapshot, preview is classified `breaking`: protocol 4 remains current, while
-legacy plugin declarations move from 38 to 0 and the public surface adds 28
-core methods and 51 schema exports. This is a static upgrade warning, not a
-claim that those methods run successfully in BrowserPod.
+snapshot the stable artifact itself ships the new `dist/gateway/protocol`
+declaration distribution: protocol 4 remains current and the legacy
+plugin-declaration tree is gone (38 declarations in `2026.6.x`, 0 now), which
+is why the generated SDK contract is resolved through that distribution.
+Relative to stable, the previous release `2026.6.11` is classified `breaking`
+(its public surface lacks 51 schema exports), and preview `2026.7.2-beta.3` is
+classified `breaking` with 237 added and 8 removed schema exports. These are
+static upgrade warnings, not a claim that those methods run successfully in
+BrowserPod.
 
 The main branch is BrowserPod-only: it contains no legacy runtime adapter,
 dependency, fixture, evidence record, report target, fallback, or vendor CSP
