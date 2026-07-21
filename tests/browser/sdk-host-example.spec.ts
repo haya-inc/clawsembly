@@ -9,6 +9,7 @@ const reportURL = "https://haya-inc.github.io/clawsembly/data/compatibility.json
 const reportSource = readFileSync(resolve("apps/web/public/data/compatibility.json"), "utf8");
 const reportSha256 = createHash("sha256").update(reportSource).digest("hex");
 const report = JSON.parse(reportSource) as {
+  generatedAt: string;
   artifact: { version: string; integrity: string };
 };
 
@@ -31,6 +32,10 @@ test("packed SDK host renders the current fail-closed launch decision", async ({
     });
   });
 
+  // The route above serves the committed report, so the freshness gate must be
+  // judged at that report's own time; wall-clock CI runs would fail-closed as
+  // "Report unavailable" once the pinned evidence ages past maxAgeMs.
+  await page.clock.setFixedTime(new Date(report.generatedAt));
   await page.goto(sdkHostURL);
   await expect(page.getByRole("heading", { name: "Provider boot blocked" })).toBeVisible();
   await expect(page.locator("[data-decision-state]")).toHaveText("blocked");
