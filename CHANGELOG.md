@@ -9,6 +9,17 @@ The project does not yet promise semantic-version compatibility.
 
 ### Added
 
+- a performance-baseline harness for issue #8 on the hello-agent reference
+  chain, executable independent of the vendor gaps: a payload-free schema and
+  digest-bound record (`packages/hello-agent-binding/hello-agent-perf.mjs`)
+  covering cold, warm, and persistent-reuse passes with six phase timings per
+  sampled boot (embed boot, provider boot, digest-verified staging, readiness,
+  first round trip, cooperative close) plus storage estimates, median-plus-raw
+  aggregation with the three-sample publishable floor, and an owner-authorized
+  capture driver (`examples/hello-agent-evidence-host/perf-capture.mjs`) that
+  prints the full metered-boot cost before the first spend and writes a
+  payload-free status artifact on failure. Reference-binding numbers only; no
+  upstream agent performance is claimed.
 - the first owner-authorized runtime record on the real provider: the
   hello-agent reference binding's complete chain — exact-digest staging, dual
   readiness with a live capability mailbox, one `hello.say` round trip, four
