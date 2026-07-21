@@ -19,7 +19,11 @@ assert.equal(contract.profile.clientMode, "webchat");
 assert.deepEqual(contract.profile.scopes, ["operator.read", "operator.write"]);
 assert.deepEqual(contract.rpc.methods, ["chat.send", "chat.history", "chat.abort"]);
 assert.equal(contract.rpc.event, "chat");
-assert.equal(Object.keys(contract.sources).length, 6);
+const sourcePaths = Object.keys(contract.sources);
+assert.ok(sourcePaths.length === 6 || (
+  sourcePaths.includes("gateway/protocol/index.d.ts")
+  && sourcePaths.includes("extensions/device-pair/api.d.ts")
+));
 for (const hash of Object.values(contract.sources)) assert.match(hash, /^sha256-[a-f0-9]{64}$/u);
 
 process.stdout.write("Validated exact-artifact OpenClaw Gateway contract.\n");

@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, normalize, relative, resolve } from "node:path";
 import { promisify } from "node:util";
 
 const run = promisify(execFile);
@@ -18,7 +18,7 @@ function runNpm(args, options = {}) {
 const reportPath = resolve(root, "apps/web/public/data/compatibility.json");
 const outputPath = resolve(root, "packages/embed-sdk/openclaw-gateway-contract.generated.mjs");
 const check = process.argv.includes("--check");
-const sourcePaths = [
+const legacySourcePaths = [
   "gateway-protocol/src/version.d.ts",
   "gateway-protocol/src/schema/frames.d.ts",
   "gateway-protocol/src/schema/primitives.d.ts",
@@ -26,6 +26,73 @@ const sourcePaths = [
   "gateway-protocol/src/schema/logs-chat.d.ts",
   "gateway-protocol/src/schema/devices.d.ts"
 ];
+
+async function readSources(packageRoot, version) {
+  const versionMatch = version.match(/^2026\.(\d+)\./u);
+  const minor = Number(versionMatch?.[1]);
+  if (!versionMatch || minor > 7) {
+    throw new Error(`unsupported OpenClaw Gateway declaration layout for ${version}`);
+  }
+  const legacyRoot = join(packageRoot, "dist", "plugin-sdk", "packages");
+  if (minor <= 6) {
+    try {
+      const contents = Object.fromEntries(await Promise.all(legacySourcePaths.map(async (path) => [
+        path,
+        await readFile(join(legacyRoot, path), "utf8")
+      ])));
+      return { layout: "legacy", contents };
+    } catch (error) {
+      if (error?.code === "ENOENT") {
+        throw new Error(`incomplete legacy OpenClaw Gateway declaration layout for ${version}`);
+      }
+      throw error;
+    }
+  }
+
+  const distRoot = join(packageRoot, "dist");
+  const indexPath = "gateway/protocol/index.d.ts";
+  let index;
+  try {
+    index = await readFile(join(distRoot, indexPath), "utf8");
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      throw new Error(`incomplete aggregate OpenClaw Gateway declaration layout for ${version}: missing ${indexPath}`);
+    }
+    throw error;
+  }
+  const contents = { [indexPath]: index };
+  const specifiers = [...index.matchAll(/\bfrom\s+["']([^"']+)["']/gu)].map((match) => match[1]);
+  for (const specifier of new Set(specifiers)) {
+    if (!specifier.startsWith(".")) continue;
+    const declarationSpecifier = specifier.replace(/\.js$/u, ".d.ts");
+    const absolute = normalize(resolve(dirname(join(distRoot, indexPath)), declarationSpecifier));
+    const path = relative(distRoot, absolute);
+    if (path.startsWith("..") || !path.endsWith(".d.ts")) {
+      throw new Error(`unsupported OpenClaw Gateway declaration import: ${specifier}`);
+    }
+    try {
+      contents[path] = await readFile(absolute, "utf8");
+    } catch (error) {
+      if (error?.code === "ENOENT") {
+        throw new Error(`incomplete OpenClaw Gateway declaration layout: missing ${path}`);
+      }
+      throw error;
+    }
+  }
+  if (Object.keys(contents).length === 1) {
+    throw new Error("unsupported OpenClaw Gateway declaration layout: protocol index has no declaration imports");
+  }
+  const devicePairApiPath = "extensions/device-pair/api.d.ts";
+  try {
+    contents[devicePairApiPath] = await readFile(join(distRoot, devicePairApiPath), "utf8");
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      throw new Error(`incomplete OpenClaw Gateway declaration layout: missing ${devicePairApiPath}`);
+    }
+    throw error;
+  }
+  return { layout: "aggregate", contents };
+}
 
 const sha256 = (value) => `sha256-${createHash("sha256").update(value).digest("hex")}`;
 
@@ -100,37 +167,46 @@ try {
   const extracted = join(temporary, "extracted");
   await mkdir(extracted, { recursive: true });
   await run("tar", ["-xzf", tarball, "-C", extracted]);
-  const sourceRoot = join(extracted, "package", "dist", "plugin-sdk", "packages");
-  const contents = Object.fromEntries(await Promise.all(sourcePaths.map(async (path) => [
-    path,
-    await readFile(join(sourceRoot, path), "utf8")
-  ])));
-  const protocolMatch = contents["gateway-protocol/src/version.d.ts"].match(/PROTOCOL_VERSION:\s*(\d+)/u);
-  if (!protocolMatch || protocolMatch[1] !== "4") throw new Error("expected OpenClaw protocol 4");
-  const primitives = contents["gateway-protocol/src/schema/primitives.d.ts"];
-  const frames = contents["gateway-protocol/src/schema/frames.d.ts"];
-  const deviceAuth = contents["gateway-client/src/device-auth.d.ts"];
-  const chat = contents["gateway-protocol/src/schema/logs-chat.d.ts"];
-  const devices = contents["gateway-protocol/src/schema/devices.d.ts"];
-  for (const required of ["webchat-ui", "webchat"]) {
-    if (!primitives.includes(quoted(required))) throw new Error(`Gateway schema is missing ${required}`);
-  }
-  for (const required of ["ConnectParamsSchema", "HelloOkSchema", "nonce", "deviceToken", "maxPayload"]) {
-    if (!frames.includes(required)) throw new Error(`Gateway frame contract is missing ${required}`);
-  }
-  if (!deviceAuth.includes("buildDeviceAuthPayloadV3")) {
-    throw new Error("Gateway device auth contract has no v3 signer");
-  }
-  for (const required of ["ChatSendParamsSchema", "ChatHistoryParamsSchema", "ChatAbortParamsSchema", "ChatEventSchema"]) {
-    if (!chat.includes(required)) throw new Error(`Gateway chat contract is missing ${required}`);
-  }
-  for (const required of ["DevicePairListParamsSchema", "DevicePairApproveParamsSchema", "DevicePairRejectParamsSchema"]) {
-    if (!devices.includes(required)) throw new Error(`Gateway pairing contract is missing ${required}`);
+  const { layout, contents } = await readSources(join(extracted, "package"), artifact.version);
+  const declarations = Object.values(contents).join("\n");
+  const protocolVersions = [...declarations.matchAll(
+    /PROTOCOL_VERSION(?::\s*\d+)?\s*=\s*(\d+)|PROTOCOL_VERSION:\s*(\d+)/gu
+  )].map((match) => match[1] ?? match[2]);
+  if (!protocolVersions.includes("4")) throw new Error("expected OpenClaw protocol 4");
+  if (layout === "aggregate") {
+    for (const required of [
+      "webchat-ui", "webchat", "ConnectParamsSchema", "HelloOkSchema", "nonce", "deviceToken", "maxPayload",
+      "approveDevicePairing", "ChatSendParamsSchema", "ChatHistoryParamsSchema", "validateChatAbortParams", "ChatEventSchema",
+      "validateDevicePairListParams", "validateDevicePairApproveParams", "validateDevicePairRejectParams"
+    ]) {
+      if (!declarations.includes(required)) throw new Error(`Gateway aggregate contract is missing ${required}`);
+    }
+  } else {
+    const primitives = contents["gateway-protocol/src/schema/primitives.d.ts"];
+    const frames = contents["gateway-protocol/src/schema/frames.d.ts"];
+    const deviceAuth = contents["gateway-client/src/device-auth.d.ts"];
+    const chat = contents["gateway-protocol/src/schema/logs-chat.d.ts"];
+    const devices = contents["gateway-protocol/src/schema/devices.d.ts"];
+    for (const required of ["webchat-ui", "webchat"]) {
+      if (!primitives.includes(quoted(required))) throw new Error(`Gateway schema is missing ${required}`);
+    }
+    for (const required of ["ConnectParamsSchema", "HelloOkSchema", "nonce", "deviceToken", "maxPayload"]) {
+      if (!frames.includes(required)) throw new Error(`Gateway frame contract is missing ${required}`);
+    }
+    if (!deviceAuth.includes("buildDeviceAuthPayloadV3")) {
+      throw new Error("Gateway device auth contract has no v3 signer");
+    }
+    for (const required of ["ChatSendParamsSchema", "ChatHistoryParamsSchema", "ChatAbortParamsSchema", "ChatEventSchema"]) {
+      if (!chat.includes(required)) throw new Error(`Gateway chat contract is missing ${required}`);
+    }
+    for (const required of ["DevicePairListParamsSchema", "DevicePairApproveParamsSchema", "DevicePairRejectParamsSchema"]) {
+      if (!devices.includes(required)) throw new Error(`Gateway pairing contract is missing ${required}`);
+    }
   }
   const generated = render({
     artifact: { ...artifact, shasum: packed.shasum },
-    protocol: Number(protocolMatch[1]),
-    sources: Object.fromEntries(sourcePaths.map((path) => [path, sha256(contents[path])]))
+    protocol: 4,
+    sources: Object.fromEntries(Object.entries(contents).map(([path, content]) => [path, sha256(content)]))
   });
   if (check) {
     if (await readFile(outputPath, "utf8") !== generated) {
