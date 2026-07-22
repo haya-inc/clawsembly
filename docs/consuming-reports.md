@@ -22,6 +22,7 @@ passed every production gate. It must not be interpreted as fully supported.
 | Current stable report | `https://haya-inc.github.io/clawsembly/data/compatibility.json` | Complete checks and evidence for npm `latest` |
 | Release index | `https://haya-inc.github.io/clawsembly/data/release-history.json` | Stable, previous, and preview summaries, exact dependency and Gateway contract changes, and report paths |
 | Promotion policy | `https://haya-inc.github.io/clawsembly/data/promotion-policy.json` | Fail-closed promote/hold decision for preview plus independent stable and rollback gates |
+| Upgrade advisory | `https://haya-inc.github.io/clawsembly/data/upgrade-advisory.json` | Per-upgrade-path operator advisory (previous→stable, stable→preview): verdict with reasons, contract-surface deltas, engines change, dependency-risk counts — derived from the history, policy, and reports; the validator recomputes it |
 | Report schema | `https://haya-inc.github.io/clawsembly/schemas/report.schema.json` | Validation contract for a complete report |
 | History schema | `https://haya-inc.github.io/clawsembly/schemas/release-history.schema.json` | Validation contract for the channel index |
 | Promotion schema | `https://haya-inc.github.io/clawsembly/schemas/promotion-policy.schema.json` | Validation contract for the derived decision artifact |
