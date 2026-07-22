@@ -59,6 +59,23 @@ test("passes explicit environment entries through to the child", async (t) => {
   assert.equal(task.transcript, "native-env-value");
 });
 
+test("maps /native guest paths in environment values onto the host root", async (t) => {
+  const hostRoot = await mkdtemp(join(tmpdir(), "clawsembly-native-"));
+  const runtime = createNativeNodeRuntime({ hostRoot });
+  t.after(async () => {
+    await runtime.close();
+    await rm(hostRoot, { recursive: true, force: true });
+  });
+  const task = await runtime.start({
+    executable: "node",
+    args: ["-e", "process.stdout.write(`${process.env.CLAWSEMBLY_NATIVE_STATE}|${process.env.CLAWSEMBLY_NATIVE_PLAIN}`)"],
+    env: ["CLAWSEMBLY_NATIVE_STATE=/native/state", "CLAWSEMBLY_NATIVE_PLAIN=not-a-guest/native/path"]
+  });
+  const completion = await task.wait();
+  assert.equal(completion.status, "completed");
+  assert.equal(task.transcript, `${join(hostRoot, "state")}|not-a-guest/native/path`);
+});
+
 test("reports failure status, bounds output, and replays transcripts", async (t) => {
   const runtime = await nativeRuntime(t);
   const failing = await runtime.start({
