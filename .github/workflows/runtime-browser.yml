@@ -8,6 +8,13 @@ on:
         required: true
         type: boolean
         default: false
+      capture_native:
+        description: >-
+          Capture one native-Gateway record (separate native-gateway evidence
+          class; plain Node, no BrowserPod key, no metered spend).
+        required: false
+        type: boolean
+        default: false
       evidence_report:
         description: >-
           Repo-relative pinned report the capture targets (must live under
@@ -47,6 +54,31 @@ jobs:
           path: |
             playwright-report
             test-results
+          if-no-files-found: error
+          retention-days: 30
+
+  native-gateway-evidence:
+    name: native-gateway-evidence
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.capture_native == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Capture one exact-artifact native Gateway record
+        env:
+          CLAWSEMBLY_EVIDENCE_REPORT: ${{ inputs.evidence_report }}
+        run: npm run native:capture
+      - name: Upload native evidence and payload-free status
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: native-gateway-evidence-${{ github.run_id }}
+          path: test-results/native-gateway-evidence
           if-no-files-found: error
           retention-days: 30
 
