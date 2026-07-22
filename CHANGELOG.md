@@ -107,7 +107,13 @@ No changes yet.
   the legacy `dist/plugin-sdk/packages/` declaration tree and had silenced
   every scheduled tracker run since.
 
-## [0.1.0-alpha.3] - 2026-07-13
+## 0.1.0-alpha.3 - 2026-07-13 (bump only; superseded before release)
+
+> This version bump merged on 2026-07-13 but its release train never ran: no
+> `v0.1.0-alpha.3` tag, GitHub prerelease, or npm publication exists, and
+> 0.1.0-alpha.4 superseded it as the prepared version. While current, its
+> bytes were distributed through the Pages channel only; the changes below
+> first reach a cut prerelease together with 0.1.0-alpha.4.
 
 ### Changed (evidence baseline)
 
@@ -370,7 +376,6 @@ No changes yet.
 - Firefox, Safari, remote Gateway parity, general workspace migration, and
   owner-authorized live-provider evidence remain unverified.
 
-[0.1.0-alpha.4]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.3...v0.1.0-alpha.4
-[0.1.0-alpha.3]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.2...v0.1.0-alpha.3
+[0.1.0-alpha.4]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.2...v0.1.0-alpha.4
 [0.1.0-alpha.2]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.1...v0.1.0-alpha.2
 [0.1.0-alpha.1]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.0...v0.1.0-alpha.1

@@ -161,12 +161,14 @@ suppression, generated-report pull requests, public schemas, and a fail-closed
 promotion policy with dependency-free Node and GitHub Action consumers are implemented. External
 consumption and multi-release runtime evidence are not yet proven.
 
-The byte-reproducible SDK alpha.2 is distributed from Pages, GitHub Releases,
-and npm with an exact checksum, compatibility-report binding,
-tag/source/report provenance, and provider-free browser diagnostics. The
-provenance-backed npm bootstrap is complete: the reviewed publication record
-(`packages/compatibility/npm-publication.json`) binds the registry bytes to
-the same SHA-512 integrity and Sigstore provenance. npm remains an additional
+The byte-reproducible SDK is distributed from Pages, GitHub Releases, and npm
+with an exact checksum, compatibility-report binding, tag/source/report
+provenance, and provider-free browser diagnostics; the reviewed publication
+record (`packages/compatibility/npm-publication.json`) binds the registry
+bytes to the same SHA-512 integrity and Sigstore provenance. A newly prepared
+version reaches those channels only when its own release train completes;
+until then Pages alone carries the prepared bytes and the record stays
+`pending`. npm remains an additional
 discovery channel, not a prerequisite for the first external integration and
 never a substitute for BrowserPod runtime evidence; no distribution surface
 weakens the `probing` gate.
