@@ -7,6 +7,10 @@ The project does not yet promise semantic-version compatibility.
 
 ## Unreleased
 
+No changes yet.
+
+## [0.1.0-alpha.6] - 2026-07-22
+
 ### Added
 
 - an explicit `deviceManagement` opt-in on the Gateway client and the
