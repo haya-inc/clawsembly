@@ -467,7 +467,14 @@ browser-local acceptance gates (ADR 0002).
    until a Gateway configuration produces one.
 3. **Operator release intelligence** (`contributor`): the promotion policy,
    contract diffs, and dependency-risk scans translated into upgrade
-   advisories; supporting trust infrastructure, not the product.
+   advisories; supporting trust infrastructure, not the product. First
+   slice landed 2026-07-22: the tracker now derives
+   `data/upgrade-advisory.json` — one bounded advisory per upgrade path
+   (previous→stable, stable→preview) with a hold / review-required /
+   routine verdict, reasons, contract-surface deltas, engines changes,
+   and dependency-risk counts — and the artifact validator recomputes it
+   from the committed history, policy, and reports, so it cannot go
+   stale.
 4. **Extension-vetting exploration** (`contributor`): apply the no-execution
    dependency scanner to the upstream plugin ecosystem while the
    skills-to-plugins migration is in flight.

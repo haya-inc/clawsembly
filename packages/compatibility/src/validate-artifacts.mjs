@@ -6,6 +6,7 @@ import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
 import { deriveBrowserCapabilities } from "./dependency-risk.mjs";
 import { buildPromotionPolicy } from "./promotion-policy.mjs";
+import { assertUpgradeAdvisory, buildUpgradeAdvisory } from "./upgrade-advisory.mjs";
 import { computeReportLatencySeconds, deriveRuntimeClaimStatuses, evidenceDigest } from "./report.mjs";
 import { compareDirectDependencies, compareGatewayContracts } from "./release-tracking.mjs";
 
@@ -81,6 +82,7 @@ assertValid(validatePromotionPolicy, promotionPolicy, "promotion-policy.json");
 assert.deepEqual(promotionPolicy, buildPromotionPolicy(history), "promotion-policy.json must be derived from release-history.json");
 
 const reports = [];
+const reportsByPath = new Map();
 for (const release of history.releases) {
   const reportPath = resolve(dirname(historyPath), release.reportPath);
   if (!reportPath.startsWith(`${dataDirectory}${sep}`)) {
@@ -112,7 +114,19 @@ for (const release of history.releases) {
     `${release.channel} direct dependency inventory must be sorted`
   );
   reports.push(report);
+  reportsByPath.set(release.reportPath, report);
 }
+
+// The committed advisory must be exactly what the committed history, policy,
+// and reports derive: staleness is impossible by construction.
+const advisoryPath = resolve(dataDirectory, "upgrade-advisory.json");
+const advisory = readJson(advisoryPath);
+assertUpgradeAdvisory(advisory);
+assert.deepEqual(
+  advisory,
+  buildUpgradeAdvisory(history, { promotionPolicy, reportsByPath }),
+  "upgrade-advisory.json must be derived from the committed history, policy, and reports"
+);
 
 for (let index = 0; index < history.releases.length; index += 1) {
   const release = history.releases[index];
@@ -173,4 +187,4 @@ for (const name of readdirSync(releasesDirectory).filter((entry) => entry.endsWi
   extraReports += 1;
 }
 
-process.stdout.write(`Validated ${reports.length + 1 + extraReports} compatibility reports, release-history.json, and promotion-policy.json.\n`);
+process.stdout.write(`Validated ${reports.length + 1 + extraReports} compatibility reports, release-history.json, promotion-policy.json, and upgrade-advisory.json.\n`);
