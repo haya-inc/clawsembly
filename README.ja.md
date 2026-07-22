@@ -1,19 +1,24 @@
 # Clawsembly
 
-> 上流のコーディングエージェントを、埋め込み側アプリケーションが制御する
-> ホスト境界の内側で、ブラウザローカルに実行する。証拠(evidence)で
-> ゲートされ、OpenClaw が最初の対応上流。
+> 上流の OpenClaw を、埋め込み側アプリケーションが制御するホスト境界の
+> 内側で、ブラウザローカルに実行する。証拠(evidence)でゲートし、
+> 汎用エージェント基盤ではなく OpenClaw に特化する。
 
 [English README](README.md) /
 [プロジェクトページ](https://haya-inc.github.io/clawsembly/)
 
-Clawsembly は、上流のコーディングエージェントをブラウザローカルで実行する
-ための、証拠ゲート付き埋め込みレイヤーです。
-[OpenClaw](https://github.com/openclaw/openclaw) が最初の対応上流です:
-公開された正確なパッケージを公開互換性証拠に束縛し、その証拠が検証される
+Clawsembly は、[OpenClaw](https://github.com/openclaw/openclaw) に特化した
+証拠ゲート付き埋め込みレイヤーです。上流パッケージを、埋め込み側
+アプリケーションが制御するホスト境界の内側でブラウザローカルに実行し、
+公開された正確なパッケージを公開互換性証拠に束縛して、その証拠が検証される
 までは起動を拒否します。現在、追跡中の全リリースは **probing**
 (正確なアーティファクトの静的検査は済んでいるが、オーナー承認のランタイム
 証拠がまだ存在しないため、検証済み起動はブロックされたまま)という状態です。
+上流 OpenClaw をラップして、運用者と埋め込み側に必要な利便 — ネイティブ
+Gateway 相互運用、リリースインテリジェンス、拡張の審査 — を足していくことが
+製品方針です
+([ADR 0006](docs/decisions/0006-openclaw-specialist-refocus.md))。他の上流
+エージェントはこのリポジトリの対象外です。
 Clawsembly は実験的なシングルメンテナのプロジェクトであり、OpenClaw
 プロジェクトとは無関係で、承認も受けていません。
 
@@ -84,6 +89,7 @@ Clawsembly がコミットするブラウザローカルランタイムは
 - [上流バインディング契約](docs/upstream-binding-contract.md)
 - [ADR 0004: 上流可搬な埋め込み境界](docs/decisions/0004-upstream-portable-embedding-boundary.md)
 - [ADR 0005: 参照エージェントと二つの成長パス](docs/decisions/0005-reference-agent-growth-paths.md)
+- [ADR 0006: OpenClaw 特化への再フォーカス](docs/decisions/0006-openclaw-specialist-refocus.md)
 - [コントリビューションガイド](CONTRIBUTING.md)(コミットには DCO 署名が必要です)
 
 ## ライセンス
