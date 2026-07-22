@@ -153,3 +153,49 @@ record. Keep it `pending` in a release tag. After npm confirms the exact
 registry integrity and provenance, change it to `published` with the matching
 SHA-512 integrity, publication time, and Sigstore log URL. Pages and its SDK
 manifest derive their npm status and install command from this file.
+
+## Graduation criteria (alpha → beta → stable)
+
+Recorded 2026-07-22 so the prerelease posture is a decision, not a habit.
+Coordinated promotion stays deferred until the alpha label is gone
+(owner decision of 2026-07-22).
+
+Every release so far is `0.1.0-alpha.N` because the flagship promise —
+evidence-gated browser-local OpenClaw — is vendor-gated: the BrowserPod
+guest Node trails the artifact's engines floor
+([#6](https://github.com/haya-inc/clawsembly/issues/6)) and ships no
+`node:sqlite` binding
+([#47](https://github.com/haya-inc/clawsembly/issues/47)), so every
+published browser-runtime report stays `probing` and `bootVerifiedEmbed`
+fails closed by design. A stable label on an SDK whose flagship path
+cannot run would contradict the project's own evidence rules.
+
+**Beta requires** the flagship path to exist in reality:
+
+- the vendor gaps close and one owner-authorized BrowserPod capture of a
+  tracked OpenClaw release passes the ADR 0002 acceptance gates, flipping
+  a published report from `probing` to `supported` (the capture harness
+  is kept dispatch-ready for that day);
+- the wrap surfaces that exist today — native-Gateway evidence lane,
+  remote mode with device management — keep their evidence classes and
+  honesty constraints intact through that flip.
+
+**Stable additionally requires** promises this repository can only earn
+over time:
+
+- the public SDK surface (manifest/boot plus the published subpaths)
+  survives at least one full upstream stable cycle, including a
+  regenerated Gateway contract, without a breaking change to embedders;
+- the changelog drops its "does not yet promise semantic-version
+  compatibility" disclaimer and states a semver policy, including how
+  version-locked contract regenerations map onto majors/minors;
+- at least one external consumer runs against the published package or
+  report endpoints ([#9](https://github.com/haya-inc/clawsembly/issues/9));
+- remote-mode pairing review has been exercised against a Gateway
+  configuration that actually raises a pending pairing request.
+
+An alternative exists and is a positioning decision, not an engineering
+one: redefining the wrap surfaces as the product and browser-local
+execution as a future capability would justify a beta without the vendor.
+That path requires its own ADR; until then the flagship definition of
+ADR 0006 stands.
