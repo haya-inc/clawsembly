@@ -7,6 +7,10 @@ The project does not yet promise semantic-version compatibility.
 
 ## Unreleased
 
+No changes yet.
+
+## [0.1.0-alpha.5] - 2026-07-22
+
 ### Added
 
 - a public `@haya-inc/clawsembly/remote-gateway` subpath — "connect your
