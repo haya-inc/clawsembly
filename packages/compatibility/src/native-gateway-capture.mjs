@@ -1,9 +1,11 @@
 // Native-Gateway evidence lane (ADR 0006, decision 1.i): boot the exact
-// verified OpenClaw artifact on plain Node, observe readiness, and build a
-// digest-bound record of the separate "native-gateway" evidence class. This
-// class never satisfies, implies, or promotes BrowserPod runtime support:
-// the record names runtime "native-node" with browserLocal:false and is not
-// consumed by the report pipeline or the verified-launch gates.
+// verified OpenClaw artifact on plain Node, observe readiness, exercise the
+// generated protocol client against it (native-gateway-protocol.mjs), and
+// build a digest-bound record of the separate "native-gateway" evidence
+// class. This class never satisfies, implies, or promotes BrowserPod
+// runtime support: the record names runtime "native-node" with
+// browserLocal:false and is not consumed by the report pipeline or the
+// verified-launch gates.
 
 import { createHash } from "node:crypto";
 
@@ -14,8 +16,11 @@ import {
 } from "../../browser-runtime/openclaw-gateway.mjs";
 
 export const NATIVE_GATEWAY_EVIDENCE_CLASS = "native-gateway";
+export const NATIVE_GATEWAY_EVIDENCE_SCHEMA_VERSION = 2;
 export const NATIVE_GATEWAY_READY_LINE = "[gateway] ready";
 const HEALTH_ENDPOINTS = ["healthz", "readyz"];
+const BOUNDED_IDENTIFIER = /^[a-z][a-z0-9._-]{0,63}$/u;
+const TERMINAL_CHAT_STATES = new Set(["final", "error", "aborted"]);
 
 /**
  * Starts the installed OpenClaw Gateway as a direct native child process.
@@ -155,6 +160,78 @@ export async function probeNativeGatewayHealth(port, {
   return Object.freeze(result);
 }
 
+function isBoundedInt(value, min, max) {
+  return Number.isSafeInteger(value) && value >= min && value <= max;
+}
+
+function sectionMatches(section, validators) {
+  if (!section || typeof section !== "object" || Array.isArray(section)) return false;
+  const keys = Object.keys(validators);
+  if (Object.keys(section).length !== keys.length) return false;
+  return keys.every((key) => validators[key](section[key]));
+}
+
+/**
+ * Fail-closed shape check for the protocol-exercise section produced by
+ * exerciseNativeGatewayProtocol. Every field is an enum, boolean, or bounded
+ * integer except sendStatus, which stays a bounded lowercase identifier —
+ * the section can never smuggle transcript text, tokens, or host paths.
+ */
+export function isValidNativeGatewayProtocolSection(protocol) {
+  const durationMs = (value) => isBoundedInt(value, 0, 3_600_000);
+  return sectionMatches(protocol, {
+    transport: (value) => value === "loopback-ws",
+    originPolicy: (value) => value === "control-ui-host",
+    handshake: (value) => sectionMatches(value, {
+      durationMs,
+      protocol: (inner) => isBoundedInt(inner, 1, 99),
+      methodCount: (inner) => isBoundedInt(inner, 3, 10_000),
+      eventCount: (inner) => isBoundedInt(inner, 1, 10_000),
+      contractMethodsAdvertised: (inner) => inner === true,
+      requiredScopesGranted: (inner) => inner === true,
+      scopeCount: (inner) => isBoundedInt(inner, 1, 64),
+      deviceTokenIssued: (inner) => inner === true,
+      authenticatedWith: (inner) => inner === "shared-token"
+    }),
+    chat: (value) => sectionMatches(value, {
+      sendStatus: (inner) => typeof inner === "string" && BOUNDED_IDENTIFIER.test(inner),
+      terminalState: (inner) => TERMINAL_CHAT_STATES.has(inner),
+      eventCount: (inner) => isBoundedInt(inner, 1, 10_000),
+      errorMessagePresent: (inner) => typeof inner === "boolean",
+      providerCredential: (inner) => inner === false,
+      durationMs
+    }),
+    abort: (value) => sectionMatches(value, {
+      ok: (inner) => inner === true,
+      aborted: (inner) => typeof inner === "boolean",
+      requestedRunIncluded: (inner) => typeof inner === "boolean",
+      runIdCount: (inner) => isBoundedInt(inner, 0, 64),
+      durationMs
+    }),
+    history: (value) => sectionMatches(value, {
+      messageCount: (inner) => isBoundedInt(inner, 0, 200),
+      durationMs
+    }),
+    reconnect: (value) => sectionMatches(value, {
+      durationMs,
+      authenticatedWith: (inner) => inner === "device-token",
+      deviceTokenIssued: (inner) => typeof inner === "boolean"
+    })
+  });
+}
+
+function freezeProtocolSection(protocol) {
+  return {
+    transport: protocol.transport,
+    originPolicy: protocol.originPolicy,
+    handshake: { ...protocol.handshake },
+    chat: { ...protocol.chat },
+    abort: { ...protocol.abort },
+    history: { ...protocol.history },
+    reconnect: { ...protocol.reconnect }
+  };
+}
+
 function canonicalizeValue(value) {
   if (Array.isArray(value)) return value.map((entry) => canonicalizeValue(entry));
   if (value && typeof value === "object") {
@@ -176,7 +253,9 @@ function digestOf(record) {
 /**
  * Builds the digest-bound native-gateway evidence record. Payload-free by
  * construction: it carries statuses, durations, and identity only — no
- * transcript text, bodies, environment values, or host paths.
+ * transcript text, bodies, environment values, or host paths. Since schema
+ * version 2 a record exists only when the full generated-client protocol
+ * exercise completed; boot-plus-health alone is not admissible evidence.
  */
 export function buildNativeGatewayEvidence({
   artifact,
@@ -185,6 +264,7 @@ export function buildNativeGatewayEvidence({
   gateway,
   health,
   termination,
+  protocol,
   capturedAt
 }) {
   if (!artifact || artifact.package !== "openclaw" || typeof artifact.version !== "string"
@@ -206,11 +286,14 @@ export function buildNativeGatewayEvidence({
   if (!termination || termination.mode !== "signal" || typeof termination.graceful !== "boolean") {
     throw new TypeError("a signal-mode termination result is required");
   }
+  if (!isValidNativeGatewayProtocolSection(protocol)) {
+    throw new TypeError("a complete protocol exercise section is required");
+  }
   if (typeof capturedAt !== "string" || Number.isNaN(Date.parse(capturedAt))) {
     throw new TypeError("a capture timestamp is required");
   }
   const record = {
-    schemaVersion: 1,
+    schemaVersion: NATIVE_GATEWAY_EVIDENCE_SCHEMA_VERSION,
     class: NATIVE_GATEWAY_EVIDENCE_CLASS,
     target: {
       package: "openclaw",
@@ -240,6 +323,7 @@ export function buildNativeGatewayEvidence({
       readyz: { status: 200 },
       termination: { mode: "signal", graceful: termination.graceful }
     },
+    protocol: freezeProtocolSection(protocol),
     capturedAt
   };
   return Object.freeze({ ...record, digest: digestOf(record) });
@@ -257,7 +341,8 @@ export function assertNativeGatewayEvidence(evidence, { artifact } = {}) {
     throw new BrowserRuntimeError("invalid_native_evidence", "a native-gateway evidence record is required");
   }
   const { digest, ...record } = evidence;
-  if (evidence.schemaVersion !== 1 || evidence.class !== NATIVE_GATEWAY_EVIDENCE_CLASS
+  if (evidence.schemaVersion !== NATIVE_GATEWAY_EVIDENCE_SCHEMA_VERSION
+    || evidence.class !== NATIVE_GATEWAY_EVIDENCE_CLASS
     || evidence.target?.runtime !== "native-node" || evidence.target?.browserLocal !== false
     || evidence.target?.package !== "openclaw") {
     throw new BrowserRuntimeError("invalid_native_evidence", "the record is not native-gateway class evidence");
@@ -269,6 +354,12 @@ export function assertNativeGatewayEvidence(evidence, { artifact } = {}) {
   if (evidence.gateway?.healthz?.status !== 200 || evidence.gateway?.readyz?.status !== 200
     || evidence.gateway?.readyLine !== NATIVE_GATEWAY_READY_LINE) {
     throw new BrowserRuntimeError("invalid_native_evidence", "the record does not prove Gateway readiness");
+  }
+  if (!isValidNativeGatewayProtocolSection(evidence.protocol)) {
+    throw new BrowserRuntimeError(
+      "invalid_native_evidence",
+      "the record does not prove the generated-client protocol exercise"
+    );
   }
   if (typeof digest !== "string" || digest !== digestOf(record)) {
     throw new BrowserRuntimeError("invalid_native_evidence", "the record digest does not match its content");

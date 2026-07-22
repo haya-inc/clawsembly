@@ -1,9 +1,14 @@
 // Native-Gateway evidence capture (ADR 0006, wrap deliverable 1): install the
 // exact pinned OpenClaw artifact on plain Node, boot the real Gateway on
-// loopback, probe health and readiness, and write one digest-bound record of
-// the separate "native-gateway" evidence class. No BrowserPod, no API key,
-// no metered spend. The record never satisfies, implies, or promotes
-// BrowserPod runtime support, and the status file stays payload-free.
+// loopback, probe health and readiness, run the generated protocol client
+// against it (handshake, bounded chat, abort, history, device-token
+// reconnect), and write one digest-bound record of the separate
+// "native-gateway" evidence class. No BrowserPod, no API key, no metered
+// spend: the lane carries no model-provider credential, so the chat run is
+// expected to terminate at the provider boundary and the record keeps
+// statuses, enums, counts, and durations only. The record never satisfies,
+// implies, or promotes BrowserPod runtime support, and the status file
+// stays payload-free.
 import { randomBytes } from "node:crypto";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -18,6 +23,10 @@ import {
   probeNativeGatewayHealth,
   startNativeOpenClawGateway
 } from "../../packages/compatibility/src/native-gateway-capture.mjs";
+import {
+  createLoopbackControlUiWebSocketFactory,
+  exerciseNativeGatewayProtocol
+} from "../../packages/compatibility/src/native-gateway-protocol.mjs";
 import { createNativeNodeRuntime } from "../../packages/compatibility/src/native-node-runtime.mjs";
 import {
   NodeEngineRangeError,
@@ -85,6 +94,20 @@ async function main() {
     log(`Gateway ready on loopback:${port} after ${gateway.readyDurationMs}ms`);
     const health = await probeNativeGatewayHealth(port);
     log("healthz and readyz both returned 200");
+    log("exercising the generated protocol client (handshake, chat, abort, history, reconnect)");
+    const protocol = await exerciseNativeGatewayProtocol({
+      artifact,
+      port,
+      token,
+      createWebSocket: createLoopbackControlUiWebSocketFactory({ port })
+    });
+    log(`handshake ok in ${protocol.handshake.durationMs}ms `
+      + `(${protocol.handshake.methodCount} methods, device token issued)`);
+    log(`chat round trip: send "${protocol.chat.sendStatus}", terminal "${protocol.chat.terminalState}" `
+      + `after ${protocol.chat.eventCount} event(s) with no provider credential`);
+    log(`abort acknowledged (aborted: ${protocol.abort.aborted}), `
+      + `history returned ${protocol.history.messageCount} message(s)`);
+    log(`reconnect authenticated with the vaulted device token in ${protocol.reconnect.durationMs}ms`);
     const termination = await gateway.stop();
     log(`Gateway stopped (${termination.graceful ? "graceful" : "forced"})`);
 
@@ -95,6 +118,7 @@ async function main() {
       gateway: { port, readyDurationMs: gateway.readyDurationMs },
       health,
       termination,
+      protocol,
       capturedAt: new Date().toISOString()
     });
     assertNativeGatewayEvidence(evidence, { artifact });
