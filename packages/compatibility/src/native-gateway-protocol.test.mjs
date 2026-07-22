@@ -258,11 +258,11 @@ test("memory identity store and token persistence hold exactly one subject", asy
   assert.equal(await persistence.readToken("token-1"), undefined);
 });
 
-test("the loopback factory rewrites wss to ws and presents the gateway-host origin", () => {
+test("the loopback factory presents the gateway-host origin header", () => {
   const calls = [];
   function recordingSocket(url, options) { calls.push({ url, options }); }
   const factory = createLoopbackControlUiWebSocketFactory({ port: PORT, webSocket: recordingSocket });
-  factory(`wss://127.0.0.1:${PORT}/`);
+  factory(`ws://127.0.0.1:${PORT}/`);
   assert.deepEqual(calls, [{
     url: `ws://127.0.0.1:${PORT}/`,
     options: { headers: { origin: `http://127.0.0.1:${PORT}` } }

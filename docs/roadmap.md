@@ -441,7 +441,15 @@ browser-local acceptance gates (ADR 0002).
    OpenClaw" — the implemented browser device identity, pairing review,
    encrypted token vault, and bounded chat client offered against a
    user-operated native Gateway behind the same default-deny broker and
-   payload-free audit, with a static cockpit page as its demo.
+   payload-free audit, with a static cockpit page as its demo. In
+   progress 2026-07-22: the packed SDK gained the public
+   `remote-gateway` subpath (validated user-supplied endpoints, TLS
+   required off-loopback, dedicated `server_version_mismatch` refusal)
+   and the cockpit example; the native evidence lane drives the same
+   remote connection form against the real stable Gateway on every
+   capture. Remaining: an owner-verified cockpit session against a
+   real remote Gateway, plus the phase-2 leftovers (remote approval,
+   rotation, revocation, recovery).
 3. **Operator release intelligence** (`contributor`): the promotion policy,
    contract diffs, and dependency-risk scans translated into upgrade
    advisories; supporting trust infrastructure, not the product.

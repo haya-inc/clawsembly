@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clawsembly remote Gateway cockpit</title>
+    <style>
+      :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+      body { margin: 0 auto; max-width: 72rem; padding: 1rem 1.5rem 4rem; line-height: 1.45; }
+      h1 { font-size: 1.35rem; }
+      fieldset { border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 0.5rem; margin: 0 0 1rem; }
+      label { display: block; margin: 0.4rem 0 0.15rem; font-weight: 600; font-size: 0.85rem; }
+      input, textarea { width: 100%; box-sizing: border-box; padding: 0.45rem; font: inherit; }
+      button { font: inherit; padding: 0.4rem 0.9rem; margin: 0.5rem 0.5rem 0 0; cursor: pointer; }
+      button:disabled { cursor: not-allowed; opacity: 0.5; }
+      .cockpit-grid { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; align-items: start; }
+      .cockpit-grid > section { min-width: 0; }
+      dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.15rem 0.8rem; margin: 0.5rem 0; font-size: 0.9rem; }
+      dt { font-weight: 600; }
+      dd { margin: 0; overflow-wrap: anywhere; }
+      output[data-state] { font-weight: 700; }
+      .cockpit-note { font-size: 0.85rem; opacity: 0.85; }
+      .cockpit-error { color: #b3261e; white-space: pre-wrap; overflow-wrap: anywhere; }
+      .chat-log, .audit-log { border: 1px solid color-mix(in srgb, currentColor 25%, transparent); border-radius: 0.4rem; padding: 0.6rem; max-height: 20rem; overflow: auto; font-size: 0.85rem; }
+      .chat-log article { margin: 0 0 0.6rem; }
+      .chat-log .chat-run-state { font-size: 0.75rem; opacity: 0.8; }
+      .chat-log pre { margin: 0.2rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-family: ui-monospace, monospace; }
+      .audit-log { font-family: ui-monospace, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Clawsembly remote Gateway cockpit</h1>
+      <p class="cockpit-note">
+        Connect your OpenClaw: this page opens the generated, version-locked
+        Clawsembly client against a Gateway <em>you</em> operate. Nothing runs
+        in this browser beyond the bounded chat client; the connection is
+        interoperability, not browser-local execution, and it carries no
+        evidence claim.
+      </p>
+
+      <fieldset>
+        <legend>Gateway connection</legend>
+        <label for="gateway-url">Gateway URL (wss:// — or http(s)/ws on 127.0.0.1)</label>
+        <input id="gateway-url" name="gateway-url" placeholder="ws://127.0.0.1:18789" autocomplete="off" spellcheck="false" />
+        <label for="gateway-token">Gateway token (kept in memory only)</label>
+        <input id="gateway-token" name="gateway-token" type="password" autocomplete="off" />
+        <button id="connect" type="button">Connect</button>
+        <button id="disconnect" type="button" disabled>Disconnect</button>
+        <p class="cockpit-note">
+          The Gateway admits this page only when its
+          <code>gateway.controlUi.allowedOrigins</code> allowlist contains this
+          page's exact origin (<code data-page-origin></code>) — the Gateway's
+          own connect error names that setting. The client refuses any Gateway
+          that is not running the verified artifact version
+          (<code data-contract-version></code>).
+        </p>
+        <p class="cockpit-error" data-connect-error hidden></p>
+      </fieldset>
+
+      <section data-pairing hidden>
+        <h2>Pairing approval required</h2>
+        <p>
+          Your Gateway is holding this browser's signed device request for
+          explicit approval. Approve it on the Gateway (its own UI or CLI),
+          then reconnect.
+        </p>
+        <dl>
+          <dt>Request</dt><dd data-pairing-request></dd>
+          <dt>Device</dt><dd data-pairing-device></dd>
+          <dt>Reason</dt><dd data-pairing-reason></dd>
+        </dl>
+      </section>
+
+      <div class="cockpit-grid">
+        <section>
+          <h2>Session</h2>
+          <dl>
+            <dt>State</dt><dd><output data-state>idle</output></dd>
+            <dt>Server</dt><dd data-server>—</dd>
+            <dt>Authenticated with</dt><dd data-authenticated>—</dd>
+            <dt>Scopes</dt><dd data-scopes>—</dd>
+            <dt>Advertised surface</dt><dd data-surface>—</dd>
+            <dt>Stored device token</dt><dd data-device-token>none</dd>
+          </dl>
+          <button id="clear-device-token" type="button" disabled>Clear stored device token</button>
+
+          <h2>Chat</h2>
+          <label for="chat-message">Message</label>
+          <textarea id="chat-message" name="chat-message" rows="3" placeholder="Reply with the single word: pong"></textarea>
+          <button id="chat-send" type="button" disabled>Send</button>
+          <button id="chat-abort" type="button" disabled>Abort</button>
+          <button id="chat-history" type="button" disabled>Load history</button>
+          <div class="chat-log" data-chat-log aria-live="polite"></div>
+        </section>
+
+        <section>
+          <h2>Payload-free audit</h2>
+          <p class="cockpit-note">
+            Every client action lands here exactly as the embed-sdk audit sink
+            reports it: outcomes, methods, and durations — never message text
+            or tokens.
+          </p>
+          <div class="audit-log" data-audit-log></div>
+        </section>
+      </div>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

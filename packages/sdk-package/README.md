@@ -70,9 +70,17 @@ oversized or non-JSON responses, and internally inconsistent support claims.
 A caller-created object with `status: "supported"` cannot authorize launch.
 Additional narrow entrypoints are available for the explicit pairing prompt,
 capability permission prompt, BrowserPod evidence probe, encrypted workspace
-backup, and capability broker. The workspace subpath exports a passphrase-
-encrypted exact-subject v2 envelope plus explicit v1 migration; it does not
-silently reuse a disk or expose an ambient backup UI.
+backup, capability broker, and remote-mode Gateway connection. The workspace
+subpath exports a passphrase-encrypted exact-subject v2 envelope plus
+explicit v1 migration; it does not silently reuse a disk or expose an
+ambient backup UI.
+
+The `remote-gateway` subpath is "connect your OpenClaw": it validates a
+user-supplied Gateway endpoint (TLS required off-loopback) and opens the
+same generated, version-locked client — persistent browser device identity,
+encrypted device-token vault, bounded chat only — against a Gateway the
+user already operates. It is interoperability, runs nothing
+browser-locally, and never satisfies the browser-local acceptance gates.
 There is no generic Gateway RPC export.
 
 ## Local artifact verification
