@@ -27,8 +27,14 @@ import {
   createOpenClawGatewayClient,
   OpenClawGatewayClientError,
   resolveGatewayWebSocketConnection,
-  type GatewayPairingRequirement
+  type GatewayPairingRequirement,
+  type OpenClawGatewayClient,
+  type RemoteGatewayConnectionMaterial
 } from "../../packages/embed-sdk/gateway-client.mjs";
+import {
+  connectRemoteOpenClawGateway,
+  createRemoteGatewayConnection
+} from "../../packages/embed-sdk/remote-gateway.mjs";
 import { createBrowserDeviceIdentity } from "../../packages/embed-sdk/gateway-device-identity.mjs";
 import { createGatewayDeviceTokenVault } from "../../packages/embed-sdk/gateway-device-token-vault.mjs";
 import { mountGatewayPairingPrompt } from "../../packages/embed-sdk/gateway-pairing-prompt.mjs";
@@ -52,6 +58,21 @@ declare const unproven: GatewayPairingRequirement;
 void gateway.pairing.review(unproven);
 declare const reviewable: ReviewableGatewayPairingRequirement;
 void gateway.pairing.review(reviewable);
+
+// Remote mode: the builder's material feeds both the client resolver and
+// the remote connect surface, and the connect result is the same bounded
+// generated client.
+const remoteMaterial: Readonly<RemoteGatewayConnectionMaterial> = createRemoteGatewayConnection({
+  url: "https://gateway.example:18789",
+  token: "remote-gateway-shared-token",
+  allowedOrigins: ["https://cockpit.example"]
+});
+void resolveGatewayWebSocketConnection(remoteMaterial, "https://cockpit.example");
+const remoteClient: Readonly<OpenClawGatewayClient> = connectRemoteOpenClawGateway({
+  connection: remoteMaterial,
+  browserOrigin: "https://cockpit.example"
+});
+void remoteClient;
 
 // Broker construction and its request surface stay exercisable.
 const broker = new CapabilityBroker({

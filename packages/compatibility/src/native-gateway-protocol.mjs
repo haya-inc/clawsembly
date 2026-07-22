@@ -50,19 +50,18 @@ export function createMemoryDeviceTokenPersistence() {
 }
 
 /**
- * WebSocket factory for the loopback native Gateway. The generated client
- * resolves the connection material to a wss:// URL; the native Gateway
- * serves plain WebSocket on loopback, so the factory rewrites the scheme
- * and presents the Gateway host's own origin — the stable Gateway admits
- * webchat connects only from origins in its Control-UI allowlist, and the
- * gateway host origin is the built-in member of that allowlist.
+ * WebSocket factory for the loopback native Gateway. A browser sends its
+ * page origin automatically, but Node's WebSocket sends no Origin header at
+ * all — and the stable Gateway admits webchat connects only from origins in
+ * its Control-UI allowlist. The factory presents the Gateway host's own
+ * origin, the allowlist's built-in member.
  */
 export function createLoopbackControlUiWebSocketFactory({ port, webSocket = globalThis.WebSocket } = {}) {
   const gatewayPort = assertOpenClawGatewayPort(port);
   if (typeof webSocket !== "function") throw new TypeError("a WebSocket constructor is required");
   const WebSocketConstructor = webSocket;
   const origin = `http://127.0.0.1:${gatewayPort}`;
-  return (url) => new WebSocketConstructor(url.replace(/^wss:/u, "ws:"), { headers: { origin } });
+  return (url) => new WebSocketConstructor(url, { headers: { origin } });
 }
 
 function protocolFailure(code, phase, error) {
@@ -141,11 +140,11 @@ export async function exerciseNativeGatewayProtocol({
   });
   const connection = () => ({
     schemaVersion: 1,
+    kind: "remote-gateway",
     auth: { mode: "token", token },
-    // The client's connection resolver models the HTTPS portal shape; the
-    // socket factory maps the resolved wss URL back onto the plain loopback
-    // listener. The evidence record names the real transport explicitly.
-    portal: { visibility: "public-url", url: `https://127.0.0.1:${gatewayPort}` },
+    // The client's remote-gateway connection form: cleartext WebSocket is
+    // admissible on the loopback host only, which is exactly this lane.
+    gateway: { url: `ws://127.0.0.1:${gatewayPort}` },
     allowedOrigins: [origin]
   });
   const openClient = () => createOpenClawGatewayClient({

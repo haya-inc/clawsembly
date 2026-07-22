@@ -1,6 +1,6 @@
 {
   "name": "@haya-inc/clawsembly",
-  "version": "0.1.0-alpha.4",
+  "version": "0.1.0-alpha.5",
   "description": "Evidence-gated, capability-safe browser embedding SDK for upstream OpenClaw.",
   "private": false,
   "license": "MIT",
@@ -50,6 +50,10 @@
     "./report-loader": {
       "types": "./packages/embed-sdk/report-loader.d.mts",
       "import": "./packages/embed-sdk/report-loader.mjs"
+    },
+    "./remote-gateway": {
+      "types": "./packages/embed-sdk/remote-gateway.d.mts",
+      "import": "./packages/embed-sdk/remote-gateway.mjs"
     },
     "./browserpod-probe": {
       "types": "./packages/browser-runtime/browserpod-openclaw-probe.d.mts",

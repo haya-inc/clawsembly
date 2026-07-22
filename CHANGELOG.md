@@ -7,7 +7,23 @@ The project does not yet promise semantic-version compatibility.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- a public `@haya-inc/clawsembly/remote-gateway` subpath — "connect your
+  OpenClaw" (ADR 0006 wrap deliverable 2). `createRemoteGatewayConnection`
+  validates a user-supplied Gateway endpoint into remote connection
+  material (HTTP(S) normalizes onto WebSocket schemes; cleartext endpoints
+  are limited to the loopback host; credentials in URLs are rejected), and
+  `connectRemoteOpenClawGateway` opens the generated, version-locked client
+  against it with browser-persistent defaults. A Gateway running another
+  OpenClaw version now fails closed with the dedicated
+  `server_version_mismatch` code. The native-Gateway evidence lane drives
+  the same remote-gateway connection form against the real stable artifact
+  on every capture;
+- a remote-gateway cockpit example (`examples/remote-gateway-cockpit/`): a
+  static page that connects to a user-operated Gateway, surfaces pairing
+  requirements, streams one bounded chat session, and shows the payload-free
+  audit trail.
 
 ## [0.1.0-alpha.4] - 2026-07-22
 

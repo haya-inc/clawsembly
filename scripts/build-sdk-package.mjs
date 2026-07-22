@@ -125,6 +125,8 @@ async function pack(staging, destination) {
     "packages/embed-sdk/report-loader.mjs",
     "packages/embed-sdk/report-loader.d.mts",
     "packages/embed-sdk/boot.mjs",
+    "packages/embed-sdk/remote-gateway.mjs",
+    "packages/embed-sdk/remote-gateway.d.mts",
     "packages/browser-runtime/browserpod-runtime.mjs",
     "packages/browser-runtime/workspace-backup.mjs",
     "packages/capability-broker/capability-broker.mjs"
@@ -155,6 +157,7 @@ import * as reportLoader from "@haya-inc/clawsembly/report-loader";
 import * as probe from "@haya-inc/clawsembly/browserpod-probe";
 import * as workspace from "@haya-inc/clawsembly/workspace-backup";
 import * as broker from "@haya-inc/clawsembly/capability-broker";
+import * as remote from "@haya-inc/clawsembly/remote-gateway";
 const required = [
   sdk.bootVerifiedEmbed,
   sdk.createEmbedManifest,
@@ -164,7 +167,9 @@ const required = [
   probe.runBrowserPodOpenClawProbe,
   workspace.exportBrowserPodWorkspace,
   workspace.restoreBrowserPodWorkspace,
-  broker.CapabilityBroker
+  broker.CapabilityBroker,
+  remote.createRemoteGatewayConnection,
+  remote.connectRemoteOpenClawGateway
 ];
 if (required.some((value) => typeof value !== "function")) throw new Error("packed ESM export is missing");
 process.stdout.write("packed ESM consumer passed\\n");
@@ -183,16 +188,19 @@ import { mountGatewayPairingPrompt } from "@haya-inc/clawsembly/pairing-prompt";
 import { CapabilityBroker } from "@haya-inc/clawsembly/capability-broker";
 import { loadVerifiedCompatibilityReport, type CompatibilityReportExpectation } from "@haya-inc/clawsembly/report-loader";
 import { decodeWorkspaceBackup, type WorkspaceBackupSubject } from "@haya-inc/clawsembly/workspace-backup";
+import { connectRemoteOpenClawGateway, createRemoteGatewayConnection } from "@haya-inc/clawsembly/remote-gateway";
 const boot: typeof bootVerifiedEmbed = bootVerifiedEmbed;
 const create: typeof createEmbedManifest = createEmbedManifest;
 const prompt: typeof mountGatewayPairingPrompt = mountGatewayPairingPrompt;
 const broker: typeof CapabilityBroker = CapabilityBroker;
 const loader: typeof loadVerifiedCompatibilityReport = loadVerifiedCompatibilityReport;
 const decode: typeof decodeWorkspaceBackup = decodeWorkspaceBackup;
+const remoteConnection: typeof createRemoteGatewayConnection = createRemoteGatewayConnection;
+const remoteConnect: typeof connectRemoteOpenClawGateway = connectRemoteOpenClawGateway;
 type Manifest = EmbedManifest;
 type ReportExpectation = CompatibilityReportExpectation;
 type BackupSubject = WorkspaceBackupSubject;
-const exports = [boot, create, prompt, broker, loader, decode] satisfies readonly unknown[];
+const exports = [boot, create, prompt, broker, loader, decode, remoteConnection, remoteConnect] satisfies readonly unknown[];
 void exports;
 export type { BackupSubject, Manifest, ReportExpectation };
 `;

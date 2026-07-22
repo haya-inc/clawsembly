@@ -41,12 +41,30 @@ export interface OpenClawGatewayHello {
   }>;
 }
 
-export interface GatewayConnectionMaterial {
+export interface BrowserPodPortalConnectionMaterial {
   schemaVersion: 1;
+  kind?: undefined;
   portal: Readonly<{ port: number; url: string; visibility: "public-url" }>;
   allowedOrigins: readonly string[];
   auth: Readonly<{ mode: "token"; token: string }>;
 }
+
+/**
+ * Remote mode ("connect your OpenClaw"): the user operates the Gateway and
+ * supplies its endpoint. Cleartext WebSocket endpoints resolve only on the
+ * loopback host; anything remote must be TLS.
+ */
+export interface RemoteGatewayConnectionMaterial {
+  schemaVersion: 1;
+  kind: "remote-gateway";
+  gateway: Readonly<{ url: string; loopback?: boolean }>;
+  allowedOrigins: readonly string[];
+  auth: Readonly<{ mode: "token"; token: string }>;
+}
+
+export type GatewayConnectionMaterial =
+  | BrowserPodPortalConnectionMaterial
+  | RemoteGatewayConnectionMaterial;
 
 export interface OpenClawGatewayClient {
   readonly schemaVersion: 1;

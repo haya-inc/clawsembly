@@ -146,16 +146,45 @@ function assertStoredDeviceToken(value) {
   return value;
 }
 
+const LOOPBACK_HOSTNAMES = new Set(["127.0.0.1", "[::1]", "localhost"]);
+
 export function resolveGatewayWebSocketConnection(connection, browserOrigin) {
   if (!connection || connection.schemaVersion !== 1 || connection.auth?.mode !== "token"
     || !isNonEmptyString(connection.auth.token, 512) || connection.auth.token.length < 16
-    || /[|\0\r\n]/u.test(connection.auth.token)
-    || connection.portal?.visibility !== "public-url" || !isNonEmptyString(connection.portal.url, 2_048)) {
+    || /[|\0\r\n]/u.test(connection.auth.token)) {
+    throw fail("invalid_connection", "verified Gateway connection material is invalid");
+  }
+  const remote = connection.kind === "remote-gateway" || connection.gateway !== undefined;
+  if (remote
+    ? (connection.kind !== "remote-gateway" || connection.portal !== undefined
+      || !isNonEmptyString(connection.gateway?.url, 2_048))
+    : (connection.portal?.visibility !== "public-url" || !isNonEmptyString(connection.portal.url, 2_048))) {
     throw fail("invalid_connection", "verified Gateway connection material is invalid");
   }
   const origin = exactOrigin(browserOrigin);
   if (!origin || !Array.isArray(connection.allowedOrigins) || !connection.allowedOrigins.includes(origin)) {
     throw fail("origin_not_allowed", "browser origin is not in the Gateway allowlist");
+  }
+  if (remote) {
+    // Remote mode ("connect your OpenClaw"): the user operates the Gateway
+    // and supplies its endpoint. Cleartext WebSockets are acceptable only on
+    // the loopback host; anything remote must be TLS.
+    let endpoint;
+    try { endpoint = new URL(connection.gateway.url); }
+    catch { throw fail("invalid_gateway_endpoint", "remote Gateway endpoint URL is invalid"); }
+    if (endpoint.username || endpoint.password) {
+      throw fail("invalid_gateway_endpoint", "remote Gateway endpoint must not carry credentials");
+    }
+    if (endpoint.protocol === "https:") endpoint.protocol = "wss:";
+    else if (endpoint.protocol === "http:") endpoint.protocol = "ws:";
+    if (endpoint.protocol !== "wss:" && endpoint.protocol !== "ws:") {
+      throw fail("invalid_gateway_endpoint", "remote Gateway endpoint must be an HTTP(S) or WebSocket URL");
+    }
+    if (endpoint.protocol === "ws:" && !LOOPBACK_HOSTNAMES.has(endpoint.hostname)) {
+      throw fail("invalid_gateway_endpoint", "cleartext Gateway endpoints are limited to the loopback host");
+    }
+    endpoint.hash = "";
+    return Object.freeze({ url: endpoint.href, origin, token: connection.auth.token });
   }
   let portal;
   try { portal = new URL(connection.portal.url); }
@@ -189,6 +218,13 @@ function pairingFrom(error, signedDeviceId) {
 }
 
 function parseHello(payload, artifactVersion) {
+  // A well-formed hello from a Gateway running another OpenClaw version gets
+  // its own code: the generated client is version-locked by design, and
+  // remote-mode hosts need to tell "wrong version" from "broken contract".
+  if (isRecord(payload) && payload.type === "hello-ok" && isRecord(payload.server)
+    && isNonEmptyString(payload.server.version, 128) && payload.server.version !== artifactVersion) {
+    throw fail("server_version_mismatch", "Gateway server runs a different OpenClaw version than the verified artifact");
+  }
   if (!isRecord(payload) || payload.type !== "hello-ok"
     || payload.protocol !== OPENCLAW_GATEWAY_CONTRACT.protocol.max
     || !isRecord(payload.server) || payload.server.version !== artifactVersion
