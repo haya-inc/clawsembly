@@ -22,6 +22,7 @@ design does not become stale when OpenClaw changes.
 | [OSS strategy](oss-strategy.md) | Competitive position, distribution loop, and 90-day success gates |
 | [Consuming reports](consuming-reports.md) | Badge, JSON endpoints, validation policy, and trust boundary |
 | [Releasing](releasing.md) | Maintainer gates for publishing, Pages setup, and prerelease evidence |
+| [Plugin vetting](plugin-vetting.md) | Extension-vetting exploration: no-execution scans over the real OpenClaw plugin ecosystem and what a vetting product would need |
 | [Risk register](risk-register.md) | Technical, platform, legal, and adoption risks with decision gates |
 | [Security model](security-model.md) | Trust boundaries, assets, threats, and release requirements |
 | [Deployment](deployment.md) | Required isolation headers and supported static hosts |
