@@ -2,6 +2,9 @@
 
 - Status: accepted
 - Date: 2026-07-12
+- Amended by: [ADR 0006](0006-openclaw-specialist-refocus.md) (2026-07-22),
+  which supersedes the multi-upstream product commitment for this
+  repository; the moat analysis below stands.
 
 ## Context
 

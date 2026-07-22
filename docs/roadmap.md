@@ -3,12 +3,13 @@
 The roadmap prioritizes evidence about upstream compatibility before product UI
 or a broad feature set.
 
-As of ADR 0004 (2026-07-12), the phases below serve one positioning:
-Clawsembly is an evidence-gated embedding layer that runs upstream coding
-agents browser-locally, behind a host boundary the embedding application
-controls. OpenClaw is the first supported upstream. The dated execution plan at
-the end of this document tracks the repositioning work; the phase structure and
-its evidence gates are unchanged.
+As of ADR 0004 (2026-07-12), refocused by ADR 0006 (2026-07-22), the phases
+below serve one positioning: Clawsembly is an evidence-gated embedding layer
+specialized in OpenClaw, running the upstream package browser-locally behind
+a host boundary the embedding application controls and wrapping it with the
+conveniences its operators and embedders need. The dated execution plans at
+the end of this document track that work; the phase structure and its
+evidence gates are unchanged.
 
 ## Phase 0: feasibility gate and compatibility lab
 
@@ -397,3 +398,37 @@ Code (`contributor`):
 - project-page messaging realigned with ADR 0004, tracked as its own item
   because the page carries browser-test text assertions that must move with it
   (`contributor`).
+
+## Refocus execution plan (ADR 0006, 2026-07-22)
+
+[ADR 0006](decisions/0006-openclaw-specialist-refocus.md) narrows the
+repository to an OpenClaw-specialist identity and orders the wrap-value
+work. Honesty constraints: native-mode evidence and BrowserPod evidence are
+separate classes and neither stands in for the other; all published
+browser-runtime reports remain `probing` until owner-authorized BrowserPod
+evidence exists; remote mode is interoperability and cannot satisfy the
+browser-local acceptance gates (ADR 0002).
+
+1. **Native-Gateway evidence lane** (`contributor`): install the exact
+   stable artifact on a plain Node runner that satisfies its engines
+   declaration, boot the real Gateway, and run the generated protocol client
+   against it — handshake, pairing review, bounded chat, abort, reconnect.
+   Recorded as a distinct native-mode evidence class.
+2. **Remote-mode embedding surface** (`contributor`): "connect your
+   OpenClaw" — the implemented browser device identity, pairing review,
+   encrypted token vault, and bounded chat client offered against a
+   user-operated native Gateway behind the same default-deny broker and
+   payload-free audit, with a static cockpit page as its demo.
+3. **Operator release intelligence** (`contributor`): the promotion policy,
+   contract diffs, and dependency-risk scans translated into upgrade
+   advisories; supporting trust infrastructure, not the product.
+4. **Extension-vetting exploration** (`contributor`): apply the no-execution
+   dependency scanner to the upstream plugin ecosystem while the
+   skills-to-plugins migration is in flight.
+
+Browser-local OpenClaw verification stays the flagship deliverable and
+remains vendor-gated
+([#6](https://github.com/haya-inc/clawsembly/issues/6),
+[#47](https://github.com/haya-inc/clawsembly/issues/47)); the capture
+harness stays ready. Coordinated promotion stays deferred until the first
+genuinely useful wrap deliverable exists (`owner`).
