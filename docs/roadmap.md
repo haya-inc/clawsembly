@@ -93,22 +93,26 @@ Deliverables:
 Exit criterion: a browser restart restores a session and workspace without
 persisting plaintext secrets or accessing files outside the granted scope.
 
-Status: partial. Versioned mock-state recovery and the encrypted browser-host
-credential vault pass in Chromium. A real OpenClaw agent turn now crosses the
-fixed-destination browser-host broker with mock transport and no API-key exposure
-to the guest. Typed text deltas reach OpenClaw, a streamed `agents_list`
+Status: partial. A versioned, encrypted BrowserPod user-workspace envelope now
+passes provider-free real-filesystem export, fresh-root restore, tamper and
+wrong-subject rejection, and a checked v1-to-v2 migration fixture. The removed
+WebContainer mock-state format is explicitly non-migratable. The encrypted
+browser-host credential vault passes in Chromium. A real OpenClaw agent turn
+now crosses the fixed-destination browser-host broker with mock transport and
+no API-key exposure to the guest. Typed text deltas reach OpenClaw, a streamed `agents_list`
 function call is translated and executed, and its matched result is serialized
 as Responses `function_call` / `function_call_output` input for the second
 provider request. `chat.abort` cancels the browser request and provider stream.
 User-configurable request/input/output budgets are enforced and reported by the
 browser host. A fixed-prompt live smoke-test UI is credential- and consent-gated,
 cost-bounded, cancellable, and complete-output-only; automation proves the gate
-without making a live request. User-workspace migration fixtures, the first
-owner-authorized live execution and broader moderation UX remain. The first
+without making a live request. Owner-authorized BrowserPod workspace-scale
+recovery evidence, a user-facing backup UI, the first owner-authorized live
+execution, and broader moderation UX remain. The first
 default-deny capability broker now enforces exact artifact subjects, scopes,
 call limits, expiry, revocation, cancellation, and payload-free audit. The typed
-guest transport and reusable permission prompt are integrated; workspace
-migration and owner-authorized provider evidence remain.
+guest transport and reusable permission prompt are integrated; owner-authorized
+workspace recovery and provider evidence remain.
 
 The removed Chromium runtime measured a 57.1-second cold install, including
 49.7 seconds for a 293-package nested repair, a 2.9-second warm reinstall,
@@ -302,7 +306,8 @@ the vendor has been notified
 today. Tasks 3 and 4 depend on a vendor Node upgrade or a revisited baseline
 decision.
 
-1. Extend the versioned mock-state envelope to cover user workspaces and migration fixtures.
+1. Completed 2026-07-22: replace the removed mock-state path with an encrypted,
+   exact-subject BrowserPod user-workspace v2 envelope and checked migration fixture.
 2. Execute the protected live smoke test with an owner-provided key, archive redacted evidence, and expand moderation UX.
 3. Measure BrowserPod cold, warm, and persistent install paths and establish
    provider-specific latency/storage budgets.

@@ -7,8 +7,22 @@ The project does not yet promise semantic-version compatibility.
 
 ## Unreleased
 
+No changes yet.
+
+## [0.1.0-alpha.4] - 2026-07-22
+
 ### Added
 
+- a public `@haya-inc/clawsembly/workspace-backup` subpath now exports and
+  restores bounded BrowserPod user workspaces through an exact-subject v2
+  envelope. The file payload is encrypted with passphrase-derived AES-GCM;
+  the temporary guest exchange is separately encrypted with a one-shot key,
+  and restore is limited to a fresh root. Real-filesystem tests cover binary
+  round-trip, encrypted guest exchange, tampering, wrong passphrases, exact-
+  subject drift, traversal, duplicate paths, and restore conflicts;
+- a checked BrowserPod v1 workspace fixture migrates explicitly into v2. The
+  removed WebContainer `CLAWBKP1` mock-state format is classified as
+  non-migratable instead of being reinterpreted as BrowserPod data;
 - an owner-authorized performance baseline on the hello-agent chain
   (`browserpod@2.12.1`, HeadlessChrome 149 on Windows 11, three samples per
   pass, 10 metered boots): median provider boot under 0.9 s, digest-verified
@@ -58,26 +72,6 @@ The project does not yet promise semantic-version compatibility.
   baseline), previous `2026.6.11`, and preview `2026.7.2-beta.3`, and the
   regenerated contract, SDK host pin, promotion policy, and README/evidence
   docs move with them. All channels remain `probing` with promotion `hold`.
-
-### Fixed
-
-- `compat:track` and dependency-risk classification now run on Windows
-  maintainer machines: npm is invoked through the calling npm's JS entry
-  point, tar receives cwd-relative paths, and large dependency extractions
-  pass their member list via `-T` instead of argv (the Windows command-line
-  length limit made `spawnSync tar` fail with `ENAMETOOLONG`). The contract
-  generator gets the same tar treatment.
-- the six-hour release tracker no longer goes silent when a new upstream
-  stable breaks Gateway-contract regeneration: the tracker records the
-  `protocol:verify` outcome in its run summary and in the generated report
-  pull request instead of aborting before publication, while the protocol
-  gate in the check chain keeps a report/contract mismatch fail-closed on
-  that pull request. `openclaw@2026.7.1` (stable since 2026-07-13) removed
-  the legacy `dist/plugin-sdk/packages/` declaration tree and had silenced
-  every scheduled tracker run since.
-
-### Changed
-
 - the `hello-agent` reference binding grows from a greeter into a minimal
   capability-consuming chat agent (fixture 0.1.0 → 0.2.0, protocol
   `clawsembly-hello/2`): `chat.send`, `chat.history`, and `chat.abort` join
@@ -95,6 +89,23 @@ The project does not yet promise semantic-version compatibility.
   `>=22.12.0`, below the OpenClaw baseline, so the full verified chain stays
   capturable on the vendor's currently provisioned Node. No runtime-support
   claim is added; OpenClaw remains the only bound real upstream.
+
+### Fixed
+
+- `compat:track` and dependency-risk classification now run on Windows
+  maintainer machines: npm is invoked through the calling npm's JS entry
+  point, tar receives cwd-relative paths, and large dependency extractions
+  pass their member list via `-T` instead of argv (the Windows command-line
+  length limit made `spawnSync tar` fail with `ENAMETOOLONG`). The contract
+  generator gets the same tar treatment.
+- the six-hour release tracker no longer goes silent when a new upstream
+  stable breaks Gateway-contract regeneration: the tracker records the
+  `protocol:verify` outcome in its run summary and in the generated report
+  pull request instead of aborting before publication, while the protocol
+  gate in the check chain keeps a report/contract mismatch fail-closed on
+  that pull request. `openclaw@2026.7.1` (stable since 2026-07-13) removed
+  the legacy `dist/plugin-sdk/packages/` declaration tree and had silenced
+  every scheduled tracker run since.
 
 ## [0.1.0-alpha.3] - 2026-07-13
 
@@ -359,6 +370,7 @@ The project does not yet promise semantic-version compatibility.
 - Firefox, Safari, remote Gateway parity, general workspace migration, and
   owner-authorized live-provider evidence remain unverified.
 
+[0.1.0-alpha.4]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.3...v0.1.0-alpha.4
 [0.1.0-alpha.3]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.2...v0.1.0-alpha.3
 [0.1.0-alpha.2]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.1...v0.1.0-alpha.2
 [0.1.0-alpha.1]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.0...v0.1.0-alpha.1

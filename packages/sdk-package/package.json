@@ -1,6 +1,6 @@
 {
   "name": "@haya-inc/clawsembly",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "description": "Evidence-gated, capability-safe browser embedding SDK for upstream OpenClaw.",
   "private": false,
   "license": "MIT",
@@ -54,6 +54,10 @@
     "./browserpod-probe": {
       "types": "./packages/browser-runtime/browserpod-openclaw-probe.d.mts",
       "import": "./packages/browser-runtime/browserpod-openclaw-probe.mjs"
+    },
+    "./workspace-backup": {
+      "types": "./packages/browser-runtime/workspace-backup.d.mts",
+      "import": "./packages/browser-runtime/workspace-backup.mjs"
     },
     "./capability-broker": {
       "types": "./packages/capability-broker/capability-broker.d.mts",

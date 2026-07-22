@@ -111,9 +111,13 @@ pull request from a fork.
 
 ## Current persistence boundary
 
-The project page does not expose a runtime snapshot UI. BrowserPod persistence
-needs its own migration, encryption, recovery,
-and workspace-scale evidence before any user backup contract is enabled.
+The project page does not expose a runtime snapshot UI. The SDK's BrowserPod
+workspace module now produces a passphrase-encrypted, exact-subject v2 backup,
+uses a separate one-shot AES-GCM key for its temporary guest exchange, restores
+only into a fresh root, and checks a v1 migration fixture. Symlinks, special
+files, traversal, oversized inputs, tampering, and cross-subject reuse fail
+closed. Owner-authorized workspace-scale recovery evidence and user-facing
+recovery UX are still required before any production backup contract is enabled.
 
 Provider credentials use a separate browser-host vault. A non-extractable
 AES-GCM-256 `CryptoKey` is structured-cloned into IndexedDB; each provider record

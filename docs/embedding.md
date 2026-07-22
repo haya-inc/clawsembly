@@ -160,6 +160,32 @@ Persistent sessions accept a logical `workspaceId`; the SDK derives
 `storageKey`. Different OpenClaw versions therefore cannot silently reuse the
 same persisted disk.
 
+User workspace export is a separate explicit surface:
+
+```js
+import { exportBrowserPodWorkspace } from "@haya-inc/clawsembly/workspace-backup";
+
+const subject = {
+  artifact: manifest.artifact,
+  runtime: { provider: "browserpod", version: manifest.runtimeVersion },
+  workspaceId: "primary"
+};
+const backup = await exportBrowserPodWorkspace({
+  runtime: session.runtime,
+  subject,
+  workspaceRoot: "/workspace/project",
+  passphrase: userEnteredBackupPassphrase
+});
+```
+
+The v2 envelope encrypts file content and binds it to that exact subject and
+root. Restore requires the same subject, passphrase, and a non-existent target
+root. A v2 backup is never silently rebound; changing its subject or root
+requires an explicit decode-and-recreate step, while the checked v1 shape uses
+`migrateLegacyWorkspaceSnapshot`. Provider-free tests exercise real binary
+files and the guest helper, but owner-authorized workspace-scale BrowserPod
+evidence and a user-facing recovery UI remain pending.
+
 ## BrowserPod lifecycle contract
 
 The BrowserPod 2.12.1 adapter now supports:
