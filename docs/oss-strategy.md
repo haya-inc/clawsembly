@@ -9,11 +9,13 @@ and evidence discipline. The main strategic risk is not technical ambiguity;
 it is being mistaken for one more browser-native agent product, or being
 reduced to an OpenClaw release-tracking service. Clawsembly should therefore
 lead with the positioning fixed in
-[ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md):
+[ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md) and
+refocused by [ADR 0006](decisions/0006-openclaw-specialist-refocus.md):
 
-> Clawsembly is an evidence-gated embedding layer that runs upstream coding
-> agents browser-locally, behind a host boundary the embedding application
-> controls. OpenClaw is the first supported upstream.
+> Clawsembly is an evidence-gated embedding layer specialized in OpenClaw:
+> it runs the upstream package browser-locally behind a host boundary the
+> embedding application controls, and wraps it with the conveniences its
+> operators and embedders need.
 
 The project should not compete on the number of providers, tools, channels, or
 agent features. Those are the upstream agent's job. Clawsembly's job is to run
@@ -26,10 +28,12 @@ OpenClaw is bound; the boundary chain has one owner-authorized runtime record
 on the real provider via the hello-agent reference binding (2026-07-21, PR
 [#48](https://github.com/haya-inc/clawsembly/pull/48)), while no OpenClaw
 release has owner-authorized runtime evidence, so all published OpenClaw
-reports are status `probing`; and multi-upstream is a design commitment whose
-next concrete step is a documented upstream-binding contract, not a shipped
-capability. No surface may state or imply that other agents already run, and
-no surface may present the reference-binding record as agent evidence.
+reports are status `probing`; and per
+[ADR 0006](decisions/0006-openclaw-specialist-refocus.md) multi-upstream is
+out of scope for this repository — upstream portability remains engineering
+discipline verified by the test-scoped reference binding. No surface may
+state or imply that other agents run or are planned here, and no surface may
+present the reference-binding record as agent evidence.
 
 ## Market evidence
 
@@ -212,8 +216,11 @@ deadline pressure:
 ## Decisions that protect the strategy
 
 - Do not become a second OpenClaw implementation.
-- Do not let the project identity become OpenClaw-only; OpenClaw is the first
-  bound upstream, not the definition of the project.
+- The project identity is OpenClaw-specialist by owner decision
+  ([ADR 0006](decisions/0006-openclaw-specialist-refocus.md)); other
+  upstreams belong to separate projects. Keep the boundary upstream-portable
+  as engineering discipline so specialization stays a choice rather than a
+  trap.
 - Do not present the report pipeline as the product; it is trust
   infrastructure that gates the embedding layer.
 - Do not hide unsupported native capabilities behind generic dummy packages.
@@ -268,3 +275,17 @@ deadline pressure:
    second binding.
 7. Ship the embedder-DX slice: make the host boundary easy for an embedding
    application to adopt and adjust.
+
+Update 2026-07-22
+([ADR 0006](decisions/0006-openclaw-specialist-refocus.md)): the owner
+refocused the repository as OpenClaw-specialist, so item 6 closes as
+engineering discipline rather than a multi-upstream step (the binding
+contract shipped 2026-07-13 and stays test infrastructure). The wrap-value
+order ahead of any announcement is now: (1) the native-Gateway evidence lane
+— boot the exact stable artifact on a plain Node runner that satisfies its
+engines declaration and exercise the generated client against the real
+Gateway, recorded as a distinct native-mode evidence class that never
+promotes BrowserPod support; (2) the remote-mode embedding surface against a
+user-operated native Gateway; (3) operator release intelligence; (4) an
+extension-vetting exploration. Coordinated promotion stays deferred until
+the first genuinely useful wrap deliverable exists.

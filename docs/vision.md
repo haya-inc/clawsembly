@@ -14,19 +14,22 @@ without giving the agent unrestricted access to the user's machine.
 
 ## Vision
 
-Clawsembly is an evidence-gated embedding layer that runs upstream coding
-agents browser-locally, behind a host boundary the embedding application
-controls. OpenClaw is the first supported upstream: Clawsembly binds an exact
-OpenClaw artifact to public compatibility evidence, a BrowserPod runtime, and
-explicit browser-host capabilities.
+Clawsembly is an evidence-gated embedding layer specialized in OpenClaw
+([ADR 0006](decisions/0006-openclaw-specialist-refocus.md)): it runs the
+upstream package browser-locally, behind a host boundary the embedding
+application controls, binding an exact OpenClaw artifact to public
+compatibility evidence, a BrowserPod runtime, and explicit browser-host
+capabilities, and it wraps that upstream with the conveniences its operators
+and embedders need.
 
 An embedded upstream should feel like the same agent running in a different
 host environment, rather than a separate agent that happens to resemble it.
 BrowserPod supplies execution; Clawsembly supplies the verified artifact, the
 upstream-portable authority boundary, protocol integration, and the evidence
-required to trust that execution. Today only OpenClaw is bound; upstream
-portability is a design property of the host boundary, not a demonstrated
-multi-upstream capability.
+required to trust that execution. Upstream portability is an engineering
+property of the host boundary, kept verified by the test-scoped reference
+binding; it is not a multi-upstream roadmap — other upstreams belong to
+separate projects.
 
 ## Principles
 
@@ -59,7 +62,10 @@ ship a shared device identity or embedded secret.
 Host-boundary APIs — the capability broker, embed manifest, permission UI, and
 capability mailbox — must not hard-code OpenClaw specifics. Anything
 upstream-specific belongs in a binding that satisfies a documented
-upstream-binding contract.
+upstream-binding contract. Per
+[ADR 0006](decisions/0006-openclaw-specialist-refocus.md) this is discipline
+that keeps the core honest, not a commitment to bind additional real agents
+in this repository.
 
 ### Automated upstream tracking
 

@@ -1,8 +1,8 @@
 # Clawsembly
 
-> Run upstream coding agents browser-locally, behind a host boundary the
-> embedding application controls. Evidence-gated; OpenClaw is the first
-> supported upstream.
+> Run upstream OpenClaw browser-locally, behind a host boundary the
+> embedding application controls. Evidence-gated, and specialized in
+> OpenClaw rather than generic across agents.
 
 [![CI](https://github.com/haya-inc/clawsembly/actions/workflows/ci.yml/badge.svg)](https://github.com/haya-inc/clawsembly/actions/workflows/ci.yml)
 [![Compatibility probe](https://github.com/haya-inc/clawsembly/actions/workflows/compatibility.yml/badge.svg)](https://github.com/haya-inc/clawsembly/actions/workflows/compatibility.yml)
@@ -14,16 +14,21 @@
 
 日本語: [README.ja.md](README.ja.md)
 
-Clawsembly is an evidence-gated embedding layer that runs upstream coding
-agents browser-locally, behind a host boundary the embedding application
-controls. [OpenClaw](https://github.com/openclaw/openclaw) is the first
-supported upstream: Clawsembly binds the exact published package to public
-compatibility evidence and refuses to launch it until that evidence verifies.
+Clawsembly is an evidence-gated embedding layer specialized in
+[OpenClaw](https://github.com/openclaw/openclaw): it runs the upstream
+package browser-locally, behind a host boundary the embedding application
+controls, binding the exact published package to public compatibility
+evidence and refusing to launch it until that evidence verifies.
 Today every tracked release is **probing** — meaning the exact artifact has
 been statically inspected, but no owner-authorized runtime evidence exists
-yet, so verified launch stays blocked. Clawsembly is an experimental,
-single-maintainer project and is not affiliated with or endorsed by the
-OpenClaw project.
+yet, so verified launch stays blocked. Wrapping upstream OpenClaw with the
+conveniences its operators and embedders need — native-Gateway
+interoperability, release intelligence, extension vetting — is the product
+direction
+([ADR 0006](docs/decisions/0006-openclaw-specialist-refocus.md)); other
+upstream agents are out of scope for this repository. Clawsembly is an
+experimental, single-maintainer project and is not affiliated with or
+endorsed by the OpenClaw project.
 
 ## What works today, what is blocked
 
@@ -86,8 +91,10 @@ licensing analysis.
 
 BrowserPod supplies browser-local Node execution. Clawsembly supplies the
 parts an embedding application still needs in order to trust an upstream
-agent — implemented today against upstream OpenClaw, the first bound
-upstream, and designed to stay upstream-portable
+agent — implemented against upstream OpenClaw, this repository's
+specialized upstream
+([ADR 0006](docs/decisions/0006-openclaw-specialist-refocus.md)), while the
+boundary itself stays upstream-portable as an engineering property
 ([ADR 0004](docs/decisions/0004-upstream-portable-embedding-boundary.md)):
 
 - exact-version compatibility reports and reproducible failure fixtures;
@@ -375,21 +382,25 @@ uploads evidence for review without committing or promoting it automatically.
 
 ## Goals
 
-- Run upstream coding agents rather than maintaining an independent agent
-  rewrite. OpenClaw is the first bound upstream; additional upstreams bind
-  through the documented
-  [upstream-binding contract](docs/upstream-binding-contract.md), whose
+- Run upstream OpenClaw rather than maintaining an independent agent
+  rewrite. This repository specializes in OpenClaw
+  ([ADR 0006](docs/decisions/0006-openclaw-specialist-refocus.md)); other
+  upstreams belong to separate projects. The documented
+  [upstream-binding contract](docs/upstream-binding-contract.md) and its
   hello-agent reference binding — test-scoped, and since 2026-07-21 backed by
-  one owner-authorized real-BrowserPod record — demonstrates that the boundary
-  is upstream-portable and extends an agent through embedder-granted host
-  capabilities
+  one owner-authorized real-BrowserPod record — remain the test
+  infrastructure that keeps the boundary upstream-portable
   ([ADR 0005](docs/decisions/0005-reference-agent-growth-paths.md)). No
-  second real agent runs today.
+  second real agent runs today, and none is planned here.
 - Keep the host boundary — default-deny capability broker, evidence-bound
   embed manifest, permission prompts, and payload-free audit — embedder-
-  controlled and upstream-portable, as the reusable product across upstreams.
-- Make each bound upstream safe to embed through exact artifact identity,
+  controlled, with upstream portability retained as an engineering property
+  of the boundary rather than a multi-upstream roadmap.
+- Make upstream OpenClaw safe to embed through exact artifact identity,
   evidence-bound launch, and explicit browser-host authority.
+- Wrap upstream OpenClaw with the conveniences its operators and embedders
+  need — native-Gateway evidence and interoperability, release
+  intelligence, extension vetting — without reimplementing the agent.
 - Keep the useful default browser-local, with an optional native Gateway
   interoperability mode rather than a remote-sandbox dependency.
 - Expose browser limitations as explicit capabilities instead of silently
@@ -415,6 +426,7 @@ uploads evidence for review without committing or promoting it automatically.
 - [Verified OpenClaw embedding decision](docs/decisions/0003-verified-openclaw-embedding.md)
 - [Upstream-portable embedding boundary decision](docs/decisions/0004-upstream-portable-embedding-boundary.md)
 - [Reference-agent growth paths decision](docs/decisions/0005-reference-agent-growth-paths.md)
+- [OpenClaw-specialist refocus decision](docs/decisions/0006-openclaw-specialist-refocus.md)
 - [Verified embedding contract](docs/embedding.md)
 - [Upstream binding contract](docs/upstream-binding-contract.md)
 
