@@ -28,7 +28,7 @@ Clawsembly は実験的なシングルメンテナのプロジェクトであり
 | --- | --- | --- |
 | ゼロインストールの promotion-policy チェック | **動く** | `node examples/release-policy/check.mjs --observe` が依存なし・数秒で現在の判定を表示 |
 | ホスト済みプロジェクトページ | **動く** | [ライブレポートと許可プロンプトのデモ](https://haya-inc.github.io/clawsembly/)(不活性なローカルブローカー相手に承認・拒否・失効・監査エクスポート) |
-| npm アルファパッケージ | **公開済み** | `npm install @haya-inc/clawsembly@alpha` — SHA-512 整合性と Sigstore provenance 付き |
+| npm アルファパッケージ | **record ゲート制** | `npm install @haya-inc/clawsembly@alpha` は最新のレビュー済み npm 公開版をインストールする。準備中バージョンのレジストリ状態は [publication record](packages/compatibility/npm-publication.json) が保持する(リリース列車完走まで `pending`、レビュー後は SHA-512 整合性と Sigstore provenance 付きで `published`) |
 | 証拠ゲート付きブートのデモ | **動く** | [SDK ホスト例](examples/sdk-host/README.md)が pinned レポートを検証し `Provider boot blocked` を表示(未検証リリースの拒否はセキュリティ機能が正しく動いている状態) |
 | 実 BrowserPod 上の境界チェーン | **動く** | hello-agent リファレンスバインディングの全チェーン(digest 検証済み staging、二重 readiness、capability 仲介チャット の denied/allowed 両結果、実行中 abort、協調停止)に `browserpod@2.12.1` 上のオーナー承認記録が 1 件([evidence](packages/hello-agent-binding/evidence/hello-agent-0.2.0.json))。リファレンスバインディングであり実エージェントではない。OpenClaw ブートは下記の通りブロック中 |
 | 検証済み BrowserPod ブート | **ブロック中** | 現行 stable `openclaw@2026.7.1-2` は複合 engines レンジ `>=22.22.3 <23 \|\| >=24.15.0 <25 \|\| >=25.9.0` を宣言しており、exact-form ベースラインゲートがトークン消費前に `node_baseline_unsupported` で fail closed する。BrowserPod 2.12.1 の Node 22.15.0 はどのブランチも満たさない(ベンダーへ報告済み)。チェックイン済みの `openclaw@2026.5.7` レポートが現在捕獲可能なターゲット([#6](https://github.com/haya-inc/clawsembly/issues/6)) |

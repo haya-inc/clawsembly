@@ -448,7 +448,8 @@ export function createVerifiedHelloAgentProcess({
 }
 
 /**
- * The bounded protocol client. It exposes exactly one method, hello.say,
+ * The bounded protocol client. It exposes the four artifact-declared methods
+ * — hello.say plus the chat.send / chat.history / chat.abort chat surface —
  * verifies the installed protocol descriptor against the generated pin
  * before the first request, presents the guest-minted session token on
  * every request, and holds that token in memory only.
@@ -788,8 +789,10 @@ function canonicalize(value) {
 /**
  * The minimal evidence gate. Evidence passes only when it binds the exact
  * generated artifact identity, a verified staging result, both readiness
- * signals, at least one completed protocol round trip, and an acknowledged
- * cooperative shutdown. Anything else fails closed.
+ * signals, at least one completed hello round trip and one chat round trip,
+ * a capability-boundary crossing with at least one denied and one allowed
+ * outcome for the declared requirement, and an acknowledged cooperative
+ * shutdown. Anything else fails closed.
  */
 export function assertHelloAgentRuntimeEvidence(evidence) {
   const failures = [];

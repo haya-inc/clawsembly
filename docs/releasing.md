@@ -106,6 +106,11 @@ change. Each entry names how it is kept honest:
 - `SECURITY.md` — manual; the supported-versions table follows the latest
   source prerelease.
 - `CHANGELOG.md` — manual; the dated heading for the version being released.
+- `README.md` and `README.ja.md` — manual; the npm-alpha status row, the
+  source-prerelease links, and the install-command versions.
+- `docs/roadmap.md` and `docs/oss-strategy.md` — manual; the
+  distribution-state paragraphs that name released and prepared versions.
+- `.github/ISSUE_TEMPLATE/support.yml` — manual; the release placeholder.
 
 ## npm pack reproducibility
 

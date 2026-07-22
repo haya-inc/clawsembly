@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// The deployment security headers are declared in five places: the Pages
-// `_headers` file, netlify.toml, vercel.json, the index.html CSP meta, and
+// The deployment security headers are declared in five places: the Cloudflare
+// Pages `_headers` file, netlify.toml, vercel.json, the index.html CSP meta, and
 // the Vite dev/preview server. Release readiness exercises only `_headers`,
 // so this check pins the other four to it and fails on silent drift.
 import assert from "node:assert/strict";
