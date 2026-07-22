@@ -333,17 +333,16 @@ ESM subpath, and compiles a strict TypeScript consumer. `sdk:lock` deliberately
 updates the copy-ready starter URL and SHA-512 when the SDK version changes;
 normal checks reject silent drift. `sdk:pack` writes
 `@haya-inc/clawsembly@0.1.0-alpha.4` plus its checksum under ignored
-`.artifacts/sdk/`. The matching GitHub prerelease triggers provenance-backed
-npm publication under the `alpha` dist-tag only after the source release gate
-passes. The reviewed
-[npm publication record](packages/compatibility/npm-publication.json) remains
-`pending` for alpha.4, so registry installation is not yet admitted for these
-bytes.
+`.artifacts/sdk/`. The matching GitHub prerelease triggered provenance-backed
+npm publication under the `alpha` dist-tag; the reviewed
+[npm publication record](packages/compatibility/npm-publication.json) now
+records `status: published` with matching SHA-512 integrity and Sigstore
+provenance.
 
 The [release manifest](https://haya-inc.github.io/clawsembly/downloads/sdk-release.json)
 is the source of truth for package distribution. It binds the tarball SHA-256
 to the exact public compatibility report and admits the npm install path only
-after the reviewed publication record supplies matching SHA-512 integrity and
+because the reviewed publication record supplies matching SHA-512 integrity and
 Sigstore provenance. Runtime support remains independently recorded as
 `status:probing`.
 
