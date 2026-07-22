@@ -477,7 +477,15 @@ browser-local acceptance gates (ADR 0002).
    stale.
 4. **Extension-vetting exploration** (`contributor`): apply the no-execution
    dependency scanner to the upstream plugin ecosystem while the
-   skills-to-plugins migration is in flight.
+   skills-to-plugins migration is in flight. Explored 2026-07-22
+   ([plugin vetting](plugin-vetting.md)): the ecosystem is real
+   (first-party and genuinely third-party plugins on npm), seven pinned
+   packages were scanned without execution, no install-time scripts were
+   found anywhere, capability spread is legible (shim → channel bridge →
+   subprocess/database/wasm), and two methodological gaps were recorded —
+   budget truncation on 41 MB plugins and source formats the scanner
+   cannot read. What a vetting product would additionally need is
+   documented; no build commitment is made.
 
 Browser-local OpenClaw verification stays the flagship deliverable and
 remains vendor-gated
