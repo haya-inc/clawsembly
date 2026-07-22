@@ -157,7 +157,8 @@ must stay behind a contract covering process execution, terminal I/O, file
 operations, local service discovery, persistence, cancellation, and teardown.
 
 The first BrowserPod preflight is intentionally dependency-injected. It checks
-the exact Node 22.19+ baseline, `node:crypto`, and `node:sqlite` without loading
+the report-declared Node baseline (the artifact's exact `>=` `nodeEngine`
+form), `node:crypto`, and `node:sqlite` without loading
 proprietary runtime code or transmitting a metered API key until the caller
 explicitly opts in. The archived container2wasm lane retains its pinned Node
 22.19 amd64 conversion, size, boot failure, and license evidence separately.

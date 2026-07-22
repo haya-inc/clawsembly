@@ -156,9 +156,9 @@ environment credentials, implicit host filesystem access, or a compatibility
 report from another runtime.
 
 Persistent sessions accept a logical `workspaceId`; the SDK derives
-`clawsembly:<exact-openclaw-version>:<workspaceId>` as the BrowserPod
-`storageKey`. Different OpenClaw versions therefore cannot silently reuse the
-same persisted disk.
+`clawsembly:<package>:<exact-version>:<workspaceId>` as the BrowserPod
+`storageKey`. Different upstream packages or versions therefore cannot
+silently reuse the same persisted disk.
 
 User workspace export is a separate explicit surface:
 

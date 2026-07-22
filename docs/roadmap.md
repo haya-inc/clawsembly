@@ -28,8 +28,11 @@ either reach the Gateway handshake in a browser-local runtime or retain a
 reproducible, classified blocker. A trivial Node service alone is not
 sufficient evidence.
 
-Status: achieved locally for `openclaw@2026.6.11`; the checked-in evidence
-includes server readiness, `/healthz`, and protocol 4 `hello-ok`.
+Status: achieved historically for `openclaw@2026.6.11` on the since-removed
+WebContainer runtime, whose server-readiness, `/healthz`, and protocol 4
+`hello-ok` evidence was deleted in the BrowserPod-only cutover (see the
+Phase 1 historical status). The current checked-in reports carry no runtime
+evidence and remain `probing` with `hello-ok` pending.
 
 ## Phase 1: current stable OpenClaw probe
 
@@ -210,7 +213,8 @@ cutting off an active Gateway's cooperative stop path. The boot slice is not pro
 owner-authorized BrowserPod evidence remains missing.
 
 The repository now also produces a byte-reproducible
-`@haya-inc/clawsembly@0.1.0-alpha.2` tarball without making the compatibility lab
+`@haya-inc/clawsembly` tarball (the prepared version lives in
+`packages/sdk-package/package.json`) without making the compatibility lab
 itself publishable. CI installs that tarball into an isolated ESM/TypeScript
 consumer, verifies every declared public subpath, and builds an independent
 host application from the packed dependency with no workspace alias. Its
@@ -221,10 +225,12 @@ artifact, and BrowserPod version; raw or hand-edited `supported` objects cannot
 authorize launch. The six-hour tracker deterministically rotates that pin in
 its read-only job and publishes it with the report through the isolated
 write-capable PR job. Package distribution is gated independently from runtime
-support: the identical checked alpha.2 tarball is available from Pages, its
-GitHub prerelease, and the npm `alpha` dist-tag now that the provenance-backed
-bootstrap publication is complete, but none of those channels can turn missing
-BrowserPod evidence into a supported launch. The Pages release
+support: a completed release train puts the identical checked tarball on
+Pages, its GitHub prerelease, and the npm `alpha` dist-tag with a
+provenance-backed, reviewed publication, and a newly prepared version stays
+Pages-only with a `pending` record until its own train completes. None of
+those channels can turn missing BrowserPod evidence into a supported launch.
+The Pages release
 manifest records that distinction with exact checksums and reviewed npm
 publication state, so external source-alpha consumers do not depend on registry
 publication. A
