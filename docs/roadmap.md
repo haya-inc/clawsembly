@@ -424,7 +424,19 @@ browser-local acceptance gates (ADR 0002).
    stable artifact on a plain Node runner that satisfies its engines
    declaration, boot the real Gateway, and run the generated protocol client
    against it — handshake, pairing review, bounded chat, abort, reconnect.
-   Recorded as a distinct native-mode evidence class.
+   Recorded as a distinct native-mode evidence class. Completed 2026-07-22
+   ([#59](https://github.com/haya-inc/clawsembly/pull/59),
+   [#61](https://github.com/haya-inc/clawsembly/pull/61),
+   [#62](https://github.com/haya-inc/clawsembly/pull/62)): the capture
+   installs and boots the real stable artifact, probes health, and drives
+   the generated client — unmodified — through the challenge-signed
+   handshake, device-token issuance into the encrypted vault, a bounded
+   chat round trip, a live-run abort, history, and a device-token
+   reconnect, recorded as evidence schema version 2. One measured reality:
+   the stable Gateway trusts a loopback shared-token connect without a
+   pairing prompt, so pairing review is not triggerable in this lane and
+   stays contract-test covered until remote mode (item 2) can produce it
+   for real.
 2. **Remote-mode embedding surface** (`contributor`): "connect your
    OpenClaw" — the implemented browser device identity, pairing review,
    encrypted token vault, and bounded chat client offered against a
