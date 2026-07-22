@@ -334,8 +334,13 @@ The first implementation should separate:
 - secrets as non-extractable Web Crypto keys and encrypted IndexedDB records;
 - exportable user backups in an explicit, versioned format.
 
-BrowserPod workspace migration fixtures, encryption, and workspace-scale
-recovery remain required before a production backup contract exists.
+The SDK now has a BrowserPod-specific v2 user-workspace envelope. It encrypts
+file contents with passphrase-derived AES-GCM, binds restore to exact artifact,
+runtime, workspace id, and root, encrypts the temporary guest exchange with a
+separate one-shot key, and restores only into a fresh root. A checked v1
+fixture proves explicit migration; the removed WebContainer binary format is
+rejected. A user-facing backup UI and owner-authorized workspace-scale recovery
+evidence remain required before this becomes a production backup contract.
 
 The browser host now has a separate credential-vault slice. It stores a
 non-extractable AES-GCM key and provider-scoped ciphertext in IndexedDB and

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "package": {
     "name": "@haya-inc/clawsembly",
-    "version": "0.1.0-alpha.3"
+    "version": "0.1.0-alpha.4"
   },
   "registry": "https://registry.npmjs.org/",
   "distTag": "alpha",

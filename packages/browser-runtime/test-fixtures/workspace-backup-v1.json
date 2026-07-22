@@ -1,0 +1,30 @@
+{
+  "format": "clawsembly.browserpod-workspace",
+  "version": 1,
+  "createdAt": "2026-07-13T00:00:00.000Z",
+  "subject": {
+    "artifact": {
+      "package": "openclaw",
+      "version": "2026.6.11",
+      "integrity": "sha512-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+    },
+    "runtime": {
+      "provider": "browserpod",
+      "version": "2.12.1"
+    },
+    "workspaceId": "primary"
+  },
+  "workspaceRoot": "/workspace/project",
+  "files": [
+    {
+      "path": "README.md",
+      "encoding": "base64",
+      "content": "IyBNaWdyYXRlZCB3b3Jrc3BhY2UK"
+    },
+    {
+      "path": "src/index.mjs",
+      "encoding": "base64",
+      "content": "ZXhwb3J0IGNvbnN0IG9rID0gdHJ1ZTsK"
+    }
+  ]
+}
