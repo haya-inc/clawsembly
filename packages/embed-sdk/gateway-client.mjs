@@ -112,6 +112,93 @@ function sanitizeChatEvent(payload) {
   });
 }
 
+const DEVICE_ROLE = /^[a-z][a-z0-9._-]{0,63}$/u;
+
+function optionalBoundedString(value, max = 128) {
+  return value === undefined || (isNonEmptyString(value, max) && !/[\0\r\n]/u.test(value));
+}
+
+function optionalTimestamp(value) {
+  return value === undefined || (Number.isSafeInteger(value) && value >= 0);
+}
+
+function sanitizePairedDevice(entry) {
+  if (!isRecord(entry) || !DEVICE_ID.test(entry.deviceId ?? "")
+    || !optionalBoundedString(entry.publicKey) || !optionalBoundedString(entry.platform, 64)
+    || !optionalBoundedString(entry.deviceFamily, 64) || !optionalBoundedString(entry.clientId, 64)
+    || !optionalBoundedString(entry.clientMode, 64)
+    || (entry.role !== undefined && !DEVICE_ROLE.test(entry.role))
+    || (entry.roles !== undefined && !stringArray(entry.roles, 16))
+    || (entry.scopes !== undefined && !stringArray(entry.scopes, 64))
+    || !optionalTimestamp(entry.createdAtMs) || !optionalTimestamp(entry.approvedAtMs)
+    || !optionalTimestamp(entry.lastSeenAtMs) || !optionalBoundedString(entry.lastSeenReason, 64)
+    || (entry.tokens !== undefined && (!Array.isArray(entry.tokens) || entry.tokens.length > 16
+      || entry.tokens.some((token) => !isRecord(token)
+        || (token.role !== undefined && !DEVICE_ROLE.test(token.role))
+        || (token.scopes !== undefined && !stringArray(token.scopes, 64))
+        || !optionalTimestamp(token.createdAtMs) || !optionalTimestamp(token.rotatedAtMs))))) {
+    throw fail("invalid_devices_response", "Gateway returned an invalid paired-device entry");
+  }
+  return Object.freeze({
+    deviceId: entry.deviceId,
+    ...(entry.publicKey === undefined ? {} : { publicKey: entry.publicKey }),
+    ...(entry.platform === undefined ? {} : { platform: entry.platform }),
+    ...(entry.deviceFamily === undefined ? {} : { deviceFamily: entry.deviceFamily }),
+    ...(entry.clientId === undefined ? {} : { clientId: entry.clientId }),
+    ...(entry.clientMode === undefined ? {} : { clientMode: entry.clientMode }),
+    ...(entry.role === undefined ? {} : { role: entry.role }),
+    ...(entry.roles === undefined ? {} : { roles: Object.freeze([...entry.roles]) }),
+    ...(entry.scopes === undefined ? {} : { scopes: Object.freeze([...entry.scopes]) }),
+    ...(entry.createdAtMs === undefined ? {} : { createdAtMs: entry.createdAtMs }),
+    ...(entry.approvedAtMs === undefined ? {} : { approvedAtMs: entry.approvedAtMs }),
+    ...(entry.lastSeenAtMs === undefined ? {} : { lastSeenAtMs: entry.lastSeenAtMs }),
+    ...(entry.lastSeenReason === undefined ? {} : { lastSeenReason: entry.lastSeenReason }),
+    ...(entry.tokens === undefined ? {} : {
+      tokens: Object.freeze(entry.tokens.map((token) => Object.freeze({
+        ...(token.role === undefined ? {} : { role: token.role }),
+        ...(token.scopes === undefined ? {} : { scopes: Object.freeze([...token.scopes]) }),
+        ...(token.createdAtMs === undefined ? {} : { createdAtMs: token.createdAtMs }),
+        ...(token.rotatedAtMs === undefined ? {} : { rotatedAtMs: token.rotatedAtMs })
+      })))
+    })
+  });
+}
+
+// The trusted-loopback configuration never populates the pending list, so
+// its entry shape is bounded conservatively rather than asserted exactly.
+function sanitizePendingDevice(entry) {
+  if (!isRecord(entry)
+    || (entry.requestId !== undefined && !SAFE_REQUEST_ID.test(entry.requestId))
+    || (entry.deviceId !== undefined && !DEVICE_ID.test(entry.deviceId))
+    || (entry.role !== undefined && !DEVICE_ROLE.test(entry.role))
+    || (entry.scopes !== undefined && !stringArray(entry.scopes, 64))
+    || !optionalTimestamp(entry.requestedAtMs) || !optionalTimestamp(entry.expiresAtMs)) {
+    throw fail("invalid_devices_response", "Gateway returned an invalid pending-pairing entry");
+  }
+  return Object.freeze({
+    ...(entry.requestId === undefined ? {} : { requestId: entry.requestId }),
+    ...(entry.deviceId === undefined ? {} : { deviceId: entry.deviceId }),
+    ...(entry.role === undefined ? {} : { role: entry.role }),
+    ...(entry.scopes === undefined ? {} : { scopes: Object.freeze([...entry.scopes]) }),
+    ...(entry.requestedAtMs === undefined ? {} : { requestedAtMs: entry.requestedAtMs }),
+    ...(entry.expiresAtMs === undefined ? {} : { expiresAtMs: entry.expiresAtMs })
+  });
+}
+
+function assertDeviceId(value) {
+  if (typeof value !== "string" || !DEVICE_ID.test(value)) {
+    throw new TypeError("device id is invalid");
+  }
+  return value;
+}
+
+function assertDeviceRole(value) {
+  if (typeof value !== "string" || !DEVICE_ROLE.test(value)) {
+    throw new TypeError("device role is invalid");
+  }
+  return value;
+}
+
 function assertArtifact(artifact) {
   const expected = OPENCLAW_GATEWAY_CONTRACT.artifact;
   if (!artifact || artifact.package !== expected.package || artifact.version !== expected.version
@@ -197,7 +284,7 @@ export function resolveGatewayWebSocketConnection(connection, browserOrigin) {
   return Object.freeze({ url: portal.href, origin, token: connection.auth.token });
 }
 
-function pairingFrom(error, signedDeviceId) {
+function pairingFrom(error, signedDeviceId, requestedScopes) {
   const details = isRecord(error?.details) ? error.details : {};
   const detailCode = typeof details.code === "string" ? details.code : "";
   const pairingRequired = error?.code === "NOT_PAIRED" || detailCode === "PAIRING_REQUIRED";
@@ -213,11 +300,11 @@ function pairingFrom(error, signedDeviceId) {
     ...(deviceId && DEVICE_ID.test(deviceId) ? { deviceId } : {}),
     reason,
     role: OPENCLAW_GATEWAY_CONTRACT.profile.role,
-    scopes: OPENCLAW_GATEWAY_CONTRACT.profile.scopes
+    scopes: requestedScopes
   });
 }
 
-function parseHello(payload, artifactVersion) {
+function parseHello(payload, artifactVersion, requiredScopes) {
   // A well-formed hello from a Gateway running another OpenClaw version gets
   // its own code: the generated client is version-locked by design, and
   // remote-mode hosts need to tell "wrong version" from "broken contract".
@@ -239,7 +326,6 @@ function parseHello(payload, artifactVersion) {
     || payload.policy.tickIntervalMs < 1) {
     throw fail("invalid_hello", "Gateway returned an invalid hello-ok contract");
   }
-  const requiredScopes = OPENCLAW_GATEWAY_CONTRACT.profile.scopes;
   if (!requiredScopes.every((scope) => payload.auth.scopes.includes(scope))) {
     throw fail("scope_mismatch", "Gateway did not grant the requested operator scopes");
   }
@@ -286,11 +372,24 @@ export function createOpenClawGatewayClient({
   createWebSocket = (url) => new WebSocket(url),
   requestIdFactory = () => globalThis.crypto.randomUUID(),
   timeoutMs = OPENCLAW_GATEWAY_CONTRACT.limits.handshakeTimeoutMs,
+  deviceManagement = false,
   onAudit,
   onGap,
   now = Date.now
 }) {
   const verifiedArtifact = assertArtifact(artifact);
+  if (typeof deviceManagement !== "boolean") {
+    throw new TypeError("Gateway device-management flag is invalid");
+  }
+  // Explicit opt-in widens the surface: the extra operator.pairing scope and
+  // the fixed device-management method list come from the generated contract,
+  // never from the caller.
+  const requestedScopes = Object.freeze(deviceManagement
+    ? [...OPENCLAW_GATEWAY_CONTRACT.profile.scopes, OPENCLAW_GATEWAY_CONTRACT.pairing.scope]
+    : [...OPENCLAW_GATEWAY_CONTRACT.profile.scopes]);
+  const allowedMethods = Object.freeze(deviceManagement
+    ? [...OPENCLAW_GATEWAY_CONTRACT.rpc.methods, ...OPENCLAW_GATEWAY_CONTRACT.pairing.methods]
+    : [...OPENCLAW_GATEWAY_CONTRACT.rpc.methods]);
   if (typeof getConnection !== "function") throw new TypeError("Gateway connection supplier is required");
   const verifiedIdentity = assertIdentity(identity);
   const verifiedDeviceTokenVault = assertDeviceTokenVault(
@@ -409,7 +508,7 @@ export function createOpenClawGatewayClient({
     if (state !== "ready" || !socket || !hello) {
       return Promise.reject(fail("client_not_ready", "Gateway client is not ready"));
     }
-    if (!OPENCLAW_GATEWAY_CONTRACT.rpc.methods.includes(method)) {
+    if (!allowedMethods.includes(method)) {
       return Promise.reject(fail("method_not_allowed", "Gateway RPC method is outside the generated contract"));
     }
     if (!hello.features.methods.includes(method)) {
@@ -647,7 +746,7 @@ export function createOpenClawGatewayClient({
               clientId: profile.clientId,
               clientMode: profile.clientMode,
               role: profile.role,
-              scopes: profile.scopes,
+              scopes: requestedScopes,
               token: authenticationToken,
               nonce,
               platform: profile.platform,
@@ -675,7 +774,7 @@ export function createOpenClawGatewayClient({
                   mode: profile.clientMode
                 },
                 role: profile.role,
-                scopes: profile.scopes,
+                scopes: requestedScopes,
                 caps: profile.caps,
                 auth: usedStoredDeviceToken
                   ? { deviceToken: authenticationToken }
@@ -720,7 +819,7 @@ export function createOpenClawGatewayClient({
                 return;
               }
             }
-            const pairing = pairingFrom(frame.error, signedDeviceId);
+            const pairing = pairingFrom(frame.error, signedDeviceId, requestedScopes);
             finishFailure(fail(
               pairing ? "pairing_required" : "connect_rejected",
               pairing ? "Gateway requires explicit device pairing approval" : "Gateway rejected the authenticated connect request",
@@ -734,7 +833,7 @@ export function createOpenClawGatewayClient({
             return;
           }
           let parsedHello;
-          try { parsedHello = parseHello(frame.payload, verifiedArtifact.version); }
+          try { parsedHello = parseHello(frame.payload, verifiedArtifact.version, requestedScopes); }
           catch (error) { finishFailure(error); return; }
           if (parsedHello.deviceToken !== undefined) {
             try {
@@ -900,6 +999,110 @@ export function createOpenClawGatewayClient({
     }
   });
 
+  function deviceRequestOptions(options, label) {
+    if (!deviceManagement) {
+      throw fail("device_management_disabled", "Gateway device management was not enabled for this client");
+    }
+    const value = assertObject(options, label, new Set(["signal", "requestTimeoutMs"]));
+    return {
+      signal: value.signal,
+      ...(value.requestTimeoutMs === undefined ? {} : { timeout: value.requestTimeoutMs })
+    };
+  }
+
+  async function listDevices(options = {}) {
+    const response = await request(
+      "device.pair.list",
+      {},
+      deviceRequestOptions(options, "devices.list options")
+    );
+    if (!isRecord(response) || !Array.isArray(response.pending) || response.pending.length > 256
+      || !Array.isArray(response.paired) || response.paired.length > 256) {
+      throw fail("invalid_devices_response", "Gateway returned an invalid device.pair.list payload");
+    }
+    return Object.freeze({
+      pending: Object.freeze(response.pending.map((entry) => sanitizePendingDevice(entry))),
+      paired: Object.freeze(response.paired.map((entry) => sanitizePairedDevice(entry)))
+    });
+  }
+
+  async function decidePairing(method, params, options, label) {
+    const value = assertObject(params, label, new Set(["requestId"]));
+    const requestId = assertRunId(value.requestId, `${label} request id`);
+    const response = await request(method, { requestId }, deviceRequestOptions(options, `${label} options`));
+    if (!isRecord(response)) {
+      throw fail("invalid_devices_response", `Gateway returned an invalid ${method} payload`);
+    }
+    return Object.freeze({
+      requestId,
+      ...(DEVICE_ID.test(response.deviceId ?? "") ? { deviceId: response.deviceId } : {})
+    });
+  }
+
+  async function removeDevice(params, options = {}) {
+    const value = assertObject(params, "devices.remove", new Set(["deviceId"]));
+    const deviceId = assertDeviceId(value.deviceId);
+    const response = await request(
+      "device.pair.remove",
+      { deviceId },
+      deviceRequestOptions(options, "devices.remove options")
+    );
+    if (!isRecord(response) || response.deviceId !== deviceId) {
+      throw fail("invalid_devices_response", "Gateway returned an invalid device.pair.remove payload");
+    }
+    return Object.freeze({ deviceId });
+  }
+
+  async function rotateDeviceToken(params, options = {}) {
+    const value = assertObject(params, "devices.rotateToken", new Set(["deviceId", "role"]));
+    const deviceId = assertDeviceId(value.deviceId);
+    const role = assertDeviceRole(value.role);
+    const response = await request(
+      "device.token.rotate",
+      { deviceId, role },
+      deviceRequestOptions(options, "devices.rotateToken options")
+    );
+    if (!isRecord(response) || response.deviceId !== deviceId || response.role !== role
+      || !stringArray(response.scopes, 64) || !Number.isSafeInteger(response.rotatedAtMs)
+      || response.rotatedAtMs < 0) {
+      throw fail("invalid_devices_response", "Gateway returned an invalid device.token.rotate payload");
+    }
+    return Object.freeze({
+      deviceId,
+      role,
+      scopes: Object.freeze([...response.scopes]),
+      rotatedAtMs: response.rotatedAtMs
+    });
+  }
+
+  async function revokeDeviceToken(params, options = {}) {
+    const value = assertObject(params, "devices.revokeToken", new Set(["deviceId", "role"]));
+    const deviceId = assertDeviceId(value.deviceId);
+    const role = assertDeviceRole(value.role);
+    const response = await request(
+      "device.token.revoke",
+      { deviceId, role },
+      deviceRequestOptions(options, "devices.revokeToken options")
+    );
+    if (!isRecord(response) || response.deviceId !== deviceId || response.role !== role
+      || !Number.isSafeInteger(response.revokedAtMs) || response.revokedAtMs < 0) {
+      throw fail("invalid_devices_response", "Gateway returned an invalid device.token.revoke payload");
+    }
+    return Object.freeze({ deviceId, role, revokedAtMs: response.revokedAtMs });
+  }
+
+  // Rotating or revoking the connected device's own token invalidates this
+  // very session on the Gateway side: the caller owns that decision, and
+  // recovery is the documented clear-vault + shared-token reconnect.
+  const devices = Object.freeze({
+    list: listDevices,
+    approve: (params, options = {}) => decidePairing("device.pair.approve", params, options, "devices.approve"),
+    reject: (params, options = {}) => decidePairing("device.pair.reject", params, options, "devices.reject"),
+    remove: removeDevice,
+    rotateToken: rotateDeviceToken,
+    revokeToken: revokeDeviceToken
+  });
+
   const deviceAuth = Object.freeze({
     async metadata() {
       const descriptor = await verifiedIdentity.descriptor();
@@ -926,9 +1129,11 @@ export function createOpenClawGatewayClient({
   return Object.freeze({
     schemaVersion: 1,
     contract: OPENCLAW_GATEWAY_CONTRACT,
+    deviceManagement,
     get state() { return state; },
     connect,
     chat,
+    devices,
     deviceAuth,
     close() {
       if (state === "closed") return false;

@@ -21,6 +21,17 @@ export interface OpenClawGatewayContract {
     methods: readonly ["chat.send", "chat.history", "chat.abort"];
     event: "chat";
   }>;
+  readonly pairing: Readonly<{
+    scope: "operator.pairing";
+    methods: readonly [
+      "device.pair.list",
+      "device.pair.approve",
+      "device.pair.reject",
+      "device.pair.remove",
+      "device.token.rotate",
+      "device.token.revoke"
+    ];
+  }>;
   readonly limits: Readonly<{
     preauthPayloadBytes: number;
     authenticatedPayloadBytes: number;

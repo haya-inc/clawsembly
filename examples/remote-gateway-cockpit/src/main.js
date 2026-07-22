@@ -16,6 +16,10 @@ const AUDIT_LIMIT = 200;
 const query = (selector) => document.querySelector(selector);
 const urlInput = query("#gateway-url");
 const tokenInput = query("#gateway-token");
+const deviceManagementInput = query("#device-management");
+const devicesPanel = query("[data-devices-panel]");
+const devicesList = query("[data-devices-list]");
+const devicesRefreshButton = query("#devices-refresh");
 const connectButton = query("#connect");
 const disconnectButton = query("#disconnect");
 const clearTokenButton = query("#clear-device-token");
@@ -110,6 +114,111 @@ function renderPairing(pairing) {
     `${pairing.reason} — requesting ${pairing.role} with ${pairing.scopes.join(", ")}`;
 }
 
+function deviceActionButton(label, handler) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.addEventListener("click", () => {
+    button.disabled = true;
+    void handler().finally(() => { button.disabled = false; });
+  });
+  return button;
+}
+
+async function refreshDevices() {
+  if (!client?.deviceManagement) return;
+  let listing;
+  try {
+    listing = await client.devices.list();
+  } catch (error) {
+    appendAudit({ action: "cockpit-devices-list", outcome: "failed", reason: error?.code ?? "unknown" });
+    return;
+  }
+  devicesList.replaceChildren();
+  const renderEntry = (title, lines, actions) => {
+    const article = document.createElement("article");
+    const head = document.createElement("div");
+    head.className = "chat-run-state";
+    head.textContent = title;
+    const body = document.createElement("pre");
+    body.textContent = lines.join("\n");
+    article.append(head, body, ...actions);
+    devicesList.append(article);
+  };
+  for (const pendingEntry of listing.pending) {
+    const requestId = pendingEntry.requestId;
+    renderEntry(
+      `pending pairing ${requestId ?? "(no request id)"}`,
+      [
+        `device: ${pendingEntry.deviceId ?? "?"}`,
+        `role: ${pendingEntry.role ?? "?"} scopes: ${(pendingEntry.scopes ?? []).join(", ")}`
+      ],
+      requestId
+        ? [
+          deviceActionButton("Approve", async () => {
+            try {
+              await client.devices.approve({ requestId });
+              appendAudit({ action: "cockpit-devices-approve", outcome: "succeeded" });
+            } catch (error) {
+              appendAudit({ action: "cockpit-devices-approve", outcome: "failed", reason: error?.code ?? "unknown" });
+            }
+            await refreshDevices();
+          }),
+          deviceActionButton("Reject", async () => {
+            try {
+              await client.devices.reject({ requestId });
+              appendAudit({ action: "cockpit-devices-reject", outcome: "succeeded" });
+            } catch (error) {
+              appendAudit({ action: "cockpit-devices-reject", outcome: "failed", reason: error?.code ?? "unknown" });
+            }
+            await refreshDevices();
+          })
+        ]
+        : []
+    );
+  }
+  for (const device of listing.paired) {
+    const role = device.role ?? "operator";
+    renderEntry(
+      `paired ${device.deviceId.slice(0, 12)}…${device.deviceId.slice(-8)}`,
+      [
+        `client: ${device.clientId ?? "?"} (${device.clientMode ?? "?"}) on ${device.platform ?? "?"}`,
+        `role: ${role} scopes: ${(device.scopes ?? []).join(", ")}`,
+        `last seen: ${device.lastSeenAtMs ? new Date(device.lastSeenAtMs).toISOString() : "?"} (${device.lastSeenReason ?? "?"})`
+      ],
+      [
+        deviceActionButton("Rotate token", async () => {
+          try {
+            const rotated = await client.devices.rotateToken({ deviceId: device.deviceId, role });
+            appendAudit({ action: "cockpit-devices-rotate", outcome: "succeeded", rotatedAtMs: rotated.rotatedAtMs });
+          } catch (error) {
+            appendAudit({ action: "cockpit-devices-rotate", outcome: "failed", reason: error?.code ?? "unknown" });
+          }
+          await refreshDevices();
+        }),
+        deviceActionButton("Revoke token", async () => {
+          try {
+            const revoked = await client.devices.revokeToken({ deviceId: device.deviceId, role });
+            appendAudit({ action: "cockpit-devices-revoke", outcome: "succeeded", revokedAtMs: revoked.revokedAtMs });
+          } catch (error) {
+            appendAudit({ action: "cockpit-devices-revoke", outcome: "failed", reason: error?.code ?? "unknown" });
+          }
+          await refreshDevices();
+        }),
+        deviceActionButton("Remove pairing", async () => {
+          try {
+            await client.devices.remove({ deviceId: device.deviceId });
+            appendAudit({ action: "cockpit-devices-remove", outcome: "succeeded" });
+          } catch (error) {
+            appendAudit({ action: "cockpit-devices-remove", outcome: "failed", reason: error?.code ?? "unknown" });
+          }
+          await refreshDevices();
+        })
+      ]
+    );
+  }
+}
+
 async function refreshDeviceTokenStatus() {
   if (!client) return;
   try {
@@ -161,6 +270,7 @@ async function connect() {
   try {
     client = connectRemoteOpenClawGateway({
       connection: material,
+      deviceManagement: deviceManagementInput.checked,
       onAudit: appendAudit
     });
     unsubscribeChat = client.chat.onEvent(renderChatEvent);
@@ -168,7 +278,9 @@ async function connect() {
     renderHello(hello);
     setState(client.state);
     setConnectedControls(true);
+    devicesPanel.hidden = !client.deviceManagement;
     await refreshDeviceTokenStatus();
+    await refreshDevices();
   } catch (error) {
     setState(client?.state ?? "failed");
     setConnectedControls(false);
@@ -186,6 +298,8 @@ function disconnect() {
   setState(client?.state ?? "closed");
   setConnectedControls(false);
   connectButton.disabled = false;
+  devicesPanel.hidden = true;
+  devicesList.replaceChildren();
 }
 
 async function sendChat() {
@@ -252,6 +366,7 @@ async function clearDeviceToken() {
 
 connectButton.addEventListener("click", () => { void connect(); });
 disconnectButton.addEventListener("click", disconnect);
+devicesRefreshButton.addEventListener("click", () => { void refreshDevices(); });
 sendButton.addEventListener("click", () => { void sendChat(); });
 abortButton.addEventListener("click", () => { void abortChat(); });
 historyButton.addEventListener("click", () => { void loadHistory(); });

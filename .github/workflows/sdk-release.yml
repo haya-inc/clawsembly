@@ -71,8 +71,8 @@ jobs:
           fi
           expected='browser-host-page-diagnostics.tgz
           compatibility.json
-          haya-inc-clawsembly-0.1.0-alpha.5.tgz
-          haya-inc-clawsembly-0.1.0-alpha.5.tgz.sha256
+          haya-inc-clawsembly-0.1.0-alpha.6.tgz
+          haya-inc-clawsembly-0.1.0-alpha.6.tgz.sha256
           promotion-policy.json
           release-history.json
           release-notes.md
@@ -84,7 +84,7 @@ jobs:
             echo 'Release artifact file set is not exact.' >&2
             exit 1
           fi
-          (cd "$staging" && sha256sum --check haya-inc-clawsembly-0.1.0-alpha.5.tgz.sha256)
+          (cd "$staging" && sha256sum --check haya-inc-clawsembly-0.1.0-alpha.6.tgz.sha256)
       - name: Publish fail-closed source prerelease
         env:
           GH_TOKEN: ${{ github.token }}
@@ -98,8 +98,8 @@ jobs:
             --notes-file "$staging/release-notes.md" \
             "$staging/browser-host-page-diagnostics.tgz" \
             "$staging/compatibility.json" \
-            "$staging/haya-inc-clawsembly-0.1.0-alpha.5.tgz" \
-            "$staging/haya-inc-clawsembly-0.1.0-alpha.5.tgz.sha256" \
+            "$staging/haya-inc-clawsembly-0.1.0-alpha.6.tgz" \
+            "$staging/haya-inc-clawsembly-0.1.0-alpha.6.tgz.sha256" \
             "$staging/promotion-policy.json" \
             "$staging/release-history.json" \
             "$staging/sdk-release.json" \

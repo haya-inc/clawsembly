@@ -46,6 +46,11 @@
         <input id="gateway-url" name="gateway-url" placeholder="ws://127.0.0.1:18789" autocomplete="off" spellcheck="false" />
         <label for="gateway-token">Gateway token (kept in memory only)</label>
         <input id="gateway-token" name="gateway-token" type="password" autocomplete="off" />
+        <label for="device-management" style="display:inline-flex; gap:0.4rem; align-items:center; font-weight: 400;">
+          <input id="device-management" name="device-management" type="checkbox" style="width:auto;" />
+          Connect with device management (requests the extra
+          <code>operator.pairing</code> scope)
+        </label>
         <button id="connect" type="button">Connect</button>
         <button id="disconnect" type="button" disabled>Disconnect</button>
         <p class="cockpit-note">
@@ -93,6 +98,18 @@
           <button id="chat-abort" type="button" disabled>Abort</button>
           <button id="chat-history" type="button" disabled>Load history</button>
           <div class="chat-log" data-chat-log aria-live="polite"></div>
+        </section>
+
+        <section data-devices-panel hidden>
+          <h2>Devices</h2>
+          <p class="cockpit-note">
+            Owner surface behind the device-management opt-in. Rotating or
+            revoking <em>this browser's own</em> token ends the current
+            session on the Gateway side; recover by reconnecting with the
+            shared token.
+          </p>
+          <button id="devices-refresh" type="button">Refresh devices</button>
+          <div data-devices-list></div>
         </section>
 
         <section>
