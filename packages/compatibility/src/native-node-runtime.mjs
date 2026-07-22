@@ -133,9 +133,12 @@ export function createNativeNodeRuntime({ hostRoot, now = Date.now, onAudit } = 
         cwd: cwd === undefined ? hostRoot : mapGuestPath(assertGuestPath(cwd, "command cwd")),
         env: {
           ...process.env,
+          // Env values can carry /native guest paths (the Gateway recipe passes
+          // OPENCLAW_STATE_DIR=<stateRoot>); the child needs host paths there
+          // just as it does for args and cwd.
           ...Object.fromEntries(env.map((entry) => {
             const index = entry.indexOf("=");
-            return [entry.slice(0, index), entry.slice(index + 1)];
+            return [entry.slice(0, index), mapGuestPath(entry.slice(index + 1))];
           }))
         },
         stdio: ["ignore", "pipe", "pipe"],

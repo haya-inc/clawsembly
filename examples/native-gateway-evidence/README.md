@@ -23,6 +23,10 @@ and answers health checks on a plain Node host — nothing more.
   dependency tree of the upstream artifact in a temporary directory that is
   removed afterwards.
 - No BrowserPod key, no provider credential, no metered spend.
+- Known host side effect: the upstream artifact's install and `--dev` boot
+  also touch `~/.openclaw` (for example `workspace-dev`) in the invoking
+  user's home directory. CI runners are ephemeral; on a local run, remove it
+  afterwards if you do not use OpenClaw yourself.
 
 ## Run it
 
