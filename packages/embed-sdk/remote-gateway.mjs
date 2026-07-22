@@ -89,6 +89,7 @@ export function connectRemoteOpenClawGateway({
   deviceTokenVault,
   createWebSocket,
   timeoutMs,
+  deviceManagement,
   onAudit,
   onGap,
   now
@@ -112,6 +113,7 @@ export function connectRemoteOpenClawGateway({
     browserOrigin,
     ...(createWebSocket === undefined ? {} : { createWebSocket }),
     ...(timeoutMs === undefined ? {} : { timeoutMs }),
+    ...(deviceManagement === undefined ? {} : { deviceManagement }),
     ...(onAudit === undefined ? {} : { onAudit }),
     ...(onGap === undefined ? {} : { onGap }),
     ...(now === undefined ? {} : { now })

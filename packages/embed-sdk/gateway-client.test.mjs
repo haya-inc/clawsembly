@@ -106,7 +106,11 @@ function tokenVault(initial) {
   };
 }
 
-function helloFrame(id = "connect-1", methods = ["chat.send", "chat.history", "chat.abort"]) {
+function helloFrame(
+  id = "connect-1",
+  methods = ["chat.send", "chat.history", "chat.abort"],
+  scopes = ["operator.read", "operator.write"]
+) {
   return {
     type: "res",
     id,
@@ -119,7 +123,7 @@ function helloFrame(id = "connect-1", methods = ["chat.send", "chat.history", "c
       snapshot: { presence: [], health: {}, stateVersion: { presence: 1, health: 1 }, uptimeMs: 10 },
       auth: {
         role: "operator",
-        scopes: ["operator.read", "operator.write"],
+        scopes,
         deviceToken: "issued-device-token"
       },
       policy: { maxPayload: 25 * 1024 * 1024, maxBufferedBytes: 50 * 1024 * 1024, tickIntervalMs: 15_000 }
@@ -149,6 +153,7 @@ function fixture(options = {}) {
     browserOrigin: "https://embed.example",
     createWebSocket(url) { socket = new FakeWebSocket(url); return socket; },
     requestIdFactory: () => requestSequence++ === 0 ? "connect-1" : `request-${requestSequence}`,
+    ...(options.deviceManagement === undefined ? {} : { deviceManagement: options.deviceManagement }),
     onAudit: (event) => audit.push(event),
     onGap: (gap) => { gaps.push(gap); options.onGap?.(gap); },
     now: (() => { let value = 1_000; return () => value += 10; })()
@@ -156,15 +161,21 @@ function fixture(options = {}) {
   return { client, audit, gaps, vault, get socket() { return socket; } };
 }
 
-async function completeHandshake(current, methods) {
+async function completeHandshake(current, methods, scopes) {
   const connecting = current.client.connect();
   current.socket.emit("message", {
     data: JSON.stringify({ type: "event", event: "connect.challenge", payload: { nonce: "server-nonce", ts: 1 } })
   });
   await waitFor(() => current.socket.sent.length === 1);
   const request = JSON.parse(current.socket.sent[0]);
-  current.socket.emit("message", { data: JSON.stringify(helloFrame(request.id, methods)) });
+  current.socket.emit("message", { data: JSON.stringify(helloFrame(request.id, methods, scopes)) });
   return connecting;
+}
+
+function respondToLastRequest(current, payload) {
+  const frame = JSON.parse(current.socket.sent.at(-1));
+  current.socket.emit("message", { data: JSON.stringify({ type: "res", id: frame.id, ok: true, payload }) });
+  return frame;
 }
 
 test("derives a WSS portal only for an explicitly allowed browser origin", () => {
@@ -633,4 +644,115 @@ test("drops stale or rewound event sequences without delivery", async () => {
   await waitFor(() => delivered.length === 2);
   assert.deepEqual(delivered, [5, 6]);
   assert.equal(current.audit.filter((event) => event.reason === "stale_sequence").length, 2);
+});
+
+const DEVICE_METHODS = [
+  "chat.send", "chat.history", "chat.abort",
+  "device.pair.list", "device.pair.approve", "device.pair.reject",
+  "device.pair.remove", "device.token.rotate", "device.token.revoke"
+];
+const PAIRING_SCOPES = ["operator.read", "operator.write", "operator.pairing"];
+const SUBJECT_DEVICE = "f".repeat(64);
+
+test("device management stays a fail-closed opt-in", async () => {
+  const current = fixture();
+  await completeHandshake(current, DEVICE_METHODS, PAIRING_SCOPES);
+  assert.equal(current.client.deviceManagement, false);
+  await assert.rejects(current.client.devices.list(), (error) => error.code === "device_management_disabled");
+  await assert.rejects(
+    current.client.devices.rotateToken({ deviceId: SUBJECT_DEVICE, role: "operator" }),
+    (error) => error.code === "device_management_disabled"
+  );
+  current.client.close();
+});
+
+test("a device-management client requests the pairing scope and drives the device surface", async () => {
+  const current = fixture({ deviceManagement: true });
+  const connecting = current.client.connect();
+  current.socket.emit("message", {
+    data: JSON.stringify({ type: "event", event: "connect.challenge", payload: { nonce: "server-nonce", ts: 1 } })
+  });
+  await waitFor(() => current.socket.sent.length === 1);
+  const connect = JSON.parse(current.socket.sent[0]);
+  assert.deepEqual(connect.params.scopes, PAIRING_SCOPES);
+  assert.deepEqual(connect.params.device.nonce, "server-nonce");
+  current.socket.emit("message", { data: JSON.stringify(helloFrame(connect.id, DEVICE_METHODS, PAIRING_SCOPES)) });
+  await connecting;
+
+  const listing = current.client.devices.list();
+  await waitFor(() => current.socket.sent.length === 2);
+  const listRequest = respondToLastRequest(current, {
+    pending: [{ requestId: "pair-1", deviceId: SUBJECT_DEVICE, role: "operator", scopes: ["operator.read"] }],
+    paired: [{
+      deviceId: SUBJECT_DEVICE,
+      publicKey: "subject-public-key",
+      platform: "browser",
+      deviceFamily: "clawsembly",
+      clientId: "webchat-ui",
+      clientMode: "webchat",
+      role: "operator",
+      roles: ["operator"],
+      scopes: ["operator.read", "operator.write"],
+      createdAtMs: 1_784_000_000_000,
+      approvedAtMs: 1_784_000_000_000,
+      lastSeenAtMs: 1_784_000_000_500,
+      lastSeenReason: "connect",
+      tokens: [{ role: "operator", scopes: ["operator.read", "operator.write"], createdAtMs: 1_784_000_000_000, rotatedAtMs: 1_784_000_000_100 }],
+      unexpectedFreeText: "must be dropped"
+    }]
+  });
+  assert.equal(listRequest.method, "device.pair.list");
+  const devices = await listing;
+  assert.equal(devices.pending[0].requestId, "pair-1");
+  assert.equal(devices.paired[0].deviceId, SUBJECT_DEVICE);
+  assert.equal("unexpectedFreeText" in devices.paired[0], false);
+
+  const approving = current.client.devices.approve({ requestId: "pair-1" });
+  await waitFor(() => current.socket.sent.length === 3);
+  const approveRequest = respondToLastRequest(current, { deviceId: SUBJECT_DEVICE });
+  assert.equal(approveRequest.method, "device.pair.approve");
+  assert.deepEqual(approveRequest.params, { requestId: "pair-1" });
+  assert.deepEqual(await approving, { requestId: "pair-1", deviceId: SUBJECT_DEVICE });
+
+  const rotating = current.client.devices.rotateToken({ deviceId: SUBJECT_DEVICE, role: "operator" });
+  await waitFor(() => current.socket.sent.length === 4);
+  const rotateRequest = respondToLastRequest(current, {
+    deviceId: SUBJECT_DEVICE, role: "operator", scopes: ["operator.read", "operator.write"], rotatedAtMs: 1_784_000_001_000
+  });
+  assert.deepEqual(rotateRequest.params, { deviceId: SUBJECT_DEVICE, role: "operator" });
+  assert.equal((await rotating).rotatedAtMs, 1_784_000_001_000);
+
+  const revoking = current.client.devices.revokeToken({ deviceId: SUBJECT_DEVICE, role: "operator" });
+  await waitFor(() => current.socket.sent.length === 5);
+  respondToLastRequest(current, { deviceId: SUBJECT_DEVICE, role: "operator", revokedAtMs: 1_784_000_002_000 });
+  assert.equal((await revoking).revokedAtMs, 1_784_000_002_000);
+
+  const removing = current.client.devices.remove({ deviceId: SUBJECT_DEVICE });
+  await waitFor(() => current.socket.sent.length === 6);
+  const removeRequest = respondToLastRequest(current, { deviceId: SUBJECT_DEVICE });
+  assert.deepEqual(removeRequest.params, { deviceId: SUBJECT_DEVICE });
+  assert.deepEqual(await removing, { deviceId: SUBJECT_DEVICE });
+  current.client.close();
+});
+
+test("device responses that drift from the observed shapes fail closed", async () => {
+  const current = fixture({ deviceManagement: true });
+  await completeHandshake(current, DEVICE_METHODS, PAIRING_SCOPES);
+
+  const listing = current.client.devices.list();
+  await waitFor(() => current.socket.sent.length === 2);
+  respondToLastRequest(current, { pending: [], paired: [{ deviceId: "not-a-device-id" }] });
+  await assert.rejects(listing, (error) => error.code === "invalid_devices_response");
+
+  const rotating = current.client.devices.rotateToken({ deviceId: SUBJECT_DEVICE, role: "operator" });
+  await waitFor(() => current.socket.sent.length === 3);
+  respondToLastRequest(current, { deviceId: "e".repeat(64), role: "operator", scopes: ["s"], rotatedAtMs: 1 });
+  await assert.rejects(rotating, (error) => error.code === "invalid_devices_response");
+  current.client.close();
+});
+
+test("a hello withholding the pairing scope fails the device-management handshake", async () => {
+  const current = fixture({ deviceManagement: true });
+  const outcome = completeHandshake(current, DEVICE_METHODS, ["operator.read", "operator.write"]);
+  await assert.rejects(outcome, (error) => error.code === "scope_mismatch");
 });

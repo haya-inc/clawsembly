@@ -7,7 +7,7 @@ body:
     id: clawsembly-version
     attributes:
       label: Clawsembly release or commit
-      placeholder: v0.1.0-alpha.5
+      placeholder: v0.1.0-alpha.6
     validations:
       required: true
   - type: input

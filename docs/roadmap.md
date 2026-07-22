@@ -454,8 +454,17 @@ browser-local acceptance gates (ADR 0002).
    behind it) held all three promises — cleartext non-loopback refusal
    before any socket, wss handshake to ready with device-token
    issuance, and a reconnect authenticated by the vaulted device
-   token. Remaining: the phase-2 leftovers (remote approval, rotation,
-   revocation, recovery).
+   token. The phase-2 leftovers landed 2026-07-22 behind an explicit
+   `deviceManagement` opt-in: the generated contract carries the
+   `operator.pairing` scope and a fixed device-method list, the client
+   gains a bounded devices surface (pairing list/approve/reject, device
+   remove, token rotate/revoke) with responses sanitized to the real
+   stable Gateway's observed shapes, and revoked-token recovery is the
+   verified clear-vault plus shared-token reconnect. One honesty note
+   stands: a real pending pairing request has not been produced on the
+   stable Gateway (loopback shared-token connects are trusted without a
+   prompt), so the approve/reject happy path stays contract-test covered
+   until a Gateway configuration produces one.
 3. **Operator release intelligence** (`contributor`): the promotion policy,
    contract diffs, and dependency-risk scans translated into upgrade
    advisories; supporting trust infrastructure, not the product.
