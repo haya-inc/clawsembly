@@ -4,15 +4,39 @@ This host captures the first wrap deliverable of
 [ADR 0006](../../docs/decisions/0006-openclaw-specialist-refocus.md): it
 installs the exact pinned `openclaw` artifact on plain Node, boots the real
 Gateway on loopback, waits for the `[gateway] ready` line, probes
-`/healthz` and `/readyz` from the host, stops the process by signal, and
-writes one digest-bound record of the **`native-gateway` evidence class**.
+`/healthz` and `/readyz` from the host, runs the generated protocol client
+against the live Gateway, stops the process by signal, and writes one
+digest-bound record of the **`native-gateway` evidence class**
+(schema version 2).
+
+The protocol exercise drives the same generated embed-sdk client the
+browser embeds — unmodified — through its injectable seams: a
+challenge-signed protocol-4 handshake over loopback WebSocket, Gateway
+device-token issuance into the encrypted vault, one bounded `chat.send`
+round trip observed to a terminal event, `chat.abort`, `chat.history`, and
+a second connect that must authenticate with the vaulted device token.
+Two reality notes the capture depends on:
+
+- the stable Gateway admits webchat connects only from origins in its
+  Control-UI allowlist, so the socket factory presents the Gateway host's
+  own origin (the allowlist's built-in member);
+- the lane carries no model-provider credential by design, so the chat run
+  is expected to terminate in an `error` event at the provider boundary —
+  that terminal state is the recorded full-protocol outcome, not a
+  failure. The record keeps statuses, enums, counts, and durations only.
+
+Device pairing review is not part of this capture: a loopback shared-token
+connect is trusted by the stable Gateway without a pairing prompt, so the
+client's pairing-review surface stays covered by its contract tests until
+a remote-mode configuration can trigger it for real.
 
 Honesty boundary: this class is deliberately disjoint from BrowserPod
 runtime evidence. The record names `runtime: "native-node"` with
 `browserLocal: false`, is admitted only by `assertNativeGatewayEvidence`,
 and never enters the compatibility reports, the promotion policy, or the
-verified-launch gates. A passing native capture proves the artifact boots
-and answers health checks on a plain Node host — nothing more.
+verified-launch gates. A passing native capture proves the artifact boots,
+answers health checks, and serves the generated client's protocol surface
+on a plain Node host — nothing more.
 
 ## Requirements
 

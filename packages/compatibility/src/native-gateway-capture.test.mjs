@@ -23,6 +23,32 @@ const ARTIFACT = Object.freeze({
   integrity: `sha512-${"A".repeat(86)}==`
 });
 const TOKEN = "native-test-token-0123456789";
+const PROTOCOL_SECTION = Object.freeze({
+  transport: "loopback-ws",
+  originPolicy: "control-ui-host",
+  handshake: {
+    durationMs: 120,
+    protocol: 4,
+    methodCount: 218,
+    eventCount: 30,
+    contractMethodsAdvertised: true,
+    requiredScopesGranted: true,
+    scopeCount: 2,
+    deviceTokenIssued: true,
+    authenticatedWith: "shared-token"
+  },
+  chat: {
+    sendStatus: "started",
+    terminalState: "error",
+    eventCount: 2,
+    errorMessagePresent: true,
+    providerCredential: false,
+    durationMs: 8_000
+  },
+  abort: { ok: true, aborted: false, requestedRunIncluded: false, runIdCount: 0, durationMs: 50 },
+  history: { messageCount: 2, durationMs: 40 },
+  reconnect: { durationMs: 300, authenticatedWith: "device-token", deviceTokenIssued: true }
+});
 
 const FAKE_GATEWAY_SOURCE = `
 import { createServer } from "node:http";
@@ -91,6 +117,7 @@ test("boots the staged Gateway, probes health, and stops it by signal", async (t
     gateway: { port, readyDurationMs: gateway.readyDurationMs },
     health,
     termination,
+    protocol: PROTOCOL_SECTION,
     capturedAt: "2026-07-22T00:00:00.000Z"
   });
   assert.equal(evidence.class, NATIVE_GATEWAY_EVIDENCE_CLASS);
@@ -152,6 +179,7 @@ test("evidence assertion rejects tampering, class confusion, and artifact drift"
     gateway: { port: 18_789, readyDurationMs: 10 },
     health: { healthz: { status: 200 }, readyz: { status: 200 } },
     termination: { mode: "signal", graceful: true },
+    protocol: PROTOCOL_SECTION,
     capturedAt: "2026-07-22T00:00:00.000Z"
   });
   assertNativeGatewayEvidence(evidence, { artifact: ARTIFACT });
