@@ -28,17 +28,21 @@ design does not become stale when OpenClaw changes.
 | [ADR 0001](decisions/0001-compatibility-lab-first.md) | Why compatibility evidence ships before a broad product UI |
 | [ADR 0002](decisions/0002-commercial-browser-runtime.md) | Commercial browser-local runtime decision and acceptance gates |
 | [ADR 0003](decisions/0003-verified-openclaw-embedding.md) | BrowserPod selection and verified capability-safe embedding position |
-| [ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md) | Upstream-portable embedding boundary; OpenClaw repositioned as the first bound upstream |
+| [ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md) | Upstream-portable embedding boundary; OpenClaw repositioned as the first bound upstream (amended by ADR 0006) |
 | [ADR 0005](decisions/0005-reference-agent-growth-paths.md) | The reference agent demonstrates both growth paths: internal exact-identity growth and external capability extension |
+| [ADR 0006](decisions/0006-openclaw-specialist-refocus.md) | OpenClaw-specialist refocus: wrap upstream OpenClaw with operator conveniences; other upstreams out of scope for this repository |
 
 ## Current position
 
-Clawsembly is an evidence-gated embedding layer that runs upstream coding
-agents browser-locally, behind a host boundary the embedding application
-controls. OpenClaw is the first supported upstream — not the project identity —
-and Clawsembly is neither a new implementation of OpenClaw nor a generic
-BrowserPod wrapper. The embedder-controlled host boundary — capability broker,
-embed manifest, permission prompts, and payload-free audit — plus browser-local
-execution are the durable product surfaces; the compatibility-evidence pipeline
-is supporting trust infrastructure ([ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md)).
-Today only OpenClaw is bound and all published reports are status `probing`.
+Clawsembly is an evidence-gated embedding layer specialized in OpenClaw: it
+runs the upstream package browser-locally, behind a host boundary the
+embedding application controls, and wraps it with the conveniences its
+operators and embedders need
+([ADR 0006](decisions/0006-openclaw-specialist-refocus.md)). Clawsembly is
+neither a new implementation of OpenClaw nor a generic BrowserPod wrapper.
+The embedder-controlled host boundary — capability broker, embed manifest,
+permission prompts, and payload-free audit — plus browser-local execution are
+the durable product surfaces; the boundary stays upstream-portable as an
+engineering property ([ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md)),
+and the compatibility-evidence pipeline is supporting trust infrastructure.
+Today all published reports are status `probing`.

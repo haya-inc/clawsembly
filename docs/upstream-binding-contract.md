@@ -1,6 +1,11 @@
 # Upstream binding contract
 
 Status: first written 2026-07-13, per [ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md).
+Refocused 2026-07-22 by
+[ADR 0006](decisions/0006-openclaw-specialist-refocus.md): this contract and
+the hello-agent reference binding are retained as the test infrastructure
+that keeps the embedding core upstream-portable; no second real binding is
+planned in this repository.
 
 Clawsembly separates an upstream-agnostic embedding core from an upstream
 binding. This document states what any binding must supply before its upstream

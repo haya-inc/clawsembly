@@ -1,9 +1,11 @@
 # Product and adoption strategy
 
-Clawsembly is an evidence-gated embedding layer that runs upstream coding
-agents browser-locally, behind a host boundary the embedding application
-controls. OpenClaw is the first supported upstream (see
-[ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md)).
+Clawsembly is an evidence-gated embedding layer specialized in OpenClaw: it
+runs the upstream package browser-locally, behind a host boundary the
+embedding application controls, and wraps it with the conveniences its
+operators and embedders need (see
+[ADR 0004](decisions/0004-upstream-portable-embedding-boundary.md) and
+[ADR 0006](decisions/0006-openclaw-specialist-refocus.md)).
 
 ## Initial user
 
