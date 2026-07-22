@@ -55,6 +55,7 @@
     "compat:inspect": "node packages/compatibility/src/inspect.mjs",
     "compat:track": "node packages/compatibility/src/track-releases.mjs",
     "compat:validate": "node packages/compatibility/src/validate-artifacts.mjs",
+    "native:capture": "node examples/native-gateway-evidence/capture.mjs",
     "runtime:validate": "node scripts/validate-active-runtime.mjs",
     "workflows:validate": "node scripts/validate-workflows.mjs",
     "docs:validate": "node scripts/validate-doc-refs.mjs",
