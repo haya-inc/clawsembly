@@ -61,6 +61,14 @@ npm run native:capture
 Running through the npm script matters on Windows: the runtime resolves npm
 through `npm_execpath` and fails closed when it cannot.
 
+The first schema-2 record — captured 2026-07-22 on a plain Node 24 GitHub
+runner by
+[run 29895087743](https://github.com/haya-inc/clawsembly/actions/runs/29895087743)
+— is checked in at
+`packages/compatibility/evidence/native-gateway-openclaw-2026.7.1-2.json`
+(CI artifacts expire; the committed copy is the durable one) and is
+re-admitted through `assertNativeGatewayEvidence` on every test run.
+
 Outputs land under `test-results/native-gateway-evidence/`:
 
 - `native-gateway-openclaw-<version>.json` — the digest-bound evidence

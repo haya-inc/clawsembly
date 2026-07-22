@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 2,
+  "class": "native-gateway",
+  "target": {
+    "package": "openclaw",
+    "version": "2026.7.1-2",
+    "integrity": "sha512-ycF3yPcbjN6bUPeaUx6Mh6vze1hQWoD3CT/wWcmD7a8xaHHHRUaAlaq+lFxMHf1ssEgODVAwjlzYqp2twkYZ7g==",
+    "runtime": "native-node",
+    "browserLocal": false
+  },
+  "host": {
+    "nodeVersion": "24.18.0",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "engines": {
+    "declared": ">=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0",
+    "satisfiedBy": "24.18.0"
+  },
+  "install": {
+    "durationMs": 14276,
+    "outputTruncated": false,
+    "integrityMatched": true
+  },
+  "gateway": {
+    "port": 18789,
+    "bind": "loopback",
+    "auth": "token",
+    "readyLine": "[gateway] ready",
+    "readyDurationMs": 5958,
+    "healthz": {
+      "status": 200
+    },
+    "readyz": {
+      "status": 200
+    },
+    "termination": {
+      "mode": "signal",
+      "graceful": true
+    }
+  },
+  "protocol": {
+    "transport": "loopback-ws",
+    "originPolicy": "control-ui-host",
+    "handshake": {
+      "durationMs": 85,
+      "protocol": 4,
+      "methodCount": 218,
+      "eventCount": 30,
+      "contractMethodsAdvertised": true,
+      "requiredScopesGranted": true,
+      "scopeCount": 2,
+      "deviceTokenIssued": true,
+      "authenticatedWith": "shared-token"
+    },
+    "chat": {
+      "sendStatus": "started",
+      "terminalState": "error",
+      "eventCount": 1,
+      "errorMessagePresent": true,
+      "providerCredential": false,
+      "durationMs": 1064
+    },
+    "abort": {
+      "ok": true,
+      "aborted": true,
+      "requestedRunIncluded": true,
+      "runIdCount": 1,
+      "durationMs": 13
+    },
+    "history": {
+      "messageCount": 0,
+      "durationMs": 16
+    },
+    "reconnect": {
+      "durationMs": 64,
+      "authenticatedWith": "device-token",
+      "deviceTokenIssued": true
+    }
+  },
+  "capturedAt": "2026-07-22T05:54:32.479Z",
+  "digest": "82c8443a366134946ddab231fc524b50a4ba116bb55f2f058f84917ee2d28429"
+}
