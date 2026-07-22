@@ -447,9 +447,15 @@ browser-local acceptance gates (ADR 0002).
    required off-loopback, dedicated `server_version_mismatch` refusal)
    and the cockpit example; the native evidence lane drives the same
    remote connection form against the real stable Gateway on every
-   capture. Remaining: an owner-verified cockpit session against a
-   real remote Gateway, plus the phase-2 leftovers (remote approval,
-   rotation, revocation, recovery).
+   capture. Remote-session verification completed 2026-07-22: a
+   driven-browser cockpit session over TLS to a non-loopback endpoint
+   (a TLS-terminating proxy on the machine's LAN address, self-signed
+   certificate accepted by the driven browser, real native Gateway
+   behind it) held all three promises — cleartext non-loopback refusal
+   before any socket, wss handshake to ready with device-token
+   issuance, and a reconnect authenticated by the vaulted device
+   token. Remaining: the phase-2 leftovers (remote approval, rotation,
+   revocation, recovery).
 3. **Operator release intelligence** (`contributor`): the promotion policy,
    contract diffs, and dependency-risk scans translated into upgrade
    advisories; supporting trust infrastructure, not the product.
