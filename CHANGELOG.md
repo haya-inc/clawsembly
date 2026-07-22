@@ -7,7 +7,19 @@ The project does not yet promise semantic-version compatibility.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- an explicit `deviceManagement` opt-in on the Gateway client and the
+  remote-gateway subpath completes the remote-mode leftovers: the connect
+  requests the generated contract's extra `operator.pairing` scope and
+  unlocks a bounded `devices` surface — `list`, pairing `approve`/`reject`,
+  `remove`, `rotateToken`, `revokeToken` — with fail-closed response
+  sanitization matched to the real stable Gateway's observed shapes.
+  Rotating or revoking the connected device's own token ends that session
+  upstream; recovery is the existing clear-vault plus shared-token
+  reconnect, which the Gateway confirms with `AUTH_DEVICE_TOKEN_MISMATCH`
+  (verified against the real artifact). The cockpit example gains the
+  matching owner panel behind the same opt-in.
 
 ## [0.1.0-alpha.5] - 2026-07-22
 

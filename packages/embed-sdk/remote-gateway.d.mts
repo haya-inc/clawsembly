@@ -32,6 +32,7 @@ export function connectRemoteOpenClawGateway(options: {
   deviceTokenVault?: GatewayDeviceTokenVault;
   createWebSocket?: (url: string) => WebSocket;
   timeoutMs?: number;
+  deviceManagement?: boolean;
   onAudit?: (event: Readonly<Record<string, unknown>>) => void;
   onGap?: (gap: Readonly<{ expected: number; received: number }>) => void;
   now?: () => number;

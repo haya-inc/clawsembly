@@ -81,7 +81,11 @@ same generated, version-locked client — persistent browser device identity,
 encrypted device-token vault, bounded chat only — against a Gateway the
 user already operates. It is interoperability, runs nothing
 browser-locally, and never satisfies the browser-local acceptance gates.
-There is no generic Gateway RPC export.
+An explicit `deviceManagement` opt-in additionally requests the generated
+contract's `operator.pairing` scope and unlocks a bounded owner surface
+for pairing review and device-token rotation, revocation, and removal —
+the scope and the method list come from the generated contract, never
+from the caller. There is no generic Gateway RPC export.
 
 ## Local artifact verification
 

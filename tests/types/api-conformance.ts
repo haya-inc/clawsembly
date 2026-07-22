@@ -70,8 +70,13 @@ const remoteMaterial: Readonly<RemoteGatewayConnectionMaterial> = createRemoteGa
 void resolveGatewayWebSocketConnection(remoteMaterial, "https://cockpit.example");
 const remoteClient: Readonly<OpenClawGatewayClient> = connectRemoteOpenClawGateway({
   connection: remoteMaterial,
-  browserOrigin: "https://cockpit.example"
+  browserOrigin: "https://cockpit.example",
+  deviceManagement: true
 });
+const devicesListing: ReturnType<typeof remoteClient.devices.list> = remoteClient.devices.list();
+const rotation = remoteClient.devices.rotateToken({ deviceId: "a".repeat(64), role: "operator" });
+void devicesListing;
+void rotation;
 void remoteClient;
 
 // Broker construction and its request surface stay exercisable.

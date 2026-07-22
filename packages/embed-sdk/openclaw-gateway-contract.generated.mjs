@@ -24,6 +24,17 @@ export const OPENCLAW_GATEWAY_CONTRACT = Object.freeze({
     methods: Object.freeze(["chat.send", "chat.history", "chat.abort"]),
     event: "chat"
   }),
+  pairing: Object.freeze({
+    scope: "operator.pairing",
+    methods: Object.freeze([
+      "device.pair.list",
+      "device.pair.approve",
+      "device.pair.reject",
+      "device.pair.remove",
+      "device.token.rotate",
+      "device.token.revoke"
+    ])
+  }),
   limits: Object.freeze({
     preauthPayloadBytes: 64 * 1024,
     authenticatedPayloadBytes: 4 * 1024 * 1024,

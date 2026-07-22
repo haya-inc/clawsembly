@@ -66,12 +66,73 @@ export type GatewayConnectionMaterial =
   | BrowserPodPortalConnectionMaterial
   | RemoteGatewayConnectionMaterial;
 
+export interface GatewayPairedDevice {
+  readonly deviceId: string;
+  readonly publicKey?: string;
+  readonly platform?: string;
+  readonly deviceFamily?: string;
+  readonly clientId?: string;
+  readonly clientMode?: string;
+  readonly role?: string;
+  readonly roles?: readonly string[];
+  readonly scopes?: readonly string[];
+  readonly createdAtMs?: number;
+  readonly approvedAtMs?: number;
+  readonly lastSeenAtMs?: number;
+  readonly lastSeenReason?: string;
+  readonly tokens?: readonly Readonly<{
+    role?: string;
+    scopes?: readonly string[];
+    createdAtMs?: number;
+    rotatedAtMs?: number;
+  }>[];
+}
+
+export interface GatewayPendingPairing {
+  readonly requestId?: string;
+  readonly deviceId?: string;
+  readonly role?: string;
+  readonly scopes?: readonly string[];
+  readonly requestedAtMs?: number;
+  readonly expiresAtMs?: number;
+}
+
+/**
+ * Bounded device-management surface behind the explicit `deviceManagement`
+ * opt-in: the extra `operator.pairing` scope and the fixed method list come
+ * from the generated contract, never from the caller. Rotating or revoking
+ * the connected device's own token invalidates the running session; recovery
+ * is the documented clear-vault plus shared-token reconnect.
+ */
+export interface OpenClawGatewayDevicesClient {
+  list(options?: GatewayRpcOptions): Promise<Readonly<{
+    pending: readonly Readonly<GatewayPendingPairing>[];
+    paired: readonly Readonly<GatewayPairedDevice>[];
+  }>>;
+  approve(params: { requestId: string }, options?: GatewayRpcOptions): Promise<Readonly<{ requestId: string; deviceId?: string }>>;
+  reject(params: { requestId: string }, options?: GatewayRpcOptions): Promise<Readonly<{ requestId: string; deviceId?: string }>>;
+  remove(params: { deviceId: string }, options?: GatewayRpcOptions): Promise<Readonly<{ deviceId: string }>>;
+  rotateToken(params: { deviceId: string; role: string }, options?: GatewayRpcOptions): Promise<Readonly<{
+    deviceId: string;
+    role: string;
+    scopes: readonly string[];
+    rotatedAtMs: number;
+  }>>;
+  revokeToken(params: { deviceId: string; role: string }, options?: GatewayRpcOptions): Promise<Readonly<{
+    deviceId: string;
+    role: string;
+    revokedAtMs: number;
+  }>>;
+}
+
 export interface OpenClawGatewayClient {
   readonly schemaVersion: 1;
   readonly contract: Readonly<OpenClawGatewayContract>;
+  readonly deviceManagement: boolean;
   readonly state: "idle" | "connecting" | "ready" | "disconnected" | "failed" | "closed";
   connect(options?: { signal?: AbortSignal }): Promise<Readonly<OpenClawGatewayHello>>;
   readonly chat: Readonly<OpenClawGatewayChatClient>;
+  readonly devices: Readonly<OpenClawGatewayDevicesClient>;
   readonly deviceAuth: Readonly<{
     metadata(): Promise<Readonly<GatewayDeviceTokenMetadata> | undefined>;
     clear(): Promise<boolean>;
@@ -141,6 +202,7 @@ export function createOpenClawGatewayClient(options: {
   createWebSocket?: (url: string) => WebSocket;
   requestIdFactory?: () => string;
   timeoutMs?: number;
+  deviceManagement?: boolean;
   onAudit?: (event: Readonly<Record<string, unknown>>) => void;
   onGap?: (gap: Readonly<{ expected: number; received: number }>) => void;
   now?: () => number;

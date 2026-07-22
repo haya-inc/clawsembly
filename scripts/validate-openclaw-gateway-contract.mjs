@@ -19,6 +19,15 @@ assert.equal(contract.profile.clientMode, "webchat");
 assert.deepEqual(contract.profile.scopes, ["operator.read", "operator.write"]);
 assert.deepEqual(contract.rpc.methods, ["chat.send", "chat.history", "chat.abort"]);
 assert.equal(contract.rpc.event, "chat");
+assert.equal(contract.pairing.scope, "operator.pairing");
+assert.deepEqual(contract.pairing.methods, [
+  "device.pair.list",
+  "device.pair.approve",
+  "device.pair.reject",
+  "device.pair.remove",
+  "device.token.rotate",
+  "device.token.revoke"
+]);
 // The legacy plugin-sdk layout pins six fixed declaration files; the
 // gateway-protocol distribution pins the entry pair plus per-release hashed
 // chunks, so the count is layout-dependent but never small.
