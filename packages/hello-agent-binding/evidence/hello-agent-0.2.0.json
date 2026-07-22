@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-21T10:13:47.424Z",
+  "target": {
+    "runtime": "browserpod",
+    "browserLocal": true,
+    "runtimeVersion": "2.12.1",
+    "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36"
+  },
+  "artifact": {
+    "package": "clawsembly-hello-agent",
+    "version": "0.2.0",
+    "integrity": "sha512-YwR1wMa7nX9uc2IPs4fbfEzcwasUg62Y6KHvAEcSdtBTA0Gmn9QTP3CL9CBDBoc/bTFAmhocP5ICcDURzS0oHQ=="
+  },
+  "install": {
+    "result": "pass",
+    "integrityMatched": true,
+    "fileCount": 3,
+    "durationMs": 3
+  },
+  "process": {
+    "result": "pass",
+    "readiness": {
+      "output": true,
+      "readyFile": true,
+      "protocol": "clawsembly-hello/2",
+      "capabilityTransport": "filesystem-mailbox"
+    },
+    "termination": {
+      "mode": "guest-supervisor",
+      "result": "pass"
+    }
+  },
+  "protocol": {
+    "methods": [
+      "hello.say",
+      "chat.send",
+      "chat.history",
+      "chat.abort"
+    ],
+    "helloRoundTrips": 1,
+    "chatRoundTrips": 4
+  },
+  "capability": {
+    "capability": "chat.complete",
+    "scope": "provider:reference",
+    "denied": 2,
+    "allowed": 1
+  }
+}

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T03:18:55.401Z",
+  "generatedAt": "2026-07-21T12:47:47.515Z",
   "package": "openclaw",
   "decision": "hold",
   "baseline": {
@@ -56,7 +56,7 @@
   },
   "rollback": {
     "channel": "previous",
-    "version": "2026.6.11",
+    "version": "2026.6.33",
     "eligible": false,
     "reasons": [
       "status-not-supported",

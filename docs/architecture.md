@@ -157,7 +157,8 @@ must stay behind a contract covering process execution, terminal I/O, file
 operations, local service discovery, persistence, cancellation, and teardown.
 
 The first BrowserPod preflight is intentionally dependency-injected. It checks
-the exact Node 22.19+ baseline, `node:crypto`, and `node:sqlite` without loading
+the report-declared Node baseline (the artifact's exact `>=` `nodeEngine`
+form), `node:crypto`, and `node:sqlite` without loading
 proprietary runtime code or transmitting a metered API key until the caller
 explicitly opts in. The archived container2wasm lane retains its pinned Node
 22.19 amd64 conversion, size, boot failure, and license evidence separately.
@@ -334,8 +335,13 @@ The first implementation should separate:
 - secrets as non-extractable Web Crypto keys and encrypted IndexedDB records;
 - exportable user backups in an explicit, versioned format.
 
-BrowserPod workspace migration fixtures, encryption, and workspace-scale
-recovery remain required before a production backup contract exists.
+The SDK now has a BrowserPod-specific v2 user-workspace envelope. It encrypts
+file contents with passphrase-derived AES-GCM, binds restore to exact artifact,
+runtime, workspace id, and root, encrypts the temporary guest exchange with a
+separate one-shot key, and restores only into a fresh root. A checked v1
+fixture proves explicit migration; the removed WebContainer binary format is
+rejected. A user-facing backup UI and owner-authorized workspace-scale recovery
+evidence remain required before this becomes a production backup contract.
 
 The browser host now has a separate credential-vault slice. It stores a
 non-extractable AES-GCM key and provider-scoped ciphertext in IndexedDB and

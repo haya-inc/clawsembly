@@ -54,6 +54,75 @@ embedder-supplied handler after explicit approval, cancels mid-turn across
 the typed mailbox, fails closed again after revocation, and never leaks chat
 payloads into any audit surface.
 
+## Runtime evidence
+
+One owner-authorized record of the full chain on the real provider is checked
+in under [`evidence/`](evidence/hello-agent-0.2.0.json): the exact fixture
+staged with verified per-file digests into `browserpod@2.12.1` in a real
+browser, both readiness signals with a live capability mailbox, one `hello.say`
+round trip, four capability-mediated chat turns across the default-deny
+boundary (denied before approval, completed after approval, aborted in flight,
+denied after revocation), and a completed guest-supervisor shutdown. The
+digest-bound reference next to it recomputes from the evidence bytes and both
+are validated by `hello-agent-evidence.test.mjs` in the normal test run.
+
+Recapture (owner-authorized and metered; requires a local `BROWSERPOD_API_KEY`
+and Playwright Chromium — GitHub-hosted runners are rejected by the provider):
+
+```bash
+npm install --prefix examples/hello-agent-evidence-host --ignore-scripts
+node examples/hello-agent-evidence-host/capture.mjs
+```
+
+The capture host feeds the verified-launch assertion a self-served bootstrap
+report pinned by its own SHA-256 — the same shape the provider-free test uses —
+because the first real capture is what produces hello-agent evidence at all.
+The captured record never inherits that report's status; it must pass the
+digest-bound evidence gate on its own.
+
+## Performance baseline
+
+`hello-agent-perf.mjs` defines the performance-baseline schema for
+[issue #8](https://github.com/haya-inc/clawsembly/issues/8) on this chain:
+three pass kinds (`cold` — fresh browser context and workspace, `warm` —
+reloaded page with hot caches and a fresh workspace, `persistentReuse` — the
+same workspace storage key as a previous boot), six phase timings per sample
+(embed boot, provider boot from the runtime boot audit, digest-verified
+staging, readiness, first `hello.say` round trip, cooperative close), storage
+estimates, and a digest-bound record. The schema is deliberately payload-free:
+the only strings a sample can carry are the pattern-bounded pass kind and
+workspace id. Aggregation reports the median next to every raw sample, and
+`meetsSampleFloor` marks whether a pass reaches the three samples issue #8
+requires for a publishable baseline.
+
+Capture (owner-authorized and metered; each planned boot is printed with the
+total cost before the first spend):
+
+```bash
+npm install --prefix examples/hello-agent-evidence-host --ignore-scripts
+node examples/hello-agent-evidence-host/perf-capture.mjs --samples 3
+```
+
+One owner-authorized baseline is checked in under
+[`evidence/`](evidence/hello-agent-perf-0.2.0.json) (2026-07-21,
+`browserpod@2.12.1`, HeadlessChrome 149 on Windows 11, three samples per
+pass, 10 metered boots including the persistence seed). Medians for
+cold / warm / persistentReuse: provider boot 844 / 690 / 792 ms, staging
+12 / 7 / 8 ms, readiness 5.1 / 5.4 / 3.7 s, first `hello.say` round trip
+≈160 ms, cooperative close 123 / 109 / 62 ms — ≈6.2 s cold and ≈4.7 s with
+persistent workspace reuse to the first protocol round trip, with ≈1.75 MB
+of reported storage growth per fresh workspace. The digest-bound gate in
+`hello-agent-perf.test.mjs` revalidates both files on every test run.
+
+These are boundary-chain numbers on the reference binding, bound to the exact
+fixture identity and provider version. They claim nothing about any real
+upstream agent: OpenClaw npm-install and Gateway-start timings stay open until
+the vendor gaps in issues
+[#6](https://github.com/haya-inc/clawsembly/issues/6) and
+[#47](https://github.com/haya-inc/clawsembly/issues/47) close, and workspace
+persistence keys already isolate by artifact version, so a version or
+integrity change never reuses another artifact's storage.
+
 ## What it deliberately is not
 
 - Not a real agent, and not evidence that any second agent runs. OpenClaw
@@ -62,6 +131,7 @@ payloads into any audit surface.
 - Not published to any registry: the fixture is `private: true`, the generated
   descriptor records `registryPublished: false`, and its identity exists only
   in this repository.
-- Not covered by BrowserPod runtime evidence, and never surfaced through the
-  published reports or Pages. Test evidence exercises the gate machinery; it
-  is not runtime support evidence.
+- Not OpenClaw runtime support, and never surfaced through the published
+  reports or Pages. The checked-in record proves the embedding boundary chain
+  on the real provider for this reference fixture; every OpenClaw report stays
+  `probing` on its own evidence.

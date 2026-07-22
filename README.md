@@ -1,8 +1,8 @@
 # Clawsembly
 
-> Run upstream coding agents browser-locally, behind a host boundary the
-> embedding application controls. Evidence-gated; OpenClaw is the first
-> supported upstream.
+> Run upstream OpenClaw browser-locally, behind a host boundary the
+> embedding application controls. Evidence-gated, and specialized in
+> OpenClaw rather than generic across agents.
 
 [![CI](https://github.com/haya-inc/clawsembly/actions/workflows/ci.yml/badge.svg)](https://github.com/haya-inc/clawsembly/actions/workflows/ci.yml)
 [![Compatibility probe](https://github.com/haya-inc/clawsembly/actions/workflows/compatibility.yml/badge.svg)](https://github.com/haya-inc/clawsembly/actions/workflows/compatibility.yml)
@@ -14,16 +14,21 @@
 
 日本語: [README.ja.md](README.ja.md)
 
-Clawsembly is an evidence-gated embedding layer that runs upstream coding
-agents browser-locally, behind a host boundary the embedding application
-controls. [OpenClaw](https://github.com/openclaw/openclaw) is the first
-supported upstream: Clawsembly binds the exact published package to public
-compatibility evidence and refuses to launch it until that evidence verifies.
+Clawsembly is an evidence-gated embedding layer specialized in
+[OpenClaw](https://github.com/openclaw/openclaw): it runs the upstream
+package browser-locally, behind a host boundary the embedding application
+controls, binding the exact published package to public compatibility
+evidence and refusing to launch it until that evidence verifies.
 Today every tracked release is **probing** — meaning the exact artifact has
 been statically inspected, but no owner-authorized runtime evidence exists
-yet, so verified launch stays blocked. Clawsembly is an experimental,
-single-maintainer project and is not affiliated with or endorsed by the
-OpenClaw project.
+yet, so verified launch stays blocked. Wrapping upstream OpenClaw with the
+conveniences its operators and embedders need — native-Gateway
+interoperability, release intelligence, extension vetting — is the product
+direction
+([ADR 0006](docs/decisions/0006-openclaw-specialist-refocus.md)); other
+upstream agents are out of scope for this repository. Clawsembly is an
+experimental, single-maintainer project and is not affiliated with or
+endorsed by the OpenClaw project.
 
 ## What works today, what is blocked
 
@@ -31,11 +36,12 @@ OpenClaw project.
 | --- | --- | --- |
 | Zero-install promotion-policy check | **Works** | `node examples/release-policy/check.mjs --observe` prints the current promotion decision in a few seconds, no dependencies. |
 | Hosted project page | **Works** | [Live reports plus a permission-prompt demo](https://haya-inc.github.io/clawsembly/) against an inert local broker: approve, deny, revoke, export a payload-free audit. |
-| npm alpha package | **Published now** | `npm install @haya-inc/clawsembly@alpha` — the reviewed [publication record](packages/compatibility/npm-publication.json) records `status: published` with SHA-512 integrity and Sigstore provenance. |
+| npm alpha package | **Record-gated** | `npm install @haya-inc/clawsembly@alpha` installs the latest reviewed npm publication. The prepared version's registry status lives in the [publication record](packages/compatibility/npm-publication.json): `pending` until its release train completes, `published` with SHA-512 integrity and Sigstore provenance once reviewed. |
 | Evidence-gated boot demo | **Works** | The [SDK host example](examples/sdk-host/README.md) verifies the pinned report and shows `Provider boot blocked`. Refusing an unverified report is the security feature, working. |
+| Boundary chain on real BrowserPod | **Works** | The hello-agent reference binding's full chain — exact-digest staging, dual readiness, capability-mediated chat with denied and allowed outcomes, in-flight abort, cooperative guest stop — has one owner-authorized record on `browserpod@2.12.1` ([evidence](packages/hello-agent-binding/evidence/hello-agent-0.2.0.json), [capture host](examples/hello-agent-evidence-host/capture.mjs)). A reference binding, not a real agent; OpenClaw boot stays blocked below. |
 | Verified BrowserPod boot | **Blocked** | Current stable `openclaw@2026.7.1-2` declares the compound engines range `>=22.22.3 <23 \|\| >=24.15.0 <25 \|\| >=25.9.0`, which the exact-form baseline gate rejects before any token spend (`node_baseline_unsupported`), and BrowserPod 2.12.1 provisions Node 22.15.0 — below every branch of that range; reported to the vendor. The checked-in `openclaw@2026.5.7` report remains the capturable target ([#6](https://github.com/haya-inc/clawsembly/issues/6)). |
 | Live provider smoke test | **Blocked** | The gated path exists but has never been executed. |
-| Performance baselines | **Blocked** | Not yet measured ([#8](https://github.com/haya-inc/clawsembly/issues/8)). |
+| Performance baselines | **Measured** | Owner-authorized baseline on `browserpod@2.12.1`, three samples per pass ([baseline](packages/hello-agent-binding/evidence/hello-agent-perf-0.2.0.json)): median provider boot under 0.9 s, digest-verified staging under 15 ms, first protocol round trip ≈6.2 s cold / ≈4.7 s with persistent workspace reuse. Boundary-chain numbers on the reference binding — OpenClaw install and Gateway timings stay open ([#8](https://github.com/haya-inc/clawsembly/issues/8)). |
 
 ## Try it
 
@@ -85,8 +91,10 @@ licensing analysis.
 
 BrowserPod supplies browser-local Node execution. Clawsembly supplies the
 parts an embedding application still needs in order to trust an upstream
-agent — implemented today against upstream OpenClaw, the first bound
-upstream, and designed to stay upstream-portable
+agent — implemented against upstream OpenClaw, this repository's
+specialized upstream
+([ADR 0006](docs/decisions/0006-openclaw-specialist-refocus.md)), while the
+boundary itself stays upstream-portable as an engineering property
 ([ADR 0004](docs/decisions/0004-upstream-portable-embedding-boundary.md)):
 
 - exact-version compatibility reports and reproducible failure fixtures;
@@ -232,7 +240,7 @@ the release is reported as `probing` rather than production-compatible.
 - [Release-channel history](apps/web/public/data/release-history.json)
 - [Promotion policy](https://haya-inc.github.io/clawsembly/data/promotion-policy.json)
 - [SDK alpha release manifest](https://haya-inc.github.io/clawsembly/downloads/sdk-release.json)
-- [SDK source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.3)
+- [SDK source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.4)
 - [npm publication record](packages/compatibility/npm-publication.json)
 - [Report schema](packages/compatibility/report.schema.json)
 - [Release-history schema](packages/compatibility/release-history.schema.json)
@@ -271,11 +279,11 @@ prerelease:
 
 ```bash
 npm install @haya-inc/clawsembly@alpha
-npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.3.tgz
-npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.3/haya-inc-clawsembly-0.1.0-alpha.3.tgz
+npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.4.tgz
+npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.4/haya-inc-clawsembly-0.1.0-alpha.4.tgz
 ```
 
-The [GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.3)
+The [GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.4)
 carries provider-free browser diagnostics and a provenance record binding the
 tag, source commit, Pages manifest, and compatibility report. Runtime support
 remains `probing` independently of package distribution.
@@ -331,7 +339,7 @@ digests, installs it into an isolated temporary consumer, imports every public
 ESM subpath, and compiles a strict TypeScript consumer. `sdk:lock` deliberately
 updates the copy-ready starter URL and SHA-512 when the SDK version changes;
 normal checks reject silent drift. `sdk:pack` writes
-`@haya-inc/clawsembly@0.1.0-alpha.3` plus its checksum under ignored
+`@haya-inc/clawsembly@0.1.0-alpha.4` plus its checksum under ignored
 `.artifacts/sdk/`. The matching GitHub prerelease triggered provenance-backed
 npm publication under the `alpha` dist-tag; the reviewed
 [npm publication record](packages/compatibility/npm-publication.json) now
@@ -341,8 +349,8 @@ provenance.
 The [release manifest](https://haya-inc.github.io/clawsembly/downloads/sdk-release.json)
 is the source of truth for package distribution. It binds the tarball SHA-256
 to the exact public compatibility report and admits the npm install path only
-because the reviewed publication record supplies matching SHA-512 integrity
-and Sigstore provenance. Runtime support remains independently recorded as
+because the reviewed publication record supplies matching SHA-512 integrity and
+Sigstore provenance. Runtime support remains independently recorded as
 `status:probing`.
 
 The six-hour release tracker regenerates the host pin from the exact stable
@@ -374,20 +382,25 @@ uploads evidence for review without committing or promoting it automatically.
 
 ## Goals
 
-- Run upstream coding agents rather than maintaining an independent agent
-  rewrite. OpenClaw is the first bound upstream; additional upstreams bind
-  through the documented
-  [upstream-binding contract](docs/upstream-binding-contract.md), whose
-  test-only hello-agent reference binding demonstrates that the boundary is
-  upstream-portable and extends an agent through embedder-granted host
-  capabilities
+- Run upstream OpenClaw rather than maintaining an independent agent
+  rewrite. This repository specializes in OpenClaw
+  ([ADR 0006](docs/decisions/0006-openclaw-specialist-refocus.md)); other
+  upstreams belong to separate projects. The documented
+  [upstream-binding contract](docs/upstream-binding-contract.md) and its
+  hello-agent reference binding — test-scoped, and since 2026-07-21 backed by
+  one owner-authorized real-BrowserPod record — remain the test
+  infrastructure that keeps the boundary upstream-portable
   ([ADR 0005](docs/decisions/0005-reference-agent-growth-paths.md)). No
-  second real agent runs today.
+  second real agent runs today, and none is planned here.
 - Keep the host boundary — default-deny capability broker, evidence-bound
   embed manifest, permission prompts, and payload-free audit — embedder-
-  controlled and upstream-portable, as the reusable product across upstreams.
-- Make each bound upstream safe to embed through exact artifact identity,
+  controlled, with upstream portability retained as an engineering property
+  of the boundary rather than a multi-upstream roadmap.
+- Make upstream OpenClaw safe to embed through exact artifact identity,
   evidence-bound launch, and explicit browser-host authority.
+- Wrap upstream OpenClaw with the conveniences its operators and embedders
+  need — native-Gateway evidence and interoperability, release
+  intelligence, extension vetting — without reimplementing the agent.
 - Keep the useful default browser-local, with an optional native Gateway
   interoperability mode rather than a remote-sandbox dependency.
 - Expose browser limitations as explicit capabilities instead of silently
@@ -413,6 +426,7 @@ uploads evidence for review without committing or promoting it automatically.
 - [Verified OpenClaw embedding decision](docs/decisions/0003-verified-openclaw-embedding.md)
 - [Upstream-portable embedding boundary decision](docs/decisions/0004-upstream-portable-embedding-boundary.md)
 - [Reference-agent growth paths decision](docs/decisions/0005-reference-agent-growth-paths.md)
+- [OpenClaw-specialist refocus decision](docs/decisions/0006-openclaw-specialist-refocus.md)
 - [Verified embedding contract](docs/embedding.md)
 - [Upstream binding contract](docs/upstream-binding-contract.md)
 
@@ -438,6 +452,14 @@ exact pending-request review, explicit pairing controls, encrypted token
 retention, and token reconnect pass provider-free contract tests. They are not
 yet backed by an owner-authorized BrowserPod/Gateway record. Remote-mode
 approval, rotation, revocation, and recovery remain future work.
+The embedding boundary itself now has its first owner-authorized record on the
+real provider: the hello-agent reference chain — verified staging, readiness,
+capability-mediated chat with denied and allowed outcomes, in-flight abort,
+and cooperative stop — executed on `browserpod@2.12.1` in a real browser, with
+the digest-bound evidence checked in under
+[`packages/hello-agent-binding/evidence/`](packages/hello-agent-binding/evidence/hello-agent-0.2.0.json).
+That record proves the boundary machinery, not any real upstream: OpenClaw
+runtime support remains `probing` and blocked on the vendor gaps above.
 
 ## License
 

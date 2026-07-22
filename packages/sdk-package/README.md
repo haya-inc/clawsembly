@@ -2,7 +2,7 @@
 
 Evidence-gated browser embedding infrastructure for upstream OpenClaw.
 
-This package is prepared as `0.1.0-alpha.3` for the npm `alpha` channel.
+This package is prepared as `0.1.0-alpha.4` for the npm `alpha` channel.
 Publication follows the matching provenance-bound GitHub prerelease; consumers
 can verify registry availability before preferring the npm install path.
 The checked-in BrowserPod report remains `probing`, so verified boot correctly
@@ -12,14 +12,14 @@ and tested without making a runtime-support claim.
 ## Install the Pages-distributed source alpha
 
 ```bash
-npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.3.tgz
+npm install https://haya-inc.github.io/clawsembly/downloads/haya-inc-clawsembly-0.1.0-alpha.4.tgz
 ```
 
 The identical checked tarball is also attached to the
-[GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.3):
+[GitHub source prerelease](https://github.com/haya-inc/clawsembly/releases/tag/v0.1.0-alpha.4):
 
 ```bash
-npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.3/haya-inc-clawsembly-0.1.0-alpha.3.tgz
+npm install https://github.com/haya-inc/clawsembly/releases/download/v0.1.0-alpha.4/haya-inc-clawsembly-0.1.0-alpha.4.tgz
 ```
 
 Verify the SHA-256 and compatibility binding through the public
@@ -69,7 +69,10 @@ The loader rejects redirects, non-HTTPS sources, byte drift, identity drift,
 oversized or non-JSON responses, and internally inconsistent support claims.
 A caller-created object with `status: "supported"` cannot authorize launch.
 Additional narrow entrypoints are available for the explicit pairing prompt,
-capability permission prompt, BrowserPod evidence probe, and capability broker.
+capability permission prompt, BrowserPod evidence probe, encrypted workspace
+backup, and capability broker. The workspace subpath exports a passphrase-
+encrypted exact-subject v2 envelope plus explicit v1 migration; it does not
+silently reuse a disk or expose an ambient backup UI.
 There is no generic Gateway RPC export.
 
 ## Local artifact verification

@@ -7,7 +7,7 @@ StackBlitz code, fallback, frame, network permission, or production dependency.
 
 ## Security headers
 
-The checked-in deployment configurations enforce:
+The checked-in deployment configurations declare:
 
 - HTTPS hosting;
 - `Cross-Origin-Opener-Policy: same-origin`;
@@ -15,6 +15,13 @@ The checked-in deployment configurations enforce:
 - a restrictive Content Security Policy;
 - `Referrer-Policy: strict-origin-when-cross-origin`;
 - MIME sniffing protection and a minimal Permissions Policy.
+
+Platform enforcement of these response headers applies on hosts that read the
+checked-in configs (Cloudflare Pages, Netlify, Vercel). The live GitHub Pages
+deployment cannot serve custom response headers, so there only the
+`index.html` CSP `<meta>` element applies at runtime; that is accepted because
+the public page never boots a guest runtime or handles embedding-host
+credentials. Embedding hosts must serve the full header set themselves.
 
 The CSP permits same-origin scripts, the hashed JSON-LD block, Google Fonts,
 same-origin data, and the fixed OpenAI Responses destination used only by the

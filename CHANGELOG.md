@@ -7,6 +7,55 @@ The project does not yet promise semantic-version compatibility.
 
 ## Unreleased
 
+No changes yet.
+
+## [0.1.0-alpha.4] - 2026-07-22
+
+### Added
+
+- a public `@haya-inc/clawsembly/workspace-backup` subpath now exports and
+  restores bounded BrowserPod user workspaces through an exact-subject v2
+  envelope. The file payload is encrypted with passphrase-derived AES-GCM;
+  the temporary guest exchange is separately encrypted with a one-shot key,
+  and restore is limited to a fresh root. Real-filesystem tests cover binary
+  round-trip, encrypted guest exchange, tampering, wrong passphrases, exact-
+  subject drift, traversal, duplicate paths, and restore conflicts;
+- a checked BrowserPod v1 workspace fixture migrates explicitly into v2. The
+  removed WebContainer `CLAWBKP1` mock-state format is classified as
+  non-migratable instead of being reinterpreted as BrowserPod data;
+- an owner-authorized performance baseline on the hello-agent chain
+  (`browserpod@2.12.1`, HeadlessChrome 149 on Windows 11, three samples per
+  pass, 10 metered boots): median provider boot under 0.9 s, digest-verified
+  staging under 15 ms, readiness 5.1 s cold / 3.7 s with persistent workspace
+  reuse, ≈6.2 s cold and ≈4.7 s persistent-reuse to the first protocol round
+  trip. Checked in with its digest-bound record under
+  `packages/hello-agent-binding/evidence/` and revalidated by the normal test
+  run. Reference-binding numbers only; OpenClaw install and Gateway timings
+  stay open on issue #8.
+- a performance-baseline harness for issue #8 on the hello-agent reference
+  chain, executable independent of the vendor gaps: a payload-free schema and
+  digest-bound record (`packages/hello-agent-binding/hello-agent-perf.mjs`)
+  covering cold, warm, and persistent-reuse passes with six phase timings per
+  sampled boot (embed boot, provider boot, digest-verified staging, readiness,
+  first round trip, cooperative close) plus storage estimates, median-plus-raw
+  aggregation with the three-sample publishable floor, and an owner-authorized
+  capture driver (`examples/hello-agent-evidence-host/perf-capture.mjs`) that
+  prints the full metered-boot cost before the first spend and writes a
+  payload-free status artifact on failure. Reference-binding numbers only; no
+  upstream agent performance is claimed.
+- the first owner-authorized runtime record on the real provider: the
+  hello-agent reference binding's complete chain — exact-digest staging, dual
+  readiness with a live capability mailbox, one `hello.say` round trip, four
+  capability-mediated chat turns across the default-deny boundary (denied,
+  completed, aborted in flight, denied after revocation), and cooperative
+  guest shutdown — executed on `browserpod@2.12.1` in a real browser. The
+  digest-bound evidence is checked in under
+  `packages/hello-agent-binding/evidence/` and validated in the normal test
+  run, and the reproducible capture host lives at
+  `examples/hello-agent-evidence-host/`. The record proves the embedding
+  boundary machinery, not any real upstream: OpenClaw runtime support remains
+  `probing`.
+
 ### Changed
 
 - the pinned Gateway contract migrates to the `dist/gateway/protocol`
@@ -23,26 +72,6 @@ The project does not yet promise semantic-version compatibility.
   baseline), previous `2026.6.11`, and preview `2026.7.2-beta.3`, and the
   regenerated contract, SDK host pin, promotion policy, and README/evidence
   docs move with them. All channels remain `probing` with promotion `hold`.
-
-### Fixed
-
-- `compat:track` and dependency-risk classification now run on Windows
-  maintainer machines: npm is invoked through the calling npm's JS entry
-  point, tar receives cwd-relative paths, and large dependency extractions
-  pass their member list via `-T` instead of argv (the Windows command-line
-  length limit made `spawnSync tar` fail with `ENAMETOOLONG`). The contract
-  generator gets the same tar treatment.
-- the six-hour release tracker no longer goes silent when a new upstream
-  stable breaks Gateway-contract regeneration: the tracker records the
-  `protocol:verify` outcome in its run summary and in the generated report
-  pull request instead of aborting before publication, while the protocol
-  gate in the check chain keeps a report/contract mismatch fail-closed on
-  that pull request. `openclaw@2026.7.1` (stable since 2026-07-13) removed
-  the legacy `dist/plugin-sdk/packages/` declaration tree and had silenced
-  every scheduled tracker run since.
-
-### Changed
-
 - the `hello-agent` reference binding grows from a greeter into a minimal
   capability-consuming chat agent (fixture 0.1.0 → 0.2.0, protocol
   `clawsembly-hello/2`): `chat.send`, `chat.history`, and `chat.abort` join
@@ -61,7 +90,30 @@ The project does not yet promise semantic-version compatibility.
   capturable on the vendor's currently provisioned Node. No runtime-support
   claim is added; OpenClaw remains the only bound real upstream.
 
-## [0.1.0-alpha.3] - 2026-07-13
+### Fixed
+
+- `compat:track` and dependency-risk classification now run on Windows
+  maintainer machines: npm is invoked through the calling npm's JS entry
+  point, tar receives cwd-relative paths, and large dependency extractions
+  pass their member list via `-T` instead of argv (the Windows command-line
+  length limit made `spawnSync tar` fail with `ENAMETOOLONG`). The contract
+  generator gets the same tar treatment.
+- the six-hour release tracker no longer goes silent when a new upstream
+  stable breaks Gateway-contract regeneration: the tracker records the
+  `protocol:verify` outcome in its run summary and in the generated report
+  pull request instead of aborting before publication, while the protocol
+  gate in the check chain keeps a report/contract mismatch fail-closed on
+  that pull request. `openclaw@2026.7.1` (stable since 2026-07-13) removed
+  the legacy `dist/plugin-sdk/packages/` declaration tree and had silenced
+  every scheduled tracker run since.
+
+## 0.1.0-alpha.3 - 2026-07-13 (bump only; superseded before release)
+
+> This version bump merged on 2026-07-13 but its release train never ran: no
+> `v0.1.0-alpha.3` tag, GitHub prerelease, or npm publication exists, and
+> 0.1.0-alpha.4 superseded it as the prepared version. While current, its
+> bytes were distributed through the Pages channel only; the changes below
+> first reach a cut prerelease together with 0.1.0-alpha.4.
 
 ### Changed (evidence baseline)
 
@@ -324,6 +376,6 @@ The project does not yet promise semantic-version compatibility.
 - Firefox, Safari, remote Gateway parity, general workspace migration, and
   owner-authorized live-provider evidence remain unverified.
 
-[0.1.0-alpha.3]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.2...v0.1.0-alpha.3
+[0.1.0-alpha.4]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.2...v0.1.0-alpha.4
 [0.1.0-alpha.2]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.1...v0.1.0-alpha.2
 [0.1.0-alpha.1]: https://github.com/haya-inc/clawsembly/compare/v0.1.0-alpha.0...v0.1.0-alpha.1

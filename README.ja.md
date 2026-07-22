@@ -1,19 +1,24 @@
 # Clawsembly
 
-> 上流のコーディングエージェントを、埋め込み側アプリケーションが制御する
-> ホスト境界の内側で、ブラウザローカルに実行する。証拠(evidence)で
-> ゲートされ、OpenClaw が最初の対応上流。
+> 上流の OpenClaw を、埋め込み側アプリケーションが制御するホスト境界の
+> 内側で、ブラウザローカルに実行する。証拠(evidence)でゲートし、
+> 汎用エージェント基盤ではなく OpenClaw に特化する。
 
 [English README](README.md) /
 [プロジェクトページ](https://haya-inc.github.io/clawsembly/)
 
-Clawsembly は、上流のコーディングエージェントをブラウザローカルで実行する
-ための、証拠ゲート付き埋め込みレイヤーです。
-[OpenClaw](https://github.com/openclaw/openclaw) が最初の対応上流です:
-公開された正確なパッケージを公開互換性証拠に束縛し、その証拠が検証される
+Clawsembly は、[OpenClaw](https://github.com/openclaw/openclaw) に特化した
+証拠ゲート付き埋め込みレイヤーです。上流パッケージを、埋め込み側
+アプリケーションが制御するホスト境界の内側でブラウザローカルに実行し、
+公開された正確なパッケージを公開互換性証拠に束縛して、その証拠が検証される
 までは起動を拒否します。現在、追跡中の全リリースは **probing**
 (正確なアーティファクトの静的検査は済んでいるが、オーナー承認のランタイム
 証拠がまだ存在しないため、検証済み起動はブロックされたまま)という状態です。
+上流 OpenClaw をラップして、運用者と埋め込み側に必要な利便 — ネイティブ
+Gateway 相互運用、リリースインテリジェンス、拡張の審査 — を足していくことが
+製品方針です
+([ADR 0006](docs/decisions/0006-openclaw-specialist-refocus.md))。他の上流
+エージェントはこのリポジトリの対象外です。
 Clawsembly は実験的なシングルメンテナのプロジェクトであり、OpenClaw
 プロジェクトとは無関係で、承認も受けていません。
 
@@ -23,11 +28,12 @@ Clawsembly は実験的なシングルメンテナのプロジェクトであり
 | --- | --- | --- |
 | ゼロインストールの promotion-policy チェック | **動く** | `node examples/release-policy/check.mjs --observe` が依存なし・数秒で現在の判定を表示 |
 | ホスト済みプロジェクトページ | **動く** | [ライブレポートと許可プロンプトのデモ](https://haya-inc.github.io/clawsembly/)(不活性なローカルブローカー相手に承認・拒否・失効・監査エクスポート) |
-| npm アルファパッケージ | **公開済み** | `npm install @haya-inc/clawsembly@alpha` — SHA-512 整合性と Sigstore provenance 付き |
+| npm アルファパッケージ | **record ゲート制** | `npm install @haya-inc/clawsembly@alpha` は最新のレビュー済み npm 公開版をインストールする。準備中バージョンのレジストリ状態は [publication record](packages/compatibility/npm-publication.json) が保持する(リリース列車完走まで `pending`、レビュー後は SHA-512 整合性と Sigstore provenance 付きで `published`) |
 | 証拠ゲート付きブートのデモ | **動く** | [SDK ホスト例](examples/sdk-host/README.md)が pinned レポートを検証し `Provider boot blocked` を表示(未検証リリースの拒否はセキュリティ機能が正しく動いている状態) |
+| 実 BrowserPod 上の境界チェーン | **動く** | hello-agent リファレンスバインディングの全チェーン(digest 検証済み staging、二重 readiness、capability 仲介チャット の denied/allowed 両結果、実行中 abort、協調停止)に `browserpod@2.12.1` 上のオーナー承認記録が 1 件([evidence](packages/hello-agent-binding/evidence/hello-agent-0.2.0.json))。リファレンスバインディングであり実エージェントではない。OpenClaw ブートは下記の通りブロック中 |
 | 検証済み BrowserPod ブート | **ブロック中** | 現行 stable `openclaw@2026.7.1-2` は複合 engines レンジ `>=22.22.3 <23 \|\| >=24.15.0 <25 \|\| >=25.9.0` を宣言しており、exact-form ベースラインゲートがトークン消費前に `node_baseline_unsupported` で fail closed する。BrowserPod 2.12.1 の Node 22.15.0 はどのブランチも満たさない(ベンダーへ報告済み)。チェックイン済みの `openclaw@2026.5.7` レポートが現在捕獲可能なターゲット([#6](https://github.com/haya-inc/clawsembly/issues/6)) |
 | ライブプロバイダーのスモークテスト | **ブロック中** | ゲート付き経路は実装済みだが未実行 |
-| 性能ベースライン | **ブロック中** | 未計測([#8](https://github.com/haya-inc/clawsembly/issues/8)) |
+| 性能ベースライン | **計測済み** | `browserpod@2.12.1` 上のオーナー承認ベースライン(各パス 3 サンプル、[baseline](packages/hello-agent-binding/evidence/hello-agent-perf-0.2.0.json)): provider boot 中央値 0.9 秒未満、digest 検証 staging 15 ms 未満、初回プロトコル往復まで cold 約 6.2 秒 / 永続ワークスペース再利用で約 4.7 秒。リファレンスバインディング上の境界チェーンの数値であり、OpenClaw の install / Gateway 計測は未了([#8](https://github.com/haya-inc/clawsembly/issues/8)) |
 
 ## 試す
 
@@ -83,6 +89,7 @@ Clawsembly がコミットするブラウザローカルランタイムは
 - [上流バインディング契約](docs/upstream-binding-contract.md)
 - [ADR 0004: 上流可搬な埋め込み境界](docs/decisions/0004-upstream-portable-embedding-boundary.md)
 - [ADR 0005: 参照エージェントと二つの成長パス](docs/decisions/0005-reference-agent-growth-paths.md)
+- [ADR 0006: OpenClaw 特化への再フォーカス](docs/decisions/0006-openclaw-specialist-refocus.md)
 - [コントリビューションガイド](CONTRIBUTING.md)(コミットには DCO 署名が必要です)
 
 ## ライセンス

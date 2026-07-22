@@ -1,0 +1,8 @@
+{
+  "id": "hello-agent-runtime",
+  "kind": "browser-runtime",
+  "capturedAt": "2026-07-21T10:13:47.424Z",
+  "path": "evidence/hello-agent-0.2.0.json",
+  "sha256": "2d1e76d58b7073865cdf43a794ae22f168c10804034e10013b93115dbd3048ec",
+  "summary": "The exact clawsembly-hello-agent 0.2.0 artifact staged with verified per-file digests, reached both readiness signals with a live capability mailbox, answered hello.say 1 time(s), completed 4 capability-mediated chat turn(s) across the default-deny boundary (2 denied, 1 allowed), and completed guest-supervisor shutdown in Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36."
+}

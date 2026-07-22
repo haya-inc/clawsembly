@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-07-21T18:15:01.411Z",
+  "target": {
+    "runtime": "browserpod",
+    "browserLocal": true,
+    "runtimeVersion": "2.12.1",
+    "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+    "os": "win32 10.0.26200"
+  },
+  "artifact": {
+    "package": "clawsembly-hello-agent",
+    "version": "0.2.0",
+    "integrity": "sha512-YwR1wMa7nX9uc2IPs4fbfEzcwasUg62Y6KHvAEcSdtBTA0Gmn9QTP3CL9CBDBoc/bTFAmhocP5ICcDURzS0oHQ=="
+  },
+  "scope": {
+    "chain": "hello-agent-reference-binding",
+    "upstreamApplicability": "none"
+  },
+  "passes": {
+    "cold": {
+      "passKind": "cold",
+      "sampleCount": 3,
+      "meetsSampleFloor": true,
+      "medianMs": {
+        "bootMs": 908.0150000154972,
+        "providerBootMs": 844,
+        "installMs": 12,
+        "readyMs": 5117.189999997616,
+        "helloRoundTripMs": 163.11500000953674,
+        "closeMs": 122.51500001549721
+      },
+      "samples": [
+        {
+          "schemaVersion": 1,
+          "passKind": "cold",
+          "workspaceId": "perf-mruz2r2d-cold-1",
+          "phases": {
+            "bootMs": 1280.0699999928474,
+            "providerBootMs": 1187,
+            "installMs": 13,
+            "readyMs": 5504.610000014305,
+            "helloRoundTripMs": 171.0949999988079,
+            "closeMs": 76.3299999833107
+          },
+          "install": {
+            "integrityMatched": true,
+            "fileCount": 3,
+            "stagedBytes": 12300
+          },
+          "storage": {
+            "beforeUsageBytes": 0,
+            "afterUsageBytes": 1746932
+          }
+        },
+        {
+          "schemaVersion": 1,
+          "passKind": "cold",
+          "workspaceId": "perf-mruz2r2d-cold-2",
+          "phases": {
+            "bootMs": 803.6349999904633,
+            "providerBootMs": 741,
+            "installMs": 12,
+            "readyMs": 5117.189999997616,
+            "helloRoundTripMs": 156.8550000190735,
+            "closeMs": 122.51500001549721
+          },
+          "install": {
+            "integrityMatched": true,
+            "fileCount": 3,
+            "stagedBytes": 12300
+          },
+          "storage": {
+            "beforeUsageBytes": 0,
+            "afterUsageBytes": 1746932
+          }
+        },
+        {
+          "schemaVersion": 1,
+          "passKind": "cold",
+          "workspaceId": "perf-mruz2r2d-cold-3",
+          "phases": {
+            "bootMs": 908.0150000154972,
+            "providerBootMs": 844,
+            "installMs": 4,
+            "readyMs": 5021.375,
+            "helloRoundTripMs": 163.11500000953674,
+            "closeMs": 167.92500001192093
+          },
+          "install": {
+            "integrityMatched": true,
+            "fileCount": 3,
+            "stagedBytes": 12300
+          },
+          "storage": {
+            "beforeUsageBytes": 0,
+            "afterUsageBytes": 1746932
+          }
+        }
+      ]
+    },
+    "warm": {
+      "passKind": "warm",
+      "sampleCount": 3,
+      "meetsSampleFloor": true,
+      "medianMs": {
+        "bootMs": 750.125,
+        "providerBootMs": 690,
+        "installMs": 7,
+        "readyMs": 5397.335000008345,
+        "helloRoundTripMs": 155.91499999165535,
+        "closeMs": 109.19499999284744
+      },
+      "samples": [
+        {
+          "schemaVersion": 1,
+          "passKind": "warm",
+          "workspaceId": "perf-mruz2r2d-warm-1",
+          "phases": {
+            "bootMs": 827.4249999821186,
+            "providerBootMs": 766,
+            "installMs": 7,
+            "readyMs": 6952.075000017881,
+            "helloRoundTripMs": 161.88499999046326,
+            "closeMs": 109.19499999284744
+          },
+          "install": {
+            "integrityMatched": true,
+            "fileCount": 3,
+            "stagedBytes": 12300
+          },
+          "storage": {
+            "beforeUsageBytes": 0,
+            "afterUsageBytes": 1746932
+          }
+        },
+        {
+          "schemaVersion": 1,
+          "passKind": "warm",
+          "workspaceId": "perf-mruz2r2d-warm-2",
+          "phases": {
+            "bootMs": 750.125,
+            "providerBootMs": 690,
+            "installMs": 7,
+            "readyMs": 5397.335000008345,
+            "helloRoundTripMs": 155.91499999165535,
+            "closeMs": 140.80500000715256
+          },
+          "install": {
+            "integrityMatched": true,
+            "fileCount": 3,
+            "stagedBytes": 12300
+          },
+          "storage": {
+            "beforeUsageBytes": 1746932,
+            "afterUsageBytes": 3493702
+          }
+        },
+        {
+          "schemaVersion": 1,
+          "passKind": "warm",
+          "workspaceId": "perf-mruz2r2d-warm-3",
+          "phases": {
+            "bootMs": 718.2400000095367,
+            "providerBootMs": 660,
+            "installMs": 4,
+            "readyMs": 4865.569999992847,
+            "helloRoundTripMs": 155.64500001072884,
+            "closeMs": 17
+          },
+          "install": {
+            "integrityMatched": true,
+            "fileCount": 3,
+            "stagedBytes": 12300
+          },
+          "storage": {
+            "beforeUsageBytes": 3493702,
+            "afterUsageBytes": 5240472
+          }
+        }
+      ]
+    },
+    "persistentReuse": {
+      "passKind": "persistentReuse",
+      "sampleCount": 3,
+      "meetsSampleFloor": true,
+      "medianMs": {
+        "bootMs": 810.8150000274181,
+        "providerBootMs": 792,
+        "installMs": 8,
+        "readyMs": 3687.175000011921,
+        "helloRoundTripMs": 163.9249999821186,
+        "closeMs": 61.564999997615814
+      },
+      "samples": [
+        {
+          "schemaVersion": 1,
+          "passKind": "persistentReuse",
+          "workspaceId": "perf-mruz2r2d-persist",
+          "phases": {
+            "bootMs": 846.3199999928474,
+            "providerBootMs": 822,
+            "installMs": 9,
+            "readyMs": 4533.085000008345,
+            "helloRoundTripMs": 161.49500000476837,
+            "closeMs": 61.564999997615814
+          },
+          "install": {
+            "integrityMatched": true,
+            "fileCount": 3,
+            "stagedBytes": 12300
+          },
+          "storage": {
+            "beforeUsageBytes": 6987250,
+            "afterUsageBytes": 7118322
+          }
+        },
+        {
+          "schemaVersion": 1,
+          "passKind": "persistentReuse",
+          "workspaceId": "perf-mruz2r2d-persist",
+          "phases": {
+            "bootMs": 810.8150000274181,
+            "providerBootMs": 792,
+            "installMs": 8,
+            "readyMs": 3687.175000011921,
+            "helloRoundTripMs": 163.9249999821186,
+            "closeMs": 121.23499998450279
+          },
+          "install": {
+            "integrityMatched": true,
+            "fileCount": 3,
+            "stagedBytes": 12300
+          },
+          "storage": {
+            "beforeUsageBytes": 7118322,
+            "afterUsageBytes": 7118322
+          }
+        },
+        {
+          "schemaVersion": 1,
+          "passKind": "persistentReuse",
+          "workspaceId": "perf-mruz2r2d-persist",
+          "phases": {
+            "bootMs": 678.6000000238419,
+            "providerBootMs": 655,
+            "installMs": 5,
+            "readyMs": 2809.7300000190735,
+            "helloRoundTripMs": 164.63999998569489,
+            "closeMs": 33.63500002026558
+          },
+          "install": {
+            "integrityMatched": true,
+            "fileCount": 3,
+            "stagedBytes": 12300
+          },
+          "storage": {
+            "beforeUsageBytes": 7118322,
+            "afterUsageBytes": 7118322
+          }
+        }
+      ]
+    }
+  }
+}
