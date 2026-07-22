@@ -10,6 +10,14 @@ import { FilesystemCapabilityMailboxHost } from "../../packages/capability-broke
 import { FilesystemCapabilityMailboxClient } from "../../packages/capability-broker/guest-mailbox-client.mjs";
 import { startCooperativeProcess } from "../../packages/browser-runtime/cooperative-process.mjs";
 import {
+  createWorkspaceBackup,
+  decodeWorkspaceBackup,
+  exportBrowserPodWorkspace,
+  migrateLegacyWorkspaceSnapshot,
+  restoreBrowserPodWorkspace,
+  type WorkspaceBackupSubject
+} from "../../packages/browser-runtime/workspace-backup.mjs";
+import {
   createVerifiedOpenClawGateway,
   type GatewayPairingRequirement as HostPairingRequirement,
   type ReviewableGatewayPairingRequirement,
@@ -31,6 +39,8 @@ import { loadVerifiedCompatibilityReport } from "../../packages/embed-sdk/report
 
 declare const gateway: VerifiedOpenClawGateway;
 declare const clientError: OpenClawGatewayClientError;
+declare const backupSubject: WorkspaceBackupSubject;
+void backupSubject;
 
 // The client pairing requirement narrows the shared host contract.
 const sharedPairing: HostPairingRequirement | undefined = clientError.pairing;
@@ -74,7 +84,12 @@ const callableSurface = [
   bootVerifiedEmbed,
   createEmbedManifest,
   loadVerifiedCompatibilityReport,
-  resolveGatewayWebSocketConnection
+  resolveGatewayWebSocketConnection,
+  createWorkspaceBackup,
+  decodeWorkspaceBackup,
+  exportBrowserPodWorkspace,
+  migrateLegacyWorkspaceSnapshot,
+  restoreBrowserPodWorkspace
 ] as const;
 callableSurface.forEach((entry) => void (entry satisfies (...parameters: never[]) => unknown));
 void FilesystemCapabilityMailboxHost;

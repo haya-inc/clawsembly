@@ -30,6 +30,26 @@ The probe is covered end-to-end with a fake BrowserPod. A real evidence record
 is not checked in until an owner runs the same path with a commercial API key.
 See [BrowserPod evidence](../../docs/browserpod-evidence.md).
 
+## Encrypted workspace backup
+
+`workspace-backup.mjs` exports and restores bounded user workspaces through the
+documented BrowserPod file boundary. The v2 envelope is bound to the exact
+artifact, BrowserPod version, logical workspace id, and guest root. Its payload
+is encrypted with passphrase-derived AES-GCM; the temporary guest exchange uses
+a separate random AES-GCM key passed only in the helper process environment, so
+the persistent disk never receives a plaintext snapshot. Restore accepts only
+a fresh root and rejects links, special files, traversal, duplicate paths,
+oversized inputs, checksum drift, wrong passphrases, and subject mismatch.
+
+A checked BrowserPod v1 fixture exercises explicit migration into v2. The
+removed WebContainer `CLAWBKP1` mock-state format is deliberately rejected: its
+provider-specific binary snapshot cannot be safely reinterpreted as a
+BrowserPod user workspace.
+
+This first format preserves regular-file paths and bytes. Empty directories and
+executable-mode migration are not yet part of the production backup contract;
+links and special files fail closed instead of being flattened.
+
 `cooperative-process.mjs` stages a nonce-bound Node supervisor for processes
 launched by Clawsembly. The exact-artifact probe now requires that supervisor
 to stop the Gateway after readiness. This is a cooperative guest protocol, not
