@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T12:47:47.515Z",
+  "generatedAt": "2026-07-24T18:49:18.310Z",
   "package": "openclaw",
   "decision": "hold",
   "baseline": {
@@ -30,7 +30,7 @@
   },
   "candidate": {
     "channel": "preview",
-    "version": "2026.7.2-beta.3",
+    "version": "2026.7.2-beta.4",
     "eligible": false,
     "reasons": [
       "status-not-supported",
@@ -50,7 +50,7 @@
       },
       "shrinkwrapConsistent": false,
       "gatewayClassification": "breaking",
-      "dependencyRiskCount": 10,
+      "dependencyRiskCount": 29,
       "truncatedDependencyRiskCount": 0
     }
   },
