@@ -1,0 +1,56 @@
+version: 1
+# Observe integrity-sensitive changes before requiring an independent reviewer.
+mode: audit
+approval:
+  required: 1
+sourcePaths:
+  - "apps/web/src/**/*.{js,jsx,ts,tsx}"
+  - "packages/**/*.{js,mjs,cjs,ts,mts,cts}"
+  - "examples/**/src/**/*.{js,jsx,ts,tsx}"
+protectedSurfaces:
+  - id: prooflock-policy
+    title: ProofLock policy
+    paths:
+      - ".github/prooflock.yml"
+  - id: continuous-integration
+    title: Continuous integration and release workflows
+    paths:
+      - ".github/workflows/**"
+      - "actions/**/action.yml"
+  - id: ownership-and-security
+    title: Ownership and security policy
+    paths:
+      - ".github/CODEOWNERS"
+      - "SECURITY.md"
+  - id: test-suites
+    title: Test and conformance suites
+    paths:
+      - "**/*.test.{js,mjs,cjs,ts,mts,cts,tsx}"
+      - "tests/**"
+  - id: dependency-integrity
+    title: Dependency and package integrity
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "**/package.json"
+      - "**/package-lock.json"
+  - id: verification-tooling
+    title: Verification and build tooling
+    paths:
+      - ".oxlintrc.json"
+      - "**/tsconfig*.json"
+      - "**/vite.config.{js,mjs,ts}"
+      - "playwright.config.ts"
+      - "scripts/validate-*.mjs"
+      - "scripts/*check*.mjs"
+  - id: release-and-contracts
+    title: Release automation and public contracts
+    paths:
+      - "scripts/build-sdk*.mjs"
+      - "scripts/publish-*.mjs"
+      - "scripts/generate-*.mjs"
+      - "scripts/sync-public-schemas.mjs"
+      - "apps/web/public/schemas/**"
+      - "packages/compatibility/*.schema.json"
+      - "packages/compatibility/npm-publication.json"
+      - "vercel.json"
