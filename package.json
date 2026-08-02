@@ -70,12 +70,12 @@
     "release:check": "npm run social:render && npm run check && npm run test:browser && npm run build:pages && node packages/compatibility/src/release-readiness.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "1.61.1",
+    "@playwright/test": "1.62.1",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
-    "oxlint": "1.74.0",
-    "playwright": "1.61.1",
+    "oxlint": "1.76.0",
+    "playwright": "1.62.1",
     "typescript": "7.0.2",
-    "vite": "8.1.5"
+    "vite": "8.2.0"
   }
 }
