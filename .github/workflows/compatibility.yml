@@ -2,7 +2,7 @@ name: Compatibility probe
 
 on:
   schedule:
-    - cron: "17 */6 * * *"
+    - cron: '17 5 * * 1'
   workflow_dispatch:
 
 # A manual dispatch racing the six-hour cron would contend for the same
@@ -65,7 +65,7 @@ jobs:
   publish-report-pr:
     needs: static-inspection
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 1
     permissions:
       contents: write
       pull-requests: write
