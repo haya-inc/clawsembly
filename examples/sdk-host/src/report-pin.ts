@@ -2,7 +2,7 @@ import type { CompatibilityReportExpectation } from "@haya-inc/clawsembly/report
 
 export const REPORT_EXPECTATION = {
   url: "https://haya-inc.github.io/clawsembly/data/compatibility.json",
-  sha256: "ed5b8454b32149d4eef348590be032ae6c6042e0587f7b65db5b00096187a031",
+  sha256: "0f4ae7ba28d72f1193e953b1473a7aef3f8a4ed2395a663b932bb32ac100735a",
   maxAgeMs: 604800000,
   artifact: {
     package: "openclaw",

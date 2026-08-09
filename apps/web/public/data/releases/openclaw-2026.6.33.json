@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T12:47:33.592Z",
-  "reportLatencySeconds": 4898,
+  "generatedAt": "2026-07-28T00:52:21.289Z",
+  "reportLatencySeconds": 566786,
   "status": "probing",
   "target": {
     "runtime": "browserpod",
