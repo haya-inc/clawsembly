@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
 
 permissions:
@@ -58,7 +56,7 @@ jobs:
     if: ${{ always() }}
     needs: [node_check, windows_check]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 1
     steps:
       - name: Require every Node lane
         env:
