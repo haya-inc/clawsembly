@@ -9,10 +9,16 @@ const reportURL = "https://haya-inc.github.io/clawsembly/data/compatibility.json
 const reportSource = readFileSync(resolve("apps/web/public/data/compatibility.json"), "utf8");
 const reportSha256 = createHash("sha256").update(reportSource).digest("hex");
 const report = JSON.parse(reportSource) as {
+  generatedAt: string;
   artifact: { version: string; integrity: string };
 };
+// The loader enforces a maxAgeMs freshness window against the wall clock, so
+// this suite pins the browser clock just after the fixture's generatedAt to
+// stay inside the window regardless of when CI runs.
+const fixtureClock = new Date(Date.parse(report.generatedAt) + 60_000);
 
 test("packed SDK host renders the current fail-closed launch decision", async ({ page }) => {
+  await page.clock.setFixedTime(fixtureClock);
   const prohibitedRequests: string[] = [];
   const consoleErrors: string[] = [];
   let reportRequests = 0;
