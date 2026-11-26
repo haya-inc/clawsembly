@@ -173,6 +173,109 @@ async function resolveModern(packageRoot, declarationEntry) {
   };
 }
 
+// November distributions ship their wire schemas and validators as ESM,
+// without the declaration entry. Read only statically linked bundle files.
+function importedModule(content, binding, relativePrefix) {
+  const matches = [];
+  for (const [, bindings, prefix, filename] of content.matchAll(
+    /\bimport\s*\{([^}]+)\}\s*from\s*["'](\.\.\/\.\.\/|\.\/)([A-Za-z0-9][A-Za-z0-9._-]*\.mjs)["'];/gmu
+  )) {
+    if (prefix === relativePrefix && bindings.split(",").some((item) =>
+      item.trim().split(/\s+as\s+/u).at(-1) === binding)) matches.push(filename);
+  }
+  if (matches.length !== 1) throw layoutError(`expected one local runtime import for ${binding}, saw ${matches.length}`);
+  return `dist/${matches[0]}`;
+}
+
+async function resolveRuntime(packageRoot, entry) {
+  const sources = new Map([[MODERN_RUNTIME_ENTRY, entry]]);
+  async function sourceFor(content, binding, prefix = "../../") {
+    const path = importedModule(content, binding, prefix);
+    if (!sources.has(path)) {
+      const source = await readText(packageRoot, path);
+      if (source === undefined) throw layoutError(`imported Gateway source ${path} is missing`);
+      sources.set(path, source);
+    }
+    return sources.get(path);
+  }
+  const publicNames = new Set(declarationExports(entry));
+  const schemas = ["ConnectParamsSchema", "HelloOkSchema", "ChatSendParamsSchema", "ChatHistoryParamsSchema", "ChatEventSchema"];
+  const requests = ["ChatSend", "ChatHistory", "ChatAbort", "DevicePairList", "DevicePairApprove", "DevicePairReject",
+    "DevicePairRemove", "DeviceTokenRotate", "DeviceTokenRevoke"];
+  for (const name of [...schemas, ...requests.map((request) => `validate${request}Params`), "PROTOCOL_VERSION", "MIN_CLIENT_PROTOCOL_VERSION"]) {
+    if (!publicNames.has(name)) throw layoutError(`Gateway runtime entry does not export ${name}`);
+  }
+  for (const schema of schemas) {
+    const source = await sourceFor(entry, schema);
+    if (!new RegExp(`\\bconst ${schema}\\s*=`, "mu").test(source)) {
+      throw layoutError(`Gateway schema definition missing: ${schema}`);
+    }
+  }
+  for (const request of requests) {
+    const validator = `validate${request}Params`;
+    const source = await sourceFor(entry, validator);
+    const expression = source.match(new RegExp(`\\bconst ${validator}\\s*=\\s*([^;]+);`, "u"))?.[1]
+      .replace(/\/\* @__PURE__ \*\/|\s+/gu, "");
+    if (expression !== `lazyCompile(${request}ParamsSchema)`
+      && expression !== `createProtocolValidator(${request}ParamsSchema,is${request}Params)`
+      && expression !== `createProtocolValidator(${request}ParamsSchema)`) {
+      throw layoutError(`Gateway validator no longer binds ${request}ParamsSchema`);
+    }
+  }
+  const frames = await sourceFor(entry, "ConnectParamsSchema");
+  const hello = await sourceFor(entry, "HelloOkSchema");
+  if (!/\bnonce:/.test(frames) || !/\bdeviceToken:/.test(frames) || !/\bmaxPayload:/.test(hello)) {
+    throw layoutError("Gateway handshake schema is missing nonce, deviceToken or maxPayload");
+  }
+  for (const [schema, identity, key, value] of [
+    ["GatewayClientIdSchema", "GATEWAY_CLIENT_IDS", "WEBCHAT_UI", "webchat-ui"],
+    ["GatewayClientModeSchema", "GATEWAY_CLIENT_MODES", "WEBCHAT", "webchat"]
+  ]) {
+    const primitives = await sourceFor(frames, schema, "./");
+    const values = await sourceFor(primitives, identity, "./");
+    const object = values.match(new RegExp(`\\bconst ${identity}\\s*=\\s*\\{([^}]+)\\}`, "u"))?.[1];
+    if (!new RegExp(`\\bconst ${schema}\\s*=\\s*Type\\.Enum\\(${identity}\\)`, "u").test(primitives)
+      || !object || !new RegExp(`\\b${key}:\\s*(["'\x60])${value}\\1`, "u").test(object)) {
+      throw layoutError(`Gateway handshake no longer accepts ${value}`);
+    }
+  }
+
+  const version = await sourceFor(entry, "PROTOCOL_VERSION");
+  const minimum = await sourceFor(entry, "MIN_CLIENT_PROTOCOL_VERSION");
+  const current = version.match(/\bconst PROTOCOL_VERSION\s*=\s*(\d+);/u);
+  const minClient = minimum.match(/\bconst MIN_CLIENT_PROTOCOL_VERSION\s*=\s*(\d+);/u);
+  if (!current || !minClient) throw layoutError("Gateway runtime protocol bounds are missing");
+
+  const candidates = (await readdir(join(packageRoot, "dist"))).filter((name) => /^device-auth-[A-Za-z0-9_-]+\.mjs$/u.test(name));
+  const signers = [];
+  for (const name of candidates) {
+    const path = `dist/${name}`;
+    const content = await readText(packageRoot, path);
+    const implementation = content?.match(/\bfunction buildDeviceAuthPayloadV3\((\w+)\)\s*\{([^}]+)\}/u);
+    if (implementation) signers.push({ path, content, implementation });
+  }
+  if (signers.length !== 1) throw layoutError(`expected one Gateway v3 device signer, saw ${signers.length}`);
+  const signer = signers[0];
+  const [, parameter, implementation] = signer.implementation;
+  // Minifiers rename local variables. Compare each signed field to its
+  // initializer, preserving its position and the wire delimiters.
+  const compact = implementation.replace(/\s+/gu, "").replace(/[`']/gu, '"');
+  const locals = new Map([...implementation.matchAll(/\bconst\s+(\w+)\s*=\s*([^;]+);/gu)]
+    .map(([, name, value]) => [name, value.replace(/\s+/gu, "").replace(/[`']/gu, '"')]));
+  const fields = compact.match(/return\[([^\]]+)\]\.join\("\|"\)/u)?.[1].split(",").map((field) => locals.get(field) ?? field);
+  const expected = ['"v3"', `${parameter}.deviceId`, `${parameter}.clientId`, `${parameter}.clientMode`,
+    `${parameter}.role`, `${parameter}.scopes.join(",")`, `String(${parameter}.signedAtMs)`,
+    `${parameter}.token??""`, `${parameter}.nonce`, `normalizeDeviceMetadataForAuth(${parameter}.platform)`,
+    `normalizeDeviceMetadataForAuth(${parameter}.deviceFamily)`];
+  if (JSON.stringify(fields) !== JSON.stringify(expected)) throw layoutError("Gateway v3 device signature payload changed");
+  sources.set(signer.path, signer.content);
+  return {
+    layout: "gateway-protocol-runtime",
+    protocol: { current: Number(current[1]), minClient: Number(minClient[1]) },
+    sources: [...sources].map(([path, content]) => ({ path, content }))
+  };
+}
+
 // Resolves the exact declaration sources backing the generated Gateway
 // contract from an extracted OpenClaw package root. Supports the legacy
 // plugin-sdk declaration tree (<= 2026.6.x) and the gateway-protocol
@@ -186,7 +289,9 @@ export async function resolveOpenClawGatewayContractSources(packageRoot) {
   if (legacyProbe !== undefined) return resolveLegacy(packageRoot);
   const modernProbe = await readText(packageRoot, MODERN_DECLARATION_ENTRY);
   if (modernProbe !== undefined) return resolveModern(packageRoot, modernProbe);
+  const runtime = await readText(packageRoot, MODERN_RUNTIME_ENTRY);
+  if (runtime !== undefined) return resolveRuntime(packageRoot, runtime);
   throw layoutError(
-    `unrecognized OpenClaw Gateway declaration layout: neither ${LEGACY_SOURCE_ROOT}/ nor ${MODERN_DECLARATION_ENTRY} exists in the artifact`
+    `unrecognized OpenClaw Gateway declaration layout: missing ${LEGACY_SOURCE_ROOT}/, ${MODERN_DECLARATION_ENTRY} and ${MODERN_RUNTIME_ENTRY}`
   );
 }
