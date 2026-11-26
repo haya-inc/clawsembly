@@ -46,7 +46,7 @@ interface ReleaseHistory {
       name: string;
       change: "added" | "changed";
       scan: { truncated: boolean };
-      signals: { browserCapabilities: string[] };
+      signals: { browserCapabilities: string[] } | null;
     }>;
     gatewayContractFromStable: {
       classification: "unchanged" | "changed" | "additive" | "breaking" | "incomplete";
@@ -150,7 +150,7 @@ function formatSizeDelta(bytes: number): string {
 
 function renderDependencyGroup(
   label: string,
-  entries: Array<{ name: string; detail: string; capabilities?: string[]; truncated?: boolean }>
+  entries: Array<{ name: string; detail: string; capabilities?: string[] | null; truncated?: boolean }>
 ): HTMLElement {
   const group = document.createElement("section");
   group.className = "release-diff-group";
@@ -170,13 +170,15 @@ function renderDependencyGroup(
       const detail = document.createElement("span");
       detail.textContent = entry.detail;
       item.append(name, detail);
-      if (entry.capabilities) {
+      if (entry.capabilities !== undefined) {
         const signals = document.createElement("small");
         signals.className = "release-diff-signals";
-        const capabilitySummary = entry.capabilities.length
+        const capabilitySummary = entry.capabilities?.length
           ? entry.capabilities.join(" · ")
           : "no package-level capability signal";
-        signals.textContent = `${capabilitySummary}${entry.truncated ? " · scan truncated" : ""}`;
+        signals.textContent = entry.capabilities === null
+          ? "not inspected · missing shrinkwrap identity"
+          : `${capabilitySummary}${entry.truncated ? " · scan truncated" : ""}`;
         item.append(signals);
       }
       return item;
@@ -194,13 +196,14 @@ function renderReleaseDependencyDiff(history: ReleaseHistory): void {
   if (!container || !summary || !list || !preview) return;
   const changes = preview.dependencyChangesFromStable;
   const riskByName = new Map(preview.dependencyRiskFromStable.map((risk) => [risk.name, risk]));
-  summary.textContent = `${changes.added.length} added · ${changes.changed.length} changed · ${changes.removed.length} removed · ${preview.dependencyRiskFromStable.length} classified`;
+  const classified = preview.dependencyRiskFromStable.filter((risk) => risk.signals !== null).length;
+  summary.textContent = `${changes.added.length} added · ${changes.changed.length} changed · ${changes.removed.length} removed · ${classified} classified`;
   const withRisk = ({ name, detail }: { name: string; detail: string }) => {
     const risk = riskByName.get(name);
     return {
       name,
       detail,
-      ...(risk ? { capabilities: risk.signals.browserCapabilities, truncated: risk.scan.truncated } : {})
+      ...(risk ? { capabilities: risk.signals?.browserCapabilities ?? null, truncated: risk.scan.truncated } : {})
     };
   };
   list.replaceChildren(

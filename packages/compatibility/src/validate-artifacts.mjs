@@ -159,6 +159,11 @@ for (let index = 0; index < history.releases.length; index += 1) {
     assert.equal(risk.declaredSpec, dependency.spec, `${release.channel} dependency risk spec drift`);
     assert.equal(risk.resolvedVersion, dependency.resolvedVersion, `${release.channel} dependency risk version drift`);
     assert.equal(risk.integrity, dependency.integrity, `${release.channel} dependency risk integrity drift`);
+    if (risk.signals === null) {
+      assert.ok(dependency.resolvedVersion === null || dependency.integrity === null);
+      assert.deepEqual(risk.scan, { truncated: true, reason: "missing-shrinkwrap-identity" });
+      continue;
+    }
     assert.deepEqual(
       risk.signals.browserCapabilities,
       deriveBrowserCapabilities(risk.signals),

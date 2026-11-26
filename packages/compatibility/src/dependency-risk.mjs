@@ -182,8 +182,17 @@ function runNpm(args, cwd) {
 }
 
 export function inspectDependencyRisk(dependency) {
-  if (!dependency?.resolvedVersion || !dependency?.integrity) {
-    throw new Error(`Exact shrinkwrap identity is missing for ${dependency?.name ?? "dependency"}.`);
+  if (!PACKAGE_NAME_PATTERN.test(dependency?.name) || !dependency.declaredSpec) {
+    throw new TypeError("A declared dependency is required for risk inspection.");
+  }
+  if (dependency.resolvedVersion === null || dependency.integrity === null) {
+    // A published shrinkwrap can omit bundled/workspace package identities.
+    // Keep the manifest change visible and hold promotion without fetching an unpinned package.
+    return {
+      ...dependency,
+      scan: { truncated: true, reason: "missing-shrinkwrap-identity" },
+      signals: null
+    };
   }
   const workingDirectory = mkdtempSync(resolve(tmpdir(), "clawsembly-dependency-risk-"));
   try {
