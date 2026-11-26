@@ -1,34 +1,34 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T12:47:47.515Z",
+  "generatedAt": "2026-11-26T04:13:31.092Z",
   "package": "openclaw",
   "channels": {
-    "stable": "2026.7.1-2",
-    "previous": "2026.6.33",
-    "preview": "2026.7.2-beta.3"
+    "stable": "2026.11.10",
+    "previous": "2026.11.9",
+    "preview": "2026.11.10-beta.3"
   },
   "releases": [
     {
       "channel": "stable",
-      "version": "2026.7.1-2",
+      "version": "2026.11.10",
       "status": "probing",
-      "reportPath": "releases/openclaw-2026.7.1-2.json",
-      "generatedAt": "2026-07-21T12:47:30.235Z",
-      "upstreamPublishedAt": "2026-07-18T03:53:48.967Z",
-      "reportLatencySeconds": 291221,
+      "reportPath": "releases/openclaw-2026.11.10.json",
+      "generatedAt": "2026-11-26T04:13:16.683Z",
+      "upstreamPublishedAt": "2026-11-25T05:07:34.288Z",
+      "reportLatencySeconds": 83142,
       "runtimeEvidence": false,
       "artifact": {
-        "integrity": "sha512-ycF3yPcbjN6bUPeaUx6Mh6vze1hQWoD3CT/wWcmD7a8xaHHHRUaAlaq+lFxMHf1ssEgODVAwjlzYqp2twkYZ7g==",
-        "unpackedBytes": 87477902,
-        "directDependencyCount": 56,
-        "nativeRiskCount": 13,
+        "integrity": "sha512-/FKDjxY1ZdUSXHx1a9b4EUpPRZywM3uv4181g22XImJfp/5+h+fFUZ7B7HthNrdYzq//05zH0Yf7mefzIlWFaQ==",
+        "unpackedBytes": 305703603,
+        "directDependencyCount": 76,
+        "nativeRiskCount": 0,
         "shrinkwrapConsistent": false,
-        "shrinkwrapMissingCount": 31,
+        "shrinkwrapMissingCount": 217,
         "shrinkwrapMismatchedCount": 0
       },
       "checks": {
-        "pass": 1,
-        "warn": 3,
+        "pass": 2,
+        "warn": 2,
         "fail": 0,
         "pending": 15
       },
@@ -96,120 +96,181 @@
     },
     {
       "channel": "previous",
-      "version": "2026.6.33",
+      "version": "2026.11.9",
       "status": "probing",
-      "reportPath": "releases/openclaw-2026.6.33.json",
-      "generatedAt": "2026-07-21T12:47:33.592Z",
-      "upstreamPublishedAt": "2026-07-21T11:25:55.513Z",
-      "reportLatencySeconds": 4898,
+      "reportPath": "releases/openclaw-2026.11.9.json",
+      "generatedAt": "2026-11-26T04:13:23.848Z",
+      "upstreamPublishedAt": "2026-11-25T00:33:15.923Z",
+      "reportLatencySeconds": 99608,
       "runtimeEvidence": false,
       "artifact": {
-        "integrity": "sha512-53MCYfnMEzQmrh/mFNpqfUcQunZASPZ2qYOmqn6wq3K4gZPzV0QOMwjxOCU2C+VmQ5FqzVU8exy7j7pyL3EBzQ==",
-        "unpackedBytes": 86557604,
-        "directDependencyCount": 54,
-        "nativeRiskCount": 13,
+        "integrity": "sha512-Yr0UWw8GHmMywkhAYAs/ltDqvcIp8oEFfffhiaPlCmIQr+O6bRifHiLImpdffQv3/SvdmSLMgbcWPiv1fqyH3w==",
+        "unpackedBytes": 301706380,
+        "directDependencyCount": 77,
+        "nativeRiskCount": 0,
         "shrinkwrapConsistent": false,
-        "shrinkwrapMissingCount": 31,
+        "shrinkwrapMissingCount": 217,
         "shrinkwrapMismatchedCount": 0
       },
       "checks": {
-        "pass": 1,
-        "warn": 3,
+        "pass": 2,
+        "warn": 2,
         "fail": 0,
         "pending": 15
       },
       "dependencyChangesFromStable": {
-        "added": [],
-        "removed": [
+        "added": [
           {
-            "name": "@openclaw/ai",
-            "spec": "2026.7.1-2"
-          },
-          {
-            "name": "@silvia-odwyer/photon-node",
-            "spec": "0.3.4"
+            "name": "highlight.js",
+            "spec": "11.12.0"
           }
         ],
+        "removed": [],
         "changed": [
           {
             "name": "@agentclientprotocol/sdk",
-            "stableSpec": "1.1.0",
-            "releaseSpec": "0.22.1"
+            "stableSpec": "2.1.0",
+            "releaseSpec": "1.9.0"
           },
           {
             "name": "@anthropic-ai/sdk",
-            "stableSpec": "0.109.1",
-            "releaseSpec": "0.100.1"
+            "stableSpec": "0.137.0",
+            "releaseSpec": "0.135.0"
           },
           {
-            "name": "@clack/core",
-            "stableSpec": "1.4.2",
-            "releaseSpec": "1.3.1"
+            "name": "@babel/generator",
+            "stableSpec": "8.0.10",
+            "releaseSpec": "8.0.6"
           },
           {
-            "name": "@clack/prompts",
-            "stableSpec": "1.6.0",
-            "releaseSpec": "1.4.0"
+            "name": "@babel/parser",
+            "stableSpec": "8.0.10",
+            "releaseSpec": "8.0.7"
+          },
+          {
+            "name": "@babel/traverse",
+            "stableSpec": "8.0.10",
+            "releaseSpec": "8.0.7"
           },
           {
             "name": "@earendil-works/pi-tui",
-            "stableSpec": "0.80.3",
-            "releaseSpec": "0.78.0"
+            "stableSpec": "1.4.0",
+            "releaseSpec": "1.3.0"
           },
           {
             "name": "@google/genai",
-            "stableSpec": "2.10.0",
-            "releaseSpec": "2.7.0"
+            "stableSpec": "2.32.0",
+            "releaseSpec": "2.30.0"
           },
           {
-            "name": "@mistralai/mistralai",
+            "name": "@lydell/node-pty",
+            "stableSpec": "1.2.0-beta.18",
+            "releaseSpec": "1.2.0-beta.15"
+          },
+          {
+            "name": "@modelcontextprotocol/client",
             "stableSpec": "2.4.0",
-            "releaseSpec": "2.2.5"
+            "releaseSpec": "2.3.1"
           },
           {
-            "name": "@openclaw/fs-safe",
+            "name": "@modelcontextprotocol/core",
+            "stableSpec": "2.4.0",
+            "releaseSpec": "2.3.1"
+          },
+          {
+            "name": "@modelcontextprotocol/node",
+            "stableSpec": "2.1.2",
+            "releaseSpec": "2.1.1"
+          },
+          {
+            "name": "@modelcontextprotocol/sdk",
+            "stableSpec": "1.32.2",
+            "releaseSpec": "1.32.1"
+          },
+          {
+            "name": "@modelcontextprotocol/server",
+            "stableSpec": "2.4.0",
+            "releaseSpec": "2.3.1"
+          },
+          {
+            "name": "@openclaw/ai",
+            "stableSpec": "2026.11.10",
+            "releaseSpec": "2026.11.9"
+          },
+          {
+            "name": "@openclaw/proxyline",
             "stableSpec": "0.4.1",
-            "releaseSpec": "0.3.0"
+            "releaseSpec": "0.4.0"
           },
           {
-            "name": "commander",
-            "stableSpec": "15.0.0",
-            "releaseSpec": "14.0.3"
-          },
-          {
-            "name": "grammy",
+            "name": "@opentelemetry/semantic-conventions",
             "stableSpec": "1.44.0",
             "releaseSpec": "1.43.0"
           },
           {
+            "name": "@trycua/cua-driver",
+            "stableSpec": "0.37.0",
+            "releaseSpec": "0.36.0"
+          },
+          {
+            "name": "chrome-devtools-mcp",
+            "stableSpec": "1.12.0",
+            "releaseSpec": "1.11.0"
+          },
+          {
+            "name": "dotenv",
+            "stableSpec": "18.0.9",
+            "releaseSpec": "18.0.8"
+          },
+          {
+            "name": "entities",
+            "stableSpec": "9.0.0",
+            "releaseSpec": "8.1.0"
+          },
+          {
+            "name": "execa",
+            "stableSpec": "10.2.1",
+            "releaseSpec": "10.2.0"
+          },
+          {
+            "name": "file-type",
+            "stableSpec": "22.3.0",
+            "releaseSpec": "22.2.0"
+          },
+          {
+            "name": "ignore",
+            "stableSpec": "7.0.14",
+            "releaseSpec": "7.0.13"
+          },
+          {
+            "name": "linkedom",
+            "stableSpec": "0.18.14",
+            "releaseSpec": "0.18.13"
+          },
+          {
+            "name": "node-edge-tts",
+            "stableSpec": "1.2.12",
+            "releaseSpec": "1.2.11"
+          },
+          {
+            "name": "npm",
+            "stableSpec": "12.2.1",
+            "releaseSpec": "12.2.0"
+          },
+          {
             "name": "openai",
-            "stableSpec": "6.45.0",
-            "releaseSpec": "6.39.1"
+            "stableSpec": "7.47.0",
+            "releaseSpec": "7.39.0"
           },
           {
-            "name": "playwright-core",
-            "stableSpec": "1.61.1",
-            "releaseSpec": "1.60.0"
-          },
-          {
-            "name": "quickjs-wasi",
-            "stableSpec": "3.0.2",
-            "releaseSpec": "3.0.0"
-          },
-          {
-            "name": "tar",
-            "stableSpec": "7.5.19",
-            "releaseSpec": "7.5.20"
+            "name": "rastermill",
+            "stableSpec": "0.4.1",
+            "releaseSpec": "0.4.0"
           },
           {
             "name": "typebox",
-            "stableSpec": "1.3.3",
-            "releaseSpec": "1.1.39"
-          },
-          {
-            "name": "web-tree-sitter",
-            "stableSpec": "0.26.10",
-            "releaseSpec": "0.26.9"
+            "stableSpec": "1.4.3",
+            "releaseSpec": "1.4.2"
           }
         ]
       },
@@ -217,1162 +278,362 @@
         {
           "name": "@agentclientprotocol/sdk",
           "change": "changed",
-          "declaredSpec": "0.22.1",
-          "resolvedVersion": "0.22.1",
-          "integrity": "sha512-DfqXtl/8gO9NImq094MTaCXEU2vkhh6v7q/kT+9UjZxUqj8hYaya2OjLVIqn16MzNHcXEpShTR2RIauLSYeDQQ==",
+          "declaredSpec": "1.9.0",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 34,
-            "sourceFileCount": 10,
-            "sourceBytes": 246020,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "child_process",
-              "path",
-              "readline/promises",
-              "stream",
-              "url"
-            ],
-            "networkApis": [
-              "fetch"
-            ],
-            "sourceSignals": [],
-            "browserCapabilities": [
-              "network",
-              "subprocess",
-              "terminal"
-            ]
-          }
+          "signals": null
         },
         {
           "name": "@anthropic-ai/sdk",
           "change": "changed",
-          "declaredSpec": "0.100.1",
-          "resolvedVersion": "0.100.1",
-          "integrity": "sha512-RANcEe7LpiLczkKGOwoXOTuFdPhuubS0i4xaAKOMpcqc55YO0mukgxppV7eygx3DXNjxWT6RYOLPyOy0aIAmwg==",
+          "declaredSpec": "0.135.0",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 1258,
-            "sourceFileCount": 278,
-            "sourceBytes": 1177239,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "buffer",
-              "child_process",
-              "crypto",
-              "fs",
-              "fs/promises",
-              "path",
-              "readline",
-              "stream",
-              "stream/promises",
-              "util"
-            ],
-            "networkApis": [
-              "@anthropic-ai/sdk",
-              "@modelcontextprotocol/sdk",
-              "fetch"
-            ],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "cryptography",
-              "environment",
-              "filesystem",
-              "network",
-              "subprocess",
-              "terminal"
-            ]
-          }
+          "signals": null
         },
         {
-          "name": "@clack/core",
+          "name": "@babel/generator",
           "change": "changed",
-          "declaredSpec": "1.3.1",
-          "resolvedVersion": "1.3.1",
-          "integrity": "sha512-fT1qHVGAag4IEkrupZ6lRRbNCs1vS9P01KB/sG8zKgvUztbYtFBtQpjSITNwooDZ83tpsPzP0mRNs1/KVszCRA==",
+          "declaredSpec": "8.0.6",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 7,
-            "sourceFileCount": 1,
-            "sourceBytes": 23869,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "process",
-              "readline",
-              "tty",
-              "util"
-            ],
-            "networkApis": [],
-            "sourceSignals": [],
-            "browserCapabilities": [
-              "terminal"
-            ]
-          }
+          "signals": null
         },
         {
-          "name": "@clack/prompts",
+          "name": "@babel/parser",
           "change": "changed",
-          "declaredSpec": "1.4.0",
-          "resolvedVersion": "1.4.0",
-          "integrity": "sha512-S0My7XPGIgpRWMDG8uRqalbgT+a6FmCUdOW+HaIOVVpUPHOb7RrpvjTjiODadKp06fsrVDJZlIzc6yCTp4AnxA==",
+          "declaredSpec": "8.0.7",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 7,
-            "sourceFileCount": 1,
-            "sourceBytes": 30802,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "fs",
-              "path",
-              "process",
-              "util"
-            ],
-            "networkApis": [],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "environment",
-              "filesystem"
-            ]
-          }
+          "signals": null
+        },
+        {
+          "name": "@babel/traverse",
+          "change": "changed",
+          "declaredSpec": "8.0.7",
+          "resolvedVersion": null,
+          "integrity": null,
+          "scan": {
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
+          },
+          "signals": null
         },
         {
           "name": "@earendil-works/pi-tui",
           "change": "changed",
-          "declaredSpec": "0.78.0",
-          "resolvedVersion": "0.78.0",
-          "integrity": "sha512-3a705FnsVVUhAyceShNB3kS2rpxcxLcx+hqB0u6MMMpHwQGbW+m++MqA6r7eOzq/8FLx5e3vDh38h/SVTk2qzw==",
+          "declaredSpec": "1.3.0",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 114,
-            "sourceFileCount": 27,
-            "sourceBytes": 380958,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [
-              "native/darwin/prebuilds/darwin-arm64/darwin-modifiers.node",
-              "native/darwin/prebuilds/darwin-x64/darwin-modifiers.node",
-              "native/win32/prebuilds/win32-arm64/win32-console-mode.node",
-              "native/win32/prebuilds/win32-x64/win32-console-mode.node"
-            ],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "child_process",
-              "events",
-              "fs",
-              "module",
-              "os",
-              "path",
-              "perf_hooks",
-              "url"
-            ],
-            "networkApis": [],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "environment",
-              "filesystem",
-              "native-code",
-              "os",
-              "subprocess"
-            ]
-          }
+          "signals": null
         },
         {
           "name": "@google/genai",
           "change": "changed",
-          "declaredSpec": "2.7.0",
-          "resolvedVersion": "2.7.0",
-          "integrity": "sha512-tv0DRtcndt2oEhBYy+5mA0TaXH98+L1Gt0AP9unBfH7DP20KhB7+O3QqAN1Lz+laMARGTHS7BFQSNpLbl4gm1g==",
+          "declaredSpec": "2.30.0",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 25,
-            "sourceFileCount": 9,
-            "sourceBytes": 5131969,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [
-              {
-                "name": "preinstall",
-                "command": "echo 'preinstall: no-op'"
-              }
-            ],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "buffer",
-              "crypto",
-              "fs",
-              "fs/promises",
-              "os",
-              "path",
-              "stream",
-              "stream/promises"
-            ],
-            "networkApis": [
-              "@google/genai",
-              "fetch",
-              "WebSocket",
-              "ws"
-            ],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "cryptography",
-              "environment",
-              "filesystem",
-              "install-script",
-              "network",
-              "os"
-            ]
-          }
+          "signals": null
         },
         {
-          "name": "@mistralai/mistralai",
+          "name": "@lydell/node-pty",
           "change": "changed",
-          "declaredSpec": "2.2.5",
-          "resolvedVersion": "2.2.5",
-          "integrity": "sha512-ATbWzKkNzNAZ+gtw9MI/c/ULTMG80tKUiRNIbQFfg4OP0uEZZpTfXZeBCNfs5Dq0uqMQ/tQWc4o6RRJQtMrpDA==",
+          "declaredSpec": "1.2.0-beta.15",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 5136,
-            "sourceFileCount": 974,
-            "sourceBytes": 1783721,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "buffer"
-            ],
-            "networkApis": [
-              "fetch",
-              "WebSocket",
-              "ws"
-            ],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "environment",
-              "network"
-            ]
-          }
+          "signals": null
         },
         {
-          "name": "@openclaw/fs-safe",
+          "name": "@modelcontextprotocol/client",
           "change": "changed",
-          "declaredSpec": "0.3.0",
-          "resolvedVersion": "0.3.0",
-          "integrity": "sha512-uIBE441CIt1kIURoP9qRGKZ8LkGyfD9ZzeESjwAd29ZPWtghws/5GR3Pjb67jKdcJHP1I6roNXcvnhzAU7lHlA==",
+          "declaredSpec": "2.3.1",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 302,
-            "sourceFileCount": 87,
-            "sourceBytes": 423084,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "child_process",
-              "crypto",
-              "fs",
-              "fs/promises",
-              "os",
-              "path",
-              "stream",
-              "stream/promises",
-              "url",
-              "util"
-            ],
-            "networkApis": [],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "cryptography",
-              "environment",
-              "filesystem",
-              "os",
-              "subprocess"
-            ]
-          }
+          "signals": null
         },
         {
-          "name": "commander",
+          "name": "@modelcontextprotocol/core",
           "change": "changed",
-          "declaredSpec": "14.0.3",
-          "resolvedVersion": "14.0.3",
-          "integrity": "sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw==",
+          "declaredSpec": "2.3.1",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 14,
-            "sourceFileCount": 8,
-            "sourceBytes": 126902,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "child_process",
-              "events",
-              "fs",
-              "path",
-              "process"
-            ],
-            "networkApis": [],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "environment",
-              "filesystem",
-              "subprocess"
-            ]
-          }
+          "signals": null
         },
         {
-          "name": "grammy",
+          "name": "@modelcontextprotocol/node",
           "change": "changed",
-          "declaredSpec": "1.43.0",
-          "resolvedVersion": "1.43.0",
-          "integrity": "sha512-7dYm06A945mXuIk/5HUlSjeyIYChW8vCEiU2dkOKKqJJzwAWxTkCc91Eqbz7TgODh2rtFFKWI/fekowWHOkmjQ==",
+          "declaredSpec": "2.1.1",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 45,
-            "sourceFileCount": 21,
-            "sourceBytes": 710060,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "fs",
-              "http",
-              "https",
-              "path",
-              "stream"
-            ],
-            "networkApis": [
-              "fetch"
-            ],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "environment",
-              "filesystem",
-              "network"
-            ]
-          }
+          "signals": null
         },
         {
-          "name": "openai",
+          "name": "@modelcontextprotocol/sdk",
           "change": "changed",
-          "declaredSpec": "6.39.1",
-          "resolvedVersion": "6.39.1",
-          "integrity": "sha512-z3dO9fEWOXBzlXynVb/xZ/tujzUjFWQWn3C0n0mw6Vo0zJTbEkaN4b2cLWjhJ6haJQx8LlREoafHRl+Gu/Hl+A==",
+          "declaredSpec": "1.32.1",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 2514,
-            "sourceFileCount": 556,
-            "sourceBytes": 1259171,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "buffer",
-              "child_process",
-              "fs/promises",
-              "process",
-              "stream"
-            ],
-            "networkApis": [
-              "fetch",
-              "openai",
-              "undici",
-              "WebSocket",
-              "ws"
-            ],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "environment",
-              "filesystem",
-              "network",
-              "subprocess"
-            ]
-          }
+          "signals": null
         },
         {
-          "name": "playwright-core",
+          "name": "@modelcontextprotocol/server",
           "change": "changed",
-          "declaredSpec": "1.60.0",
-          "resolvedVersion": "1.60.0",
-          "integrity": "sha512-9bW6zvX/m0lEbgTKJ6YppOKx8H3VOPBMOCFh2irXFOT4BbHgrx5hPjwJYLT40Lu+4qtD36qKc/Hn56StUW57IA==",
+          "declaredSpec": "2.3.1",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 106,
-            "sourceFileCount": 34,
-            "sourceBytes": 9443514,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "assert",
-              "async_hooks",
-              "buffer",
-              "child_process",
-              "constants",
-              "crypto",
-              "dns",
-              "events",
-              "fs",
-              "http",
-              "http2",
-              "https",
-              "inspector",
-              "module",
-              "net",
-              "os",
-              "path",
-              "process",
-              "readline",
-              "stream",
-              "tls",
-              "tty",
-              "url",
-              "util",
-              "vm",
-              "zlib"
-            ],
-            "networkApis": [
-              "@modelcontextprotocol/sdk",
-              "EventSource",
-              "fetch",
-              "WebSocket"
-            ],
-            "sourceSignals": [
-              "process.env",
-              "WebAssembly"
-            ],
-            "browserCapabilities": [
-              "cryptography",
-              "environment",
-              "filesystem",
-              "network",
-              "os",
-              "subprocess",
-              "terminal",
-              "wasm"
-            ]
-          }
-        },
-        {
-          "name": "quickjs-wasi",
-          "change": "changed",
-          "declaredSpec": "3.0.0",
-          "resolvedVersion": "3.0.0",
-          "integrity": "sha512-X7ouKC4ZVf9bXQ8rsE7+L6TeBbesejAJH61x16xRaGAQGfBHHRcniWgzJZZVtHc8rS9yVsY+Tvk8/usAosg4bg==",
-          "scan": {
-            "packageFileCount": 24,
-            "sourceFileCount": 4,
-            "sourceBytes": 99427,
-            "truncated": false
-          },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [
-              "extensions/crypto/crypto.so",
-              "extensions/encoding/encoding.so",
-              "extensions/headers/headers.so",
-              "extensions/structured-clone/structured-clone.so",
-              "extensions/url/url.so"
-            ],
-            "wasmArtifacts": [
-              "quickjs.wasm"
-            ],
-            "nodeBuiltins": [],
-            "networkApis": [
-              "fetch"
-            ],
-            "sourceSignals": [
-              "WebAssembly"
-            ],
-            "browserCapabilities": [
-              "native-code",
-              "network",
-              "wasm"
-            ]
-          }
-        },
-        {
-          "name": "tar",
-          "change": "changed",
-          "declaredSpec": "7.5.20",
-          "resolvedVersion": "7.5.20",
-          "integrity": "sha512-9FcyK4PA6+WbzlTM9WhQm6vB5W7cP7dUiPsv1g7YDwEQnQ1CGpK3MGlKk/ITVWMk05kHZuBhmVhiv8LZoy/PFQ==",
-          "scan": {
-            "packageFileCount": 249,
-            "sourceFileCount": 62,
-            "sourceBytes": 528088,
-            "truncated": false
-          },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "assert",
-              "buffer",
-              "crypto",
-              "events",
-              "fs",
-              "fs/promises",
-              "path",
-              "stream",
-              "string_decoder",
-              "zlib"
-            ],
-            "networkApis": [],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "cryptography",
-              "environment",
-              "filesystem"
-            ]
-          }
-        },
-        {
-          "name": "typebox",
-          "change": "changed",
-          "declaredSpec": "1.1.39",
-          "resolvedVersion": "1.1.39",
-          "integrity": "sha512-vj0afVtOfLQvv0GR0VxVagYxsXN64btL7Z9XoaG0ZggH3mruMMkOO6hXdgMsjCY3shZgEvooAWVeznQVs5c43w==",
-          "scan": {
-            "packageFileCount": 1383,
-            "sourceFileCount": 690,
-            "sourceBytes": 833932,
-            "truncated": false
-          },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [],
-            "networkApis": [],
-            "sourceSignals": [],
-            "browserCapabilities": []
-          }
-        },
-        {
-          "name": "web-tree-sitter",
-          "change": "changed",
-          "declaredSpec": "0.26.9",
-          "resolvedVersion": "0.26.9",
-          "integrity": "sha512-YJwSHANl6XFgeEjB8nitgj0qZYt5gkIesJ4w2srS2wcLB4GUa4xcOkM0YaMsU6WNR53YVIkDSY7Ej4pf3IXtCA==",
-          "scan": {
-            "packageFileCount": 19,
-            "sourceFileCount": 4,
-            "sourceBytes": 736552,
-            "truncated": false
-          },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [
-              "debug/web-tree-sitter.wasm",
-              "web-tree-sitter.wasm"
-            ],
-            "nodeBuiltins": [
-              "fs",
-              "fs/promises",
-              "module",
-              "path",
-              "url"
-            ],
-            "networkApis": [
-              "fetch"
-            ],
-            "sourceSignals": [
-              "WebAssembly"
-            ],
-            "browserCapabilities": [
-              "filesystem",
-              "network",
-              "wasm"
-            ]
-          }
-        }
-      ],
-      "gatewayContractFromStable": {
-        "classification": "breaking",
-        "inspection": {
-          "stable": "complete",
-          "release": "complete"
-        },
-        "protocol": {
-          "stable": {
-            "current": 4,
-            "minClient": 4,
-            "minProbe": 3,
-            "minNode": 3
-          },
-          "release": {
-            "current": 4,
-            "minClient": 4,
-            "minProbe": 4,
-            "minNode": null
-          },
-          "changed": true
-        },
-        "distribution": {
-          "legacyPluginDeclarationCount": {
-            "stable": 0,
-            "release": 38,
-            "delta": 38
-          },
-          "publicDeclarationChanged": true,
-          "publicRuntimeChanged": true,
-          "versionModuleChanged": true,
-          "serverMethodsChanged": true
-        },
-        "coreMethods": {
-          "added": [],
-          "removed": [
-            "agents.workspace.get",
-            "agents.workspace.list",
-            "audit.list",
-            "controlUi.githubPreview",
-            "crestodian.chat",
-            "crestodian.setup.activate",
-            "crestodian.setup.detect",
-            "device.pair.setupCode",
-            "skills.curator.pin",
-            "skills.curator.restore",
-            "skills.curator.status",
-            "skills.curator.unpin",
-            "system.info",
-            "terminal.attach",
-            "terminal.close",
-            "terminal.input",
-            "terminal.list",
-            "terminal.open",
-            "terminal.resize",
-            "terminal.text",
-            "tts.speak",
-            "worktrees.create",
-            "worktrees.gc",
-            "worktrees.list",
-            "worktrees.remove",
-            "worktrees.restore"
-          ]
-        },
-        "schemaExports": {
-          "added": [],
-          "removed": [
-            "AgentsWorkspaceEntrySchema",
-            "AgentsWorkspaceFileSchema",
-            "AgentsWorkspaceGetParamsSchema",
-            "AgentsWorkspaceGetResultSchema",
-            "AgentsWorkspaceListParamsSchema",
-            "AgentsWorkspaceListResultSchema",
-            "AuditEventSchema",
-            "AuditListParamsSchema",
-            "AuditListResultSchema",
-            "CrestodianChatParamsSchema",
-            "CrestodianChatResultSchema",
-            "CrestodianSetupActivateParamsSchema",
-            "CrestodianSetupActivateResultSchema",
-            "CrestodianSetupDetectParamsSchema",
-            "CrestodianSetupDetectResultSchema",
-            "CronAddResultSchema",
-            "CronDeclarativeAddResultSchema",
-            "SessionsCreateResultSchema",
-            "SessionWorktreeInfoSchema",
-            "SkillsCuratorActionParamsSchema",
-            "SkillsCuratorActionResultSchema",
-            "SkillsCuratorStatusParamsSchema",
-            "SkillsCuratorStatusResultSchema",
-            "SystemInfoParamsSchema",
-            "SystemInfoResultSchema",
-            "TerminalAckResultSchema",
-            "TerminalAttachParamsSchema",
-            "TerminalAttachResultSchema",
-            "TerminalCloseParamsSchema",
-            "TerminalDataEventSchema",
-            "TerminalEventSchema",
-            "TerminalExitEventSchema",
-            "TerminalInputParamsSchema",
-            "TerminalListResultSchema",
-            "TerminalOpenParamsSchema",
-            "TerminalOpenResultSchema",
-            "TerminalResizeParamsSchema",
-            "TerminalSessionInfoSchema",
-            "TerminalTextParamsSchema",
-            "TerminalTextResultSchema",
-            "TtsSpeakParamsSchema",
-            "TtsSpeakResultSchema",
-            "WorktreeRecordSchema",
-            "WorktreesCreateParamsSchema",
-            "WorktreesGcParamsSchema",
-            "WorktreesGcResultSchema",
-            "WorktreesListParamsSchema",
-            "WorktreesListResultSchema",
-            "WorktreesRemoveParamsSchema",
-            "WorktreesRemoveResultSchema",
-            "WorktreesRestoreParamsSchema"
-          ]
-        },
-        "validators": {
-          "added": [],
-          "removed": [
-            "validateAgentsWorkspaceGetParams",
-            "validateAgentsWorkspaceListParams",
-            "validateAuditListParams",
-            "validateCrestodianChatParams",
-            "validateCrestodianSetupActivateParams",
-            "validateCrestodianSetupDetectParams",
-            "validateDevicePairSetupCodeParams",
-            "validateExecApprovalsNodeSnapshot",
-            "validateSkillsCuratorActionParams",
-            "validateSkillsCuratorStatusParams",
-            "validateSystemInfoParams",
-            "validateSystemInfoResult",
-            "validateTerminalAttachParams",
-            "validateTerminalCloseParams",
-            "validateTerminalEvent",
-            "validateTerminalInputParams",
-            "validateTerminalOpenParams",
-            "validateTerminalResizeParams",
-            "validateTerminalTextParams",
-            "validateTtsSpeakParams",
-            "validateTtsSpeakResult",
-            "validateWorktreesCreateParams",
-            "validateWorktreesGcParams",
-            "validateWorktreesListParams",
-            "validateWorktreesRemoveParams",
-            "validateWorktreesRestoreParams"
-          ]
-        },
-        "eventSchemas": {
-          "added": [],
-          "removed": [
-            "AuditEventSchema",
-            "TerminalDataEventSchema",
-            "TerminalEventSchema",
-            "TerminalExitEventSchema"
-          ]
-        }
-      },
-      "deltaFromStable": {
-        "unpackedBytes": -920298,
-        "directDependencyCount": -2,
-        "nativeRiskCount": 0,
-        "shrinkwrapMissingCount": 0
-      }
-    },
-    {
-      "channel": "preview",
-      "version": "2026.7.2-beta.3",
-      "status": "probing",
-      "reportPath": "releases/openclaw-2026.7.2-beta.3.json",
-      "generatedAt": "2026-07-21T12:47:37.753Z",
-      "upstreamPublishedAt": "2026-07-18T23:15:12.160Z",
-      "reportLatencySeconds": 221546,
-      "runtimeEvidence": false,
-      "artifact": {
-        "integrity": "sha512-b1U1Q2/IrP3NX3ZWruiasWEJPjl2dq0Hm8ZByZrE7GwLqo78wu8eB7eJAqCEu29MtlBxLLSKz58SE01WUBf7dw==",
-        "unpackedBytes": 109663149,
-        "directDependencyCount": 63,
-        "nativeRiskCount": 13,
-        "shrinkwrapConsistent": false,
-        "shrinkwrapMissingCount": 37,
-        "shrinkwrapMismatchedCount": 0
-      },
-      "checks": {
-        "pass": 1,
-        "warn": 3,
-        "fail": 0,
-        "pending": 15
-      },
-      "dependencyChangesFromStable": {
-        "added": [
-          {
-            "name": "entities",
-            "spec": "8.0.0"
-          },
-          {
-            "name": "execa",
-            "spec": "9.6.1"
-          },
-          {
-            "name": "iconv-lite",
-            "spec": "0.7.2"
-          },
-          {
-            "name": "ms",
-            "spec": "2.1.3"
-          },
-          {
-            "name": "p-limit",
-            "spec": "7.3.0"
-          },
-          {
-            "name": "p-map",
-            "spec": "7.0.5"
-          },
-          {
-            "name": "pretty-ms",
-            "spec": "9.3.0"
-          },
-          {
-            "name": "semver",
-            "spec": "7.8.5"
-          }
-        ],
-        "removed": [
-          {
-            "name": "glob",
-            "spec": "13.0.6"
-          }
-        ],
-        "changed": [
-          {
-            "name": "@earendil-works/pi-tui",
-            "stableSpec": "0.80.3",
-            "releaseSpec": "0.80.9"
-          },
-          {
-            "name": "@openclaw/ai",
-            "stableSpec": "2026.7.1-2",
-            "releaseSpec": "2026.7.2-beta.3"
-          }
-        ]
-      },
-      "dependencyRiskFromStable": [
-        {
-          "name": "@earendil-works/pi-tui",
-          "change": "changed",
-          "declaredSpec": "0.80.9",
-          "resolvedVersion": "0.80.9",
-          "integrity": "sha512-unPTW8hRgIHEGjV8mJJ2jqm+fzgnRubes6V2FPk9ay1W9ZLofcpYQ3NDfrODXSci+oKbBpX9JyYUMfQV6jCA/A==",
-          "scan": {
-            "packageFileCount": 118,
-            "sourceFileCount": 28,
-            "sourceBytes": 403220,
-            "truncated": false
-          },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [
-              "native/darwin/prebuilds/darwin-arm64/darwin-modifiers.node",
-              "native/darwin/prebuilds/darwin-x64/darwin-modifiers.node",
-              "native/win32/prebuilds/win32-arm64/win32-console-mode.node",
-              "native/win32/prebuilds/win32-x64/win32-console-mode.node"
-            ],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "child_process",
-              "events",
-              "fs",
-              "module",
-              "os",
-              "path",
-              "perf_hooks",
-              "url"
-            ],
-            "networkApis": [],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "environment",
-              "filesystem",
-              "native-code",
-              "os",
-              "subprocess"
-            ]
-          }
+          "signals": null
         },
         {
           "name": "@openclaw/ai",
           "change": "changed",
-          "declaredSpec": "2026.7.2-beta.3",
-          "resolvedVersion": "2026.7.2-beta.3",
-          "integrity": "sha512-46wDa0Zh/bDvilR/ZIyNSE5SbNAaIkSSMu6Vpm+CKw7EKiARZI674+KgQdJwdQTwl1FMIvZMyfJZre81ymgo/Q==",
+          "declaredSpec": "2026.11.9",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 67,
-            "sourceFileCount": 44,
-            "sourceBytes": 414088,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "crypto",
-              "module",
-              "util"
-            ],
-            "networkApis": [
-              "@anthropic-ai/sdk",
-              "@google/genai",
-              "@mistralai/mistralai",
-              "fetch",
-              "openai"
-            ],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "cryptography",
-              "environment",
-              "network"
-            ]
-          }
+          "signals": null
+        },
+        {
+          "name": "@openclaw/proxyline",
+          "change": "changed",
+          "declaredSpec": "0.4.0",
+          "resolvedVersion": null,
+          "integrity": null,
+          "scan": {
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
+          },
+          "signals": null
+        },
+        {
+          "name": "@opentelemetry/semantic-conventions",
+          "change": "changed",
+          "declaredSpec": "1.43.0",
+          "resolvedVersion": null,
+          "integrity": null,
+          "scan": {
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
+          },
+          "signals": null
+        },
+        {
+          "name": "@trycua/cua-driver",
+          "change": "changed",
+          "declaredSpec": "0.36.0",
+          "resolvedVersion": null,
+          "integrity": null,
+          "scan": {
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
+          },
+          "signals": null
+        },
+        {
+          "name": "chrome-devtools-mcp",
+          "change": "changed",
+          "declaredSpec": "1.11.0",
+          "resolvedVersion": null,
+          "integrity": null,
+          "scan": {
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
+          },
+          "signals": null
+        },
+        {
+          "name": "dotenv",
+          "change": "changed",
+          "declaredSpec": "18.0.8",
+          "resolvedVersion": null,
+          "integrity": null,
+          "scan": {
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
+          },
+          "signals": null
         },
         {
           "name": "entities",
-          "change": "added",
-          "declaredSpec": "8.0.0",
-          "resolvedVersion": "8.0.0",
-          "integrity": "sha512-zwfzJecQ/Uej6tusMqwAqU/6KL2XaB2VZ2Jg54Je6ahNBGNH6Ek6g3jjNCF0fG9EWQKGZNddNjU5F1ZQn/sBnA==",
+          "change": "changed",
+          "declaredSpec": "8.1.0",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 58,
-            "sourceFileCount": 11,
-            "sourceBytes": 87044,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [],
-            "networkApis": [],
-            "sourceSignals": [],
-            "browserCapabilities": []
-          }
+          "signals": null
         },
         {
           "name": "execa",
-          "change": "added",
-          "declaredSpec": "9.6.1",
-          "resolvedVersion": "9.6.1",
-          "integrity": "sha512-9Be3ZoN4LmYR90tUoVu2te2BsbzHfhJyfEiAVfz7N5/zv+jduIfLrV2xdQXOHbaD6KgpGdO9PRPM1Y4Q9QkPkA==",
+          "change": "changed",
+          "declaredSpec": "10.2.0",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 142,
-            "sourceFileCount": 106,
-            "sourceBytes": 225674,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "buffer",
-              "child_process",
-              "events",
-              "fs",
-              "os",
-              "path",
-              "process",
-              "stream",
-              "stream/promises",
-              "string_decoder",
-              "timers/promises",
-              "tty",
-              "url",
-              "util",
-              "v8"
-            ],
-            "networkApis": [],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "environment",
-              "filesystem",
-              "os",
-              "subprocess",
-              "terminal"
-            ]
-          }
+          "signals": null
         },
         {
-          "name": "iconv-lite",
-          "change": "added",
-          "declaredSpec": "0.7.2",
-          "resolvedVersion": "0.7.2",
-          "integrity": "sha512-im9DjEDQ55s9fL4EYzOAv0yMqmMBSZp6G0VvFyTMPKWxiSBHUj9NW/qqLmXUwXrrM7AvqSlTCfvqRb0cM8yYqw==",
+          "name": "file-type",
+          "change": "changed",
+          "declaredSpec": "22.2.0",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 27,
-            "sourceFileCount": 14,
-            "sourceBytes": 109025,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [
-              "stream",
-              "string_decoder"
-            ],
-            "networkApis": [],
-            "sourceSignals": [],
-            "browserCapabilities": []
-          }
+          "signals": null
         },
         {
-          "name": "ms",
+          "name": "highlight.js",
           "change": "added",
-          "declaredSpec": "2.1.3",
-          "resolvedVersion": "2.1.3",
-          "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==",
+          "declaredSpec": "11.12.0",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 4,
-            "sourceFileCount": 1,
-            "sourceBytes": 3024,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [],
-            "networkApis": [],
-            "sourceSignals": [],
-            "browserCapabilities": []
-          }
+          "signals": null
         },
         {
-          "name": "p-limit",
-          "change": "added",
-          "declaredSpec": "7.3.0",
-          "resolvedVersion": "7.3.0",
-          "integrity": "sha512-7cIXg/Z0M5WZRblrsOla88S4wAK+zOQQWeBYfV3qJuJXMr+LnbYjaadrFaS0JILfEDPVqHyKnZ1Z/1d6J9VVUw==",
+          "name": "ignore",
+          "change": "changed",
+          "declaredSpec": "7.0.13",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 5,
-            "sourceFileCount": 1,
-            "sourceBytes": 3310,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [],
-            "networkApis": [],
-            "sourceSignals": [],
-            "browserCapabilities": []
-          }
+          "signals": null
         },
         {
-          "name": "p-map",
-          "change": "added",
-          "declaredSpec": "7.0.5",
-          "resolvedVersion": "7.0.5",
-          "integrity": "sha512-e8vJF4XdVkzqqSHguEMz41mQO1wKwxKm5ENrUJQUu9kLDCtn83cxbyHZcszr4QC5zEA7WffRRC4gsTecC7J9oA==",
+          "name": "linkedom",
+          "change": "changed",
+          "declaredSpec": "0.18.13",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 5,
-            "sourceFileCount": 1,
-            "sourceBytes": 7192,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [],
-            "networkApis": [],
-            "sourceSignals": [],
-            "browserCapabilities": []
-          }
+          "signals": null
         },
         {
-          "name": "pretty-ms",
-          "change": "added",
-          "declaredSpec": "9.3.0",
-          "resolvedVersion": "9.3.0",
-          "integrity": "sha512-gjVS5hOP+M3wMm5nmNOucbIrqudzs9v/57bWRHQWLYklXqoXKrVfYW2W9+glfGsqtPgpiz5WwyEEB+ksXIx3gQ==",
+          "name": "node-edge-tts",
+          "change": "changed",
+          "declaredSpec": "1.2.11",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 5,
-            "sourceFileCount": 1,
-            "sourceBytes": 4471,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [],
-            "networkApis": [],
-            "sourceSignals": [],
-            "browserCapabilities": []
-          }
+          "signals": null
         },
         {
-          "name": "semver",
-          "change": "added",
-          "declaredSpec": "7.8.5",
-          "resolvedVersion": "7.8.5",
-          "integrity": "sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==",
+          "name": "npm",
+          "change": "changed",
+          "declaredSpec": "12.2.0",
+          "resolvedVersion": null,
+          "integrity": null,
           "scan": {
-            "packageFileCount": 53,
-            "sourceFileCount": 49,
-            "sourceBytes": 72268,
-            "truncated": false
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
           },
-          "signals": {
-            "lifecycleScripts": [],
-            "nativeArtifacts": [],
-            "wasmArtifacts": [],
-            "nodeBuiltins": [],
-            "networkApis": [],
-            "sourceSignals": [
-              "process.env"
-            ],
-            "browserCapabilities": [
-              "environment"
-            ]
-          }
+          "signals": null
+        },
+        {
+          "name": "openai",
+          "change": "changed",
+          "declaredSpec": "7.39.0",
+          "resolvedVersion": null,
+          "integrity": null,
+          "scan": {
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
+          },
+          "signals": null
+        },
+        {
+          "name": "rastermill",
+          "change": "changed",
+          "declaredSpec": "0.4.0",
+          "resolvedVersion": null,
+          "integrity": null,
+          "scan": {
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
+          },
+          "signals": null
+        },
+        {
+          "name": "typebox",
+          "change": "changed",
+          "declaredSpec": "1.4.2",
+          "resolvedVersion": null,
+          "integrity": null,
+          "scan": {
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
+          },
+          "signals": null
         }
       ],
       "gatewayContractFromStable": {
@@ -1402,508 +663,192 @@
             "release": 0,
             "delta": 0
           },
-          "publicDeclarationChanged": true,
+          "publicDeclarationChanged": false,
           "publicRuntimeChanged": true,
-          "versionModuleChanged": false,
+          "versionModuleChanged": true,
           "serverMethodsChanged": true
         },
         "coreMethods": {
           "added": [
-            "audit.activity.list",
-            "chat.toolTitles",
-            "controlUi.sessionPullRequests",
-            "conversations.list",
-            "conversations.send",
-            "conversations.turn",
-            "conversations.turn.cancel",
-            "device.pair.rename",
-            "environments.create",
-            "environments.destroy",
-            "fs.listDir",
-            "gateway.suspend.prepare",
-            "gateway.suspend.resume",
-            "gateway.suspend.status",
-            "mcp.app.callTool",
-            "mcp.app.listResources",
-            "mcp.app.listResourceTemplates",
-            "mcp.app.listTools",
-            "mcp.app.readResource",
-            "mcp.app.view",
-            "migrations.memory.apply",
-            "migrations.memory.plan",
-            "models.probe",
-            "node.invoke.progress",
-            "node.pluginTools.update",
-            "node.skills.update",
-            "openclaw.approval.list",
-            "openclaw.chat",
-            "openclaw.setup.activate",
-            "openclaw.setup.auth.start",
-            "openclaw.setup.detect",
-            "openclaw.setup.prepare.start",
-            "openclaw.setup.verify",
-            "plugin.surface.refresh",
-            "plugins.install",
-            "plugins.list",
-            "plugins.refresh",
-            "plugins.search",
-            "plugins.setEnabled",
-            "plugins.uninstall",
-            "sessions.catalog.archive",
-            "sessions.catalog.continue",
-            "sessions.catalog.list",
-            "sessions.catalog.read",
-            "sessions.diff",
-            "sessions.dispatch",
-            "sessions.files.reveal",
-            "sessions.files.set",
-            "sessions.groups.delete",
-            "sessions.groups.list",
-            "sessions.groups.put",
-            "sessions.groups.rename",
-            "sessions.reclaim",
-            "sessions.search",
-            "talk.session.acknowledgeMark",
-            "taskSuggestions.accept",
-            "taskSuggestions.create",
-            "taskSuggestions.dismiss",
-            "taskSuggestions.list",
-            "terminal.upload",
-            "ui.command",
-            "worktrees.branches"
+            "skills.workshop.applyDraft",
+            "skills.workshop.archive",
+            "skills.workshop.changes",
+            "skills.workshop.discardDraft",
+            "skills.workshop.list",
+            "skills.workshop.read",
+            "skills.workshop.restore",
+            "skills.workshop.undo"
           ],
           "removed": [
-            "crestodian.chat",
-            "crestodian.setup.activate",
-            "crestodian.setup.detect",
-            "node.pair.approve",
-            "node.pair.list",
-            "node.pair.reject",
-            "node.pair.request",
-            "node.pair.verify",
-            "skills.bins",
-            "skills.curator.pin",
-            "skills.curator.restore",
-            "skills.curator.status",
-            "skills.curator.unpin",
-            "skills.detail",
-            "skills.install",
-            "skills.proposals.apply",
-            "skills.proposals.create",
-            "skills.proposals.inspect",
-            "skills.proposals.list",
-            "skills.proposals.quarantine",
-            "skills.proposals.reject",
-            "skills.proposals.requestRevision",
-            "skills.proposals.revise",
-            "skills.proposals.update",
-            "skills.search",
-            "skills.securityVerdicts",
-            "skills.skillCard",
-            "skills.status",
-            "skills.update",
-            "skills.upload.begin",
-            "skills.upload.chunk",
-            "skills.upload.commit"
+            "chat.steerNow",
+            "device.pair.code",
+            "mcp.authLogout",
+            "openclawId.account",
+            "openclawId.authority",
+            "openclawId.people",
+            "openclawId.status",
+            "sessions.catalog.resolve",
+            "sessions.files.preview",
+            "sessions.files.preview.release",
+            "sessions.groups.create",
+            "toolUsage.import",
+            "toolUsage.reset",
+            "toolUsage.status",
+            "users.channelIdentity"
           ]
         },
         "schemaExports": {
-          "added": [
-            "AllowedApprovalSnapshotSchema",
-            "ApprovalAllowDecisionSchema",
-            "ApprovalDecisionSchema",
-            "ApprovalGetParamsSchema",
-            "ApprovalGetResultSchema",
-            "ApprovalHistoryParamsSchema",
-            "ApprovalHistoryResultSchema",
-            "ApprovalKindSchema",
-            "ApprovalPresentationSchema",
-            "ApprovalResolveParamsSchema",
-            "ApprovalResolveResultSchema",
-            "ApprovalSnapshotSchema",
-            "ApprovalTerminalReasonSchema",
-            "AuditActivityAgentRunV1Schema",
-            "AuditActivityEventV1Schema",
-            "AuditActivityInboundMessageV1Schema",
-            "AuditActivityListParamsSchema",
-            "AuditActivityListResultSchema",
-            "AuditActivityOutboundMessageV1Schema",
-            "AuditActivityToolActionV1Schema",
-            "AuthProbeStatusSchema",
-            "CancelledApprovalSnapshotSchema",
-            "ChatToolTitlesParamsSchema",
-            "ChatToolTitlesResultSchema",
-            "ConversationListItemSchema",
-            "ConversationListParamsSchema",
-            "ConversationListResultSchema",
-            "ConversationSendParamsSchema",
-            "ConversationSendResultSchema",
-            "ConversationTurnCancelParamsSchema",
-            "ConversationTurnCancelResultSchema",
-            "ConversationTurnParamsSchema",
-            "ConversationTurnReplySchema",
-            "ConversationTurnResultSchema",
-            "DeniedApprovalSnapshotSchema",
-            "EnvironmentsCreateParamsSchema",
-            "EnvironmentsCreateResultSchema",
-            "EnvironmentsDestroyParamsSchema",
-            "EnvironmentsDestroyResultSchema",
-            "ExecApprovalPresentationSchema",
-            "ExpiredApprovalSnapshotSchema",
-            "FsDirEntrySchema",
-            "FsListDirParamsSchema",
-            "FsListDirResultSchema",
-            "GatewaySuspendBlockerSchema",
-            "GatewaySuspendPrepareBusyResultSchema",
-            "GatewaySuspendPrepareParamsSchema",
-            "GatewaySuspendPrepareReadyResultSchema",
-            "GatewaySuspendPrepareResultSchema",
-            "GatewaySuspendResumeParamsSchema",
-            "GatewaySuspendResumeResultSchema",
-            "GatewaySuspendStatusParamsSchema",
-            "GatewaySuspendStatusReadyResultSchema",
-            "GatewaySuspendStatusResultSchema",
-            "GatewaySuspendStatusRunningResultSchema",
-            "GatewaySuspendTaskBlockerSchema",
-            "MemoryMigrationItemSchema",
-            "MemoryMigrationItemStatusSchema",
-            "MemoryMigrationProviderPlanSchema",
-            "MemoryMigrationSummarySchema",
-            "MigrationsMemoryApplyParamsSchema",
-            "MigrationsMemoryApplyResultSchema",
-            "MigrationsMemoryPlanParamsSchema",
-            "MigrationsMemoryPlanResultSchema",
-            "ModelsProbeParamsSchema",
-            "ModelsProbeResultSchema",
-            "ModelsProbeTargetResultSchema",
-            "NodeInvokeInputEventSchema",
-            "NodeInvokeProgressParamsSchema",
-            "NodePluginToolDescriptorSchema",
-            "NodePluginToolsUpdateParamsSchema",
-            "NodePresenceActivityPayloadSchema",
-            "NodeSkillDescriptorSchema",
-            "NodeSkillsUpdateParamsSchema",
-            "PendingApprovalSnapshotSchema",
-            "PluginApprovalPresentationSchema",
-            "PluginApprovalSeveritySchema",
-            "PluginCatalogEntrySchema",
-            "PluginCatalogInstallActionSchema",
-            "PluginSearchPackageSchema",
-            "PluginSearchResultEntrySchema",
-            "PluginsInstallParamsSchema",
-            "PluginsInstallResultSchema",
-            "PluginsListParamsSchema",
-            "PluginsListResultSchema",
-            "PluginsRefreshParamsSchema",
-            "PluginsRefreshResultSchema",
-            "PluginsSearchParamsSchema",
-            "PluginsSearchResultSchema",
-            "PluginsSetEnabledParamsSchema",
-            "PluginsSetEnabledResultSchema",
-            "PluginsUninstallParamsSchema",
-            "PluginsUninstallResultSchema",
-            "QuestionAnswersSchema",
-            "QuestionGetParamsSchema",
-            "QuestionGetResultSchema",
-            "QuestionListParamsSchema",
-            "QuestionListResultSchema",
-            "QuestionOptionSchema",
-            "QuestionRecordSchema",
-            "QuestionRequestedEventSchema",
-            "QuestionRequestParamsSchema",
-            "QuestionRequestQuestionSchema",
-            "QuestionRequestResultSchema",
-            "QuestionResolvedEventSchema",
-            "QuestionResolveParamsSchema",
-            "QuestionResolveResultSchema",
-            "QuestionSchema",
-            "QuestionStatusSchema",
-            "QuestionWaitAnswerParamsSchema",
-            "QuestionWaitAnswerResultSchema",
-            "SessionApprovalEventSchema",
-            "SessionApprovalReplaySchema",
-            "SessionCatalogCapabilitiesSchema",
-            "SessionCatalogDescriptorSchema",
-            "SessionCatalogHostSchema",
-            "SessionCatalogSchema",
-            "SessionCatalogSessionSchema",
-            "SessionCatalogTranscriptItemSchema",
-            "SessionDiffFileSchema",
-            "SessionDiffFileStatusSchema",
-            "SessionGroupSchema",
-            "SessionPlacementSchema",
-            "SessionPlacementStateSchema",
-            "SessionsCatalogArchiveParamsSchema",
-            "SessionsCatalogArchiveResultSchema",
-            "SessionsCatalogContinueParamsSchema",
-            "SessionsCatalogContinueResultSchema",
-            "SessionsCatalogHostEventSchema",
-            "SessionsCatalogListParamsSchema",
-            "SessionsCatalogListResultSchema",
-            "SessionsCatalogReadParamsSchema",
-            "SessionsCatalogReadResultSchema",
-            "SessionsDiffParamsSchema",
-            "SessionsDiffResultSchema",
-            "SessionsDispatchParamsSchema",
-            "SessionsDispatchResultSchema",
-            "SessionsFilesRevealParamsSchema",
-            "SessionsFilesRevealResultSchema",
-            "SessionsFilesSetParamsSchema",
-            "SessionsFilesSetResultSchema",
-            "SessionsGroupsDeleteParamsSchema",
-            "SessionsGroupsListParamsSchema",
-            "SessionsGroupsListResultSchema",
-            "SessionsGroupsMutationResultSchema",
-            "SessionsGroupsPutParamsSchema",
-            "SessionsGroupsRenameParamsSchema",
-            "SessionsReclaimParamsSchema",
-            "SessionsReclaimResultSchema",
-            "SessionsSearchHitSchema",
-            "SessionsSearchParamsSchema",
-            "SessionsSearchResultSchema",
-            "SkillsProposalHistoryScanParamsSchema",
-            "SkillsProposalHistoryScanResultSchema",
-            "SkillsProposalHistoryStatusParamsSchema",
-            "SystemAgentChatParamsSchema",
-            "SystemAgentChatQuestionSchema",
-            "SystemAgentChatResultSchema",
-            "SystemAgentSetupActivateParamsSchema",
-            "SystemAgentSetupActivateResultSchema",
-            "SystemAgentSetupAuthStartParamsSchema",
-            "SystemAgentSetupAuthStartResultSchema",
-            "SystemAgentSetupDetectParamsSchema",
-            "SystemAgentSetupDetectResultSchema",
-            "SystemAgentSetupVerifyParamsSchema",
-            "SystemAgentSetupVerifyResultSchema",
-            "TalkSessionAcknowledgeMarkParamsSchema",
-            "TaskSuggestionEventSchema",
-            "TaskSuggestionResolutionSchema",
-            "TaskSuggestionsAcceptParamsSchema",
-            "TaskSuggestionsAcceptResultSchema",
-            "TaskSuggestionSchema",
-            "TaskSuggestionsCreateParamsSchema",
-            "TaskSuggestionsCreateResultSchema",
-            "TaskSuggestionsDismissParamsSchema",
-            "TaskSuggestionsDismissResultSchema",
-            "TaskSuggestionsListParamsSchema",
-            "TaskSuggestionsListResultSchema",
-            "TerminalApprovalSnapshotSchema",
-            "TerminalUploadParamsSchema",
-            "TerminalUploadResultSchema",
-            "UiClosePaneCommandSchema",
-            "UiCommandParamsSchema",
-            "UiCommandResultSchema",
-            "UiCommandSchema",
-            "UiFocusCommandSchema",
-            "UiNavigateCommandSchema",
-            "UiPanelCommandSchema",
-            "UiSidebarCommandSchema",
-            "UiSplitCommandSchema",
-            "WorkerAdmissionFailureReasonSchema",
-            "WorkerAdmissionHandshakeSchema",
-            "WorkerAdmissionResponseFrameSchema",
-            "WorkerConnectRequestFrameSchema",
-            "WorkerEnvironmentMetadataSchema",
-            "WorkerEnvironmentStateSchema",
-            "WorkerHeartbeatParamsSchema",
-            "WorkerHeartbeatRequestFrameSchema",
-            "WorkerHeartbeatResponseFrameSchema",
-            "WorkerInferenceCancelParamsSchema",
-            "WorkerInferenceCancelRequestFrameSchema",
-            "WorkerInferenceCancelResponseFrameSchema",
-            "WorkerInferenceCancelResultSchema",
-            "WorkerInferenceContextSchema",
-            "WorkerInferenceErrorReasonSchema",
-            "WorkerInferenceErrorShapeSchema",
-            "WorkerInferenceEventFrameSchema",
-            "WorkerInferenceEventParamsSchema",
-            "WorkerInferenceModelRefSchema",
-            "WorkerInferenceOptionsSchema",
-            "WorkerInferenceResolvedModelSchema",
-            "WorkerInferenceStartParamsSchema",
-            "WorkerInferenceStartRequestFrameSchema",
-            "WorkerInferenceStartResponseFrameSchema",
-            "WorkerInferenceStartResultSchema",
-            "WorkerInferenceTerminalFrameSchema",
-            "WorkerInferenceTerminalOutcomeSchema",
-            "WorkerInferenceTerminalParamsSchema",
-            "WorkerLiveEventErrorDetailsSchema",
-            "WorkerLiveEventErrorShapeSchema",
-            "WorkerLiveEventParamsSchema",
-            "WorkerLiveEventRequestFrameSchema",
-            "WorkerLiveEventResponseFrameSchema",
-            "WorkerLiveEventResultSchema",
-            "WorkerLiveEventSchema",
-            "WorkerProtocolCloseReasonSchema",
-            "WorkerTranscriptCommitErrorReasonSchema",
-            "WorkerTranscriptCommitErrorShapeSchema",
-            "WorkerTranscriptCommitParamsSchema",
-            "WorkerTranscriptCommitRequestFrameSchema",
-            "WorkerTranscriptCommitResponseFrameSchema",
-            "WorkerTranscriptCommitResultSchema",
-            "WorkerTranscriptMessageSchema",
-            "WorkerTunnelStatusSchema",
-            "WorktreeBranchSchema",
-            "WorktreesBranchesParamsSchema",
-            "WorktreesBranchesResultSchema"
-          ],
+          "added": [],
           "removed": [
-            "CrestodianChatParamsSchema",
-            "CrestodianChatResultSchema",
-            "CrestodianSetupActivateParamsSchema",
-            "CrestodianSetupActivateResultSchema",
-            "CrestodianSetupDetectParamsSchema",
-            "CrestodianSetupDetectResultSchema",
-            "NodePairRequestParamsSchema",
-            "NodePairVerifyParamsSchema"
+            "BoardWidgetDataQuerySchema",
+            "ChatSteerNowParamsSchema",
+            "ChatSteerNowResultSchema",
+            "McpAuthLogoutParamsSchema",
+            "SessionsFilesPreviewParamsSchema",
+            "SessionsFilesPreviewReleaseParamsSchema",
+            "SessionsFilesPreviewReleaseResultSchema",
+            "SessionsFilesPreviewResultSchema",
+            "SessionsGroupsCreateParamsSchema",
+            "TemplatesAddReviewedApplyParamsSchema",
+            "ToolUsageImportParamsSchema",
+            "ToolUsageResetParamsSchema",
+            "ToolUsageStatusParamsSchema",
+            "UiTemplateReviewCommandSchema",
+            "UsersChannelIdentityParamsSchema",
+            "UsersChannelIdentityResultSchema"
           ]
         },
         "validators": {
-          "added": [
-            "validateAllowedApprovalSnapshot",
-            "validateApprovalAllowDecision",
-            "validateApprovalDecision",
-            "validateApprovalGetParams",
-            "validateApprovalGetResult",
-            "validateApprovalHistoryParams",
-            "validateApprovalHistoryResult",
-            "validateApprovalKind",
-            "validateApprovalPresentation",
-            "validateApprovalResolveParams",
-            "validateApprovalResolveResult",
-            "validateApprovalSnapshot",
-            "validateApprovalTerminalReason",
-            "validateAuditActivityListParams",
-            "validateCancelledApprovalSnapshot",
-            "validateChatToolTitlesParams",
-            "validateConversationListParams",
-            "validateConversationListResult",
-            "validateConversationSendParams",
-            "validateConversationSendResult",
-            "validateConversationTurnCancelParams",
-            "validateConversationTurnParams",
-            "validateConversationTurnResult",
-            "validateDeniedApprovalSnapshot",
-            "validateDevicePairRenameParams",
-            "validateEnvironmentsCreateParams",
-            "validateEnvironmentsDestroyParams",
-            "validateExecApprovalPresentation",
-            "validateExpiredApprovalSnapshot",
-            "validateFsListDirParams",
-            "validateFsListDirResult",
-            "validateGatewaySuspendPrepareParams",
-            "validateGatewaySuspendPrepareResult",
-            "validateGatewaySuspendResumeParams",
-            "validateGatewaySuspendResumeResult",
-            "validateGatewaySuspendStatusParams",
-            "validateGatewaySuspendStatusResult",
-            "validateMigrationsMemoryApplyParams",
-            "validateMigrationsMemoryPlanParams",
-            "validateModelsProbeParams",
-            "validateNodeInvokeInputEvent",
-            "validateNodeInvokeProgressParams",
-            "validateNodePluginToolsUpdateParams",
-            "validateNodePresenceActivityPayload",
-            "validateNodeSkillsUpdateParams",
-            "validatePendingApprovalSnapshot",
-            "validatePluginApprovalPresentation",
-            "validatePluginApprovalSeverity",
-            "validatePluginsInstallParams",
-            "validatePluginsInstallResult",
-            "validatePluginsListParams",
-            "validatePluginsListResult",
-            "validatePluginsRefreshParams",
-            "validatePluginsRefreshResult",
-            "validatePluginsSearchParams",
-            "validatePluginsSearchResult",
-            "validatePluginsSetEnabledParams",
-            "validatePluginsSetEnabledResult",
-            "validatePluginsUninstallParams",
-            "validatePluginsUninstallResult",
-            "validateQuestionGetParams",
-            "validateQuestionGetResult",
-            "validateQuestionListParams",
-            "validateQuestionListResult",
-            "validateQuestionRequestedEvent",
-            "validateQuestionRequestParams",
-            "validateQuestionRequestResult",
-            "validateQuestionResolvedEvent",
-            "validateQuestionResolveParams",
-            "validateQuestionResolveResult",
-            "validateQuestionWaitAnswerParams",
-            "validateQuestionWaitAnswerResult",
-            "validateSessionsCatalogArchiveParams",
-            "validateSessionsCatalogContinueParams",
-            "validateSessionsCatalogHostEvent",
-            "validateSessionsCatalogListParams",
-            "validateSessionsCatalogReadParams",
-            "validateSessionsDiffParams",
-            "validateSessionsDispatchParams",
-            "validateSessionsDispatchResult",
-            "validateSessionsFilesRevealParams",
-            "validateSessionsFilesSetParams",
-            "validateSessionsGroupsDeleteParams",
-            "validateSessionsGroupsListParams",
-            "validateSessionsGroupsPutParams",
-            "validateSessionsGroupsRenameParams",
-            "validateSessionsReclaimParams",
-            "validateSessionsReclaimResult",
-            "validateSessionsSearchParams",
-            "validateSessionsSearchResult",
-            "validateSkillsProposalHistoryScanParams",
-            "validateSkillsProposalHistoryStatusParams",
-            "validateSystemAgentChatParams",
-            "validateSystemAgentSetupActivateParams",
-            "validateSystemAgentSetupAuthStartParams",
-            "validateSystemAgentSetupDetectParams",
-            "validateSystemAgentSetupVerifyParams",
-            "validateTalkSessionAcknowledgeMarkParams",
-            "validateTaskSuggestionsAcceptParams",
-            "validateTaskSuggestionsCreateParams",
-            "validateTaskSuggestionsDismissParams",
-            "validateTaskSuggestionsListParams",
-            "validateTerminalApprovalSnapshot",
-            "validateTerminalUploadParams",
-            "validateTerminalUploadResult",
-            "validateUiCommandParams",
-            "validateWorkerAdmissionHandshake",
-            "validateWorkerConnectRequestFrame",
-            "validateWorkerHeartbeatParams",
-            "validateWorkerInferenceCancelParams",
-            "validateWorkerInferenceEventFrame",
-            "validateWorkerInferenceStartParams",
-            "validateWorkerInferenceTerminalFrame",
-            "validateWorkerInferenceTerminalOutcome",
-            "validateWorkerLiveEventParams",
-            "validateWorkerTranscriptCommitParams",
-            "validateWorktreesBranchesParams"
-          ],
+          "added": [],
           "removed": [
-            "validateCrestodianChatParams",
-            "validateCrestodianSetupActivateParams",
-            "validateCrestodianSetupDetectParams",
-            "validateNodePairRequestParams",
-            "validateNodePairVerifyParams"
+            "validateChatSteerNowParams",
+            "validateDevicePairCodeParams",
+            "validateDiagnosticsCpuProfileParams",
+            "validateMcpAuthLogoutParams",
+            "validateSessionsFilesPreviewParams",
+            "validateSessionsFilesPreviewReleaseParams",
+            "validateSessionsGroupsCreateParams",
+            "validateToolUsageImportParams",
+            "validateToolUsageResetParams",
+            "validateToolUsageStatusParams",
+            "validateUsersChannelIdentityParams"
           ]
         },
         "eventSchemas": {
-          "added": [
-            "NodeInvokeInputEventSchema",
-            "QuestionRequestedEventSchema",
-            "QuestionResolvedEventSchema",
-            "SessionApprovalEventSchema",
-            "SessionsCatalogHostEventSchema",
-            "TaskSuggestionEventSchema",
-            "WorkerLiveEventSchema"
-          ],
+          "added": [],
           "removed": []
         }
       },
       "deltaFromStable": {
-        "unpackedBytes": 22185247,
-        "directDependencyCount": 7,
+        "unpackedBytes": -3997223,
+        "directDependencyCount": 1,
         "nativeRiskCount": 0,
-        "shrinkwrapMissingCount": 6
+        "shrinkwrapMissingCount": 0
+      }
+    },
+    {
+      "channel": "preview",
+      "version": "2026.11.10-beta.3",
+      "status": "probing",
+      "reportPath": "releases/openclaw-2026.11.10-beta.3.json",
+      "generatedAt": "2026-11-26T04:13:31.068Z",
+      "upstreamPublishedAt": "2026-11-24T03:05:25.150Z",
+      "reportLatencySeconds": 176886,
+      "runtimeEvidence": false,
+      "artifact": {
+        "integrity": "sha512-8JkXp5VcwVL3+k9RJkqI85bMbfdglEP+WqShgirBfrB8bcliVmiSxi++lp1Baw1lJDWyerNVM6ky1T/oBFtNtQ==",
+        "unpackedBytes": 305178426,
+        "directDependencyCount": 76,
+        "nativeRiskCount": 0,
+        "shrinkwrapConsistent": false,
+        "shrinkwrapMissingCount": 217,
+        "shrinkwrapMismatchedCount": 0
+      },
+      "checks": {
+        "pass": 2,
+        "warn": 2,
+        "fail": 0,
+        "pending": 15
+      },
+      "dependencyChangesFromStable": {
+        "added": [],
+        "removed": [],
+        "changed": [
+          {
+            "name": "@openclaw/ai",
+            "stableSpec": "2026.11.10",
+            "releaseSpec": "2026.11.10-beta.3"
+          }
+        ]
+      },
+      "dependencyRiskFromStable": [
+        {
+          "name": "@openclaw/ai",
+          "change": "changed",
+          "declaredSpec": "2026.11.10-beta.3",
+          "resolvedVersion": null,
+          "integrity": null,
+          "scan": {
+            "truncated": true,
+            "reason": "missing-shrinkwrap-identity"
+          },
+          "signals": null
+        }
+      ],
+      "gatewayContractFromStable": {
+        "classification": "unchanged",
+        "inspection": {
+          "stable": "complete",
+          "release": "complete"
+        },
+        "protocol": {
+          "stable": {
+            "current": 4,
+            "minClient": 4,
+            "minProbe": 3,
+            "minNode": 3
+          },
+          "release": {
+            "current": 4,
+            "minClient": 4,
+            "minProbe": 3,
+            "minNode": 3
+          },
+          "changed": false
+        },
+        "distribution": {
+          "legacyPluginDeclarationCount": {
+            "stable": 0,
+            "release": 0,
+            "delta": 0
+          },
+          "publicDeclarationChanged": false,
+          "publicRuntimeChanged": false,
+          "versionModuleChanged": false,
+          "serverMethodsChanged": false
+        },
+        "coreMethods": {
+          "added": [],
+          "removed": []
+        },
+        "schemaExports": {
+          "added": [],
+          "removed": []
+        },
+        "validators": {
+          "added": [],
+          "removed": []
+        },
+        "eventSchemas": {
+          "added": [],
+          "removed": []
+        }
+      },
+      "deltaFromStable": {
+        "unpackedBytes": -525177,
+        "directDependencyCount": 0,
+        "nativeRiskCount": 0,
+        "shrinkwrapMissingCount": 0
       }
     }
   ]

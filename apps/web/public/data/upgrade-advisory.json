@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-21T12:47:47.515Z",
+  "generatedAt": "2026-11-26T04:13:31.092Z",
   "package": "openclaw",
   "promotionDecision": "hold",
   "advisories": [
@@ -8,30 +8,30 @@
       "path": "previous->stable",
       "from": {
         "channel": "previous",
-        "version": "2026.6.33",
+        "version": "2026.11.9",
         "status": "probing",
         "runtimeEvidence": false,
-        "upstreamPublishedAt": "2026-07-21T11:25:55.513Z",
-        "reportPath": "releases/openclaw-2026.6.33.json",
-        "nodeEngine": ">=22.19.0",
+        "upstreamPublishedAt": "2026-11-25T00:33:15.923Z",
+        "reportPath": "releases/openclaw-2026.11.9.json",
+        "nodeEngine": ">=24.16.0 <25 || >=26.1.0",
         "checks": {
-          "pass": 1,
-          "warn": 3,
+          "pass": 2,
+          "warn": 2,
           "fail": 0,
           "pending": 15
         }
       },
       "to": {
         "channel": "stable",
-        "version": "2026.7.1-2",
+        "version": "2026.11.10",
         "status": "probing",
         "runtimeEvidence": false,
-        "upstreamPublishedAt": "2026-07-18T03:53:48.967Z",
-        "reportPath": "releases/openclaw-2026.7.1-2.json",
-        "nodeEngine": ">=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0",
+        "upstreamPublishedAt": "2026-11-25T05:07:34.288Z",
+        "reportPath": "releases/openclaw-2026.11.10.json",
+        "nodeEngine": ">=24.16.0 <25 || >=26.1.0",
         "checks": {
-          "pass": 1,
-          "warn": 3,
+          "pass": 2,
+          "warn": 2,
           "fail": 0,
           "pending": 15
         }
@@ -39,36 +39,115 @@
       "verdict": "review-required",
       "reasons": [
         "gateway-contract-breaking",
-        "node-engines-changed",
         "target-status-not-supported",
         "target-runtime-evidence-missing",
         "target-checks-pending",
+        "dependency-risk-scan-truncated",
         "dependency-risk-findings-present"
       ],
       "surface": {
         "classification": "breaking",
-        "protocolChanged": true,
+        "protocolChanged": false,
         "coreMethods": {
           "added": {
-            "count": 26,
+            "count": 15,
             "sample": [
-              "agents.workspace.get",
-              "agents.workspace.list",
-              "audit.list",
-              "controlUi.githubPreview",
-              "crestodian.chat",
-              "crestodian.setup.activate",
-              "crestodian.setup.detect",
-              "device.pair.setupCode",
-              "skills.curator.pin",
-              "skills.curator.restore",
-              "skills.curator.status",
-              "skills.curator.unpin",
-              "system.info",
-              "terminal.attach",
-              "terminal.close",
-              "terminal.input"
+              "chat.steerNow",
+              "device.pair.code",
+              "mcp.authLogout",
+              "openclawId.account",
+              "openclawId.authority",
+              "openclawId.people",
+              "openclawId.status",
+              "sessions.catalog.resolve",
+              "sessions.files.preview",
+              "sessions.files.preview.release",
+              "sessions.groups.create",
+              "toolUsage.import",
+              "toolUsage.reset",
+              "toolUsage.status",
+              "users.channelIdentity"
             ]
+          },
+          "removed": {
+            "count": 8,
+            "sample": [
+              "skills.workshop.applyDraft",
+              "skills.workshop.archive",
+              "skills.workshop.changes",
+              "skills.workshop.discardDraft",
+              "skills.workshop.list",
+              "skills.workshop.read",
+              "skills.workshop.restore",
+              "skills.workshop.undo"
+            ]
+          }
+        },
+        "schemaExports": {
+          "addedCount": 16,
+          "removedCount": 0
+        },
+        "eventSchemas": {
+          "addedCount": 0,
+          "removedCount": 0
+        }
+      },
+      "dependencies": {
+        "addedCount": 0,
+        "removedCount": 1,
+        "changedCount": 29,
+        "riskFindingCount": 30,
+        "truncatedRiskScanCount": 30
+      }
+    },
+    {
+      "path": "stable->preview",
+      "from": {
+        "channel": "stable",
+        "version": "2026.11.10",
+        "status": "probing",
+        "runtimeEvidence": false,
+        "upstreamPublishedAt": "2026-11-25T05:07:34.288Z",
+        "reportPath": "releases/openclaw-2026.11.10.json",
+        "nodeEngine": ">=24.16.0 <25 || >=26.1.0",
+        "checks": {
+          "pass": 2,
+          "warn": 2,
+          "fail": 0,
+          "pending": 15
+        }
+      },
+      "to": {
+        "channel": "preview",
+        "version": "2026.11.10-beta.3",
+        "status": "probing",
+        "runtimeEvidence": false,
+        "upstreamPublishedAt": "2026-11-24T03:05:25.150Z",
+        "reportPath": "releases/openclaw-2026.11.10-beta.3.json",
+        "nodeEngine": ">=24.16.0 <25 || >=26.1.0",
+        "checks": {
+          "pass": 2,
+          "warn": 2,
+          "fail": 0,
+          "pending": 15
+        }
+      },
+      "verdict": "hold",
+      "reasons": [
+        "target-status-not-supported",
+        "target-runtime-evidence-missing",
+        "target-checks-pending",
+        "dependency-risk-scan-truncated",
+        "dependency-risk-findings-present",
+        "promotion-policy-holds"
+      ],
+      "surface": {
+        "classification": "unchanged",
+        "protocolChanged": false,
+        "coreMethods": {
+          "added": {
+            "count": 0,
+            "sample": []
           },
           "removed": {
             "count": 0,
@@ -76,131 +155,26 @@
           }
         },
         "schemaExports": {
-          "addedCount": 51,
+          "addedCount": 0,
           "removedCount": 0
         },
         "eventSchemas": {
-          "addedCount": 4,
+          "addedCount": 0,
           "removedCount": 0
         }
       },
       "dependencies": {
-        "addedCount": 2,
+        "addedCount": 0,
         "removedCount": 0,
-        "changedCount": 16,
-        "riskFindingCount": 16,
-        "truncatedRiskScanCount": 0
-      }
-    },
-    {
-      "path": "stable->preview",
-      "from": {
-        "channel": "stable",
-        "version": "2026.7.1-2",
-        "status": "probing",
-        "runtimeEvidence": false,
-        "upstreamPublishedAt": "2026-07-18T03:53:48.967Z",
-        "reportPath": "releases/openclaw-2026.7.1-2.json",
-        "nodeEngine": ">=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0",
-        "checks": {
-          "pass": 1,
-          "warn": 3,
-          "fail": 0,
-          "pending": 15
-        }
-      },
-      "to": {
-        "channel": "preview",
-        "version": "2026.7.2-beta.3",
-        "status": "probing",
-        "runtimeEvidence": false,
-        "upstreamPublishedAt": "2026-07-18T23:15:12.160Z",
-        "reportPath": "releases/openclaw-2026.7.2-beta.3.json",
-        "nodeEngine": ">=22.22.3 <23 || >=24.15.0 <25 || >=25.9.0",
-        "checks": {
-          "pass": 1,
-          "warn": 3,
-          "fail": 0,
-          "pending": 15
-        }
-      },
-      "verdict": "hold",
-      "reasons": [
-        "gateway-contract-breaking",
-        "target-status-not-supported",
-        "target-runtime-evidence-missing",
-        "target-checks-pending",
-        "dependency-risk-findings-present",
-        "promotion-policy-holds"
-      ],
-      "surface": {
-        "classification": "breaking",
-        "protocolChanged": false,
-        "coreMethods": {
-          "added": {
-            "count": 62,
-            "sample": [
-              "audit.activity.list",
-              "chat.toolTitles",
-              "controlUi.sessionPullRequests",
-              "conversations.list",
-              "conversations.send",
-              "conversations.turn",
-              "conversations.turn.cancel",
-              "device.pair.rename",
-              "environments.create",
-              "environments.destroy",
-              "fs.listDir",
-              "gateway.suspend.prepare",
-              "gateway.suspend.resume",
-              "gateway.suspend.status",
-              "mcp.app.callTool",
-              "mcp.app.listResources"
-            ]
-          },
-          "removed": {
-            "count": 32,
-            "sample": [
-              "crestodian.chat",
-              "crestodian.setup.activate",
-              "crestodian.setup.detect",
-              "node.pair.approve",
-              "node.pair.list",
-              "node.pair.reject",
-              "node.pair.request",
-              "node.pair.verify",
-              "skills.bins",
-              "skills.curator.pin",
-              "skills.curator.restore",
-              "skills.curator.status",
-              "skills.curator.unpin",
-              "skills.detail",
-              "skills.install",
-              "skills.proposals.apply"
-            ]
-          }
-        },
-        "schemaExports": {
-          "addedCount": 237,
-          "removedCount": 8
-        },
-        "eventSchemas": {
-          "addedCount": 7,
-          "removedCount": 0
-        }
-      },
-      "dependencies": {
-        "addedCount": 8,
-        "removedCount": 1,
-        "changedCount": 2,
-        "riskFindingCount": 10,
-        "truncatedRiskScanCount": 0
+        "changedCount": 1,
+        "riskFindingCount": 1,
+        "truncatedRiskScanCount": 1
       },
       "footprintDelta": {
-        "unpackedBytes": 22185247,
-        "directDependencyCount": 7,
+        "unpackedBytes": -525177,
+        "directDependencyCount": 0,
         "nativeRiskCount": 0,
-        "shrinkwrapMissingCount": 6
+        "shrinkwrapMissingCount": 0
       }
     }
   ]
