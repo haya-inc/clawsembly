@@ -29,16 +29,19 @@ test("the committed advisory derives exactly from the committed inputs", () => {
 
 test("a promotion hold pins the preview-adoption verdict to hold", () => {
   const { history, promotionPolicy, reportsByPath } = committedInputs();
-  assert.equal(promotionPolicy.decision, "hold");
+  // Exercise a breaking preview regardless of which upstream versions are
+  // currently being tracked. The committed-input test above covers live data.
+  promotionPolicy.decision = "hold";
+  const diff = history.releases.find((release) => release.channel === "preview").gatewayContractFromStable;
+  diff.classification = "breaking";
+  diff.coreMethods.removed = Array.from({ length: 20 }, (_, index) => `skills.removed${index}`);
   const advisory = buildUpgradeAdvisory(history, { promotionPolicy, reportsByPath });
   const preview = advisory.advisories.find((entry) => entry.path === "stable->preview");
   assert.equal(preview.verdict, "hold");
   assert.ok(preview.reasons.includes("promotion-policy-holds"));
-  // The tracked preview removes the skills surface; the advisory must carry
-  // that as a bounded breaking-surface signal, never silently.
   assert.equal(preview.surface.classification, "breaking");
-  assert.ok(preview.surface.coreMethods.removed.count > 0);
-  assert.ok(preview.surface.coreMethods.removed.sample.length <= 16);
+  assert.equal(preview.surface.coreMethods.removed.count, 20);
+  assert.equal(preview.surface.coreMethods.removed.sample.length, 16);
 });
 
 test("the previous-to-stable path reads the tracker diff in reverse", () => {

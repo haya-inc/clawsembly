@@ -96,6 +96,9 @@ assert.match(publishJob, /git add .*examples\/sdk-host\/src\/report-pin\.ts/, "r
 assert.match(generationJob, /Package validated reports[\s\S]*?packages\/compatibility\/openclaw-gateway-contract\.generated\.mjs/u, "archive the checked Gateway contract");
 assert.match(publishJob, /cp .*openclaw-gateway-contract\.generated\.mjs.*packages\/compatibility\/openclaw-gateway-contract\.generated\.mjs/u, "install the checked Gateway contract");
 assert.match(publishJob, /git add .*packages\/compatibility\/openclaw-gateway-contract\.generated\.mjs/u, "include the reviewed Gateway contract in the report pull request");
+assert.match(generationJob, /Package validated reports[\s\S]*?apps\/web\/public\/data\/upgrade-advisory\.json/u, "archive the derived upgrade advisory");
+assert.match(publishJob, /cp .*upgrade-advisory\.json.*apps\/web\/public\/data\/upgrade-advisory\.json/u, "install the derived upgrade advisory");
+assert.match(publishJob, /git add .*apps\/web\/public\/data\/upgrade-advisory\.json/u, "include the derived upgrade advisory in report pull requests");
 assert.match(publishJob, /git add .*promotion-policy\.json/, "report publishing must commit the promotion policy with reports");
 
 assert.match(runtimeBrowser, /capture_browserpod:[\s\S]*?type: boolean[\s\S]*?default: false/u, "BrowserPod capture must require explicit dispatch input");
