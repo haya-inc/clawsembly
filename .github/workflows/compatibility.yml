@@ -32,7 +32,7 @@ jobs:
       - run: npm run report-pin:generate
       - run: npm run report-pin:check
       - run: npm run compat:validate
-      - name: Verify the generated Gateway contract against the exact npm artifact
+      - name: Generate and verify the Gateway contract against the exact npm artifact
         id: protocol-verify
         # An upstream stable that breaks contract regeneration must not
         # silence the tracker: publishing the report pull request is how that
@@ -40,7 +40,11 @@ jobs:
         # and the pull-request body, and the protocol gate in the check chain
         # keeps a report/contract mismatch fail-closed on the pull request.
         continue-on-error: true
-        run: npm run protocol:verify
+        run: |
+          if ! npm run protocol:generate || ! npm run protocol:verify; then
+            git restore -- packages/embed-sdk/openclaw-gateway-contract.generated.mjs
+            exit 1
+          fi
       - name: Write summary
         env:
           PROTOCOL_OUTCOME: ${{ steps.protocol-verify.outcome }}
@@ -57,6 +61,7 @@ jobs:
           apps/web/public/data/promotion-policy.json
           apps/web/public/data/releases/*.json
           examples/sdk-host/src/report-pin.ts
+          packages/embed-sdk/openclaw-gateway-contract.generated.mjs
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: compatibility-reports
@@ -95,10 +100,11 @@ jobs:
           cp "$staging/apps/web/public/data/promotion-policy.json" apps/web/public/data/promotion-policy.json
           cp "$staging"/apps/web/public/data/releases/*.json apps/web/public/data/releases/
           cp "$staging/examples/sdk-host/src/report-pin.ts" examples/sdk-host/src/report-pin.ts
+          cp "$staging/packages/embed-sdk/openclaw-gateway-contract.generated.mjs" packages/embed-sdk/openclaw-gateway-contract.generated.mjs
       - name: Commit changed channel reports
         id: changes
         run: |
-          if git diff --quiet -- apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/promotion-policy.json apps/web/public/data/releases examples/sdk-host/src/report-pin.ts; then
+          if git diff --quiet -- apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/promotion-policy.json apps/web/public/data/releases examples/sdk-host/src/report-pin.ts packages/embed-sdk/openclaw-gateway-contract.generated.mjs; then
             echo 'changed=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -106,7 +112,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -c "$branch"
-          git add apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/promotion-policy.json apps/web/public/data/releases examples/sdk-host/src/report-pin.ts
+          git add apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/promotion-policy.json apps/web/public/data/releases examples/sdk-host/src/report-pin.ts packages/embed-sdk/openclaw-gateway-contract.generated.mjs
           git commit -m 'chore: update OpenClaw release reports'
           remote_sha="$(git ls-remote --heads origin "refs/heads/$branch" | cut -f1)"
           if [ -n "$remote_sha" ]; then
@@ -125,7 +131,7 @@ jobs:
         run: |
           body="$(printf '%s\n\n%s\n\n%s' \
             'Automated stable / previous / preview compatibility inspection. Runtime evidence is attached only when its exact OpenClaw version matches.' \
-            "Gateway-contract verification against the tracked stable: **${PROTOCOL_OUTCOME}**. A failure means the generated contract cannot be regenerated from the tracked stable artifact (an upstream declaration-layout or contract change); the reviewed contract stays on the previous stable, and the protocol gate in the check chain keeps this pull request fail-closed until a contract migration lands." \
+            "Gateway-contract verification against the tracked stable: **${PROTOCOL_OUTCOME}**. A successful run includes the verified contract for review. If verification fails, the previous contract is retained and a stable version mismatch blocks the pull request." \
             "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}")"
           existing="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
           if [ -z "$existing" ]; then

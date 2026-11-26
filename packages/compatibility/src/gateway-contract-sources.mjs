@@ -224,7 +224,11 @@ async function resolveRuntime(packageRoot, entry) {
   }
   const frames = await sourceFor(entry, "ConnectParamsSchema");
   const hello = await sourceFor(entry, "HelloOkSchema");
-  if (!/\bnonce:/.test(frames) || !/\bdeviceToken:/.test(frames) || !/\bmaxPayload:/.test(hello)) {
+  // Scope field checks to their schema initializer. Other frames in the
+  // same bundle may use the same keys after the handshake contract changes.
+  const connectFields = frames.match(/\bconst ConnectParamsSchema\s*=\s*closedObject\(\{([\s\S]*?)\}\);/u)?.[1] ?? "";
+  const helloFields = hello.match(/\bconst HelloOkSchema\s*=\s*closedObject\(\{([\s\S]*?)\}\);/u)?.[1] ?? "";
+  if (!/\bnonce:/.test(connectFields) || !/\bdeviceToken:/.test(connectFields) || !/\bmaxPayload:/.test(helloFields)) {
     throw layoutError("Gateway handshake schema is missing nonce, deviceToken or maxPayload");
   }
   for (const [schema, identity, key, value] of [
@@ -277,10 +281,8 @@ async function resolveRuntime(packageRoot, entry) {
 }
 
 // Resolves the exact declaration sources backing the generated Gateway
-// contract from an extracted OpenClaw package root. Supports the legacy
-// plugin-sdk declaration tree (<= 2026.6.x) and the gateway-protocol
-// distribution (>= 2026.7.x); an unrecognized layout fails closed with a
-// classified error instead of a raw filesystem crash.
+// contract from an extracted OpenClaw package root. Older distributions
+// carry TypeScript declarations and newer ones ship linked ESM schemas.
 export async function resolveOpenClawGatewayContractSources(packageRoot) {
   if (typeof packageRoot !== "string" || packageRoot.length === 0) {
     throw new TypeError("An extracted OpenClaw package root is required.");
