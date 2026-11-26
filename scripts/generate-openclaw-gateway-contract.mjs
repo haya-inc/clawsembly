@@ -18,7 +18,11 @@ function runNpm(args, options = {}) {
   return run("npm", args, { ...options, shell: process.platform === "win32" });
 }
 const reportPath = resolve(root, "apps/web/public/data/compatibility.json");
-const outputPath = resolve(root, "packages/embed-sdk/openclaw-gateway-contract.generated.mjs");
+// The tracker's pin advances independently of the immutable SDK release.
+const forSdk = process.argv.includes("--sdk");
+const outputPath = resolve(root, forSdk
+  ? "packages/embed-sdk/openclaw-gateway-contract.generated.mjs"
+  : "packages/compatibility/openclaw-gateway-contract.generated.mjs");
 const check = process.argv.includes("--check");
 
 const sha256 = (value) => `sha256-${createHash("sha256").update(value).digest("hex")}`;
@@ -86,7 +90,11 @@ ${sourceLines}
 const temporary = await mkdtemp(join(tmpdir(), "clawsembly-openclaw-contract-"));
 try {
   const report = JSON.parse(await readFile(reportPath, "utf8"));
-  const artifact = report.artifact;
+  let artifact = report.artifact;
+  if (forSdk && check) {
+    const { OPENCLAW_GATEWAY_CONTRACT } = await import("../packages/embed-sdk/openclaw-gateway-contract.generated.mjs");
+    artifact = OPENCLAW_GATEWAY_CONTRACT.artifact;
+  }
   if (artifact?.package !== "openclaw" || typeof artifact.version !== "string"
     || typeof artifact.integrity !== "string") {
     throw new Error("compatibility report does not contain an exact OpenClaw artifact");
