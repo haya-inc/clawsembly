@@ -157,7 +157,10 @@ try {
       const cacheKey = JSON.stringify(identity);
       if (!riskCache.has(cacheKey)) {
         riskCache.set(cacheKey, inspectDependencyRisk(identity));
-        process.stdout.write(`Classified ${change} dependency ${name}@${identity.resolvedVersion}.\n`);
+        const result = riskCache.get(cacheKey);
+        process.stdout.write(result.signals === null
+          ? `Incomplete scan for ${name}: missing shrinkwrap identity.\n`
+          : `Classified ${change} dependency ${name}@${identity.resolvedVersion}.\n`);
       }
       return riskCache.get(cacheKey);
     });

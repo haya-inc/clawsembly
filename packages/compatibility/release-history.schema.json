@@ -88,7 +88,9 @@
           },
           "dependencyRiskFromStable": {
             "type": "array",
-            "items": { "$ref": "#/$defs/dependencyRisk" }
+            "items": {
+              "oneOf": [{ "$ref": "#/$defs/dependencyRisk" }, { "$ref": "#/$defs/unresolvedDependencyRisk" }]
+            }
           },
           "gatewayContractFromStable": { "$ref": "#/$defs/gatewayContractComparison" },
           "deltaFromStable": {
@@ -184,6 +186,24 @@
         "added": { "$ref": "#/$defs/stringList" },
         "removed": { "$ref": "#/$defs/stringList" }
       }
+    },
+    "unresolvedDependencyRisk": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "change", "declaredSpec", "resolvedVersion", "integrity", "scan", "signals"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "change": { "enum": ["added", "changed"] },
+        "declaredSpec": { "type": "string", "minLength": 1 },
+        "resolvedVersion": { "type": ["string", "null"], "minLength": 1 },
+        "integrity": { "type": ["string", "null"], "minLength": 1 },
+        "scan": { "const": { "truncated": true, "reason": "missing-shrinkwrap-identity" } },
+        "signals": { "type": "null" }
+      },
+      "anyOf": [
+        { "properties": { "resolvedVersion": { "type": "null" } } },
+        { "properties": { "integrity": { "type": "null" } } }
+      ]
     },
     "dependencyRisk": {
       "type": "object",

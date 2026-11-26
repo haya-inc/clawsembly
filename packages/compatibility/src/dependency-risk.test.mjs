@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { classifyDependencyPackage } from "./dependency-risk.mjs";
+import { classifyDependencyPackage, inspectDependencyRisk } from "./dependency-risk.mjs";
 
 const dependency = {
   name: "example-network-tool",
@@ -62,4 +62,28 @@ test("marks an explicitly budget-limited source scan as truncated", () => {
     scanTruncated: true
   });
   assert.equal(result.scan.truncated, true);
+});
+
+test("an unpublished lock identity is reported as uninspected and blocks promotion", async () => {
+  const { buildPromotionPolicy } = await import("./promotion-policy.mjs");
+  const gate = {
+    version: "1.0.0", status: "supported", runtimeEvidence: true,
+    artifact: { shrinkwrapConsistent: true }, checks: { fail: 0, pending: 0 },
+    gatewayContractFromStable: { classification: "unchanged" }
+  };
+  for (const missing of ["resolvedVersion", "integrity"]) {
+    const unpinned = { ...dependency, [missing]: null };
+    const result = inspectDependencyRisk(unpinned);
+    assert.deepEqual(result, {
+      ...unpinned, scan: { truncated: true, reason: "missing-shrinkwrap-identity" }, signals: null
+    });
+    const policy = buildPromotionPolicy({
+      schemaVersion: 1, generatedAt: "2026-11-26T00:00:00Z", package: "openclaw",
+      releases: ["stable", "previous", "preview"].map(channel => ({
+        ...gate, channel, dependencyRiskFromStable: channel === "preview" ? [result] : []
+      }))
+    });
+    assert.equal(policy.decision, "hold");
+    assert.deepEqual(policy.candidate.reasons, ["dependency-risk-scan-truncated"]);
+  }
 });

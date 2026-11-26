@@ -28,7 +28,7 @@ test("project page distinguishes stable, previous, and preview evidence", async 
         dependencyRiskFromStable: Array<{
           name: string;
           scan: { truncated: boolean };
-          signals: { browserCapabilities: string[] };
+          signals: { browserCapabilities: string[] } | null;
         }>;
         gatewayContractFromStable: {
           classification: string;
@@ -183,9 +183,9 @@ test("project page distinguishes stable, previous, and preview evidence", async 
     expect(preview?.dependencyRiskFromStable.length).toBe(
       (changes?.added.length ?? 0) + (changes?.changed.length ?? 0)
     );
-    expect(preview?.dependencyRiskFromStable.every((risk) => !risk.scan.truncated)).toBe(true);
+    const classified = preview?.dependencyRiskFromStable.filter((risk) => risk.signals !== null).length ?? 0;
     await expect(dependencyDiff.getByText(
-      `${changes?.added.length ?? 0} added · ${changes?.changed.length ?? 0} changed · ${changes?.removed.length ?? 0} removed · ${preview?.dependencyRiskFromStable.length ?? 0} classified`,
+      `${changes?.added.length ?? 0} added · ${changes?.changed.length ?? 0} changed · ${changes?.removed.length ?? 0} removed · ${classified} classified`,
       { exact: true }
     )).toBeVisible();
     await dependencyDiff.locator("summary").click();
@@ -196,7 +196,10 @@ test("project page distinguishes stable, previous, and preview evidence", async 
       const firstRisk = preview?.dependencyRiskFromStable.find((risk) => risk.name === firstAdded.name);
       const riskRow = dependencyDiff.locator("li").filter({ hasText: firstAdded.name });
       await expect(riskRow.locator(".release-diff-signals")).toHaveText(
-        firstRisk?.signals.browserCapabilities.join(" · ") || "no package-level capability signal"
+        firstRisk?.signals === null
+          ? "not inspected · missing shrinkwrap identity"
+          : (firstRisk?.signals.browserCapabilities.join(" · ") || "no package-level capability signal")
+            + (firstRisk?.scan.truncated ? " · scan truncated" : "")
       );
     }
   });
