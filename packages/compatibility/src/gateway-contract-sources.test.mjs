@@ -162,3 +162,58 @@ test("a non-4 protocol constant is reported, not asserted, by source resolution"
     await rm(root, { recursive: true, force: true });
   }
 });
+
+const wireSchemas = ["ConnectParamsSchema", "HelloOkSchema", "ChatSendParamsSchema", "ChatHistoryParamsSchema", "ChatEventSchema"];
+const wireRequests = ["ChatSend", "ChatHistory", "ChatAbort", "DevicePairList", "DevicePairApprove", "DevicePairReject",
+  "DevicePairRemove", "DeviceTokenRotate", "DeviceTokenRevoke"];
+const validators = wireRequests.map((name) => `validate${name}Params`);
+const versions = ["PROTOCOL_VERSION", "MIN_CLIENT_PROTOCOL_VERSION"];
+const runtimeFramePath = "dist/schemas-new.mjs";
+const runtimeFiles = {
+  "dist/gateway/protocol/index.js": [
+    `import{${wireSchemas.join(",")}}from"../../schemas-new.mjs";`,
+    `import{${validators.join(",")}}from"../../validators-new.mjs";`,
+    `import{i as PROTOCOL_VERSION,t as MIN_CLIENT_PROTOCOL_VERSION}from"../../version-new.mjs";`,
+    `export{${[...wireSchemas, ...validators, ...versions].join(",")}};`
+  ].join(""),
+  [runtimeFramePath]: [
+    'import{n as GatewayClientIdSchema,r as GatewayClientModeSchema}from"./primitives-new.mjs";',
+    "const ConnectParamsSchema=closedObject({nonce:NonEmptyString,deviceToken:Type.Optional(Type.String())});",
+    "const HelloOkSchema=closedObject({maxPayload:Type.Integer()});",
+    ...wireSchemas.slice(2).map((name) => `const ${name}=closedObject({});`)
+  ].join(""),
+  "dist/validators-new.mjs": wireRequests.map((name) =>
+    `const validate${name}Params=/* @__PURE__ */ createProtocolValidator(${name}ParamsSchema,is${name}Params);`).join(""),
+  "dist/primitives-new.mjs": 'import{n as GATEWAY_CLIENT_IDS,r as GATEWAY_CLIENT_MODES}from"./client-info-new.mjs";'
+    + "const GatewayClientIdSchema=Type.Enum(GATEWAY_CLIENT_IDS);const GatewayClientModeSchema=Type.Enum(GATEWAY_CLIENT_MODES);",
+  "dist/client-info-new.mjs": 'const GATEWAY_CLIENT_IDS={WEBCHAT_UI:`webchat-ui`};const GATEWAY_CLIENT_MODES={WEBCHAT:`webchat`};',
+  "dist/version-new.mjs": "const PROTOCOL_VERSION=4;const MIN_CLIENT_PROTOCOL_VERSION=4;",
+  "dist/device-auth-new.mjs": "function buildDeviceAuthPayloadV3(e){const t=e.scopes.join(`,`);const n=e.token??``;"
+    + "const r=normalizeDeviceMetadataForAuth(e.platform);const i=normalizeDeviceMetadataForAuth(e.deviceFamily);"
+    + "return[`v3`,e.deviceId,e.clientId,e.clientMode,e.role,t,String(e.signedAtMs),n,e.nonce,r,i].join(`|`)}export{buildDeviceAuthPayloadV3 as n};"
+};
+
+test("pins the runtime wire schema, validators, identity, protocol bounds and v3 signing sources", async (t) => {
+  const root = await packageRootWith(runtimeFiles);
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const resolved = await resolveOpenClawGatewayContractSources(root);
+  assert.equal(resolved.layout, "gateway-protocol-runtime");
+  assert.deepEqual(resolved.protocol, { current: 4, minClient: 4 });
+  assert.deepEqual(new Set(resolved.sources.map(({ path }) => path)), new Set(Object.keys(runtimeFiles)));
+});
+
+test("runtime contract generation fails on handshake, validator, signer or path changes", async (t) => {
+  for (const [path, replacement, error] of [
+    [runtimeFramePath, runtimeFiles[runtimeFramePath].replace("nonce:", "other:")
+      + "const UnrelatedSchema=closedObject({nonce:NonEmptyString});", /handshake schema/u],
+    ["dist/validators-new.mjs", runtimeFiles["dist/validators-new.mjs"].replace("ChatAbortParamsSchema,", "OtherSchema,"), /no longer binds ChatAbort/u],
+    ["dist/device-auth-new.mjs", runtimeFiles["dist/device-auth-new.mjs"].replace("e.nonce,r,i", "e.nonce,i,r"), /signature payload changed/u],
+    ["dist/gateway/protocol/index.js", runtimeFiles["dist/gateway/protocol/index.js"].replace("../../schemas-new.mjs", "../../../schemas-new.mjs"), /local runtime import for ConnectParamsSchema/u]
+  ]) {
+    await t.test(error.source, async (subtest) => {
+      const root = await packageRootWith({ ...runtimeFiles, [path]: replacement });
+      subtest.after(() => rm(root, { recursive: true, force: true }));
+      await assert.rejects(resolveOpenClawGatewayContractSources(root), error);
+    });
+  }
+});
