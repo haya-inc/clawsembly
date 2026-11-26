@@ -65,7 +65,7 @@ assert.match(generationJob, /npm run compat:validate/, "report generation must v
 assert.match(generationJob, /npm run protocol:verify/, "report generation must verify the Gateway contract against the exact npm artifact");
 assert.match(
   generationJob,
-  /id: protocol-verify\n(?:\s+#[^\n]*\n)*\s+continue-on-error: true\n\s+run: \|\n\s+if ! npm run protocol:generate \|\| ! npm run protocol:verify; then\n\s+git restore -- packages\/embed-sdk\/openclaw-gateway-contract\.generated\.mjs\n\s+exit 1/u,
+  /id: protocol-verify\n(?:\s+#[^\n]*\n)*\s+continue-on-error: true\n\s+run: \|\n\s+if ! npm run protocol:generate \|\| ! npm run protocol:verify \|\| ! npm run protocol:check; then\n\s+git restore -- packages\/compatibility\/openclaw-gateway-contract\.generated\.mjs\n\s+exit 1/u,
   "an upstream contract break must surface as a recorded verification outcome, not a silenced tracker run"
 );
 assert.match(
@@ -93,9 +93,9 @@ assert.match(publishJob, /Report artifact contains an unsafe path/, "report publ
 assert.match(publishJob, /Report artifact must not contain symlinks/, "report publishing must reject artifact symlinks");
 assert.match(publishJob, /cp .*report-pin\.ts.*examples\/sdk-host\/src\/report-pin\.ts/, "report publishing must install the validated SDK host pin");
 assert.match(publishJob, /git add .*examples\/sdk-host\/src\/report-pin\.ts/, "report publishing must commit the SDK host pin with reports");
-assert.match(generationJob, /Package validated reports[\s\S]*?packages\/embed-sdk\/openclaw-gateway-contract\.generated\.mjs/u, "archive the checked Gateway contract");
-assert.match(publishJob, /cp .*openclaw-gateway-contract\.generated\.mjs.*packages\/embed-sdk\/openclaw-gateway-contract\.generated\.mjs/u, "install the checked Gateway contract");
-assert.match(publishJob, /git add .*packages\/embed-sdk\/openclaw-gateway-contract\.generated\.mjs/u, "include the reviewed Gateway contract in the report pull request");
+assert.match(generationJob, /Package validated reports[\s\S]*?packages\/compatibility\/openclaw-gateway-contract\.generated\.mjs/u, "archive the checked Gateway contract");
+assert.match(publishJob, /cp .*openclaw-gateway-contract\.generated\.mjs.*packages\/compatibility\/openclaw-gateway-contract\.generated\.mjs/u, "install the checked Gateway contract");
+assert.match(publishJob, /git add .*packages\/compatibility\/openclaw-gateway-contract\.generated\.mjs/u, "include the reviewed Gateway contract in the report pull request");
 assert.match(publishJob, /git add .*promotion-policy\.json/, "report publishing must commit the promotion policy with reports");
 
 assert.match(runtimeBrowser, /capture_browserpod:[\s\S]*?type: boolean[\s\S]*?default: false/u, "BrowserPod capture must require explicit dispatch input");

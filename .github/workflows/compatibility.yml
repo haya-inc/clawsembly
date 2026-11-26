@@ -41,8 +41,8 @@ jobs:
         # keeps a report/contract mismatch fail-closed on the pull request.
         continue-on-error: true
         run: |
-          if ! npm run protocol:generate || ! npm run protocol:verify; then
-            git restore -- packages/embed-sdk/openclaw-gateway-contract.generated.mjs
+          if ! npm run protocol:generate || ! npm run protocol:verify || ! npm run protocol:check; then
+            git restore -- packages/compatibility/openclaw-gateway-contract.generated.mjs
             exit 1
           fi
       - name: Write summary
@@ -61,7 +61,7 @@ jobs:
           apps/web/public/data/promotion-policy.json
           apps/web/public/data/releases/*.json
           examples/sdk-host/src/report-pin.ts
-          packages/embed-sdk/openclaw-gateway-contract.generated.mjs
+          packages/compatibility/openclaw-gateway-contract.generated.mjs
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: compatibility-reports
@@ -100,11 +100,11 @@ jobs:
           cp "$staging/apps/web/public/data/promotion-policy.json" apps/web/public/data/promotion-policy.json
           cp "$staging"/apps/web/public/data/releases/*.json apps/web/public/data/releases/
           cp "$staging/examples/sdk-host/src/report-pin.ts" examples/sdk-host/src/report-pin.ts
-          cp "$staging/packages/embed-sdk/openclaw-gateway-contract.generated.mjs" packages/embed-sdk/openclaw-gateway-contract.generated.mjs
+          cp "$staging/packages/compatibility/openclaw-gateway-contract.generated.mjs" packages/compatibility/openclaw-gateway-contract.generated.mjs
       - name: Commit changed channel reports
         id: changes
         run: |
-          if git diff --quiet -- apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/promotion-policy.json apps/web/public/data/releases examples/sdk-host/src/report-pin.ts packages/embed-sdk/openclaw-gateway-contract.generated.mjs; then
+          if git diff --quiet -- apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/promotion-policy.json apps/web/public/data/releases examples/sdk-host/src/report-pin.ts packages/compatibility/openclaw-gateway-contract.generated.mjs; then
             echo 'changed=false' >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -112,7 +112,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git switch -c "$branch"
-          git add apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/promotion-policy.json apps/web/public/data/releases examples/sdk-host/src/report-pin.ts packages/embed-sdk/openclaw-gateway-contract.generated.mjs
+          git add apps/web/public/data/compatibility.json apps/web/public/data/compatibility-badge.svg apps/web/public/data/release-history.json apps/web/public/data/promotion-policy.json apps/web/public/data/releases examples/sdk-host/src/report-pin.ts packages/compatibility/openclaw-gateway-contract.generated.mjs
           git commit -m 'chore: update OpenClaw release reports'
           remote_sha="$(git ls-remote --heads origin "refs/heads/$branch" | cut -f1)"
           if [ -n "$remote_sha" ]; then

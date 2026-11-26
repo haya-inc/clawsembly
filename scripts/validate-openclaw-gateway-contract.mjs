@@ -2,10 +2,16 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-import { OPENCLAW_GATEWAY_CONTRACT } from "../packages/embed-sdk/openclaw-gateway-contract.generated.mjs";
+import { OPENCLAW_GATEWAY_CONTRACT as contract } from "../packages/compatibility/openclaw-gateway-contract.generated.mjs";
+import { OPENCLAW_GATEWAY_CONTRACT as sdkContract } from "../packages/embed-sdk/openclaw-gateway-contract.generated.mjs";
 
 const report = JSON.parse(await readFile("apps/web/public/data/compatibility.json", "utf8"));
-const contract = OPENCLAW_GATEWAY_CONTRACT;
+// The released SDK pins its own artifact. Every other field is part of
+// its wire contract and must agree before the tracker can advance.
+function wireContract({ artifact: _artifact, sources: _sources, ...wire }) {
+  return wire;
+}
+assert.deepEqual(wireContract(contract), wireContract(sdkContract), "tracked Gateway wire contract differs from the released SDK");
 
 assert.equal(contract.schemaVersion, 1);
 assert.deepEqual(

@@ -151,9 +151,10 @@ after five minutes, and is refused if the device, role, or scopes changed.
 Issued tokens are encrypted with a non-extractable AES-GCM key in a separate
 IndexedDB vault bound to artifact, device, role, and scopes. Reconnect signs and
 authenticates with that device token; a mismatch clears it before a later
-explicit connect can fall back to shared auth. The generated
-contract is pinned to the same npm artifact and can be reproduced with
-`npm run protocol:verify`. The post-authentication surface is deliberately
+explicit connect can fall back to shared auth. The released SDK accepts its
+exact release-time OpenClaw artifact. Reproduce its contract with
+`npm run protocol:verify -- --sdk`. Tracking a newer stable report does not
+change this release pin. The post-authentication surface is deliberately
 limited to generated `chat.send`, `chat.history`, and `chat.abort` contracts.
 It caps payloads and pending requests, delivers validated delta/final/aborted/
 error events, detects sequence gaps, rejects pending work on disconnect, and

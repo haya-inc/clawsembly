@@ -358,13 +358,19 @@ report in its read-only job and carries both through one validated artifact to
 the separate PR-publishing job. Pin changes therefore remain explicit review
 diffs without becoming a handwritten release step.
 
-To regenerate and byte-check the Gateway contract against the exact published
-npm artifact:
+To regenerate and byte-check the tracked Gateway contract against the exact
+stable npm artifact:
 
 ```bash
 npm run protocol:generate
 npm run protocol:verify
 ```
+
+The report PR updates the tracked contract in `packages/compatibility`. CI
+compares its wire fields to the contract bundled with the released SDK.
+The SDK keeps its own exact artifact pin. Run `npm run protocol:verify -- --sdk`
+to reproduce that pin, and use `npm run protocol:generate -- --sdk` during
+an intentional SDK version bump.
 
 The browser lane requires Playwright Chromium and verifies the public page,
 BrowserPod-only runtime presentation, deployment policy, and provider-free
